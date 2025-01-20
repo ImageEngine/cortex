@@ -811,9 +811,15 @@ std::pair< size_t, size_t > getEndPointDuplication( const T &basis )
 }
 
 template<typename Spline>
-void expandSpline( const InternedString &name, const Spline &spline, CompoundDataMap &newParameters )
+void expandSpline( const InternedString &name, const Spline &spline, CompoundDataMap &newParameters, const std::string shaderType = "", const std::string shaderName = "" )
 {
 	const char *basis = "catmull-rom";
+	// For Renderman see https://rmanwiki-26.pixar.com/space/REN26/19661691/PxrRamp
+	const char *riBasis = "catmull-rom";
+	// For Arnold see https://help.autodesk.com/view/ARNOL/ENU/?guid=arnold_user_guide_ac_texture_shaders_ac_texture_ramp_html
+	int aiBasisIdx = 2;
+	const bool isArnold = boost::starts_with( shaderType, "ai:" );
+
 	if( spline.basis == Spline::Basis::bezier() )
 	{
 		basis = "bezier";
@@ -821,16 +827,21 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 	else if( spline.basis == Spline::Basis::bSpline() )
 	{
 		basis = "bspline";
+		riBasis = "bspline";
 	}
 	else if( spline.basis == Spline::Basis::linear() )
 	{
 		basis = "linear";
+		riBasis = "linear";
+		aiBasisIdx = 1;
 	}
 	else if( spline.basis == Spline::Basis::constant() )
 	{
 		// Also, "To maintain consistency", "constant splines ignore the first and the two last
 		// data values."
 		basis = "constant";
+		riBasis = "constant";
+		aiBasisIdx = 0;
 	}
 	auto [ duplicateStartPoints, duplicateEndPoints ] = getEndPointDuplication( spline.basis );
 
@@ -843,7 +854,7 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 	auto &values = valuesData->writable();
 	values.reserve( spline.points.size() + duplicateStartPoints + duplicateEndPoints );
 
-	if( spline.points.size() )
+	if( spline.points.size() && !isArnold )
 	{
 		for( size_t i = 0; i < duplicateStartPoints; i++ )
 		{
@@ -856,7 +867,7 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 		positions.push_back( it->first );
 		values.push_back( it->second );
 	}
-	if( spline.points.size() )
+	if( spline.points.size() && !isArnold )
 	{
 		for( size_t i = 0; i < duplicateEndPoints; i++ )
 		{
@@ -865,16 +876,50 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 		}
 	}
 
-	newParameters[ name.string() + "Positions" ] = positionsData;
-	newParameters[ name.string() + "Values" ] = valuesData;
-	newParameters[ name.string() + "Basis" ] = new StringData( basis );
+	if( isArnold && ( shaderName == "ramp_float" || shaderName == "ramp_rgb" ) )
+	{
+		newParameters[ "position" ] = positionsData;
+		if constexpr ( std::is_same_v<Spline, SplinefColor3f> )
+		{
+			newParameters[ "color" ] = valuesData;
+		}
+		else
+		{
+			newParameters[ "value" ] = valuesData;
+		}
+		std::vector<int> interp;
+		interp.resize( spline.points.size() );
+		std::fill( interp.begin(), interp.end(), aiBasisIdx );
+		newParameters[ "interpolation" ] = new IntVectorData( interp );
+	}
+	// Intentionally OR'd here as many Renderman shaders are OSL so search for the 'Pxr' prefix.
+	else if( boost::starts_with( shaderType, "ri:" ) || ( boost::starts_with( shaderName, "Pxr" ) ) )
+	{
+		newParameters[ name.string() + "_Knots" ] = positionsData;
+		if constexpr ( std::is_same_v<Spline, SplinefColor3f> )
+		{
+			newParameters[ name.string() + "_Colors" ] = valuesData;
+		}
+		else
+		{
+			newParameters[ name.string() + "_Floats" ] = valuesData;
+		}
+		newParameters[ name.string() + "_Interpolation" ] = new StringData( riBasis );
+	}
+	else
+	{
+		newParameters[ name.string() + "Positions" ] = positionsData;
+		newParameters[ name.string() + "Values" ] = valuesData;
+		newParameters[ name.string() + "Basis" ] = new StringData( basis );
+	}
 }
 
 template<typename SplineData>
 IECore::DataPtr loadSpline(
 	const StringData *basisData,
 	const IECore::TypedData< std::vector< typename SplineData::ValueType::XType > > *positionsData,
-	const IECore::TypedData< std::vector< typename SplineData::ValueType::YType > > *valuesData
+	const IECore::TypedData< std::vector< typename SplineData::ValueType::YType > > *valuesData,
+	const bool unduplicatePoints = true
 )
 {
 	typename SplineData::Ptr resultData = new SplineData();
@@ -895,15 +940,21 @@ IECore::DataPtr loadSpline(
 	else if( basis == "linear" )
 	{
 		// Reverse the duplication we do when expanding splines
-		unduplicateStartPoints = 1;
-		unduplicateEndPoints = 1;
+		if( unduplicatePoints )
+		{
+			unduplicateStartPoints = 1;
+			unduplicateEndPoints = 1;
+		}
 		result.basis = SplineData::ValueType::Basis::linear();
 	}
 	else if( basis == "constant" )
 	{
 		// Reverse the duplication we do when expanding splines
-		unduplicateStartPoints = 1;
-		unduplicateEndPoints = 2;
+		if( unduplicatePoints )
+		{
+			unduplicateStartPoints = 1;
+			unduplicateEndPoints = 2;
+		}
 		result.basis = SplineData::ValueType::Basis::constant();
 	}
 	else
@@ -1039,7 +1090,7 @@ void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string tar
 		}
 
 		// For nodes which aren't spline adapters, we just need to deal with any parameters that are splines
-		ConstCompoundDataPtr collapsed = collapseSplineParameters( shader->parametersData() );
+		ConstCompoundDataPtr collapsed = collapseSplineParameters( shader->parametersData(), shader->getType(), shader->getName());
 		if( collapsed != shader->parametersData() )
 		{
 			// \todo - this const_cast is ugly, although safe because if the return from collapseSplineParameters
@@ -1166,13 +1217,13 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 			{
 				ensureParametersCopy( origParameters, newParametersData, newParameters );
 				newParameters->erase( name );
-				expandSpline( name, colorSpline->readable(), *newParameters );
+				expandSpline( name, colorSpline->readable(), *newParameters, s.second->getType(), s.second->getName() );
 			}
 			else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( value.get() ) )
 			{
 				ensureParametersCopy( origParameters, newParametersData, newParameters );
 				newParameters->erase( name );
-				expandSpline( name, floatSpline->readable(), *newParameters );
+				expandSpline( name, floatSpline->readable(), *newParameters, s.second->getType(), s.second->getName() );
 			}
 		}
 
@@ -1288,27 +1339,80 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 	}
 }
 
-IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
+IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const IECore::ConstCompoundDataPtr &parametersData, const std::string shaderType, const std::string shaderName )
 {
 	const CompoundDataMap &parameters( parametersData->readable() );
 	CompoundDataPtr newParametersData;
 	CompoundDataMap *newParameters = nullptr;
 
+	std::string basisStr = "Basis";
+	std::string positionsStr = "Positions";
+	std::string valuesStr = "Values";
+
+	const bool isArnold = boost::starts_with( shaderType, "ai:" );
+	const bool isRenderman = boost::starts_with( shaderType, "ri:" ) || boost::starts_with( shaderName, "Pxr" );
+	const bool unduplicatePoints = !isArnold;
+
+	if( isArnold && ( shaderName == "ramp_float" || shaderName == "ramp_rgb" ) )
+	{
+		basisStr = "interpolation";
+		positionsStr = "position";
+		if( shaderName == "ramp_rgb" )
+		{
+			valuesStr = "color";
+		}
+		else
+		{
+			valuesStr = "value";
+		}
+	}
+	else if( isRenderman )
+	{
+		basisStr = "_Interpolation";
+		positionsStr = "_Knots";
+		valuesStr = "_Floats";
+	}
+
 	for( const auto &maybeBasis : parameters )
 	{
-		if( !boost::ends_with( maybeBasis.first.string(), "Basis" ) )
+		if( !boost::ends_with( maybeBasis.first.string(), basisStr ) )
 		{
 			continue;
 		}
-		const StringData *basis = runTimeCast<const StringData>( maybeBasis.second.get() );
+		StringDataPtr basisPtr;
+		const StringData *basis = runTimeCast<StringData>( maybeBasis.second.get() );
 		if( !basis )
 		{
-			continue;
+			const IntVectorData *intBasis = runTimeCast<const IntVectorData>( maybeBasis.second.get() );
+			if( !intBasis )
+			{
+				continue;
+			}
+			// Do int to string conversion here, using the first value of the interpolation array
+			if( intBasis->readable().front() == 0 )
+			{
+				basisPtr = new StringData( "constant" );
+			}
+			else if( intBasis->readable().front() == 1 )
+			{
+				basisPtr = new StringData( "linear" );
+			}
+			else if( intBasis->readable().front() == 3 )
+			{
+				basisPtr = new StringData( "monotonecubic" );
+			}
+			else
+			{
+				basisPtr = new StringData( "catmull-rom" );
+			}
+		}
+		else
+		{
+			basisPtr = basis->copy();
 		}
 
-
-		std::string prefix = maybeBasis.first.string().substr( 0, maybeBasis.first.string().size() - 5 );
-		IECore::InternedString positionsName = prefix + "Positions";
+		std::string prefix = maybeBasis.first.string().substr( 0, maybeBasis.first.string().size() - basisStr.size() );
+		IECore::InternedString positionsName = prefix + positionsStr;
 		const auto positionsIter = parameters.find( positionsName );
 		const FloatVectorData *floatPositions = nullptr;
 
@@ -1322,30 +1426,41 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 			continue;
 		}
 
-		IECore::InternedString valuesName = prefix + "Values";
-		const auto valuesIter = parameters.find( valuesName );
+		IECore::InternedString valuesName = prefix + valuesStr;
+		auto valuesIter = parameters.find( valuesName );
+		if( valuesIter == parameters.end() && isRenderman )
+		{
+			valuesName = prefix + "_Colors";
+			valuesIter = parameters.find( valuesName );
+		}
 
 		IECore::DataPtr foundSpline;
 		if( valuesIter != parameters.end() )
 		{
 			if( const FloatVectorData *floatValues = runTimeCast<const FloatVectorData>( valuesIter->second.get() ) )
 			{
-				foundSpline = loadSpline<SplineffData>( basis, floatPositions, floatValues );
+				foundSpline = loadSpline<SplineffData>( basisPtr.get(), floatPositions, floatValues, unduplicatePoints );
 			}
 			else if( const Color3fVectorData *color3Values = runTimeCast<const Color3fVectorData>( valuesIter->second.get() ) )
 			{
-				foundSpline = loadSpline<SplinefColor3fData>( basis, floatPositions, color3Values );
+				foundSpline = loadSpline<SplinefColor3fData>( basisPtr.get(), floatPositions, color3Values, unduplicatePoints );
 			}
 			else if( const Color4fVectorData *color4Values = runTimeCast<const Color4fVectorData>( valuesIter->second.get() ) )
 			{
-				foundSpline = loadSpline<SplinefColor4fData>( basis, floatPositions, color4Values );
+				foundSpline = loadSpline<SplinefColor4fData>( basisPtr.get(), floatPositions, color4Values, unduplicatePoints );
 			}
 		}
 
 		if( foundSpline )
 		{
 			ensureParametersCopy( parameters, newParametersData, newParameters );
-			(*newParameters)[prefix] = foundSpline;
+			// Arnold ramp_rgb/ramp_float has no prefix so ensure we have a parameter name to set
+			std::string newParamName( "ramp" );
+			if( !prefix.empty() )
+			{
+				newParamName = prefix;
+			}
+			(*newParameters)[newParamName] = foundSpline;
 			newParameters->erase( maybeBasis.first );
 			newParameters->erase( positionsName );
 			newParameters->erase( valuesName );
@@ -1362,7 +1477,7 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 	}
 }
 
-IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
+IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IECore::ConstCompoundDataPtr &parametersData, const std::string shaderType, const std::string shaderName )
 {
 	const CompoundDataMap &parameters( parametersData->readable() );
 
@@ -1375,13 +1490,13 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IE
 		{
 			ensureParametersCopy( parameters, newParametersData, newParameters );
 			newParameters->erase( i.first );
-			expandSpline( i.first, colorSpline->readable(), *newParameters );
+			expandSpline( i.first, colorSpline->readable(), *newParameters, shaderType, shaderName );
 		}
 		else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( i.second.get() ) )
 		{
 			ensureParametersCopy( parameters, newParametersData, newParameters );
 			newParameters->erase( i.first );
-			expandSpline( i.first, floatSpline->readable(), *newParameters );
+			expandSpline( i.first, floatSpline->readable(), *newParameters, shaderType, shaderName );
 		}
 	}
 

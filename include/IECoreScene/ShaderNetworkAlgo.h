@@ -149,10 +149,10 @@ IECORESCENE_API void expandSplines( ShaderNetwork *network, std::string targetPr
 
 
 /// \deprecated: Use collapseSplines on the whole network, which can handle input connections
-IECORESCENE_API IECore::ConstCompoundDataPtr collapseSplineParameters( const IECore::ConstCompoundDataPtr& parametersData );
+IECORESCENE_API IECore::ConstCompoundDataPtr collapseSplineParameters( const IECore::ConstCompoundDataPtr& parametersData, const std::string shaderType = "", const std::string shaderName = "" );
 
 /// \deprecated: Use expandSplines on the whole network, which can handle input connections
-IECORESCENE_API IECore::ConstCompoundDataPtr expandSplineParameters( const IECore::ConstCompoundDataPtr& parametersData );
+IECORESCENE_API IECore::ConstCompoundDataPtr expandSplineParameters( const IECore::ConstCompoundDataPtr& parametersData, const std::string shaderType = "", const std::string shaderName = "" );
 
 
 } // namespace ShaderNetworkAlgo
