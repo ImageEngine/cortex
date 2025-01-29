@@ -11,6 +11,12 @@ Fixes
 
 - IECore : Fixed bug that was causing imath vectors and colors with values of `inf` / `std::numeric_limits<float>::infinity()` to be serialised in a way that could not be evaluated with `eval()`.
 
+Build
+-----
+
+- CI :
+  - IECoreHoudini.LiveSceneTest : Reverted recent update since #1441 made it unnecessary.
+
 10.5.11.0 (relative to 10.5.10.0)
 =========
 
