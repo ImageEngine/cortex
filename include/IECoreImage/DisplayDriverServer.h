@@ -92,7 +92,6 @@ class IECOREIMAGE_API DisplayDriverServer : public IECore::RunTimeTyped
 		static const PortRange &registeredPortRange( const std::string &name );
 
 	private:
-
 		// Session class
 		// Takes care of one client connection.
 		class Session;

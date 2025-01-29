@@ -34,11 +34,19 @@
 
 import unittest
 import sys
+import os
+import imath
 
 import IECore
 import IECoreImage
 
 class DisplayDriverServerTest( unittest.TestCase ) :
+
+	def __prepareBuf( self, buf, width, offset, red, green, blue ):
+		for i in range( 0, width ):
+			buf[3*i] = blue[i+offset]
+			buf[3*i+1] = green[i+offset]
+			buf[3*i+2] = red[i+offset]
 
 	def testPortNumber( self ) :
 
@@ -117,6 +125,63 @@ class DisplayDriverServerTest( unittest.TestCase ) :
 		IECoreImage.DisplayDriverServer.setPortRange( IECoreImage.DisplayDriverServer.registeredPortRange( "b" ) )
 		s2 = IECoreImage.DisplayDriverServer()
 		self.assertEqual( s2.portNumber(), 45021 )
+
+	def testMergeMap( self ) :
+		server = IECoreImage.DisplayDriverServer( 45001 )
+
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "bluegreen_noise.400x300.tif" ) )()
+		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
+		red = img['R']
+		green = img['G']
+		blue = img['B']
+		width = img.dataWindow.max().x - img.dataWindow.min().x + 1
+
+		params = IECore.CompoundData()
+		params['displayHost'] = IECore.StringData('localhost')
+		params['displayPort'] = IECore.StringData( '45001' )
+		params['displayDriverServer:mergeId'] = IECore.IntData( 42 )
+		params['displayDriverServer:mergeClients'] = IECore.IntData( 2 )
+		params["remoteDisplayType"] = IECore.StringData( "ImageDisplayDriver" )
+		params["handle"] = IECore.StringData( "myHandle1" )
+
+		idd1 = IECoreImage.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
+
+		params["handle"] = IECore.StringData( "myHandle2" )
+		idd2 = IECoreImage.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
+
+		params['displayDriverServer:mergeId'] = IECore.IntData( 666 )
+		params['displayDriverServer:mergeClients'] = IECore.IntData( 1 )
+		params["handle"] = IECore.StringData( "myHandle3" )
+		idd3 = IECoreImage.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
+
+		buf = IECore.FloatVectorData( width * 3 )
+		for i in range( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
+			self.__prepareBuf( buf, width, i*width, red, green, blue )
+			idd1.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
+			idd2.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
+			idd3.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
+
+		idd1.imageClose()
+		idd2.imageClose()
+		idd3.imageClose()
+
+		newImg = IECoreImage.ImageDisplayDriver.removeStoredImage( "myHandle1" )
+		newImg2 = IECoreImage.ImageDisplayDriver.removeStoredImage( "myHandle2" )
+		newImg3 = IECoreImage.ImageDisplayDriver.removeStoredImage( "myHandle3" )
+
+		# merge drivers share the same display driver - so second image should be none,
+		# as there is no image drivere associated with it.
+		self.assertIsNone( newImg2 )
+
+		# remove blindData for comparison
+		newImg.blindData().clear()
+		img.blindData().clear()
+		self.assertEqual( newImg, img )
+
+		newImg3.blindData().clear()
+		self.assertEqual( newImg3, img )
+
+		server = None
 
 if __name__ == "__main__":
 	unittest.main()
