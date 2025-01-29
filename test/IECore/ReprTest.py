@@ -60,6 +60,28 @@ class ReprTest( unittest.TestCase ) :
 		] :
 			self.assertTrue( type( v ) is type( eval( IECore.repr( v ) ) ) )
 			self.assertEqual( v, eval( IECore.repr( v ) ) )
+	
+	def testInfinity( self ) :
+
+		for v in [
+			# Python raises "OverflowError : bad numeric conversion : positive overflow"
+			# when passing `float( "inf" )` to `V2f``
+			imath.V2d( float( "inf" ), float( "inf" ) ),
+			imath.V3f( float( "inf" ), float( "inf" ), float( "inf" ) ),
+			imath.V3d( float( "inf" ), float( "inf" ), float( "inf" ) ),
+			imath.Color3f( float( "inf" ), float( "inf" ), float( "inf" ) ),
+			imath.Color4f( float( "inf" ), float( "inf" ), float( "inf" ), float( "inf" ) ),
+		] :
+			with self.subTest( v = v ) :
+				self.assertTrue( type( v ) is type( eval( IECore.repr( v ) ) ) )
+				self.assertEqual( v, eval( IECore.repr( v ) ) )
+
+				self.assertTrue( type( -v ) is type( eval( IECore.repr( -v ) ) ) )
+				self.assertEqual( -v, eval( IECore.repr( -v ) ) )
+
+				self.assertEqual( str( v ), "{}({})".format( type( v ).__name__, ", ".join( ["inf"] * v.dimensions() ) ) )
+				self.assertEqual( str( -v ), "{}({})".format( type( v ).__name__, ", ".join( ["-inf"] * v.dimensions() ) ) )
+
 
 if __name__ == "__main__":
 	unittest.main()
