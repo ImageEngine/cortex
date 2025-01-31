@@ -1,6 +1,11 @@
 10.5.x.x (relative to 10.5.12.0)
 ========
 
+Features
+--------
+
+- PointInstancerAlgo : Added support for the env var IECOREUSD_POINTINSTANCER_RELATIVEPROTOTYPES. If this is set to "1", then when USD PointInstancers are loaded as point clouds, if they contain prototype paths beneath themselves in the hierarchy, those prototype paths will be loaded as relative paths, starting with "./". This aligns with how Gaffer will now handle prototype paths, and allows point instancers to be relocated in the hierarchy.
+
 Fixes
 -----
 
