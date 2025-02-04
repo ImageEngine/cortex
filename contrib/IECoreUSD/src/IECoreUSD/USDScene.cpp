@@ -1341,7 +1341,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 						pxr::TfToken( g.first.string().substr( 10 ) ),
 						DataAlgo::valueTypeName( d )
 					);
-					globalAttribute.Set( DataAlgo::toUSD( d ) );
+					globalAttribute.Set( DataAlgo::toUSD( d ), m_root->timeCode( time ) );
 				}
 			}
 		}
@@ -1357,14 +1357,14 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				pxr::UsdGeomPrimvar usdPrimvar = primvarsAPI.CreatePrimvar(
 					usdName.name, DataAlgo::valueTypeName( data ), pxr::UsdGeomTokens->constant
 				);
-				usdPrimvar.Set( DataAlgo::toUSD( data ), time );
+				usdPrimvar.Set( DataAlgo::toUSD( data ), m_root->timeCode( time ) );
 			}
 			else
 			{
 				pxr::UsdAttribute newAttribute = m_location->prim.CreateAttribute(
 					usdName.name, DataAlgo::valueTypeName( data )
 				);
-				newAttribute.Set( DataAlgo::toUSD( data ), time );
+				newAttribute.Set( DataAlgo::toUSD( data ), m_root->timeCode( time ) );
 			}
 		}
 	}
