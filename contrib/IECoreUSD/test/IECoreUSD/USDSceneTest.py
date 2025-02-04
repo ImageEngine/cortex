@@ -2826,6 +2826,24 @@ class USDSceneTest( unittest.TestCase ) :
 		for t in ( 0.0, 0.5, 1.0 ) :
 			self.assertEqual( child.readAttribute( "user:test", t ), IECore.FloatData( t ) )
 
+	def testWriteAnimatedBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+
+		for t in ( 1.0, 1.5, 2.0 ) :
+			child.writeObject( IECoreScene.SpherePrimitive( t ), t )
+			child.writeBound( imath.Box3d( imath.V3d( -t ), imath.V3d( t ) ), t )
+
+		del child, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "child" )
+
+		for t in ( 1.0, 1.5, 2.0 ) :
+			self.assertEqual( child.readBound( t ), imath.Box3d( imath.V3d( -t ), imath.V3d( t ) ) )
+
 	def testShaders( self ) :
 
 		# Write shaders

@@ -1008,7 +1008,7 @@ void USDScene::writeBound( const Imath::Box3d &bound, double time )
 	extent.push_back( DataAlgo::toUSD( Imath::V3f( bound.max ) ) );
 
 	pxr::UsdAttribute extentAttr = boundable.CreateExtentAttr();
-	extentAttr.Set( pxr::VtValue( extent ) );
+	extentAttr.Set( pxr::VtValue( extent ), m_root->timeCode( time ) );
 }
 
 void USDScene::writeTransform( const Data *transform, double time )

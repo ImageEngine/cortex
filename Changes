@@ -4,7 +4,9 @@
 Fixes
 -----
 
-- USDScene : Fixed timecodes used when writing animated attributes.
+- USDScene :
+  - Fixed timecodes used when writing animated attributes.
+  - Fixed timecodes used when writing animated bounds.
 
 10.5.12.0 (relative to 10.5.11.0)
 ========
