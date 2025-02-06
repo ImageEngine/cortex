@@ -711,7 +711,7 @@ class USDScene::IO : public RefCounted
 			return m_stage;
 		}
 
-		pxr::UsdTimeCode getTime( double timeSeconds ) const
+		pxr::UsdTimeCode timeCode( double timeSeconds ) const
 		{
 			return timeSeconds * m_timeCodesPerSecond;
 		}
@@ -937,7 +937,7 @@ Imath::Box3d USDScene::readBound( double time ) const
 	}
 
 	pxr::VtArray<pxr::GfVec3f> extents;
-	attr.Get( &extents, m_root->getTime( time ) );
+	attr.Get( &extents, m_root->timeCode( time ) );
 
 	// When coming from UsdGeomModelAPI, `extents` may contain several bounds,
 	// on a per-purpose basis. Take the union, since the SceneInterface API only
@@ -965,12 +965,12 @@ ConstDataPtr USDScene::readTransform( double time ) const
 
 Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 {
-	return localTransform( m_location->prim, m_root->getTime( time ) );
+	return localTransform( m_location->prim, m_root->timeCode( time ) );
 }
 
 ConstObjectPtr USDScene::readObject( double time, const Canceller *canceller ) const
 {
-	return ObjectAlgo::readObject( m_location->prim, m_root->getTime( time ), canceller );
+	return ObjectAlgo::readObject( m_location->prim, m_root->timeCode( time ), canceller );
 }
 
 SceneInterface::Name USDScene::name() const
@@ -1008,7 +1008,7 @@ void USDScene::writeBound( const Imath::Box3d &bound, double time )
 	extent.push_back( DataAlgo::toUSD( Imath::V3f( bound.max ) ) );
 
 	pxr::UsdAttribute extentAttr = boundable.CreateExtentAttr();
-	extentAttr.Set( pxr::VtValue( extent ) );
+	extentAttr.Set( pxr::VtValue( extent ), m_root->timeCode( time ) );
 }
 
 void USDScene::writeTransform( const Data *transform, double time )
@@ -1023,7 +1023,7 @@ void USDScene::writeTransform( const Data *transform, double time )
 	if( xformable )
 	{
 		pxr::UsdGeomXformOp transformOp = xformable.MakeMatrixXform();
-		const pxr::UsdTimeCode timeCode = m_root->getTime( time );
+		const pxr::UsdTimeCode timeCode = m_root->timeCode( time );
 		transformOp.Set( DataAlgo::toUSD( m44->readable() ), timeCode );
 	}
 }
@@ -1182,7 +1182,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		{
 			return nullptr;
 		}
-		pxr::TfToken value; attr.Get( &value, m_root->getTime( time ) );
+		pxr::TfToken value; attr.Get( &value, m_root->timeCode( time ) );
 		if( value == pxr::UsdGeomTokens->inherited )
 		{
 			return new BoolData( true );
@@ -1227,7 +1227,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	{
 		pxr::UsdAttribute attr = pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr();
 		bool doubleSided;
-		if( attr.HasAuthoredValue() && attr.Get( &doubleSided, m_root->getTime( time ) ) )
+		if( attr.HasAuthoredValue() && attr.Get( &doubleSided, m_root->timeCode( time ) ) )
 		{
 			return new BoolData( doubleSided );
 		}
@@ -1235,7 +1235,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	}
 	else if( pxr::UsdAttribute attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
-		return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
+		return DataAlgo::fromUSD( attribute, m_root->timeCode( time ) );
 	}
 	else
 	{
@@ -1260,7 +1260,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			pxr::UsdGeomImageable imageable( m_location->prim );
 			imageable.GetVisibilityAttr().Set(
 				data->readable() ? pxr::UsdGeomTokens->inherited : pxr::UsdGeomTokens->invisible,
-				m_root->getTime( time )
+				m_root->timeCode( time )
 			);
 		}
 	}
@@ -1293,7 +1293,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			pxr::UsdGeomGprim gprim( m_location->prim );
 			if( gprim )
 			{
-				gprim.GetDoubleSidedAttr().Set( data->readable(), m_root->getTime( time ) );
+				gprim.GetDoubleSidedAttr().Set( data->readable(), m_root->timeCode( time ) );
 			}
 			else
 			{
@@ -1341,7 +1341,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 						pxr::TfToken( g.first.string().substr( 10 ) ),
 						DataAlgo::valueTypeName( d )
 					);
-					globalAttribute.Set( DataAlgo::toUSD( d ) );
+					globalAttribute.Set( DataAlgo::toUSD( d ), m_root->timeCode( time ) );
 				}
 			}
 		}
@@ -1357,14 +1357,14 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				pxr::UsdGeomPrimvar usdPrimvar = primvarsAPI.CreatePrimvar(
 					usdName.name, DataAlgo::valueTypeName( data ), pxr::UsdGeomTokens->constant
 				);
-				usdPrimvar.Set( DataAlgo::toUSD( data ), time );
+				usdPrimvar.Set( DataAlgo::toUSD( data ), m_root->timeCode( time ) );
 			}
 			else
 			{
 				pxr::UsdAttribute newAttribute = m_location->prim.CreateAttribute(
 					usdName.name, DataAlgo::valueTypeName( data )
 				);
-				newAttribute.Set( DataAlgo::toUSD( data ), time );
+				newAttribute.Set( DataAlgo::toUSD( data ), m_root->timeCode( time ) );
 			}
 		}
 	}
@@ -1488,7 +1488,7 @@ PrimitiveVariableMap USDScene::readObjectPrimitiveVariables( const std::vector<I
 
 void USDScene::writeObject( const Object *object, double time )
 {
-	if( !ObjectAlgo::writeObject( object, m_root->getStage(), m_location->prim.GetPath(), m_root->getTime( time ) ) )
+	if( !ObjectAlgo::writeObject( object, m_root->getStage(), m_location->prim.GetPath(), m_root->timeCode( time ) ) )
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "USDScene::writeObject",
