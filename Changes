@@ -54,6 +54,8 @@ Build
 - CI :
   - IECoreHoudini tests updated to pass on newer environments.
   - IECoreGL tests updated with relaxed precisions for image comparisons.
+  - Updated to GafferHQ/dependencies 9.0.0.
+  - Updated Windows build to use MSVC 2022.
 
 10.5.10.0 (relative to 10.5.9.5)
 =========
