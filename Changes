@@ -1,7 +1,21 @@
 10.5.x.x (relative to 10.5.13.0)
 ========
 
+Features
+--------
 
+- NanoBindConverter : Added new class providing interoperability between Boost Python bindings and NanoBind bindings.
+
+Improvements
+------------
+
+- IEcoreVDB : Support for the renamed python module `openvdb` in more recent versions of OpenVDB.
+
+Build
+-----
+
+- SConstruct :
+  - Added `NANOBIND_INCLUDE_PATH` option.
 
 10.5.13.0 (relative to 10.5.12.0)
 =========
