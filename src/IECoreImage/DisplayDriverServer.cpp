@@ -41,7 +41,14 @@
 // This header needs to be here so that on Windows it doesn't fail with
 // winsock2.h included more than once, and under the above include so that it
 // doesn't fail on macOS as intrusive_ptr needs to be defined via RefCounted.h
-#include "boost/asio.hpp"
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 106600
+#include <boost/asio.hpp>
+#include <boost/asio/io_context.hpp>
+#else
+#include <boost/asio.hpp>
+#include <boost/asio/io_service.hpp>
+#endif
 
 #include "IECoreImage/Private/DisplayDriverServerHeader.h"
 
@@ -102,6 +109,34 @@ static std::map<std::string, const DisplayDriverServer::PortRange> g_portRegistr
 
 } // namespace
 
+#if BOOST_VERSION >= 106600
+class DisplayDriverServer::Session : public RefCounted
+{
+	public:
+
+		Session( boost::asio::io_context& io_service, MergeMap& mergeMap );
+        ~Session() override;
+
+        boost::asio::ip::tcp::socket& socket();
+        void start();
+
+    private:
+
+  		void handleReadHeader( const boost::system::error_code& error );
+      	void handleReadOpenParameters( const boost::system::error_code& error );
+        void handleReadDataParameters( const boost::system::error_code& error );
+        void sendResult( DisplayDriverServerHeader::MessageType msg, size_t dataSize );
+        void sendException( const char *message );
+
+    private:
+		boost::asio::ip::tcp::socket m_socket;
+		DisplayDriverPtr m_displayDriver;
+		DisplayDriverServerHeader m_header;
+		CharVectorDataPtr m_buffer;
+  		MergeMap& m_mergeMap;
+		std::optional<int> m_mergeId;
+};
+#else
 class DisplayDriverServer::Session : public RefCounted
 {
 	public:
@@ -128,6 +163,7 @@ class DisplayDriverServer::Session : public RefCounted
 		MergeMap& m_mergeMap;
 		std::optional<int> m_mergeId;
 };
+#endif
 
 class DisplayDriverServer::PrivateData : public RefCounted
 {
@@ -135,7 +171,11 @@ class DisplayDriverServer::PrivateData : public RefCounted
 	public :
 
 		boost::asio::ip::tcp::endpoint m_endpoint;
+#if BOOST_VERSION >= 106600
+		boost::asio::io_context m_service;
+#else
 		boost::asio::io_service m_service;
+#endif
 		boost::asio::ip::tcp::acceptor m_acceptor;
 		std::thread m_thread;
 		MergeMap m_mergeMap;
@@ -305,11 +345,17 @@ void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session,
 /*
  * DisplayDriverServer::Session functions
  */
-
+#if BOOST_VERSION >= 106600
+DisplayDriverServer::Session::Session( boost::asio::io_context& io_service, MergeMap& mergeMap ) :
+ 	m_socket( io_service ), m_displayDriver(nullptr), m_buffer( new CharVectorData( ) ), m_mergeMap( mergeMap )
+{
+}
+#else
 DisplayDriverServer::Session::Session( boost::asio::io_service& io_service, MergeMap& mergeMap ) :
 	m_socket( io_service ), m_displayDriver(nullptr), m_buffer( new CharVectorData( ) ), m_mergeMap( mergeMap )
 {
 }
+#endif
 
 DisplayDriverServer::Session::~Session()
 {

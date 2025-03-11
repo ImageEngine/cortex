@@ -41,7 +41,12 @@
 
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/filesystem/convenience.hpp"
+#if BOOST_VERSION >= 108500
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#else
+#include <boost/filesystem/convenience.hpp>
+#endif
 
 #include <algorithm>
 #include <cassert>
@@ -130,7 +135,11 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 
 	if ( m_extensions.size() )
 	{
+#if BOOST_VERSION >= 108500
+		std::string ext = boost::filesystem::path( boost::filesystem::path( fileSequence->getFileName() ) ).extension().string();
+#else
 		std::string ext = boost::filesystem::extension( boost::filesystem::path( fileSequence->getFileName() ) );
+#endif
 		if ( ext.size() && ext[0] == '.' )
 		{
 			ext = ext.substr( 1, ext.size() - 1 );

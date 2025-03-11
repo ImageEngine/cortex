@@ -41,7 +41,13 @@
 
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/filesystem/convenience.hpp"
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 108500
+#include <boost/filesystem/path.hpp>
+#else
+#include <boost/filesystem/convenience.hpp>
+#endif
+
 
 #include <cassert>
 
@@ -116,8 +122,11 @@ void Writer::registerWriter( const std::string &extensions, CanWriteFn canWrite,
 
 WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 {
+#if BOOST_VERSION >= 108500
+	string ext = path(boost::filesystem::path(fileName)).extension().string();
+#else
 	string ext = extension(boost::filesystem::path(fileName));
-
+#endif
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );
 	ExtensionsToFnsMap::const_iterator it = m->find( ext );
@@ -146,8 +155,11 @@ WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 
 WriterPtr Writer::create( const std::string &fileName )
 {
+#if BOOST_VERSION >= 108500
+	string ext = path(boost::filesystem::path(fileName)).extension().string();
+#else
 	string ext = extension(boost::filesystem::path(fileName));
-
+#endif
 	ExtensionsToFnsMap *m = extensionsToFns();
 	ExtensionsToFnsMap::const_iterator it = m->find( ext );
 

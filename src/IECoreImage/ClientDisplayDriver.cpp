@@ -42,7 +42,13 @@
 // This header needs to be here so that on Windows it doesn't fail with
 // winsock2.h included more than once, and under the above include so that it
 // doesn't fail on macOS as intrusive_ptr needs to be defined via RefCounted.h
-#include "boost/asio.hpp"
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 106600
+#include <boost/asio.hpp>
+#include <boost/asio/io_context.hpp>
+#else
+#include <boost/asio/io_service.hpp>
+#endif
 
 #include "IECoreImage/Private/DisplayDriverServerHeader.h"
 
@@ -73,7 +79,11 @@ class ClientDisplayDriver::PrivateData : public RefCounted
 			m_socket.close();
 		}
 
+#if BOOST_VERSION >= 106600
+		boost::asio::io_context m_service;
+#else
 		boost::asio::io_service m_service;
+#endif
 		std::string m_host;
 		std::string m_port;
 		bool m_scanLineOrderOnly;
@@ -96,11 +106,33 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	m_data->m_host = displayHostData->readable();
 	m_data->m_port = displayPortData->readable();
 
+#if BOOST_VERSION >= 106600
+	boost::asio::io_context io_context;
+	tcp::resolver resolver(io_context);
+	boost::system::error_code error;
+	auto endpoints = resolver.resolve(m_data->m_host, m_data->m_port, error);
+	
+	if (!error)
+	{
+	    error = boost::asio::error::host_not_found;
+   	 	for (auto it = endpoints.begin(); it != endpoints.end() && error; ++it)
+    	{
+        	m_data->m_socket.close();
+        	m_data->m_socket.connect(*it, error);
+    	}
+	}
+
+	if (error)
+	{
+    	throw Exception("Could not connect to remote display driver server: " + error.message());
+	}
+#else
 	tcp::resolver resolver(m_data->m_service);
 	tcp::resolver::query query(m_data->m_host, m_data->m_port);
 
 	boost::system::error_code error;
 	tcp::resolver::iterator iterator = resolver.resolve( query, error );
+
 	if( !error )
 	{
 		error = boost::asio::error::host_not_found;
@@ -114,6 +146,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	{
 		throw Exception( std::string( "Could not connect to remote display driver server : " ) + error.message() );
 	}
+#endif
 
 	MemoryIndexedIOPtr io;
 	ConstCharVectorDataPtr buf;

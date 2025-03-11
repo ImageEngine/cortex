@@ -58,7 +58,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #endif
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "tbb/recursive_mutex.h"
+#include <mutex>
 
 #include <unordered_map>
 

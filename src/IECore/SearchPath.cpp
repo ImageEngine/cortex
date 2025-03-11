@@ -34,6 +34,7 @@
 
 #include "IECore/SearchPath.h"
 
+#include "boost/version.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/tokenizer.hpp"
 
@@ -106,6 +107,18 @@ std::string SearchPath::getPaths( const std::string &separator ) const
 boost::filesystem::path SearchPath::find( const boost::filesystem::path &file ) const
 {
 	// if it's a full path then there's no need to do any searching
+#if BOOST_VERSION >= 108500
+    if (file.is_absolute()) {
+		if( exists( file ) )
+		{
+			return file;
+		}
+		else
+		{
+			return "";
+		}
+	}
+#else
 	if( file.is_complete() )
 	{
 		if( exists( file ) )
@@ -117,7 +130,7 @@ boost::filesystem::path SearchPath::find( const boost::filesystem::path &file ) 
 			return "";
 		}
 	}
-
+#endif
 	// do some searching
 	for( list<path>::const_iterator it = paths.begin(); it!=paths.end(); it++ )
 	{

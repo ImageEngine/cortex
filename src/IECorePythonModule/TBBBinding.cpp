@@ -37,11 +37,14 @@
 #include "boost/python.hpp"
 
 #include "TBBBinding.h"
-
+#include "tbb/version.h"
+#if TBB_INTERFACE_VERSION >= 12040
+#include "oneapi/tbb/global_control.h"
+#else
 #include "tbb/task_scheduler_init.h"
-
 #define TBB_PREVIEW_GLOBAL_CONTROL 1
 #include "tbb/global_control.h"
+#endif
 
 #include <thread>
 
@@ -50,6 +53,9 @@ using namespace boost::python;
 namespace
 {
 
+#if TBB_INTERFACE_VERSION >= 12040
+// from onetbb was remove task_scheduler_init
+#else
 // Wraps task_scheduler_init so it can be used as a python
 // context manager.
 class TaskSchedulerInitWrapper : public tbb::task_scheduler_init
@@ -83,6 +89,7 @@ class TaskSchedulerInitWrapper : public tbb::task_scheduler_init
 		int m_maxThreads;
 
 };
+#endif
 
 class GlobalControlWrapper : public boost::noncopyable
 {
@@ -117,13 +124,16 @@ class GlobalControlWrapper : public boost::noncopyable
 
 void IECorePythonModule::bindTBB()
 {
+#if TBB_INTERFACE_VERSION >= 12040
+// from onetbb was remove task_scheduler_init
+#else
 	object tsi = class_<TaskSchedulerInitWrapper, boost::noncopyable>( "tbb_task_scheduler_init", no_init )
 		.def( init<int>( arg( "max_threads" ) = int( tbb::task_scheduler_init::automatic ) ) )
 		.def( "__enter__", &TaskSchedulerInitWrapper::enter, return_self<>() )
 		.def( "__exit__", &TaskSchedulerInitWrapper::exit )
 	;
 	tsi.attr( "automatic" ) = int( tbb::task_scheduler_init::automatic );
-
+#endif
 	class_<GlobalControlWrapper, boost::noncopyable> globalControl( "tbb_global_control", no_init );
 	{
 		scope globalControlScope = globalControl;

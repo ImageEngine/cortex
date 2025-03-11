@@ -39,7 +39,12 @@
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/SceneInterface.h"
 
+#include <tbb/version.h>
+#if TBB_INTERFACE_VERSION >= 12040
+#include <oneapi/tbb/task_group.h>
+#else
 #include "tbb/task.h"
+#endif
 
 #include <atomic>
 
@@ -49,6 +54,64 @@ using namespace IECoreScene;
 namespace
 {
 
+#if TBB_INTERFACE_VERSION >= 12040
+template<typename LocationFn>
+class Task
+{
+
+	public :
+
+		Task(
+			const SceneInterface *src, SceneInterface *dst, LocationFn &locationFn, double time, unsigned int flags
+		) : m_src( src ), m_dst( dst ), m_locationFn( locationFn ), m_time( time ), m_flags( flags )
+		{
+		}
+
+		~Task()
+		{
+		}
+
+        	void operator()() const
+        	{
+            		m_locationFn(m_src, m_dst, m_time, m_flags);
+
+            		SceneInterface::NameList childNames;
+            		m_src->childNames(childNames);
+
+            		std::vector<SceneInterfacePtr> childSceneInterfaces;
+            		childSceneInterfaces.reserve(childNames.size());
+
+            		std::vector<ConstSceneInterfacePtr> srcChildSceneInterfaces;
+            		srcChildSceneInterfaces.reserve(childNames.size());
+
+            		oneapi::tbb::task_group tg;
+            		for (const auto& childName : childNames)
+            		{
+                		SceneInterfacePtr dstChild = m_dst ? m_dst->child(childName, SceneInterface::CreateIfMissing) : nullptr;
+                		if (dstChild)
+                		{
+                    			childSceneInterfaces.push_back(dstChild);
+                	}
+
+                	ConstSceneInterfacePtr srcChild = m_src->child(childName);
+                	srcChildSceneInterfaces.push_back(srcChild);
+
+                	tg.run(Task(srcChild.get(), dstChild.get(), m_locationFn, m_time, m_flags));
+            	}
+
+            	tg.wait();
+        }
+
+	private :
+
+		const SceneInterface *m_src;
+		SceneInterface *m_dst;
+		LocationFn &m_locationFn;
+		double m_time;
+		unsigned int m_flags;
+
+};
+#else
 template<typename LocationFn>
 class Task : public tbb::task
 {
@@ -108,7 +171,7 @@ class Task : public tbb::task
 		unsigned int m_flags;
 
 };
-
+#endif
 template<typename T>
 struct CopyInfo
 {
@@ -257,6 +320,21 @@ SceneStats parallelReadAll( const SceneInterface *src, int startFrame, int endFr
 		copyInfos.pointCount += copyInfo.pointCount;
 	};
 
+#if TBB_INTERFACE_VERSION >= 12040
+	for (int f = startFrame; f <= endFrame; ++f)
+	{
+    	double time = f / frameRate;
+  	  	oneapi::tbb::task_group_context taskGroupContext(oneapi::tbb::task_group_context::isolated);
+    	oneapi::tbb::task_group tg(taskGroupContext);
+
+    	tg.run([=, &locationFn]() {
+        	Task<decltype(locationFn)> task(src, nullptr, locationFn, time, flags);
+       	 	task();
+    	});
+
+    	tg.wait();
+	}
+#else
 	for( int f = startFrame; f <= endFrame; ++f )
 	{
 		double time = f / frameRate;
@@ -264,7 +342,7 @@ SceneStats parallelReadAll( const SceneInterface *src, int startFrame, int endFr
 		Task<decltype( locationFn )> *task = new( tbb::task::allocate_root( taskGroupContext ) ) Task<decltype( locationFn )>( src, nullptr, locationFn, time, flags );
 		tbb::task::spawn_root_and_wait( *task );
 	}
-
+#endif
 	SceneStats stats;
 	stats["locations"] = locationCount;
 	stats["polygons"] = copyInfos.polygonCount;

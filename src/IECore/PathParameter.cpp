@@ -38,7 +38,12 @@
 
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/filesystem/convenience.hpp"
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 108500
+#include <boost/filesystem/path.hpp>
+#else
+#include <boost/filesystem/convenience.hpp>
+#endif
 #include "boost/filesystem/operations.hpp"
 
 #include <algorithm>

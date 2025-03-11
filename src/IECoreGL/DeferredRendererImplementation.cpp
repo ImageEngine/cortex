@@ -47,8 +47,14 @@
 
 #include "boost/noncopyable.hpp"
 
+#include <tbb/version.h>
+#if TBB_INTERFACE_VERSION >= 12040
+#include <oneapi/tbb/task_arena.h>
+#include <oneapi/tbb/task_group.h>
+#else
 #include "tbb/task.h"
 #include "tbb/task_scheduler_init.h"
+#endif
 
 #include <cassert>
 
@@ -354,6 +360,59 @@ struct DeferredRendererImplementation::ScopedRenderContext : private boost::nonc
 		const char *m_msgContext;
 };
 
+#if TBB_INTERFACE_VERSION >= 12040
+class DeferredRendererImplementation::ProceduralTask : private boost::noncopyable
+{
+	public:
+
+		ProceduralTask( DeferredRendererImplementation &renderer, IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr param ) :
+			m_renderer(renderer), m_procedural(proc), m_param(param)
+		{
+			m_numSubtasks = 0;
+			RenderContext *curContext = m_renderer.currentContext();
+
+			// create a RenderContext for a new Procedural based on the current context
+			StatePtr completeState = new State( false );
+			for ( StateStack::iterator it = curContext->stateStack.begin(); it != curContext->stateStack.end(); it++ )
+			{
+				completeState->add( *it );
+			}
+			m_proceduralContext = new RenderContext();
+			m_proceduralContext->localTransform = curContext->localTransform;
+			m_proceduralContext->transformStack.push( curContext->transformStack.top() );
+			m_proceduralContext->stateStack.push_back( completeState );
+			m_proceduralContext->groupStack.push( curContext->groupStack.top() );
+		}
+
+		~ProceduralTask()
+		{
+		}
+
+    	void execute() {
+        	oneapi::tbb::task_group taskGroup;
+
+        	// Activate the render context on the task's thread.
+        	ScopedRenderContext scopedProceduralContext(m_proceduralContext, m_renderer, "DeferredRendererImplementation::ProceduralTask::execute");
+        	m_procedural->render(m_param.get());
+
+       	 	taskGroup.wait();
+    	}
+
+    	void addSubtask(std::function<void()> subtask) {
+        	m_taskGroup.run(subtask);
+        	m_numSubtasks++;
+    	}
+
+private:
+    	std::atomic<unsigned int> m_numSubtasks;
+    	RenderContextPtr m_proceduralContext;
+    	DeferredRendererImplementation& m_renderer;
+    	IECoreScene::Renderer::ProceduralPtr m_procedural;
+    	IECoreScene::RendererPtr m_param;
+   	 	oneapi::tbb::task_group m_taskGroup;
+
+};
+#else
 class DeferredRendererImplementation::ProceduralTask : public tbb::task, private boost::noncopyable
 {
 	public:
@@ -417,9 +476,63 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 		IECoreScene::RendererPtr m_param;
 		tbb::task_list *m_taskList;
 };
+#endif
 
+#if TBB_INTERFACE_VERSION >= 12040
+void DeferredRendererImplementation::addProcedural( IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr renderer )
+{
+    bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
+    if( !visible )
+    {
+        return;
+    }
 
+    bool withThreads = static_cast<ProceduralThreadingStateComponent *>( getState( ProceduralThreadingStateComponent::staticTypeId() ) )->value();
+    if( withThreads )
+    {
+        bool mainProcedural = ( m_threadContextPool.size() == 0 );
 
+        if ( mainProcedural )
+        {
+            // Vytvoření task_arena pro řízení prostředí úloh
+            oneapi::tbb::task_arena arena;
+            arena.execute([&] {
+                // Vytvoření task_group pro správu skupiny úloh
+                oneapi::tbb::task_group tg;
+                tg.run([&] {
+                    // Spuštění procedurální úlohy
+                    proc->render( renderer.get() );
+                });
+                tg.wait();
+            });
+
+            // Kontrola, zda byly všechny kontexty vyčištěny
+            for ( const auto& context : m_threadContextPool )
+            {
+                if ( !context.empty() )
+                {
+                    IECore::msg( IECore::Msg::Error, "DeferredRendererImplementation::procedural", "Non empty thread render context detected!" );
+                }
+            }
+            m_threadContextPool.clear();
+        }
+        else
+        {
+            // Spuštění procedurální úlohy v rámci existující task_arena
+            oneapi::tbb::task_group tg;
+            tg.run([&] {
+                proc->render( renderer.get() );
+            });
+            tg.wait();
+        }
+    }
+    else
+    {
+        // Pokud není požadováno vlákno, provede se okamžitě
+        proc->render( renderer.get() );
+    }
+}
+#else
 void DeferredRendererImplementation::addProcedural( IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr renderer )
 {
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
@@ -477,6 +590,8 @@ void DeferredRendererImplementation::addProcedural( IECoreScene::Renderer::Proce
 		proc->render( renderer.get() );
 	}
 }
+
+#endif
 
 ScenePtr DeferredRendererImplementation::scene()
 {
