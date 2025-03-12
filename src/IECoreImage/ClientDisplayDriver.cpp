@@ -47,6 +47,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/io_context.hpp>
 #else
+#include <boost/asio.hpp>
 #include <boost/asio/io_service.hpp>
 #endif
 
