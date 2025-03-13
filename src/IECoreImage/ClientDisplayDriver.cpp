@@ -73,7 +73,7 @@ class ClientDisplayDriver::PrivateData : public RefCounted
 			m_socket.close();
 		}
 
-		boost::asio::io_service m_service;
+		boost::asio::io_context m_service;
 		std::string m_host;
 		std::string m_port;
 		bool m_scanLineOrderOnly;
@@ -96,23 +96,23 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	m_data->m_host = displayHostData->readable();
 	m_data->m_port = displayPortData->readable();
 
-	tcp::resolver resolver(m_data->m_service);
-	tcp::resolver::query query(m_data->m_host, m_data->m_port);
-
-	boost::system::error_code error;
-	tcp::resolver::iterator iterator = resolver.resolve( query, error );
-	if( !error )
-	{
+        boost::asio::io_context io_context;
+        tcp::resolver resolver(io_context);
+        boost::system::error_code error;
+        auto endpoints = resolver.resolve(m_data->m_host, m_data->m_port, error);
+        if (!error)
+        {
 		error = boost::asio::error::host_not_found;
-		while( error && iterator != tcp::resolver::iterator() )
-		{
-			m_data->m_socket.close();
-			m_data->m_socket.connect( *iterator++, error );
-		}
-	}
-	if( error )
-	{
-		throw Exception( std::string( "Could not connect to remote display driver server : " ) + error.message() );
+    	        for (auto it = endpoints.begin(); it != endpoints.end() && error; ++it)
+    	        {
+        		m_data->m_socket.close();
+        		m_data->m_socket.connect(*it, error);
+    	        }
+
+        	if (error)
+    	        {
+    		       throw Exception( std::string( "Could not connect to remote display driver server : " ) + error.message() );
+   	 	}
 	}
 
 	MemoryIndexedIOPtr io;
