@@ -96,8 +96,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	m_data->m_host = displayHostData->readable();
 	m_data->m_port = displayPortData->readable();
 
-        boost::asio::io_context io_context;
-        tcp::resolver resolver(io_context);
+        tcp::resolver resolver(m_data->m_service);
         boost::system::error_code error;
         auto endpoints = resolver.resolve(m_data->m_host, m_data->m_port, error);
         if (!error)
