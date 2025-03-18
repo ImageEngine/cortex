@@ -116,7 +116,7 @@ void Writer::registerWriter( const std::string &extensions, CanWriteFn canWrite,
 
 WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 {
-	string ext = path(boost::filesystem::path(fileName)).extension().string();
+	string ext = boost::filesystem::path(fileName).extension().string();
 
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );
@@ -146,7 +146,7 @@ WriterPtr Writer::create( ObjectPtr object, const std::string &fileName )
 
 WriterPtr Writer::create( const std::string &fileName )
 {
-	string ext = path(boost::filesystem::path(fileName)).extension().string();
+	string ext = boost::filesystem::path(fileName).extension().string();
 
 	ExtensionsToFnsMap *m = extensionsToFns();
 	ExtensionsToFnsMap::const_iterator it = m->find( ext );

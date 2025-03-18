@@ -84,7 +84,7 @@ ReaderPtr Reader::create( const std::string &fileName )
 	bool knownExtension = false;
 	ExtensionsToFnsMap *m = extensionsToFns();
 	assert( m );
-	string ext = path(boost::filesystem::path(fileName)).extension().string();
+	string ext = boost::filesystem::path(fileName).extension().string();
 	if( ext!="" )
 	{
 		ExtensionsToFnsMap::const_iterator it = m->find( ext );

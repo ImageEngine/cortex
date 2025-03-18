@@ -87,7 +87,7 @@ bool FileNameParameter::valueValid( const Object *value, std::string *reason ) c
 	// extensions check
 	if( extensions().size() )
 	{
-		string ext = boost::filesystem::path(boost::filesystem::path( s->readable())).extension().string();
+		string ext = boost::filesystem::path( s->readable()).extension().string();
 
 		const vector<string> &exts = extensions();
 		bool found = false;
