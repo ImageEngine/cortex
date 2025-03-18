@@ -96,23 +96,29 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	m_data->m_host = displayHostData->readable();
 	m_data->m_port = displayPortData->readable();
 
-        tcp::resolver resolver(m_data->m_service);
-        boost::system::error_code error;
-        auto endpoints = resolver.resolve(m_data->m_host, m_data->m_port, error);
-        if (!error)
-        {
-		error = boost::asio::error::host_not_found;
-    	        for (auto it = endpoints.begin(); it != endpoints.end() && error; ++it)
-    	        {
-        		m_data->m_socket.close();
-        		m_data->m_socket.connect(*it, error);
-    	        }
-
-        	if (error)
-    	        {
-    		       throw Exception( std::string( "Could not connect to remote display driver server : " ) + error.message() );
-   	 	}
+	tcp::resolver resolver(m_data->m_service);
+    	boost::system::error_code error;
+    	auto endpoints = resolver.resolve(m_data->m_host, m_data->m_port, error);
+    	if ( error )
+	{
+    		throw Exception("Could not resolve host: " + error.message());
 	}
+
+	error = boost::asio::error::host_not_found;
+	for (const auto& endpoint : endpoints)
+	{
+    		m_data->m_socket.close();
+    		m_data->m_socket.connect(endpoint, error);
+    		if ( !error )
+    		{
+    			break;
+    		}
+    	}
+
+    	if ( error )
+    	{
+		throw Exception( std::string( "Could not connect to remote display driver server : " ) + error.message() );
+   	}
 
 	MemoryIndexedIOPtr io;
 	ConstCharVectorDataPtr buf;
