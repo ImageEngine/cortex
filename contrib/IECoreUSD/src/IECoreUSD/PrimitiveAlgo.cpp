@@ -426,7 +426,7 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	pxr::GfMatrix4d inverseBind = skinningQuery.GetGeomBindTransform( time ).GetInverse();
 	for( auto &p : points )
 	{
-		p = inverseBind.Transform( p );
+		p = pxr::GfVec3f( inverseBind.Transform( pxr::GfVec3d( p ) ) );
 	}
 
 	Canceller::check( canceller );
