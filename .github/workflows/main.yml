@@ -40,7 +40,7 @@ jobs:
         include:
 
           - name: linux-gcc11
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:3.0.0
             options: .github/workflows/main/options.posix
@@ -50,7 +50,7 @@ jobs:
             jobs: 4
 
           - name: linux-debug-gcc11
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             buildType: DEBUG
             containerImage: ghcr.io/gafferhq/build/build:3.0.0
             options: .github/workflows/main/options.posix
