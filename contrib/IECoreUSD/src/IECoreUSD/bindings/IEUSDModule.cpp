@@ -39,6 +39,10 @@
 
 #include "IECore/IndexedIO.h"
 
+#if PXR_VERSION >= 2505
+#include "pxr/external/boost/python.hpp"
+#endif
+
 #include "boost/python.hpp"
 
 using namespace boost::python;
@@ -86,10 +90,47 @@ static list fromInternalPath( list l )
 	return vectorToList( path );
 }
 
+#if PXR_VERSION >= 2505
+
+// Registers `boost::python` converters for types
+// wrapped using `pxr_boost::python`.
+template<typename T>
+struct PxrBoostConverter
+{
+
+	static void registerConverters()
+	{
+		boost::python::to_python_converter<T, ToPxrBoost>();
+		/// \todo Add conversion from Python when we have
+		/// a use for it. See PyBindConverter for an example.
+	}
+
+	private :
+
+		struct ToPxrBoost
+		{
+			static PyObject *convert( const T &t )
+			{
+				pxr::pxr_boost::python::object o( t );
+				Py_INCREF( o.ptr() );
+				return o.ptr();
+			}
+		};
+
+};
+
+#endif // PXR_VERSION >= 2505
+
 } // namespace
 
 BOOST_PYTHON_MODULE( _IECoreUSD )
 {
+#if PXR_VERSION >= 2505
+	PxrBoostConverter<pxr::TfToken>::registerConverters();
+	PxrBoostConverter<pxr::VtValue>::registerConverters();
+	PxrBoostConverter<pxr::SdfValueTypeName>::registerConverters();
+#endif
+
 	{
 		object dataAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreUSD.DataAlgo" ) ) ) );
 		scope().attr( "DataAlgo" ) = dataAlgoModule;
