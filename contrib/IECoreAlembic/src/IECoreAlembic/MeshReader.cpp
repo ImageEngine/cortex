@@ -150,8 +150,23 @@ class MeshReader : public PrimitiveReader
 				}
 			}
 
-			PrimitiveVariable::Interpolation interpolation = PrimitiveReader::interpolation( uvs.getScope() );
-			primitive->variables["uv"] = PrimitiveVariable( interpolation, uvData, indexData );
+			const PrimitiveVariable primitiveVariable( PrimitiveReader::interpolation( uvs.getScope() ), uvData, indexData );
+			if( primitive->isPrimitiveVariableValid( primitiveVariable ) )
+			{
+				primitive->variables["uv"] = primitiveVariable;
+			}
+			else
+			{
+				IECore::msg(
+					IECore::Msg::Warning, "PrimitiveReader::readGeomParam",
+					boost::format(
+						"Ignoring invalid \"uv\" property on object \"%1%\" (size %2%, expected %3%)"
+					)
+						% uvs.getParent().getObject().getFullName()
+						% ( indexData ? indexData->readable().size() : uvData->readable().size() )
+						% primitive->variableSize( primitiveVariable.interpolation )
+				);
+			}
 		}
 
 };
