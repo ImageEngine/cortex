@@ -1,7 +1,15 @@
-10.5.x.x (relative to 10.5.13.0)
+10.5.x.x (relative to 10.5.13.1)
 ========
 
 
+
+10.5.13.1 (relative to 10.5.13.0)
+=========
+
+Fixes
+-----
+
+- USD : Fixed compatibility with USD 25.05.
 
 10.5.13.0 (relative to 10.5.12.0)
 =========
