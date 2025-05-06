@@ -151,6 +151,7 @@ from StringAlgoTest import StringAlgoTest
 from PathMatcherTest import PathMatcherTest
 from PathMatcherDataTest import PathMatcherDataTest
 from CancellerTest import CancellerTest
+from ObjectMatrixTest import ObjectMatrixTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

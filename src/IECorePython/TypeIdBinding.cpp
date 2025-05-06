@@ -292,6 +292,7 @@ void bindTypeId()
 		.value( "V3iVectorDataBase", V3iVectorDataBaseTypeId )
 		.value( "LensModel", LensModelTypeId )
 		.value( "StandardRadialLensModel", StandardRadialLensModelTypeId )
+		.value( "ObjectMatrix", ObjectMatrixTypeId )
 	;
 
 	converter::registry::push_back(

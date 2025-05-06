@@ -254,6 +254,7 @@ enum TypeId
 	V3iVectorDataBaseTypeId = 386,
 	LensModelTypeId = 387,
 	StandardRadialLensModelTypeId = 388,
+	ObjectMatrixTypeId = 389,
 
 	// Remember to update TypeIdBinding.cpp !!!
 
