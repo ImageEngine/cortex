@@ -1,6 +1,11 @@
 10.5.x.x (relative to 10.5.13.1)
 ========
 
+Features
+--------
+
+- ObjectMatrix : Added new class providing an object that holds a matrix of child objects.
+
 Fixes
 -----
 

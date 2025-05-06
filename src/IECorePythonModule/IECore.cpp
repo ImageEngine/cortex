@@ -157,6 +157,7 @@
 #include "IECorePython/PathMatcherBinding.h"
 #include "IECorePython/CancellerBinding.h"
 #include "IECorePython/IndexedIOAlgoBinding.h"
+#include "IECorePython/ObjectMatrixBinding.h"
 
 #include "IECore/IECore.h"
 #include "IECore/Version.h"
@@ -305,6 +306,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCanceller();
 	bindIndexedIOAlgo();
 	bindTBB();
+	bindObjectMatrix();
 
 	def( "milestoneVersion", &IECore::milestoneVersion );
 	def( "majorVersion", &IECore::majorVersion );
