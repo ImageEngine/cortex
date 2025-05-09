@@ -453,16 +453,6 @@ class ImageReader::Implementation
 			{
 				m_inputFileName = m_reader->fileName();
 
-				// Store the miplevels that the file natively supports. We do
-				// this as OIIO returns a different value once automip is turned
-				// on.
-				m_cache->get_image_info(
-					m_inputFileName,
-					0, 0, // subimage, miplevel
-					ustring( "miplevels" ),
-					TypeDesc::TypeInt, &m_miplevels
-				);
-
 				// Get the fileFormat and store the current and linear color spaces
 				// We do this so we can perform color conversion on the image after
 				// loading the data.
@@ -522,7 +512,6 @@ class ImageReader::Implementation
 		ustring m_inputFileName;
 		std::string m_currentColorSpace;
 		std::string m_linearColorSpace;
-		int m_miplevels;
 
 };
 
