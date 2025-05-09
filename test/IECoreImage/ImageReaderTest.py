@@ -218,7 +218,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		dictHeader = {
 			'channelNames': IECore.StringVectorData( [ "R", "G", "B" ] ),
-			'oiio:ColorSpace': IECore.StringData( "Linear" ),
+			'oiio:ColorSpace': IECore.StringData( "lin_rec709" if IECoreImage.OpenImageIOAlgo.version() >= 30000 else "Linear" ),
 			'compression': IECore.StringData( "piz" ),
 			'screenWindowCenter': IECore.V2fData( imath.V2f(0,0) ),
 			'displayWindow': IECore.Box2iData( imath.Box2i( imath.V2i(0,0), imath.V2i(511,255) ) ),
@@ -229,6 +229,9 @@ class ImageReaderTest( unittest.TestCase ) :
 		}
 		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
 			dictHeader['oiio:subimages'] = IECore.IntData( 1 )
+		if IECoreImage.OpenImageIOAlgo.version() >= 30000 :
+			dictHeader["openexr:lineOrder"] = IECore.StringData( "increasingY" )
+			dictHeader["screenWindowCenter"] = IECore.V2fData( imath.V2f( 0 ) )
 
 		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) )
 		header = r.readHeader()
