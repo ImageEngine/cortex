@@ -461,7 +461,7 @@ class ImageReader::Implementation
 					m_inputFileName,
 					0, miplevel(), // subimage, miplevel
 					ustring( "fileformat" ),
-					TypeDesc::TypeString, &fileFormat
+					OIIO::TypeString, &fileFormat
 				);
 
 				if( strcmp( fileFormat, "png" ) == 0 )
