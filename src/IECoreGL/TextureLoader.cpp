@@ -56,12 +56,16 @@
 
 using namespace IECoreGL;
 
+#if OIIO_VERSION < 30000
+
 namespace{
 	void destroyImageCache( OIIO::ImageCache *cache )
 	{
 		OIIO::ImageCache::destroy( cache, /* teardown */ true );
 	}
 }
+
+#endif
 
 TextureLoader::TextureLoader( const IECore::SearchPath &searchPaths )
 	:	m_searchPaths( searchPaths )
@@ -92,7 +96,12 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	// doesn't have mipmaps on disk ... but I'm keeping this consistent for now.
 	// To set automip, we need to create an ImageCache - currently I just destroy it when this function exits:
 	// we cache the GL texture ourselves, so dropping the OIIO cache should be OK.
+#if OIIO_VERSION >= 30000
+	std::shared_ptr<OIIO::ImageCache> imageCache = OIIO::ImageCache::create( /* shared */ false );
+#else
 	std::unique_ptr<OIIO::ImageCache, decltype(&destroyImageCache) > imageCache( OIIO::ImageCache::create( /* shared */ false ), &destroyImageCache );
+#endif
+
 	imageCache->attribute( "automip", 1 );
 
 	OIIO::ImageSpec mipSpec;
@@ -109,14 +118,25 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	{
 		while(
 			std::max( mipSpec.full_width, mipSpec.full_height ) > maximumResolution &&
+#if OIIO_VERSION >= 30000
+			imageCache->get_cache_dimensions( oiioPath, mipSpec, 0, miplevel + 1 )
+#else
 			imageCache->get_imagespec( oiioPath, mipSpec, 0, miplevel + 1 )
+#endif
 		)
 		{
 			miplevel++;
 		}
 	}
 
-	OIIO::ImageBuf imageBuf( oiioPath, 0, miplevel, imageCache.get() );
+	OIIO::ImageBuf imageBuf(
+		oiioPath, 0, miplevel,
+#if OIIO_VERSION >= 30000
+		imageCache
+#else
+		imageCache.get()
+#endif
+	);
 	if( imageBuf.spec().full_x != 0 || imageBuf.spec().full_y != 0 )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Texture display window must start at origin for \"%s\"." ) % path.string() );
