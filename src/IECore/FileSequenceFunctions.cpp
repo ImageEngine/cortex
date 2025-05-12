@@ -42,13 +42,17 @@
 #include "IECore/ReversedFrameList.h"
 
 #include "boost/algorithm/string.hpp"
-#include "boost/filesystem/convenience.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
-#include "boost/version.hpp"
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 108500
+#include <boost/filesystem/directory.hpp>
+#else
+#include <boost/filesystem/convenience.hpp>
+#endif
 
 #include <algorithm>
 #include <cassert>

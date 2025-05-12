@@ -33,10 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/IndexedIO.h"
-
 #include "IECore/Exception.h"
 
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 108500
+#include "boost/filesystem/path.hpp"
+#else
 #include "boost/filesystem/convenience.hpp"
+#endif
 #include "boost/algorithm/string.hpp"
 
 #include <iostream>
@@ -76,7 +80,11 @@ IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryI
 {
 	IndexedIOPtr result = nullptr;
 
+#if BOOST_VERSION >= 108500
+	std::string extension = fs::path(path).extension().string();
+#else
 	std::string extension = fs::extension(path);
+#endif
 	boost::to_lower( extension );
 
 	const CreatorMap &createFns = creators();

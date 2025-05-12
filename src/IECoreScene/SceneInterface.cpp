@@ -34,7 +34,14 @@
 
 #include "IECoreScene/SceneInterface.h"
 
-#include "boost/filesystem/convenience.hpp"
+#include <boost/version.hpp>
+
+#if BOOST_VERSION >= 108500
+#include <boost/filesystem/path.hpp>
+#else
+#include <boost/filesystem/convenience.hpp>
+#endif
+
 #include "boost/tokenizer.hpp"
 #include "boost/algorithm/string.hpp"
 
@@ -104,7 +111,11 @@ SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::Op
 {
 	SceneInterfacePtr result = nullptr;
 
+#if BOOST_VERSION >= 108500
+	std::string extension = boost::filesystem::path(path).extension().string();
+#else
 	std::string extension = boost::filesystem::extension(path);
+#endif
 	boost::algorithm::to_lower( extension );
 	IndexedIO::OpenModeFlags openMode = IndexedIO::OpenModeFlags( mode & (IndexedIO::Read|IndexedIO::Write|IndexedIO::Append) );
 	std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, openMode );

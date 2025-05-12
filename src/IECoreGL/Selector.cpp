@@ -53,8 +53,12 @@
 #include "IECore/MessageHandler.h"
 
 #include "boost/format.hpp"
-#include "boost/timer.hpp"
-
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 107000
+#include <boost/timer/timer.hpp>
+#else
+#include <boost/timer.hpp>
+#endif
 using namespace IECoreGL;
 
 //////////////////////////////////////////////////////////////////////////

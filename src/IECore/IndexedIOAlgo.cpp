@@ -33,8 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/IndexedIOAlgo.h"
-
+#include <tbb/version.h>
+#if TBB_INTERFACE_VERSION >= 12140
+#include <oneapi/tbb/task_group.h>
+#else
 #include "tbb/task.h"
+#endif
 
 #include <atomic>
 
@@ -227,6 +231,49 @@ void recursiveCopy( const IndexedIO *src, IndexedIO *dst )
 	}
 }
 
+#if TBB_INTERFACE_VERSION >= 12040
+template<template<typename, typename> class FileHandler, typename FileCallback>
+class FileTask
+{
+public:
+    FileTask(const IndexedIO* src, FileCallback& fileCallback)
+        : m_src(src), m_fileCallback(fileCallback)
+    {
+    }
+
+    void operator()() const
+    {
+        IndexedIO::EntryIDList fileNames;
+        m_src->entryIds(fileNames, IndexedIO::EntryType::File);
+
+        for (const auto& fileName : fileNames)
+        {
+            handleFile<FileHandler, FileCallback>(m_src, nullptr, fileName, m_fileCallback);
+        }
+
+        IndexedIO::EntryIDList directoryNames;
+        m_src->entryIds(directoryNames, IndexedIO::EntryType::Directory);
+
+        std::vector<ConstIndexedIOPtr> childDirectories;
+        childDirectories.reserve(directoryNames.size());
+        for (const auto& directoryName : directoryNames)
+        {
+            childDirectories.push_back(m_src->subdirectory(directoryName, IndexedIO::ThrowIfMissing));
+        }
+
+        oneapi::tbb::task_group tg;
+        for (const auto& childDirectory : childDirectories)
+        {
+            tg.run(FileTask(childDirectory.get(), m_fileCallback));
+        }
+        tg.wait();
+    }
+
+private:
+    const IndexedIO* m_src;
+    FileCallback& m_fileCallback;
+};
+#else
 //! Task for traversing all files in parallel. New tasks are spawned for each directory
 template<template<typename, typename> class FileHandler, typename FileCallback>
 class FileTask : public tbb::task
@@ -280,7 +327,7 @@ class FileTask : public tbb::task
 		const IndexedIO *m_src;
 		FileCallback &m_fileCallback;
 };
-
+#endif
 } // namespace
 
 namespace IECore
@@ -293,6 +340,26 @@ void copy( const IndexedIO *src, IndexedIO *dst )
 	::recursiveCopy( src, dst );
 }
 
+#if TBB_INTERFACE_VERSION >= 12140
+FileStats<size_t> parallelReadAll(const IndexedIO* src)
+{
+    FileStats<std::atomic<size_t>> fileStats;
+
+    auto fileCallback = [&fileStats](size_t numBytes)
+    {
+        fileStats.addBlock(numBytes);
+    };
+
+    oneapi::tbb::task_group tg;
+    tg.run([src, &fileCallback, &tg]()
+    {
+    	FileTask<Reader, decltype(fileCallback)>(src, fileCallback);
+    });
+    tg.wait();
+
+    return fileStats;
+}
+#else
 FileStats<size_t> parallelReadAll( const IndexedIO *src )
 {
 	FileStats<std::atomic<size_t> > fileStats;
@@ -307,6 +374,6 @@ FileStats<size_t> parallelReadAll( const IndexedIO *src )
 	tbb::task::spawn_root_and_wait( *task );
 	return fileStats;
 }
-
+#endif
 } // IndexedIOAlgo
 } // IECore

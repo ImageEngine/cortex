@@ -39,7 +39,11 @@
 
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/filesystem/convenience.hpp"
+#if BOOST_VERSION >= 108500
+#include <boost/filesystem/path.hpp>
+#else
+#include <boost/filesystem/convenience.hpp>
+#endif
 #include "boost/filesystem/operations.hpp"
 #include "boost/format.hpp"
 
@@ -87,8 +91,11 @@ bool FileNameParameter::valueValid( const Object *value, std::string *reason ) c
 	// extensions check
 	if( extensions().size() )
 	{
+#if BOOST_VERSION >= 108500
+		string ext = boost::filesystem::path(boost::filesystem::path( s->readable())).extension().string();
+#else
 		string ext = boost::filesystem::extension(boost::filesystem::path( s->readable()));
-
+#endif
 		const vector<string> &exts = extensions();
 		bool found = false;
 		for( vector<string>::const_iterator it=exts.begin(); it!=exts.end(); it++ )
