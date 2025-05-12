@@ -36,7 +36,7 @@
 
 #include "IECore/Exception.h"
 
-#include "boost/filesystem/convenience.hpp"
+#include "boost/filesystem/path.hpp"
 #include "boost/algorithm/string.hpp"
 
 #include <iostream>
@@ -76,7 +76,7 @@ IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryI
 {
 	IndexedIOPtr result = nullptr;
 
-	std::string extension = fs::extension(path);
+	std::string extension = fs::path(path).extension().string();
 	boost::to_lower( extension );
 
 	const CreatorMap &createFns = creators();
