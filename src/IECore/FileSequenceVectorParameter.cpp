@@ -257,7 +257,7 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 			frameList = FrameList::parse( tail );
 			found = true;
 		}
-		
+
 		catch ( Exception & )
 		{
 			fileSequenceCopy = fileSequenceCopy.substr( 0, spaceIndex )
@@ -267,7 +267,7 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 
 			spaceIndex = fileSequenceCopy.find_first_of( " " );
 		}
-		
+
 	}
 
 	return new FileSequence( filename, frameList );
