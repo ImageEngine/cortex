@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.14.0)
 ========
 
+Fixes
+-----
 
+- Boost : Fixed compatibility with Boost 1.82.
 
 10.5.14.0 (relative to 10.5.13.1)
 =========
