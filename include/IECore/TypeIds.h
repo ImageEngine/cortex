@@ -285,8 +285,8 @@ enum TypeId
 	FirstCoreMayaTypeId = 109000,
 	LastCoreMayaTypeId = 109999,
 
-	FirstGafferTypeId = 110000,
-	LastGafferTypeId = 110999,
+	OldFirstGafferTypeId = 110000, // Used by Gaffer 1.5 and earlier
+	OldLastGafferTypeId = 110999,
 
 	FirstCoreHoudiniTypeId = 111000,
 	LastCoreHoudiniTypeId = 111999,
@@ -308,6 +308,9 @@ enum TypeId
 
 	FirstCoreVDBTypeId = 117000,
 	LastCoreVDBTypeId = 117999,
+
+	FirstGafferTypeId = 118000, // Used by Gaffer 1.6 and later
+	LastGafferTypeId = 127999,
 
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,
