@@ -71,6 +71,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
+#include "pxr/usd/usdSkel/bindingAPI.h"
 #include "pxr/usd/usdUtils/stageCache.h"
 #ifdef IECOREUSD_WITH_OPENVDB
 #include "pxr/usd/usdVol/fieldBase.h"
@@ -1763,6 +1764,17 @@ void USDScene::objectHash( double time, IECore::MurmurHash &h ) const
 		if( ObjectAlgo::objectMightBeTimeVarying( m_location->prim ) )
 		{
 			h.append( time );
+		}
+		// Account for the skinning applied by PrimitiveAlgo. Ideally this
+		// responsibility would be taken on by PrimitiveAlgo itself, but that
+		// would require modifying the ObjectAlgo API, which we don't want to
+		// do right now.
+		if( auto skelBindingAPI = pxr::UsdSkelBindingAPI( m_location->prim ) )
+		{
+			if( auto animationSource = skelBindingAPI.GetInheritedAnimationSource() )
+			{
+				appendPrimOrMasterPath( animationSource, h );
+			}
 		}
 	}
 }

@@ -2588,6 +2588,49 @@ class USDSceneTest( unittest.TestCase ) :
 			for referenceNormal, normal in zip( referenceNormals.data, cubeMesh["N"].data ) :
 				self.assertTrue( normal.equalWithAbsError( referenceNormal, 0.000001 ) )
 
+	def testInstancedSkinning( self ) :
+
+		# Skinned meshes can be instanced, but with each instance inheriting different
+		# skeleton animation. Make sure we account for that.
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/instancedSkinning.usda", IECore.IndexedIO.OpenMode.Read )
+
+		# Check that the skinned meshes come out with the expected skinning.
+
+		cube1 = root.scene( [ "Instance1", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube1.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, 0.5 ), imath.V3f( 0.5, 0.5, 1.5 ) ) )
+
+		cube2 = root.scene( [ "Group", "Instance2", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube2.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -1.5 ), imath.V3f( 0.5, 0.5, -0.5 ) ) )
+
+		cube3 = root.scene( [ "Instance3", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube2.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -1.5 ), imath.V3f( 0.5, 0.5, -0.5 ) ) )
+
+		cube4 = root.scene( [ "Instance4", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube2.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -1.5 ), imath.V3f( 0.5, 0.5, -0.5 ) ) )
+
+		# And check that their object hashes match the results above.
+
+		ObjectHash = IECoreScene.SceneInterface.HashType.ObjectHash
+		self.assertNotEqual( cube1.hash( ObjectHash, 0 ), cube2.hash( ObjectHash, 0 ) ) # Different animation
+		self.assertEqual( cube2.hash( ObjectHash, 0 ), cube3.hash( ObjectHash, 0 ) ) # Same animation
+		self.assertEqual( cube2.hash( ObjectHash, 0 ), cube4.hash( ObjectHash, 0 ) ) # Same animation
+
+		# All the unskinned meshes should be the same.
+
+		unskinnedHashes = set()
+		for path in [
+			[ "Instance1", "SkeletonRoot", "UnskinnedCube" ],
+			[ "Group", "Instance2", "SkeletonRoot", "UnskinnedCube" ],
+			[ "Instance3", "SkeletonRoot", "UnskinnedCube" ],
+			[ "Instance4", "SkeletonRoot", "UnskinnedCube" ],
+		] :
+			cube = root.scene( path )
+			self.assertEqual( cube.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -0.5 ), imath.V3f( 0.5, 0.5, 0.5 ) ) )
+			unskinnedHashes.add( cube.hash( ObjectHash, 0 ) )
+
+		self.assertEqual( len( unskinnedHashes ), 1 )
+
 	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel ( self ) :
 
