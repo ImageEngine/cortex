@@ -6,6 +6,11 @@ Improvements
 
 - USDScene : Added loading of ArnoldAlembic, ArnoldUsd and ArnoldProceduralCustom prims as Cortex ExternalProcedural objects.
 
+Fixes
+-----
+
+- USDScene : Fixed loading of instanced UsdSkel geometry with unique animation applied.
+
 10.5.14.1 (relative to 10.5.14.0)
 =========
 
