@@ -490,6 +490,73 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetworkInvalid )
 		self.assertEqual( shaderNetworkInvalid, shaderNetworkInvalidOrig )
 
+	def __splineConversionArnold( self, shaderName, valueName, valueType, parms ):
+
+		shaderNetworkOrig = IECoreScene.ShaderNetwork(
+			shaders = { "test" : IECoreScene.Shader( shaderName, "ai:surface", parms ) },
+			output = "test"
+		)
+		shaderNetwork = shaderNetworkOrig.copy()
+		IECoreScene.ShaderNetworkAlgo.expandSplines( shaderNetwork )
+
+		parmsExpanded = shaderNetwork.outputShader().parameters
+
+		self.assertEqual( type( parmsExpanded["interpolation"] ), IECore.IntVectorData )
+		self.assertEqual( type( parmsExpanded["position"] ), IECore.FloatVectorData )
+		self.assertEqual( type( parmsExpanded[valueName] ), valueType )
+
+		IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetwork )
+
+		self.assertEqual( shaderNetwork, shaderNetworkOrig )
+
+	def testSplineConversionArnold( self ):
+
+		parmsRgb = IECore.CompoundData()
+		parmsRgb["ramp"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.catmullRom(),
+( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ), ( 50, imath.Color3f(6) ) ) ) )
+
+		self.__splineConversionArnold( "ramp_rgb", "color", IECore.Color3fVectorData, parmsRgb )
+
+		parmsFloat = IECore.CompoundData()
+		parmsFloat["ramp"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.constant(),
+			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) ) ) )
+
+		self.__splineConversionArnold( "ramp_float", "value", IECore.FloatVectorData, parmsFloat )
+
+	def __splineConversionRenderman( self, shaderType ):
+
+		parms = IECore.CompoundData()
+		parms["colorRamp"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.catmullRom(),
+( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ), ( 50, imath.Color3f(6) ) ) ) )
+		parms["floatRamp"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.constant(),
+			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) ) ) )
+
+		shaderNetworkOrig = IECoreScene.ShaderNetwork(
+			shaders = { "test" : IECoreScene.Shader( "PxrSplineMap", shaderType, parms ) },
+			output = "test"
+		)
+		shaderNetwork = shaderNetworkOrig.copy()
+		IECoreScene.ShaderNetworkAlgo.expandSplines( shaderNetwork )
+
+		parmsExpanded = shaderNetwork.outputShader().parameters
+
+		self.assertEqual( type( parmsExpanded["colorRamp_Interpolation"] ), IECore.StringData )
+		self.assertEqual( type( parmsExpanded["colorRamp_Knots"] ), IECore.FloatVectorData )
+		self.assertEqual( type( parmsExpanded["colorRamp_Colors"] ), IECore.Color3fVectorData )
+
+		self.assertEqual( type( parmsExpanded["floatRamp_Interpolation"] ), IECore.StringData )
+		self.assertEqual( type( parmsExpanded["floatRamp_Knots"] ), IECore.FloatVectorData )
+		self.assertEqual( type( parmsExpanded["floatRamp_Floats"] ), IECore.FloatVectorData )
+
+		IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetwork )
+
+		self.assertEqual( shaderNetwork, shaderNetworkOrig )
+
+	def testSplineConversionRenderman( self ):
+
+		self.__splineConversionRenderman( "osl:shader" )
+		self.__splineConversionRenderman( "ri:surface" )
+
 	def testSplineInputs( self ):
 
 		fC3fcatmullRom = IECore.SplinefColor3fData( IECore.SplinefColor3f(

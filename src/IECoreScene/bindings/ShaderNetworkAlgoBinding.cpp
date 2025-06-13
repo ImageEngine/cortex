@@ -70,14 +70,14 @@ void convertOSLComponentConnectionsWrapper( ShaderNetwork *network, int oslVersi
 	ShaderNetworkAlgo::convertOSLComponentConnections( network, oslVersion );
 }
 
-CompoundDataPtr collapseSplineParametersWrapper( CompoundDataPtr parameters )
+CompoundDataPtr collapseSplineParametersWrapper( CompoundDataPtr parameters, const std::string shaderType, const std::string shaderName )
 {
-	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::collapseSplineParameters( parameters ) );
+	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::collapseSplineParameters( parameters, shaderType, shaderName ) );
 }
 
-CompoundDataPtr expandSplineParametersWrapper( CompoundDataPtr parameters )
+CompoundDataPtr expandSplineParametersWrapper( CompoundDataPtr parameters, const std::string shaderType, const std::string shaderName )
 {
-	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::expandSplineParameters( parameters ) );
+	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::expandSplineParameters( parameters, shaderType, shaderName ) );
 }
 
 std::string componentConnectionAdapterLabelWrapper()
