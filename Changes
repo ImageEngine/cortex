@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.15.0)
 ========
 
+Features
+--------
 
+- IECoreUSD::ShaderAlgo : Round-trip ColorSpace data that is stored on USD Attributes by storing an additional parameter with the `_colorspace` suffix.
 
 10.5.15.0 (relative to 10.5.14.1)
 =========

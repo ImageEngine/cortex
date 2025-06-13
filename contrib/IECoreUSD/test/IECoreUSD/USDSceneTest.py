@@ -2920,6 +2920,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		texture = IECoreScene.Shader( "texture", "ai:shader" )
 		texture.parameters["filename"] = IECore.StringData( "sometexture.tx" )
+		texture.parameters["filename_colorspace"] = IECore.InternedStringData( "ACEScg" )
 
 		oneShaderNetwork = IECoreScene.ShaderNetwork()
 		oneShaderNetwork.addShader( "foo", surface )
@@ -3107,6 +3108,8 @@ class USDSceneTest( unittest.TestCase ) :
 		textureUsd = pxr.UsdShade.Shader( add1Source[0].GetPrim() )
 		self.assertEqual( textureUsd.GetShaderId(), "arnold:texture" )
 		self.assertEqual( textureUsd.GetInput( "filename" ).Get(), "sometexture.tx" )
+		self.assertEqual( add1Source[0].GetPrim().GetAttribute( "inputs:filename" ).GetColorSpace(), "ACEScg" )
+		self.assertEqual( add1Source[0].GetPrim().HasAttribute( "inputs:filename_colorspace" ), False )
 
 
 		# Read via SceneInterface, and check that we've round-tripped successfully.
@@ -3382,6 +3385,15 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual(
 			os.path.normcase( os.path.normpath( network.getShader( "udimTexture" ).parameters["file"].value ) ),
 			os.path.normcase( os.path.normpath( "/full/path/to/myTexture.<UDIM>.tx" ) )
+		)
+		self.assertEqual(
+			network.getShader( "relativeTexture" ).parameters["file_colorspace"].value, "ACEScg"
+		)
+		self.assertEqual(
+			network.getShader( "relativeUDIMTexture" ).parameters["file_colorspace"].value, "lin_rec709_scene"
+		)
+		self.assertEqual(
+			network.getShader( "udimTexture" ).parameters["file_colorspace"].value, "srgb_rec709_scene"
 		)
 
 	def testExposedShaderInput( self ) :
