@@ -111,9 +111,14 @@ IECore::ObjectPtr readCamera( pxr::UsdGeomCamera &camera, pxr::UsdTimeCode time,
 	result->setFocusDistance( focusDistance );
 
 	Imath::V2d shutter;
-	camera.GetShutterOpenAttr().Get( &shutter[0], time );
-	camera.GetShutterCloseAttr().Get( &shutter[1], time );
-	result->setShutter( shutter );
+	auto shutterOpenAttr = camera.GetShutterOpenAttr();
+	auto shutterCloseAttr = camera.GetShutterCloseAttr();
+	if( shutterOpenAttr.HasAuthoredValue() || shutterCloseAttr.HasAuthoredValue() )
+	{
+		shutterOpenAttr.Get( &shutter[0], time );
+		shutterCloseAttr.Get( &shutter[1], time );
+		result->setShutter( shutter );
+	}
 
 	return result;
 }

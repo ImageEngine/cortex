@@ -4,7 +4,9 @@
 Fixes
 -----
 
-- USDScene : Fixed writing of shutter values from cameras without a `shutter` parameter. The `shutter:open` and `shutter:close` attributes are now omitted instead of being written with Cortex's default -0.5, 0.5 shutter values.
+- USDScene :
+  - Fixed writing of shutter values from cameras without a `shutter` parameter. The `shutter:open` and `shutter:close` attributes are now omitted instead of being written with Cortex's default -0.5, 0.5 shutter values.
+  - Fixed reading of shutter values from cameras without `shutter:open` and `shutter:close` attributes. The `shutter` parameter is now omitted instead of being created with USD's default 0, 0 shutter values.
 
 10.5.x.x (relative to 10.5.15.0)
 ========

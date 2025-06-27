@@ -1400,6 +1400,7 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertEqual( c2.getClippingPlanes(), c.getClippingPlanes() )
 			self.assertEqual( c2.getFStop(), c.getFStop() )
 			self.assertEqual( c2.getFocusDistance(), c.getFocusDistance() )
+			self.assertEqual( c2.hasShutter(), c.hasShutter() )
 			self.assertEqual( c2.getShutter(), c.getShutter() )
 
 			assertVectorsAlmostEqual( c2.frustum().min(), c.frustum().min(), places = 6 )
