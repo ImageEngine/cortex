@@ -53,6 +53,19 @@ using namespace IECoreUSD;
 namespace
 {
 
+bool checkEnvFlag( const char *envVar, bool def )
+{
+	const char *value = getenv( envVar );
+	if( value )
+	{
+		return std::string( value ) != "0";
+	}
+	else
+	{
+		return def;
+	}
+}
+
 IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	pxr::VtVec3fArray pointsData;
@@ -86,18 +99,53 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	Canceller::check( canceller );
 	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetAngularVelocitiesAttr(), time, newPoints.get(), "angularVelocity" );
 
+	if( pointInstancer.GetInvisibleIdsAttr().HasAuthoredValue() )
+	{
+		DataPtr cortexInvisIds = DataAlgo::fromUSD( pointInstancer.GetInvisibleIdsAttr(), time, true );
+		if( cortexInvisIds )
+		{
+			newPoints->variables["invisibleIds"] = IECoreScene::PrimitiveVariable(
+				PrimitiveVariable::Constant, cortexInvisIds
+			);
+		}
+	}
+
+	pxr::SdfInt64ListOp inactiveIdsListOp;
+	if( pointInstancer.GetPrim().GetMetadata( pxr::UsdGeomTokens->inactiveIds, &inactiveIdsListOp ) )
+	{
+		newPoints->variables["inactiveIds"] = IECoreScene::PrimitiveVariable(
+			PrimitiveVariable::Constant,
+			new IECore::Int64VectorData( inactiveIdsListOp.GetExplicitItems() )
+		);
+	}
+
 	// Prototype paths
+
+	const static bool g_relativePrototypes = checkEnvFlag( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", false );
 
 	pxr::SdfPathVector targets;
 	Canceller::check( canceller );
 	pointInstancer.GetPrototypesRel().GetForwardedTargets( &targets );
+
+	const pxr::SdfPath &primPath = pointInstancer.GetPath();
 
 	IECore::StringVectorDataPtr prototypeRootsData = new IECore::StringVectorData();
 	auto &prototypeRoots = prototypeRootsData->writable();
 	prototypeRoots.reserve( targets.size() );
 	for( const auto &t : targets )
 	{
-		prototypeRoots.push_back( t.GetString() );
+		if( !g_relativePrototypes || !t.HasPrefix( primPath ) )
+		{
+			prototypeRoots.push_back( t.GetString() );
+		}
+		else
+		{
+			// The ./ prefix shouldn't be necessary - we want to just use the absence of a leading
+			// slash to indicate relative paths. We can remove the prefix here once we deprecate the
+			// GAFFERSCENE_INSTANCER_EXPLICIT_ABSOLUTE_PATHS env var and have Gaffer always require a leading
+			// slash for absolute paths.
+			prototypeRoots.push_back( "./" + t.MakeRelativePath( primPath ).GetString() );
+		}
 	}
 
 	newPoints->variables["prototypeRoots"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, prototypeRootsData );
@@ -120,6 +168,7 @@ bool pointInstancerMightBeTimeVarying( pxr::UsdGeomPointInstancer &instancer )
 		instancer.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
 		instancer.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
 		instancer.GetAngularVelocitiesAttr().ValueMightBeTimeVarying() ||
+		instancer.GetInvisibleIdsAttr().ValueMightBeTimeVarying() ||
 		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying(
 			pxr::UsdGeomPrimvarsAPI( instancer )
 		)

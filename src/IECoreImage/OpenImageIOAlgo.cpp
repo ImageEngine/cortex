@@ -318,7 +318,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			data = static_cast<const UCharData *>( d )->baseReadable();
 			break;
 		case StringDataTypeId :
-			type = TypeDesc::TypeString;
+			type = OIIO::TypeString;
 			m_charPointers.resize(1);
 			m_charPointers[0] = static_cast<const StringData *>( d )->readable().c_str();
 			if( createUStrings )
@@ -344,11 +344,19 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			data = static_cast<const HalfData *>( d )->baseReadable();
 			break;
 		case IntDataTypeId :
-			type = TypeDesc::TypeInt;
+			type = OIIO::TypeInt;
 			data = static_cast<const IntData *>( d )->baseReadable();
 			break;
+		case UInt64DataTypeId :
+			type = TypeDesc::UINT64;
+			data = static_cast<const UInt64Data *>( d )->baseReadable();
+			break;
+		case Int64DataTypeId :
+			type = TypeDesc::INT64;
+			data = static_cast<const Int64Data *>( d )->baseReadable();
+			break;
 		case FloatDataTypeId :
-			type = TypeDesc::TypeFloat;
+			type = OIIO::TypeFloat;
 			data = static_cast<const FloatData *>( d )->baseReadable();
 			break;
 		case DoubleDataTypeId :
@@ -412,7 +420,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			data = static_cast<const M44dData *>( d )->baseReadable();
 			break;
 		case Color3fDataTypeId :
-			type = TypeDesc::TypeColor;
+			type = OIIO::TypeColor;
 			data = static_cast<const Color3fData *>( d )->baseReadable();
 			break;
 		case Color4fDataTypeId :
@@ -420,7 +428,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			data = static_cast<const Color4fData *>( d )->baseReadable();
 			break;
 		case TimeCodeDataTypeId :
-			type = TypeDesc::TypeTimeCode;
+			type = OIIO::TypeTimeCode;
 			data = static_cast<const TimeCodeData *>( d )->baseReadable();
 			break;
 
@@ -470,6 +478,24 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 				static_cast<const UIntVectorData *>( d )->readable().size()
 			);
 			data = static_cast<const UIntVectorData *>( d )->baseReadable();
+			break;
+		case UInt64VectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::UINT64,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const UInt64VectorData *>( d )->readable().size()
+			);
+			data = static_cast<const UInt64VectorData *>( d )->baseReadable();
+			break;
+		case Int64VectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::INT64,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const Int64VectorData *>( d )->readable().size()
+			);
+			data = static_cast<const Int64VectorData *>( d )->baseReadable();
 			break;
 		case CharVectorDataTypeId :
 			type = TypeDesc(

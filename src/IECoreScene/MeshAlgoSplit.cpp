@@ -490,7 +490,8 @@ public:
 		m_newIndices( m_newIndicesData->writable() ),
 		m_blockSize( blockSize ),
 		m_fromOldIds( ( numOriginalIds - 1 ) / blockSize + 1 ),
-		m_numIdsUsed( 0 )
+		m_numIdsUsed( 0 ),
+		m_indicesComputed( false )
 	{
 		m_newIndices.reserve( numIndices );
 	}
@@ -510,21 +511,21 @@ public:
 			block = std::make_unique< std::vector<int> >( m_blockSize, -1 );
 		}
 
-		int &r = (*block)[ subIndex ];
-		if( r == -1 )
-		{
-			// Id isn't used yet, we need to set this location in the block, and use it
-			r = m_numIdsUsed;
-			m_numIdsUsed++;
-		}
+		// We initially record that this index is used just by marking it with a 0, against the background of -1.
+		// Once computeIndices is called, the 0 will be replaced with a new index, only counting indices that are
+		// used.
+		(*block)[ subIndex ] = 0;
 
-		m_newIndices.push_back( r );
+		m_newIndices.push_back( id );
+
+		m_indicesComputed = false;
 	}
 
 	// Don't add the index, but just test if it is a part of the reindex. If it is an
 	// id which has already been added, return the new id, otherwise return -1
 	inline int testIndex( int id )
 	{
+		computeIndices();
 		int blockId = id / m_blockSize;
 		int subIndex = id % m_blockSize;
 		auto &block = m_fromOldIds[ blockId ];
@@ -541,6 +542,7 @@ public:
 	// Get the new indices. Call after calling addIndex for every original index
 	IntVectorDataPtr getNewIndices()
 	{
+		computeIndices();
 		return m_newIndicesData;
 	}
 
@@ -550,6 +552,7 @@ public:
 	template <typename T >
 	void remapData( const std::vector<T> &in, std::vector<T> &out )
 	{
+		computeIndices();
 		out.resize( m_numIdsUsed );
 		for( unsigned int i = 0; i < m_fromOldIds.size(); i++ )
 		{
@@ -574,6 +577,7 @@ public:
 	// original id corresponding to each id of the output
 	void getDataRemapping( std::vector<int> &dataRemap )
 	{
+		computeIndices();
 		dataRemap.resize( m_numIdsUsed );
 		for( unsigned int i = 0; i < m_fromOldIds.size(); i++ )
 		{
@@ -595,6 +599,45 @@ public:
 	}
 
 private:
+
+	void computeIndices()
+	{
+		// Once indices have been added, and before using them, this function is called to
+		// compute the new indices.
+		if( m_indicesComputed )
+		{
+			return;
+		}
+
+		m_indicesComputed = true;
+
+		for( unsigned int blockId = 0; blockId < m_fromOldIds.size(); blockId++ )
+		{
+			auto &block = m_fromOldIds[ blockId ];
+			if( !block )
+			{
+				continue;
+			}
+
+			for( int i = 0; i < m_blockSize; i++ )
+			{
+				if( (*block)[i] != -1 )
+				{
+					(*block)[i] = m_numIdsUsed;
+					m_numIdsUsed++;
+				}
+			}
+		}
+
+		for( int &id : m_newIndices )
+		{
+			int blockId = id / m_blockSize;
+			int subIndex = id % m_blockSize;
+
+			id = (*m_fromOldIds[ blockId ])[subIndex];
+		}
+	}
+
 	// IntVectorData to hold the new indices
 	IntVectorDataPtr m_newIndicesData;
 	std::vector< int > &m_newIndices;
@@ -605,12 +648,15 @@ private:
 	// Store the mapping from old ids to new ids. The outer vector holds a unique_ptr for each
 	// block of m_blockSize ids in the original id range. These pointers are null if no ids from
 	// that block have been used. Once a block is used, it is allocated with a vector that is set
-	// to -1 for ids which have not been used, and the new corresponding id for ids which have been
-	// used
+	// to -1 for ids which have not been used, and zeros for ids which have been used.  When computeIndices()
+	// is called, all used elements get a new id assigned, relative to just the used ids.
 	std::vector< std::unique_ptr< std::vector< int > > > m_fromOldIds;
 
 	// How many unique ids have appeared in the indices added so far
 	int m_numIdsUsed;
+
+	// Whether we have yet computed the new indices for each used index
+	bool m_indicesComputed;
 
 };
 

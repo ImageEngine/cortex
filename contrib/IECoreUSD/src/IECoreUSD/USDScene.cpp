@@ -71,6 +71,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
+#include "pxr/usd/usdSkel/bindingAPI.h"
 #include "pxr/usd/usdUtils/stageCache.h"
 #ifdef IECOREUSD_WITH_OPENVDB
 #include "pxr/usd/usdVol/fieldBase.h"
@@ -283,6 +284,33 @@ boost::container::flat_map<pxr::TfToken, PrimPredicate> g_schemaTypeSetPredicate
 	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> }
 };
 
+bool collectionIsSet( const pxr::UsdCollectionAPI &collection )
+{
+	if(
+		collection.GetPrim().HasAPI<pxr::UsdLuxLightAPI>() &&
+		( collection.GetName() == pxr::UsdLuxTokens->lightLink || collection.GetName() == pxr::UsdLuxTokens->shadowLink )
+	)
+	{
+		// These collections are problematic :
+		//
+		// - They define the objects that _this_ light is linked to. So it makes
+		//   no sense to combine them from multiple prims into a single set as
+		//   we do when loading recursively.
+		// - The UsdLuxLightAPI defaults the collection to have
+		//   `includeRoot=true`, which in conjunction with the default expansion
+		//   rule means that it will include every single prim in the scene.
+		//   That's not only a lot of prims, but most of them won't be below the
+		//   collection's prim, and every single one of those will trigger a
+		//   warning.
+		// - Gaffer has a different light-linking mechanism anyway.
+		//
+		// For these reasons, we do not treat them as sets.
+		return false;
+	}
+
+	return true;
+}
+
 // If `predicate` is non-null then it is called to determine if _this_ prim is in the set. If null,
 // then the set is loaded from a UsdCollection called `name`.
 IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name, PrimPredicate predicate, const Canceller *canceller )
@@ -298,7 +326,9 @@ IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name
 	}
 
 	const size_t prefixSize = prim.GetPath().GetPathElementCount();
-	if( auto collection = pxr::UsdCollectionAPI( prim, name ) )
+
+	auto collection = pxr::UsdCollectionAPI( prim, name );
+	if( collection && collectionIsSet( collection ) )
 	{
 		Canceller::check( canceller );
 		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
@@ -406,7 +436,10 @@ SceneInterface::NameList localSetNames( const pxr::UsdPrim &prim )
 		result.reserve( allCollections.size() );
 		for( const pxr::UsdCollectionAPI &collection : allCollections )
 		{
-			result.push_back( collection.GetName().GetString() );
+			if( collectionIsSet( collection ) )
+			{
+				result.push_back( collection.GetName().GetString() );
+			}
 		}
 	}
 	else
@@ -679,7 +712,7 @@ class USDScene::IO : public RefCounted
 			return m_stage;
 		}
 
-		pxr::UsdTimeCode getTime( double timeSeconds ) const
+		pxr::UsdTimeCode timeCode( double timeSeconds ) const
 		{
 			return timeSeconds * m_timeCodesPerSecond;
 		}
@@ -761,11 +794,11 @@ class USDScene::IO : public RefCounted
 
 		static pxr::UsdStageRefPtr makeStage( const std::string &fileName, IndexedIO::OpenMode openMode )
 		{
+			pxr::UsdStageRefPtr stage;
 			switch( openMode )
 			{
 				case IndexedIO::Read : {
 					static const std::string g_stageCachePrefix( "stageCache:" );
-					pxr::UsdStageRefPtr stage;
 					if( boost::starts_with( fileName, g_stageCachePrefix ) )
 					{
 						// Get Id from filename of form "stageCache:{id}.usd"
@@ -779,17 +812,20 @@ class USDScene::IO : public RefCounted
 					{
 						stage = pxr::UsdStage::Open( fileName );
 					}
-					if( !stage )
-					{
-						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD stage : '%1%'" ) % fileName ) );
-					}
-					return stage;
+					break;
 				}
 				case IndexedIO::Write :
-					return pxr::UsdStage::CreateNew( fileName );
+					stage = pxr::UsdStage::CreateNew( fileName );
+					break;
 				default:
 					throw Exception( "Unsupported OpenMode" );
 			}
+
+			if( !stage )
+			{
+				throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD stage : '%1%'" ) % fileName ) );
+			}
+			return stage;
 		}
 
 		std::string m_fileName;
@@ -902,7 +938,7 @@ Imath::Box3d USDScene::readBound( double time ) const
 	}
 
 	pxr::VtArray<pxr::GfVec3f> extents;
-	attr.Get( &extents, m_root->getTime( time ) );
+	attr.Get( &extents, m_root->timeCode( time ) );
 
 	// When coming from UsdGeomModelAPI, `extents` may contain several bounds,
 	// on a per-purpose basis. Take the union, since the SceneInterface API only
@@ -930,12 +966,12 @@ ConstDataPtr USDScene::readTransform( double time ) const
 
 Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 {
-	return localTransform( m_location->prim, m_root->getTime( time ) );
+	return localTransform( m_location->prim, m_root->timeCode( time ) );
 }
 
 ConstObjectPtr USDScene::readObject( double time, const Canceller *canceller ) const
 {
-	return ObjectAlgo::readObject( m_location->prim, m_root->getTime( time ), canceller );
+	return ObjectAlgo::readObject( m_location->prim, m_root->timeCode( time ), canceller );
 }
 
 SceneInterface::Name USDScene::name() const
@@ -973,7 +1009,7 @@ void USDScene::writeBound( const Imath::Box3d &bound, double time )
 	extent.push_back( DataAlgo::toUSD( Imath::V3f( bound.max ) ) );
 
 	pxr::UsdAttribute extentAttr = boundable.CreateExtentAttr();
-	extentAttr.Set( pxr::VtValue( extent ) );
+	extentAttr.Set( pxr::VtValue( extent ), m_root->timeCode( time ) );
 }
 
 void USDScene::writeTransform( const Data *transform, double time )
@@ -988,7 +1024,7 @@ void USDScene::writeTransform( const Data *transform, double time )
 	if( xformable )
 	{
 		pxr::UsdGeomXformOp transformOp = xformable.MakeMatrixXform();
-		const pxr::UsdTimeCode timeCode = m_root->getTime( time );
+		const pxr::UsdTimeCode timeCode = m_root->timeCode( time );
 		transformOp.Set( DataAlgo::toUSD( m44->readable() ), timeCode );
 	}
 }
@@ -1147,7 +1183,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		{
 			return nullptr;
 		}
-		pxr::TfToken value; attr.Get( &value, m_root->getTime( time ) );
+		pxr::TfToken value; attr.Get( &value, m_root->timeCode( time ) );
 		if( value == pxr::UsdGeomTokens->inherited )
 		{
 			return new BoolData( true );
@@ -1192,7 +1228,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	{
 		pxr::UsdAttribute attr = pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr();
 		bool doubleSided;
-		if( attr.HasAuthoredValue() && attr.Get( &doubleSided, m_root->getTime( time ) ) )
+		if( attr.HasAuthoredValue() && attr.Get( &doubleSided, m_root->timeCode( time ) ) )
 		{
 			return new BoolData( doubleSided );
 		}
@@ -1200,7 +1236,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	}
 	else if( pxr::UsdAttribute attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
-		return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
+		return DataAlgo::fromUSD( attribute, m_root->timeCode( time ) );
 	}
 	else
 	{
@@ -1225,7 +1261,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			pxr::UsdGeomImageable imageable( m_location->prim );
 			imageable.GetVisibilityAttr().Set(
 				data->readable() ? pxr::UsdGeomTokens->inherited : pxr::UsdGeomTokens->invisible,
-				m_root->getTime( time )
+				m_root->timeCode( time )
 			);
 		}
 	}
@@ -1258,7 +1294,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			pxr::UsdGeomGprim gprim( m_location->prim );
 			if( gprim )
 			{
-				gprim.GetDoubleSidedAttr().Set( data->readable(), m_root->getTime( time ) );
+				gprim.GetDoubleSidedAttr().Set( data->readable(), m_root->timeCode( time ) );
 			}
 			else
 			{
@@ -1306,7 +1342,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 						pxr::TfToken( g.first.string().substr( 10 ) ),
 						DataAlgo::valueTypeName( d )
 					);
-					globalAttribute.Set( DataAlgo::toUSD( d ) );
+					globalAttribute.Set( DataAlgo::toUSD( d ), m_root->timeCode( time ) );
 				}
 			}
 		}
@@ -1322,14 +1358,14 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				pxr::UsdGeomPrimvar usdPrimvar = primvarsAPI.CreatePrimvar(
 					usdName.name, DataAlgo::valueTypeName( data ), pxr::UsdGeomTokens->constant
 				);
-				usdPrimvar.Set( DataAlgo::toUSD( data ), time );
+				usdPrimvar.Set( DataAlgo::toUSD( data ), m_root->timeCode( time ) );
 			}
 			else
 			{
 				pxr::UsdAttribute newAttribute = m_location->prim.CreateAttribute(
 					usdName.name, DataAlgo::valueTypeName( data )
 				);
-				newAttribute.Set( DataAlgo::toUSD( data ), time );
+				newAttribute.Set( DataAlgo::toUSD( data ), m_root->timeCode( time ) );
 			}
 		}
 	}
@@ -1453,7 +1489,7 @@ PrimitiveVariableMap USDScene::readObjectPrimitiveVariables( const std::vector<I
 
 void USDScene::writeObject( const Object *object, double time )
 {
-	if( !ObjectAlgo::writeObject( object, m_root->getStage(), m_location->prim.GetPath(), m_root->getTime( time ) ) )
+	if( !ObjectAlgo::writeObject( object, m_root->getStage(), m_location->prim.GetPath(), m_root->timeCode( time ) ) )
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "USDScene::writeObject",
@@ -1728,6 +1764,17 @@ void USDScene::objectHash( double time, IECore::MurmurHash &h ) const
 		if( ObjectAlgo::objectMightBeTimeVarying( m_location->prim ) )
 		{
 			h.append( time );
+		}
+		// Account for the skinning applied by PrimitiveAlgo. Ideally this
+		// responsibility would be taken on by PrimitiveAlgo itself, but that
+		// would require modifying the ObjectAlgo API, which we don't want to
+		// do right now.
+		if( auto skelBindingAPI = pxr::UsdSkelBindingAPI( m_location->prim ) )
+		{
+			if( auto animationSource = skelBindingAPI.GetInheritedAnimationSource() )
+			{
+				appendPrimOrMasterPath( animationSource, h );
+			}
 		}
 	}
 }

@@ -64,7 +64,8 @@
 namespace
 {
 
-pxr::TfToken g_adapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
+const pxr::TfToken g_blindDataToken( "cortex:blindData" );
+pxr::TfToken g_legacyAdapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
 
 std::pair<pxr::TfToken, std::string> shaderIdAndType( const pxr::UsdShadeConnectableAPI &connectable )
 {
@@ -249,11 +250,26 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 	readNonStandardLightParameters( usdShader.GetPrim(), parameters );
 
 	IECoreScene::ShaderPtr newShader = new IECoreScene::Shader( shaderName, shaderType, parametersData );
+
+	// General purpose support for any Cortex blind data.
+
+	const pxr::VtValue blindDataValue = usdShader.GetPrim().GetCustomDataByKey( g_blindDataToken );
+	if( !blindDataValue.IsEmpty() )
+	{
+		if( auto blindData = IECore::runTimeCast<IECore::CompoundData>( IECoreUSD::DataAlgo::fromUSD( blindDataValue ) ) )
+		{
+			newShader->blindData()->writable() = blindData->readable();
+		}
+	}
+
+	// Legacy support for `cortex_autoAdaptor` metadata.
+
 	pxr::VtValue metadataValue;
-	if( usdShader.GetPrim().GetMetadata( g_adapterLabelToken, &metadataValue ) && metadataValue.Get<bool>() )
+	if( usdShader.GetPrim().GetMetadata( g_legacyAdapterLabelToken, &metadataValue ) && metadataValue.Get<bool>() )
 	{
 		newShader->blindData()->writable()[ IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() ] = new IECore::BoolData( true );
 	}
+
 	shaderNetwork.addShader( handle, std::move( newShader ) );
 
 	// Can only add connections after we've added the shader.
@@ -350,10 +366,12 @@ void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShad
 		input.Set( IECoreUSD::DataAlgo::toUSD( p.second.get() ) );
 	}
 
-	const IECore::BoolData *adapterMeta = shader->blindData()->member<IECore::BoolData>( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() );
-	if( adapterMeta && adapterMeta->readable() )
+	if( shader->blindData()->readable().size() )
 	{
-		usdShader.GetPrim().SetMetadata( g_adapterLabelToken, true );
+		usdShader.GetPrim().SetCustomDataByKey(
+			g_blindDataToken,
+			IECoreUSD::DataAlgo::toUSD( shader->blindData() )
+		);
 	}
 }
 

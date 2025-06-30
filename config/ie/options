@@ -33,24 +33,23 @@
 ##########################################################################
 
 import distutils
+from distutils.version import LooseVersion
 import os
-import sys
-import os.path
 import IEEnv
 import re
-import copy
 import getpass
-import string
 
-def getOption( name, default ) :
 
-	import sys
-	result = default
-	for a in sys.argv:
-		if a[:len(name)+1]==name+"=" :
-			result = a[len(name)+1:]
+def getOption(name, default):
+    import sys
 
-	return result
+    result = default
+    for a in sys.argv:
+        if a[: len(name) + 1] == name + "=":
+            result = a[len(name) + 1 :]
+
+    return result
+
 
 # decide what compiler/app we're targeting. we either pass COMPILER_VERSION, COMPILER and PYTHON_VERSION
 # to do a straight install in /software/apps/cortex/<cortexVersion>/$PLATFORM/base/ or we pass an APP and APP_VERSION pair
@@ -59,10 +58,10 @@ def getOption( name, default ) :
 
 platform = IEEnv.platform()
 
-compiler = getOption( "COMPILER", None )
-compilerVersion = getOption( "COMPILER_VERSION", None )
-pythonVersion = getOption( "PYTHON_VERSION", None )
-targetApp = getOption( "APP", None )
+compiler = getOption("COMPILER", None)
+compilerVersion = getOption("COMPILER_VERSION", None)
+pythonVersion = getOption("PYTHON_VERSION", None)
+targetApp = getOption("APP", None)
 
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
@@ -72,420 +71,638 @@ targetApp = getOption( "APP", None )
 # parse SConstruct file for the cortex version
 ##########################################################################
 
-def cortexRegistryVersion() :
 
-	import re
-	varsFound = {}
-	varsToFind = [ "ieCoreMilestoneVersion", "ieCoreMajorVersion" ]
+def cortexVersion():
+    import re
 
-	with open( "SConstruct", "r" ) as f :
-		for line in f :
-			for varName in varsToFind :
-				match = re.match( "^\s*%s\s*=\s*(?P<value>\d+).*$" % varName, line )
-				if match :
-					varsFound[varName] = match.groupdict()["value"]
-					varsToFind.remove( varName )
-					break
-			if not varsToFind:
-				break
+    varsFound = {}
+    varNames = [
+        "ieCoreMilestoneVersion",
+        "ieCoreMajorVersion",
+        "ieCoreMinorVersion",
+        "ieCorePatchVersion",
+    ]
+    varsToFind = list(varNames)
 
-	if varsToFind :
-		raise Exception( "Could not find the Cortex version in the SConstruct file. Please review the parsing rules." )
+    with open("SConstruct", "r") as f:
+        for line in f:
+            for varName in varsToFind:
+                match = re.match("^\s*%s\s*=\s*(?P<value>\d+).*$" % varName, line)
+                if match:
+                    varsFound[varName] = match.groupdict()["value"]
+                    varsToFind.remove(varName)
+                    break
+            if not varsToFind:
+                break
 
-	return varsFound["ieCoreMilestoneVersion"] + "." + varsFound["ieCoreMajorVersion"]
+    if varsToFind:
+        raise Exception(
+            "Could not find the Cortex version in the SConstruct file. Please review the parsing"
+            " rules."
+        )
 
-cortexReg = IEEnv.registry["libraries"]["cortex"][cortexRegistryVersion()][platform]
+    return ".".join([varsFound[k] for k in varNames])
 
-if targetApp :
 
-	if targetApp not in ( "nuke", "maya", "houdini", "rv" ) :
-		raise RuntimeError( "Check config logic applies to the new app and remove this exception." )
+currentCortexVersion = cortexVersion()
+cortexReg = IEEnv.findRegistryRoot("cortex", currentCortexVersion)
 
-	if (compiler or compilerVersion) :
-		raise RuntimeError( "Must specify only one of COMPILER or APP" )
+if LooseVersion(currentCortexVersion) >= LooseVersion("10.5.9"):
+    INSTALL_CREATE_SYMLINKS = False
 
-	if pythonVersion :
-		raise RuntimeError( "Must specify only one of PYTHON_VERSION or APP" )
+if targetApp:
+    if targetApp not in ("nuke", "maya", "houdini", "rv"):
+        raise RuntimeError("Check config logic applies to the new app and remove this exception.")
 
-	targetAppVersion = getOption( "APP_VERSION", os.environ.get( targetApp.upper() + "_VERSION" ) )
+    if compiler or compilerVersion:
+        raise RuntimeError("Must specify only one of COMPILER or APP")
 
-	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
-	compiler = targetAppReg["compiler"]
-	compilerVersion = targetAppReg["compilerVersion"]
-	cxxStd = targetAppReg.get( "cxxStd", cortexReg.get( "cxxStd", "c++11" ) )
-	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
-	alembicVersion = targetAppReg.get( "AlembicVersion", cortexReg["AlembicVersion"] )
-	vdbVersion = targetAppReg.get( "OpenVDBVersion", cortexReg["OpenVDBVersion"] )
-	bloscVersion = targetAppReg.get( "bloscVersion", cortexReg["bloscVersion"] )
-	hdf5Version = targetAppReg.get( "hdf5Version", cortexReg["hdf5Version"] )
-	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
-	pythonVersion = targetAppReg["pythonVersion"]
-	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
-	oiioVersion = targetAppReg.get( "OpenImageIOVersion", cortexReg["OpenImageIOVersion"] )
-	oiioLibSuffix = targetAppReg.get( "OpenImageIOLibSuffix", oiioVersion )
-	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
-	usdVersion = targetAppReg.get( "usdVersion", cortexReg.get("usdVersion", None) )
-	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
-	compatibilityVersion = targetAppReg.get( "compatibilityVersion", targetAppMajorVersion )
-else :
-	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
-	if not compiler :
-		compiler = cortexReg.get( "compiler", platformReg["compiler"] )
-	if not compilerVersion :
-		compilerVersion = cortexReg.get( "compilerVersion", platformReg["compilerVersion"] )
-	if not pythonVersion :
-		pythonVersion = cortexReg["preferredPythonVersion"]
-	cxxStd = cortexReg.get( "cxxStd", "c++11" )
-	openEXRVersion = cortexReg["OpenEXRVersion"]
-	alembicVersion = cortexReg["AlembicVersion"]
-	vdbVersion = cortexReg.get("OpenVDBVersion", "4.0.2")
-	bloscVersion = cortexReg.get("bloscVersion" )
-	hdf5Version = cortexReg["hdf5Version"]
-	glewVersion = cortexReg["glewVersion"]
-	tbbVersion = cortexReg["tbbVersion"]
-	usdVersion = cortexReg.get("usdVersion", None)
-	boostVersion = cortexReg["boostVersion"]
-	oiioVersion = cortexReg["OpenImageIOVersion"]
-	oiioLibSuffix = oiioVersion
+    if pythonVersion:
+        raise RuntimeError("Must specify only one of PYTHON_VERSION or APP")
+
+    targetAppVersion = getOption("APP_VERSION", os.environ.get(targetApp.upper() + "_VERSION"))
+
+    targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
+    compiler = targetAppReg["compiler"]
+    compilerVersion = targetAppReg["compilerVersion"]
+    cxxStd = targetAppReg.get("cxxStd", cortexReg.get("cxxStd", "c++11"))
+    openEXRVersion = targetAppReg.get("OpenEXRVersion", cortexReg["OpenEXRVersion"])
+    alembicVersion = targetAppReg.get("AlembicVersion", cortexReg["AlembicVersion"])
+    vdbVersion = targetAppReg.get("OpenVDBVersion", cortexReg["OpenVDBVersion"])
+    pybind11Version = targetAppReg.get("pybind11", cortexReg.get("pybind11", "2.10.4"))
+    bloscVersion = targetAppReg.get("bloscVersion", cortexReg["bloscVersion"])
+    hdf5Version = targetAppReg.get("hdf5Version", cortexReg["hdf5Version"])
+    glewVersion = targetAppReg.get("glewVersion", cortexReg["glewVersion"])
+    pythonVersion = targetAppReg["pythonVersion"]
+    boostVersion = targetAppReg.get("boostVersion", cortexReg["boostVersion"])
+    oiioVersion = targetAppReg.get("OpenImageIOVersion", cortexReg["OpenImageIOVersion"])
+    oiioLibSuffix = targetAppReg.get("OpenImageIOLibSuffix", oiioVersion)
+    tbbVersion = targetAppReg.get("tbbVersion", cortexReg["tbbVersion"])
+    usdVersion = targetAppReg.get("usdVersion", cortexReg.get("usdVersion", None))
+    targetAppMajorVersion = targetAppReg.get("majorVersion", targetAppVersion)
+    compatibilityVersion = targetAppReg.get("compatibilityVersion", targetAppMajorVersion)
+else:
+    platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
+    if not compiler:
+        compiler = cortexReg.get("compiler", platformReg["compiler"])
+    if not compilerVersion:
+        compilerVersion = cortexReg.get("compilerVersion", platformReg["compilerVersion"])
+    if not pythonVersion:
+        pythonVersion = cortexReg["preferredPythonVersion"]
+    cxxStd = cortexReg.get("cxxStd", "c++11")
+    openEXRVersion = cortexReg["OpenEXRVersion"]
+    alembicVersion = cortexReg["AlembicVersion"]
+    vdbVersion = cortexReg.get("OpenVDBVersion", "4.0.2")
+    pybind11Version = cortexReg.get("pybind11", "2.10.4")
+    bloscVersion = cortexReg.get("bloscVersion")
+    hdf5Version = cortexReg["hdf5Version"]
+    glewVersion = cortexReg["glewVersion"]
+    tbbVersion = cortexReg["tbbVersion"]
+    usdVersion = cortexReg.get("usdVersion", None)
+    boostVersion = cortexReg["boostVersion"]
+    oiioVersion = cortexReg["OpenImageIOVersion"]
+    oiioLibSuffix = oiioVersion
 
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
-CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
-CXXSTD = getOption( "CXXSTD", cxxStd )
+CXX = os.path.join(compilerReg["location"], compilerReg["bin"])
+CXXSTD = getOption("CXXSTD", cxxStd)
 
-m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
-if m :
-	compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group( 1, 2, 3 )
-	compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
-else :
-	m = re.compile( "^([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
-	compilerMajorVersion, compilerMinorVersion = m.group( 1, 2 )
-	compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + 9
+m = re.compile("^([0-9]+)\.([0-9]+)\.([0-9]+)$").match(compilerVersion)
+if m:
+    compilerMajorVersion, compilerMinorVersion, compilerPatchVersion = m.group(1, 2, 3)
+    compilerVersionInt = (
+        int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + int(compilerPatchVersion)
+    )
+else:
+    m = re.compile("^([0-9]+)\.([0-9]+)$").match(compilerVersion)
+    compilerMajorVersion, compilerMinorVersion = m.group(1, 2)
+    compilerVersionInt = int(compilerMajorVersion) * 100 + int(compilerMinorVersion) * 10 + 9
 
-if not m :
-	raise RuntimeError( "Cannot determine compiler version (%s)" % compilerVersion )
+if not m:
+    raise RuntimeError("Cannot determine compiler version (%s)" % compilerVersion)
 
-CXXFLAGS = [ "-pipe", "-Wall", "-Wextra", "-pthread" ]
+# TODO: TBB_SUPPRESS_DEPRECATED_MESSAGES is required because tbb/mutex.h and tbb/recursive_mutex.h
+# are deprecated by tbb. The recommendation is to use std::mutex and std:recursive_mutex
+CXXFLAGS = ["-pipe", "-Wall", "-Wextra", "-pthread", "-DTBB_SUPPRESS_DEPRECATED_MESSAGES"]
 
 LINKFLAGS = []
 
 # set the dependency paths
-TBB_INCLUDE_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include" )
-TBB_LIB_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "lib" )
-TBB_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "tbb", tbbVersion )
+TBB_INCLUDE_PATH = os.path.join(
+    "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include"
+)
+TBB_LIB_PATH = os.path.join(
+    "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "lib"
+)
+TBB_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix("tbb", tbbVersion)
 
-BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
-BOOST_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-BOOST_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "boost", boostVersion, { "compiler" : compiler, "compilerVersion" : compilerVersion } )
+BOOST_INCLUDE_PATH = os.path.join("/software/tools/include", platform, "boost", boostVersion)
+BOOST_LIB_PATH = os.path.join("/software", "tools", "lib", platform, compiler, compilerVersion)
+BOOST_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix(
+    "boost", boostVersion, {"compiler": compiler, "compilerVersion": compilerVersion}
+)
 BOOST_PYTHON_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix(
-	"boost_python", boostVersion, { "compiler" : compiler, "compilerVersion" : compilerVersion, "pythonVersion" : pythonVersion }
+    "boost_python",
+    boostVersion,
+    {"compiler": compiler, "compilerVersion": compilerVersion, "pythonVersion": pythonVersion},
 )
 
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
-OPENEXR_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-ILMBASE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-OPENEXR_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenEXR", openEXRVersion )
+OPENEXR_LIB_PATH = os.path.join("/software", "tools", "lib", platform, compiler, compilerVersion)
+ILMBASE_LIB_PATH = os.path.join("/software", "tools", "lib", platform, compiler, compilerVersion)
+OPENEXR_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix("OpenEXR", openEXRVersion)
 
 GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
-GLEW_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-GLEW_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "glew", glewVersion )
+GLEW_LIB_PATH = os.path.join("/software", "tools", "lib", platform, compiler, compilerVersion)
+GLEW_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix("glew", glewVersion)
 
-oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
-OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
-OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
-OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenImageIO", oiioLibSuffix )
+oiioRoot = os.path.join(
+    "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion
+)
+OIIO_INCLUDE_PATH = os.path.join(oiioRoot, "include")
+OIIO_LIB_PATH = os.path.join(oiioRoot, "lib64")
+OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix("OpenImageIO", oiioLibSuffix)
 WITH_OIIO_UTIL = "true"
 
-FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+FREETYPE_LIB_PATH = os.path.join("/software", "tools", "lib", platform, compiler, compilerVersion)
 FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
 
 # find the right libraries based on compiler and platform
-LIBPATH = ":".join( [
-	os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion ),
-	os.path.join( "/software", "apps", compiler, compilerVersion, platform, "lib64" ),
-] )
-if targetApp :
-	libPaths = []
-	for libPath in targetAppReg.get( "libPaths", [] ):
-		libPaths.append( os.path.join( targetAppReg["location"], libPath ) )
-	libPaths.append( LIBPATH )
-	LIBPATH = ":".join( libPaths )
+LIBPATH = ":".join(
+    [
+        os.path.join("/software", "tools", "lib", platform, compiler, compilerVersion),
+        os.path.join("/software", "apps", compiler, compilerVersion, platform, "lib64"),
+    ]
+)
+if targetApp:
+    libPaths = []
+    for libPath in targetAppReg.get("libPaths", []):
+        libPaths.append(os.path.join(targetAppReg["location"], libPath))
+    libPaths.append(LIBPATH)
+    LIBPATH = ":".join(libPaths)
 
 # ignore python-config stuff and specify it all explicitly ourselves
-pythonReg = IEEnv.registry['apps']['python'][pythonVersion][platform]
+pythonReg = IEEnv.registry["apps"]["python"][pythonVersion][platform]
 
-pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
+pythonRoot = os.path.join(pythonReg["location"], compiler, compilerVersion)
 
 PYTHON = "/software/tools/wrappers/iePython%s" % pythonVersion
-PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
+PYTHON_INCLUDE_PATH = (
+    pythonReg["location"]
+    + "/"
+    + compiler
+    + "/"
+    + compilerVersion
+    + "/"
+    + pythonReg["include"]
+    + "/python"
+    + pythonVersion
+)
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 
-if PYTHON_LINK_FLAGS=="" :
-	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion
+if PYTHON_LINK_FLAGS == "":
+    PYTHON_LINK_FLAGS = (
+        "-L"
+        + pythonReg["location"]
+        + "/"
+        + compiler
+        + "/"
+        + compilerVersion
+        + "/lib -lpython"
+        + pythonVersion
+    )
 
-if distutils.version.LooseVersion( openEXRVersion ) < distutils.version.LooseVersion( "2.4.1" ) :
-	openEXRPythonModuleDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib64", "python" + pythonVersion, "site-packages" )
-	openEXRPythonLibDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib" )
-else :
-	openEXRPythonModuleDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib", "python" + pythonVersion, "site-packages" )
-	openEXRPythonLibDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib64" )
+if distutils.version.LooseVersion(openEXRVersion) < distutils.version.LooseVersion("2.4.1"):
+    openEXRPythonModuleDir = os.path.join(
+        "/software",
+        "apps",
+        "openexr",
+        openEXRVersion,
+        platform,
+        compiler,
+        compilerVersion,
+        "python",
+        pythonVersion,
+        "boost",
+        boostVersion,
+        "lib64",
+        "python" + pythonVersion,
+        "site-packages",
+    )
+    openEXRPythonLibDir = os.path.join(
+        "/software",
+        "apps",
+        "openexr",
+        openEXRVersion,
+        platform,
+        compiler,
+        compilerVersion,
+        "python",
+        pythonVersion,
+        "boost",
+        boostVersion,
+        "lib",
+    )
+else:
+    openEXRPythonModuleDir = os.path.join(
+        "/software",
+        "apps",
+        "openexr",
+        openEXRVersion,
+        platform,
+        compiler,
+        compilerVersion,
+        "lib",
+        "python" + pythonVersion,
+        "site-packages",
+    )
+    openEXRPythonLibDir = os.path.join(
+        "/software",
+        "apps",
+        "openexr",
+        openEXRVersion,
+        platform,
+        compiler,
+        compilerVersion,
+        "lib",
+    )
 
 PYTHONPATH = openEXRPythonModuleDir
 
 # get the installation locations right
-INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
-installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "${IECORE_VERSION}", platform )
+INSTALL_PREFIX = getOption("INSTALL_PREFIX", os.path.expanduser("~"))
+installPrefix = os.path.join("$INSTALL_PREFIX", "apps", "cortex", "${IECORE_VERSION}", platform)
 
 # add the dev suffix to local builds
-if getOption( "RELEASE", "0" )!="1" :
-	installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "${IECORE_VERSION}dev", platform )
+if getOption("RELEASE", "0") != "1":
+    installPrefix = os.path.join(
+        "$INSTALL_PREFIX", "apps", "cortex", "${IECORE_VERSION}dev", platform
+    )
 
-basePrefix = os.path.join( installPrefix, "base" )
-if targetApp :
-	if targetApp in ( "nuke", ):
-		appPrefix = os.path.join( installPrefix, targetApp, compatibilityVersion )
-	else:
-		appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
+basePrefix = os.path.join(installPrefix, "base")
+if targetApp:
+    if targetApp in ("nuke",):
+        appPrefix = os.path.join(installPrefix, targetApp, compatibilityVersion)
+    else:
+        appPrefix = os.path.join(installPrefix, targetApp, targetAppMajorVersion)
 
 # ask for opengl support
-WITH_GL=1
+WITH_GL = 1
 
 # find alembic:
-ALEMBIC_INCLUDE_PATH = os.path.join( "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "include" )
-ALEMBIC_LIB_PATH = os.path.join( "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "lib" )
-ALEMBIC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "Alembic", alembicVersion )
+ALEMBIC_INCLUDE_PATH = os.path.join(
+    "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "include"
+)
+ALEMBIC_LIB_PATH = os.path.join(
+    "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "lib"
+)
+ALEMBIC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix("Alembic", alembicVersion)
 
-VDB_INCLUDE_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "include" )
-VDB_LIB_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "lib" )
-VDB_PYTHON_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "python", "lib", "python"+pythonVersion )
+VDB_INCLUDE_PATH = os.path.join(
+    "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "include"
+)
+VDB_LIB_PATH = os.path.join(
+    "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "lib"
+)
+VDB_PYTHON_PATH = os.path.join(
+    "/software",
+    "apps",
+    "OpenVDB",
+    vdbVersion,
+    platform,
+    compiler,
+    compilerVersion,
+    "python",
+    "lib",
+    "python" + pythonVersion,
+)
 
-BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "blosc", bloscVersion )
-BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
-BLOSC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "blosc", bloscVersion )
+
+PYBIND11_INCLUDE_PATH = os.path.join(
+    "/software", "tools", "include", platform, "pybind11", pybind11Version
+)
+BLOSC_INCLUDE_PATH = os.path.join("/software/tools/include/", platform, "blosc", bloscVersion)
+BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion)
+BLOSC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix("blosc", bloscVersion)
 
 # find USD:
 
-usdReg = IEEnv.registry["apps"]["usd"].get( usdVersion, {} ).get( platform )
-if usdReg :
-	if targetApp :
-		USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
-		USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
-		USD_LIB_PREFIX = "usd_"
-	else:
-		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
-		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
-		USD_LIB_PREFIX = "usd_"
+usdReg = IEEnv.registry["apps"]["usd"].get(usdVersion, {}).get(platform)
+if usdReg:
+    if LooseVersion(currentCortexVersion) < LooseVersion("10.5.9") and targetApp:
+        USD_INCLUDE_PATH = os.path.join(
+            usdReg["location"], targetApp, compatibilityVersion, "include"
+        )
+        USD_LIB_PATH = os.path.join(usdReg["location"], targetApp, compatibilityVersion, "lib")
+        USD_LIB_PREFIX = "usd_"
+    else:
+        USD_INCLUDE_PATH = os.path.join(
+            usdReg["location"],
+            compiler,
+            compilerVersion,
+            "python",
+            pythonVersion,
+            "cortex",
+            "$IECORE_COMPATIBILITY_VERSION",
+            "include",
+        )
+        USD_LIB_PATH = os.path.join(
+            usdReg["location"],
+            compiler,
+            compilerVersion,
+            "python",
+            pythonVersion,
+            "cortex",
+            "$IECORE_COMPATIBILITY_VERSION",
+            "lib",
+        )
+        USD_LIB_PREFIX = "usd_"
 
 # find hdf5:
-HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
-HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
+HDF5_INCLUDE_PATH = os.path.join(
+    "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include"
+)
+HDF5_LIB_PATH = os.path.join(
+    "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib"
+)
+
+# options file location (so we can refer to post install files later)
+optionsFile = os.getenv("CORTEX_OPTIONS_FILE", "config/ie/options")
+optionsDir = os.path.dirname(optionsFile)
+
+ieCoreLibSuffix = ""
+ieCorePythonLibSuffix = "-python$PYTHON_VERSION"
+if LooseVersion(currentCortexVersion) < LooseVersion("10.5.9") and targetApp:
+    ieCoreLibSuffix = "-$IECORE_COMPATIBILITY_VERSION"
 
 # find maya if we're building for maya
-if targetApp=="maya" :
+if targetApp == "maya":
+    mayaVersion = targetAppVersion
 
-	mayaVersion = targetAppVersion
+    mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
+    MAYA_ROOT = mayaReg["location"]
+    INSTALL_MAYALIB_NAME = os.path.join(appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix))
+    INSTALL_MEL_DIR = os.path.join(appPrefix, "mel", "$IECORE_NAME")
+    INSTALL_MAYAPLUGIN_NAME = os.path.join(appPrefix, "plugins", "$IECORE_NAME")
+    INSTALL_MAYAICON_DIR = os.path.join(appPrefix, "icons")
+    INSTALL_COREMAYA_POST_COMMAND = (
+        "ieEnvExec {workingPath} scons -i -f {optionsDir}/postCoreMayaInstall"
+        " MAYA_VERSION='{mayaVersion}' INSTALLPREFIX={appPrefix} install".format(
+            optionsDir=optionsDir,
+            workingPath=os.environ["IEENV_WORKING_PATH"],
+            mayaVersion=mayaVersion,
+            appPrefix=appPrefix,
+        )
+    )
+    WITH_MAYA_PLUGIN_LOADER = 1
 
-	mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
-	MAYA_ROOT = mayaReg["location"]
-	INSTALL_MAYALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_MEL_DIR = os.path.join( appPrefix, "mel", "$IECORE_NAME" )
-	INSTALL_MAYAPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
-	INSTALL_MAYAICON_DIR = os.path.join( appPrefix, "icons" )
-	INSTALL_COREMAYA_POST_COMMAND="ieEnvExec {workingPath} scons -i -f config/ie/postCoreMayaInstall MAYA_VERSION='{mayaVersion}' INSTALLPREFIX={appPrefix} install".format(
-		workingPath = os.environ["IEENV_WORKING_PATH"],
-		mayaVersion = mayaVersion,
-		appPrefix = appPrefix
-	)
-	WITH_MAYA_PLUGIN_LOADER = 1
+    mayaUsdVersion = mayaReg.get("mayaUsdVersion")
+    mayaUsdReg = IEEnv.registry["apps"]["mayaUsd"].get(mayaUsdVersion, {}).get(platform)
+    # If the Maya usd plugin is not in the registry we build against our standalone USD version
+    if mayaUsdReg:
+        pluginUsdVersion = mayaUsdReg["usdVersion"]
+        # Maya ships the USD libraries with the installation, but not the header files... we use the one that are installed by standalone usd
+        usdReg = IEEnv.registry["apps"]["usd"].get(pluginUsdVersion, {}).get(platform)
+        if usdReg:
+            USD_INCLUDE_PATH = os.path.join(
+                usdReg["location"], targetApp, compatibilityVersion, "include"
+            )
 
-	mayaUsdVersion = mayaReg.get( "mayaUsdVersion" )
-	mayaUsdReg = IEEnv.registry["apps"]["mayaUsd"].get( mayaUsdVersion, {} ).get( platform )
-	# If the Maya usd plugin is not in the registry we build against our standalone USD version
-	if mayaUsdReg :
-		pluginUsdVersion = mayaUsdReg["usdVersion"]
-		# Maya ships the USD libraries with the installation, but not the header files... we use the one that are installed by standalone usd
-		usdReg = IEEnv.registry["apps"]["usd"].get( pluginUsdVersion, {} ).get( platform )
-		if usdReg :
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
+            mayaMajorVersion = mayaVersion.split(".")[0]
+            mayaLooseVersion = distutils.version.LooseVersion(mayaVersion)
+            if mayaLooseVersion >= "2022" and mayaLooseVersion < "2023":
+                # Maya 2022 installs the USD libs and the maya plugin itself for python 2 and 3. This is not the case for the 2020 version
+                # We make the assumption, that the python version suffix is for Maya 2022 only, because Maya 2023 will be python 3 exclusively.
+                mayaPythonMajorVersion = mayaReg["pythonVersion"].split(".")[0]
+                USD_LIB_PATH = os.path.join(
+                    mayaUsdReg["location"],
+                    mayaMajorVersion,
+                    "mayausd/USD{}/lib".format(mayaPythonMajorVersion),
+                )
+            else:
+                USD_LIB_PATH = os.path.join(
+                    mayaUsdReg["location"], mayaMajorVersion, "mayausd/USD/lib"
+                )
 
-			mayaMajorVersion = mayaVersion.split(".")[0]
-			mayaLooseVersion = distutils.version.LooseVersion(mayaVersion)
-			if mayaLooseVersion >= "2022" and mayaLooseVersion < "2023":
-				# Maya 2022 installs the USD libs and the maya plugin itself for python 2 and 3. This is not the case for the 2020 version
-				# We make the assumption, that the python version suffix is for Maya 2022 only, because Maya 2023 will be python 3 exclusively.
-				mayaPythonMajorVersion = mayaReg["pythonVersion"].split(".")[0]
-				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], mayaMajorVersion, "mayausd/USD{}/lib".format( mayaPythonMajorVersion ) )
-			else:
-				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], mayaMajorVersion, "mayausd/USD/lib" )
-
-			# Pixar introduced a library prefix `usd_` in USD v21.11, which Autodesk does not use yet, so we have to reset the prefix.
-			# See https://github.com/Autodesk/maya-usd/issues/2108 for reference
-			USD_LIB_PREFIX = "" if mayaUsdReg.get( "usdLibPrefix" ) == "" else mayaUsdReg.get( "usdLibPrefix" ) or USD_LIB_PREFIX
+            # Pixar introduced a library prefix `usd_` in USD v21.11, which Autodesk does not use yet, so we have to reset the prefix.
+            # See https://github.com/Autodesk/maya-usd/issues/2108 for reference
+            USD_LIB_PREFIX = (
+                ""
+                if mayaUsdReg.get("usdLibPrefix") == ""
+                else mayaUsdReg.get("usdLibPrefix") or USD_LIB_PREFIX
+            )
 
 # find nuke if we're building for nuke
-if targetApp=="nuke" :
-
-	nukeVersion = targetAppVersion
-	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-	NUKE_ROOT = nukeReg["location"]
-	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
-	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
-	INSTALL_NUKEICON_DIR = os.path.join( appPrefix, "icons" )
-	INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
+if targetApp == "nuke":
+    nukeVersion = targetAppVersion
+    nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
+    NUKE_ROOT = nukeReg["location"]
+    NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
+    USG_SHIMLIB_PATH = os.path.join(
+        "/software",
+        "apps",
+        "FnUsdShim",
+        nukeReg["compatibilityVersion"],
+        platform,
+        compiler,
+        compilerVersion,
+    )
+    INSTALL_NUKELIB_NAME = os.path.join(appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix))
+    INSTALL_NUKEPYTHON_DIR = os.path.join(appPrefix, "python")
+    INSTALL_NUKEICON_DIR = os.path.join(appPrefix, "icons")
+    INSTALL_NUKEPLUGIN_NAME = os.path.join(appPrefix, "plugins", "$IECORE_NAME")
+    # Note:
+    # This is the recommended method for disabling the deprecation warnings for the legacy 3D
+    # system.
+    # From the foundry:
+    # ...it should be fine to continue using the classic 3D system, and these plugins, in Nuke 15.1
+    # and, while we might eventually remove the classic 3D system in the future, there are currently
+    # no plans to do this. So with that said. it should be safe to ignore the deprecation warnings
+    # in the meantime.
+    CXXFLAGS.append("-DNUKE_DISABLE_DEPRECATIONS")
 
 # find houdini if we're building for houdini
-if targetApp=="houdini" :
+if targetApp == "houdini":
+    houdiniVersion = targetAppVersion
 
-	houdiniVersion = targetAppVersion
+    houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
+    HOUDINI_ROOT = houdiniReg["location"]
 
-	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
-	HOUDINI_ROOT = houdiniReg['location']
+    # houdini 17 ships its own USD so we link against that
+    if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.0"):
+        TBB_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
+        TBB_LIB_PATH = "$HOUDINI_LIB_PATH"
+        TBB_LIB_SUFFIX = ""
+        GLEW_LIB_SUFFIX = ""
+        VDB_LIB_SUFFIX = "_sesi"
+        USD_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
+        USD_LIB_PATH = "$HOUDINI_LIB_PATH"
+        USD_LIB_PREFIX = "libpxr_"
+        WITH_USD_MONOLITHIC = True
+    if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("18.0"):
+        # SideFx is non building USD monolithically anymore
+        WITH_USD_MONOLITHIC = False
+        # we stop using SideFx namespaced library as much as possible.
+        VDB_LIB_SUFFIX = ""
 
-	# we use out normal boost includes (and libs) because Houdini has mangled their
-	# boost install with an "h" prefix on the includes, libs, and even macros like HBOOST_VERSION.
-	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
+    HOUDINI_CXX_FLAGS = " ".join(houdiniReg["compilerFlags"])
 
-	# houdini 17 ships its own USD so we link against that
-	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.0") :
-		TBB_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
-		TBB_LIB_PATH = "$HOUDINI_LIB_PATH"
-		TBB_LIB_SUFFIX = ""
-		GLEW_LIB_SUFFIX = ""
-		VDB_LIB_SUFFIX = "_sesi"
-		USD_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
-		USD_LIB_PATH = "$HOUDINI_LIB_PATH"
-		USD_LIB_PREFIX = "libpxr_"
-		WITH_USD_MONOLITHIC = True
-	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("18.0") :
-		# SideFx is non building USD monolithically anymore
-		WITH_USD_MONOLITHIC = False
-		# we stop using SideFx namespaced library as much as possible.
-		VDB_LIB_SUFFIX = ""
+    INSTALL_HOUDINILIB_NAME = os.path.join(
+        appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix)
+    )
+    INSTALL_HOUDINIPLUGIN_NAME = os.path.join(appPrefix, "plugins", "$IECORE_NAME")
+    INSTALL_HOUDINIOTL_DIR = os.path.join(appPrefix, "otls")
+    INSTALL_HOUDINIICON_DIR = os.path.join(appPrefix, "icons")
+    INSTALL_HOUDINITOOLBAR_DIR = os.path.join(appPrefix, "toolbar")
+    INSTALL_HOUDINIMENU_DIR = os.path.join(appPrefix, "generic")
 
-	HOUDINI_CXX_FLAGS = " ".join( houdiniReg['compilerFlags'] )
+    WITH_MANTRA = True
+    INSTALL_MANTRALIB_NAME = os.path.join(
+        appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix)
+    )
+    INSTALL_MANTRAPROCEDURAL_NAME = os.path.join(appPrefix, "plugins", "mantra", "$IECORE_NAME")
 
-	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
-	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
-	INSTALL_HOUDINIICON_DIR = os.path.join( appPrefix, "icons" )
-	INSTALL_HOUDINITOOLBAR_DIR = os.path.join( appPrefix, "toolbar" )
-	INSTALL_HOUDINIMENU_DIR = os.path.join( appPrefix, "generic" )
+    # Temporarily disable IECoreGL until we sort out our dependency trauma
+    #    Houdini 16.0 requires Boost 1.55.0
+    #    IECoreGL requires IECoreImage requires OpenImageIO 1.8.4dev requires Boost 1.61.0
+    # We need to sort this out before Cortex 10 is officially released,
+    # but chances are by that points Houdini 16.5 will be released.
+    if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("16.5"):
+        WITH_GL = 1
+    else:
+        WITH_GL = False
 
-	WITH_MANTRA = True
-	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
+if targetApp == "rv":
+    # DEPRECATED: We no longer need to build cortex for rv
+    rvVersion = targetAppVersion
+    rvReg = IEEnv.registry["apps"]["rv"][rvVersion][platform]
+    rvRoot = rvReg["location"]
+    rvIncludes = os.path.join(rvRoot, "include")
+    rvLibs = os.path.join(rvRoot, "lib")
 
-	# Temporarily disable IECoreGL until we sort out our dependency trauma
-	#	Houdini 16.0 requires Boost 1.55.0
-	#	IECoreGL requires IECoreImage requires OpenImageIO 1.8.4dev requires Boost 1.61.0
-	# We need to sort this out before Cortex 10 is officially released,
-	# but chances are by that points Houdini 16.5 will be released.
-	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("16.5"):
-		WITH_GL = 1
-	else:
-		WITH_GL = False
+    WITH_GL = False
 
-if targetApp=="rv" :
+    if distutils.version.LooseVersion(rvVersion) >= distutils.version.LooseVersion("7.8.0"):
+        if "boostVersion" in rvReg:
+            BOOST_INCLUDE_PATH = rvIncludes
+            BOOST_LIB_PATH = rvLibs
+            BOOST_LIB_SUFFIX = rvReg.get("boostLibSuffix", BOOST_LIB_SUFFIX)
 
-	rvVersion = targetAppVersion
-	rvReg = IEEnv.registry["apps"]["rv"][rvVersion][platform]
-	rvRoot = rvReg["location"]
-	rvIncludes = os.path.join( rvRoot, "include" )
-	rvLibs = os.path.join( rvRoot, "lib" )
-
-	WITH_GL = False
-
-	if distutils.version.LooseVersion(rvVersion) >= distutils.version.LooseVersion("7.8.0"):
-		if "boostVersion" in rvReg:
-			BOOST_INCLUDE_PATH = rvIncludes
-			BOOST_LIB_PATH = rvLibs
-			BOOST_LIB_SUFFIX = rvReg.get( "boostLibSuffix", BOOST_LIB_SUFFIX )
-
-		if "OpenImageIOVersion" in rvReg:
-			# NOTE: At the moment RV doesn't provide OIIO headers, so we rely on
-			# the default `OIIO_INCLUDE_PATH` value.
-			OIIO_LIB_PATH = rvLibs
-			OIIO_LIB_SUFFIX = rvReg.get( "OpenImageIOLibSuffix", OIIO_LIB_SUFFIX )
-			# current version of OIIO used by RV doesn't include the Util library
-			# this variable will tell the build process to not require it
-			WITH_OIIO_UTIL = rvReg.get( "WithOpenImageIOUtil", WITH_OIIO_UTIL )
+        if "OpenImageIOVersion" in rvReg:
+            # NOTE: At the moment RV doesn't provide OIIO headers, so we rely on
+            # the default `OIIO_INCLUDE_PATH` value.
+            OIIO_LIB_PATH = rvLibs
+            OIIO_LIB_SUFFIX = rvReg.get("OpenImageIOLibSuffix", OIIO_LIB_SUFFIX)
+            # current version of OIIO used by RV doesn't include the Util library
+            # this variable will tell the build process to not require it
+            WITH_OIIO_UTIL = rvReg.get("WithOpenImageIOUtil", WITH_OIIO_UTIL)
 
 # find doxygen
-DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
+DOXYGEN = os.path.join(
+    "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen"
+)
 
 # import vars we need to get our doxygen and python wrappers working
 envVarsToImport = [
-	"PATH",
-	"PYTHONPATH",
-	"IEENV_ROOT",
-	"IEENV_WORKING_PATH",
-	"IEENV_LIBRARY_PREFIX_PATH",
-	"DOXYGEN_VERSION",
-	"IEENV_DEBUG",
-	"IEENV_DEBUG_PYTHON",
-	"IEENV_DEBUGGER",
-	"IEENV_DEBUGGER_ARGS",
-	"DELIGHT_CONF",
-	"SCONS_VERSION",
-	"DL_VERSION",
-	"DL_SHADERS_PATH",
-	"DL_DISPLAYS_PATH",
-	"solidangle_LICENSE",
-	"CORTEX_POINTDISTRIBUTION_TILESET",
-	"OCIO",
-	"IECORE_DEBUG_WAIT",
-	"CORTEX_PERFORMANCE_TEST",
-	"IECORE_RTLD_GLOBAL",
+    "PATH",
+    "PYTHONPATH",
+    "IEENV_ROOT",
+    "IEENV_WORKING_PATH",
+    "IEENV_LIBRARY_PREFIX_PATH",
+    "DOXYGEN_VERSION",
+    "IEENV_DEBUG",
+    "IEENV_DEBUG_PYTHON",
+    "IEENV_DEBUGGER",
+    "IEENV_DEBUGGER_ARGS",
+    "DELIGHT_CONF",
+    "SCONS_VERSION",
+    "DL_VERSION",
+    "DL_SHADERS_PATH",
+    "DL_DISPLAYS_PATH",
+    "solidangle_LICENSE",
+    "CORTEX_POINTDISTRIBUTION_TILESET",
+    "OCIO",
+    "IECORE_DEBUG_WAIT",
+    "CORTEX_PERFORMANCE_TEST",
+    "IECORE_RTLD_GLOBAL",
 ]
 
-ENV_VARS_TO_IMPORT= " ".join(envVarsToImport)
+ENV_VARS_TO_IMPORT = " ".join(envVarsToImport)
 
 # make sure the tests can run
 testLibs = [
-	openEXRPythonLibDir,
-	os.path.join( pythonReg["location"], compiler, compilerVersion, "lib" ),
-	os.path.join( compilerReg["location"], "lib" ),
+    openEXRPythonLibDir,
+    os.path.join(pythonReg["location"], compiler, compilerVersion, "lib"),
+    os.path.join(compilerReg["location"], "lib"),
 ]
 
-TEST_LIBPATH = ":".join( testLibs )
+TEST_LIBPATH = ":".join(testLibs)
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
 # install the op stubs and procedural stubs
-INSTALL_IECORE_PROCEDURAL_PATH = os.path.join( basePrefix, "procedurals", "$IECORE_NAME-${IECORE_COMPATIBILITY_VERSION}.py" )
+INSTALL_IECORE_PROCEDURAL_PATH = os.path.join(
+    basePrefix, "procedurals", "$IECORE_NAME-${IECORE_COMPATIBILITY_VERSION}.py"
+)
 # ClassLoader requires integer versioning in the op filenames, so we use milestone version over compatibility version
-INSTALL_IECORE_OP_PATH = os.path.join( basePrefix, "ops", "$IECORE_NAME-${IECORE_MILESTONE_VERSION}.py" )
+INSTALL_IECORE_OP_PATH = os.path.join(
+    basePrefix, "ops", "$IECORE_NAME-${IECORE_MILESTONE_VERSION}.py"
+)
 
-if targetApp :
-	INSTALL_HEADER_DIR = os.path.join( appPrefix, "include" )
-	INSTALL_USD_RESOURCE_DIR = os.path.join( appPrefix, "resource" )
-	INSTALL_LIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
-	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
-	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_USDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-else :
-	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
-	INSTALL_USD_RESOURCE_DIR = os.path.join( basePrefix, "resource" )
-	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
-	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion, compiler, compilerVersion )
-	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_USDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+if targetApp:
+    INSTALL_HEADER_DIR = os.path.join(appPrefix, "include")
+    INSTALL_USD_RESOURCE_DIR = os.path.join(appPrefix, "resource")
+    INSTALL_LIB_NAME = os.path.join(appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix))
+    INSTALL_PYTHONLIB_NAME = os.path.join(
+        appPrefix, "lib", "$IECORE_NAME{}{}".format(ieCoreLibSuffix, ieCorePythonLibSuffix)
+    )
+    INSTALL_PYTHON_DIR = os.path.join(appPrefix, "python")
+    INSTALL_ALEMBICLIB_NAME = os.path.join(
+        appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix)
+    )
+    INSTALL_USDLIB_NAME = os.path.join(appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix))
+else:
+    INSTALL_HEADER_DIR = os.path.join(basePrefix, "include")
+    INSTALL_USD_RESOURCE_DIR = os.path.join(basePrefix, "resource")
+    INSTALL_LIB_NAME = os.path.join(
+        basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME{}".format(ieCoreLibSuffix)
+    )
+    INSTALL_PYTHONLIB_NAME = os.path.join(
+        basePrefix,
+        "lib",
+        compiler,
+        compilerVersion,
+        "$IECORE_NAME{}{}".format(ieCoreLibSuffix, ieCorePythonLibSuffix),
+    )
+    INSTALL_PYTHON_DIR = os.path.join(
+        basePrefix, "python", pythonVersion, compiler, compilerVersion
+    )
+    INSTALL_ALEMBICLIB_NAME = os.path.join(
+        basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME{}".format(ieCoreLibSuffix)
+    )
+    INSTALL_USDLIB_NAME = os.path.join(
+        basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME{}".format(ieCoreLibSuffix)
+    )
 
-	# only installing for the base installation as the CORTEX_STARTUP_PATHS will load these within target apps as well
-	INSTALL_CORESCENE_POST_COMMAND = "ieEnvExec {workingPath} scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} install".format(
-		workingPath = os.environ["IEENV_WORKING_PATH"], prefix = basePrefix
-	)
-	INSTALL_COREIMAGE_POST_COMMAND = "ieEnvExec {workingPath} scons -i -f config/ie/postCoreImageInstall INSTALLPREFIX={prefix} install".format(
-		workingPath = os.environ["IEENV_WORKING_PATH"], prefix = basePrefix
-	)
+    # only installing for the base installation as the CORTEX_STARTUP_PATHS will load these within target apps as well
+    INSTALL_CORESCENE_POST_COMMAND = (
+        "ieEnvExec {workingPath} scons -i -f {optionsDir}/postCoreSceneInstall"
+        " INSTALLPREFIX={prefix} install".format(
+            optionsDir=optionsDir, workingPath=os.environ["IEENV_WORKING_PATH"], prefix=basePrefix
+        )
+    )
+    INSTALL_COREIMAGE_POST_COMMAND = (
+        "ieEnvExec {workingPath} scons -i -f {optionsDir}/postCoreImageInstall"
+        " INSTALLPREFIX={prefix} install".format(
+            optionsDir=optionsDir, workingPath=os.environ["IEENV_WORKING_PATH"], prefix=basePrefix
+        )
+    )
 
-INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
-INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )
-INSTALL_RSL_HEADER_DIR =  os.path.join( basePrefix, "rsl" )
-INSTALL_DOC_DIR = os.path.join( installPrefix, "doc" )
+INSTALL_GLSL_HEADER_DIR = os.path.join(basePrefix, "glsl")
+INSTALL_GLSL_SHADER_DIR = os.path.join(basePrefix, "glsl")
+INSTALL_RSL_HEADER_DIR = os.path.join(basePrefix, "rsl")
+INSTALL_DOC_DIR = os.path.join(installPrefix, "doc")
 INSTALL_PKG_CONFIG_FILE = "0"
 
 # speed up the build a bit hopefully.
@@ -494,5 +711,5 @@ BUILD_CACHEDIR = os.environ["IEBUILD_CACHEDIR"]
 # build build will embed full paths to source code paths in the dwarf information
 # Disabling the build cache to ensure our debug builds are correct rather than fast.
 
-if getOption( "DEBUG", False ) and os.path.exists("/disk1") :
-	BUILD_CACHEDIR = '/disk1/{0}/scons-cache'.format( getpass.getuser() )
+if getOption("DEBUG", False) and os.path.exists("/disk1"):
+    BUILD_CACHEDIR = "/disk1/{0}/scons-cache".format(getpass.getuser())

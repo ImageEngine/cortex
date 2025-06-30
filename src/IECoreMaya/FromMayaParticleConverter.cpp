@@ -305,7 +305,7 @@ IECoreScene::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnP
 
 				writableQuatData.reserve( readableEulerData.size() );
 
-				for( const auto rotation : readableEulerData )
+				for( const auto& rotation : readableEulerData )
 				{
 					float x = IECore::degreesToRadians( rotation.x );
 					float y = IECore::degreesToRadians( rotation.y );

@@ -418,6 +418,8 @@ class ImageWriterTest( unittest.TestCase ) :
 		del imgBlindData['oiio:ColorSpace']
 		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
 			del imgBlindData['oiio:subimages']
+		if IECoreImage.OpenImageIOAlgo.version() >= 30000 :
+			del imgBlindData["openexr:lineOrder"]
 		del imgBlindData['compression']
 		del imgBlindData['PixelAspectRatio']
 		del imgBlindData['displayWindow']

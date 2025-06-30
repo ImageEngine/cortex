@@ -5,9 +5,9 @@ import subprocess
 import sys
 import os
 import os.path
-import shutil
 import VersionControl
-VersionControl.setVersion( "IEBuild" )
+
+VersionControl.setVersion("IEBuild")
 import IEBuild
 
 ##########################################################################
@@ -15,124 +15,139 @@ import IEBuild
 ##########################################################################
 
 ## \todo: this is duplicated from ./options but can we centralize it instead?
-def cortexRegistryVersion() :
+def cortexVersion():
+    import re
 
-	import re
-	varsFound = {}
-	varsToFind = [ "ieCoreMilestoneVersion", "ieCoreMajorVersion" ]
+    varsFound = {}
+    varNames = [
+        "ieCoreMilestoneVersion", "ieCoreMajorVersion", "ieCoreMinorVersion", "ieCorePatchVersion"
+    ]
+    varsToFind = list(varNames)
 
-	with open( "SConstruct", "r" ) as f :
-		for line in f :
-			for varName in varsToFind :
-				match = re.match( "^\s*%s\s*=\s*(?P<value>\d+).*$" % varName, line )
-				if match :
-					varsFound[varName] = match.groupdict()["value"]
-					varsToFind.remove( varName )
-					break
-			if not varsToFind:
-				break
+    with open("SConstruct", "r") as f:
+        for line in f:
+            for varName in varsToFind:
+                match = re.match("^\s*%s\s*=\s*(?P<value>\d+).*$" % varName, line)
+                if match:
+                    varsFound[varName] = match.groupdict()["value"]
+                    varsToFind.remove(varName)
+                    break
+            if not varsToFind:
+                break
 
-	if varsToFind :
-		raise Exception( "Could not find the Cortex version in the SConstruct file. Please review the parsing rules." )
+    if varsToFind:
+        raise Exception(
+            "Could not find the Cortex version in the SConstruct file. Please review the parsing"
+            " rules."
+        )
 
-	return varsFound["ieCoreMilestoneVersion"] + "." + varsFound["ieCoreMajorVersion"]
+    return ".".join([varsFound[k] for k in varNames])
+
+
+currentCortexVersion = cortexVersion()
+cortexReg = IEEnv.findRegistryRoot("cortex", currentCortexVersion)
 
 platform = IEEnv.platform()
-cortexCompatibilityVersion = cortexRegistryVersion()
-cortexReg = IEEnv.registry["libraries"]["cortex"][cortexCompatibilityVersion][platform]
 
 ##########################################################################
 # Run a single build
 ##########################################################################
 
-def build( extraArgs = [] ) :
 
-	sysArgs = sys.argv[1:]
+def build(extraArgs=[]):
+    sysArgs = sys.argv[1:]
 
-	install = False
-	if "install" in sysArgs :
-		install = True
-		sysArgs.remove( "install" )
+    install = False
+    if "install" in sysArgs:
+        install = True
+        sysArgs.remove("install")
 
-	release = False
-	if "RELEASE=1" in sysArgs :
-		release = True
+    release = False
+    if "RELEASE=1" in sysArgs:
+        release = True
 
-	if "J=" in " ".join( sysArgs ) :
-		sysArgs = " ".join( sysArgs ).replace( "J=", "-j " ).split( " " )
+    if "J=" in " ".join(sysArgs):
+        sysArgs = " ".join(sysArgs).replace("J=", "-j ").split(" ")
 
-	installPrefix = "/software" if release else os.path.expanduser( "~" )
-	buildArgs = [ "INSTALL_PREFIX=" + installPrefix ]
-	buildArgs.extend( extraArgs )
-	buildArgs.extend( sysArgs )
+    installPrefix = "/software" if release else os.path.expanduser("~")
+    buildArgs = ["INSTALL_PREFIX=" + installPrefix]
+    buildArgs.extend(extraArgs)
+    buildArgs.extend(sysArgs)
 
-	argsToValidate = [ "CORTEX_VERSION={}".format( cortexCompatibilityVersion ) ] + extraArgs
-	if not IEEnv.Registry.validateVariation( argsToValidate ) :
-		print( "Skipped invalid variation combination: " + str(argsToValidate) + "\n" )
-		return
+    argsToValidate = ["CORTEX_VERSION={}".format(currentCortexVersion)] + extraArgs
+    if not IEEnv.Registry.validateVariation(argsToValidate):
+        print("Skipped invalid variation combination: " + str(argsToValidate) + "\n")
+        return
 
-	cmd = [ "scons", "install" ] if install or release else [ "scons" ]
+    cmd = ["scons", "install"] if install or release else ["scons"]
 
-	print( " ".join( cmd + buildArgs ) )
-	if "DRYRUN=1" in sysArgs :
-		return
+    print(" ".join(cmd + buildArgs))
+    if "DRYRUN=1" in sysArgs:
+        return
 
-	if subprocess.call( cmd + buildArgs ) != 0 :
-		raise RuntimeError( "Error : " + str( " ".join( cmd + buildArgs ) ) )
-	print( "Build succeeded: " + " ".join( cmd + buildArgs ) + "\n" )
+    if subprocess.call(cmd + buildArgs) != 0:
+        raise RuntimeError("Error : " + str(" ".join(cmd + buildArgs)))
+    print("Build succeeded: " + " ".join(cmd + buildArgs) + "\n")
+
 
 ##########################################################################
 # Build docs only
 ##########################################################################
 
-def installDocs() :
 
-	sysArgs = sys.argv[1:]
+def installDocs():
+    sysArgs = sys.argv[1:]
 
-	if "RELEASE=1" not in sysArgs :
-		return
+    if "RELEASE=1" not in sysArgs:
+        return
 
-	buildArgs = [ "INSTALL_PREFIX=/software" ]
-	buildArgs.extend( sysArgs )
+    buildArgs = ["INSTALL_PREFIX=/software"]
+    buildArgs.extend(sysArgs)
 
-	cmd = [ "scons", "installDoc" ]
-	print( " ".join( cmd + buildArgs ) )
-	if "DRYRUN=1" in sysArgs :
-		return
+    cmd = ["scons", "installDoc"]
+    print(" ".join(cmd + buildArgs))
+    if "DRYRUN=1" in sysArgs:
+        return
 
-	if subprocess.call( cmd + buildArgs ) != 0 :
+    if subprocess.call(cmd + buildArgs) != 0:
+        raise RuntimeError("Error : scons installDoc " + str(" ".join(buildArgs)))
 
-		raise RuntimeError("Error : scons installDoc " + str( " ".join( buildArgs ) ) )
 
 ##########################################################################
 # Loop over all builds
 ##########################################################################
 
-compilerVersions = IEBuild.utils.versionsToInstall( "gcc" )
-pythonVersions = IEBuild.utils.versionsToInstall( "python" )
-mayaVersions = IEBuild.utils.versionsToInstall( "maya" )
-nukeVersions = IEBuild.utils.versionsToInstall( "nuke" )
-houdiniVersions = IEBuild.utils.versionsToInstall( "houdini" )
-rvVersions = IEBuild.utils.versionsToInstall( "rv" )
+compilerVersions = IEBuild.utils.versionsToInstall("gcc")
+pythonVersions = IEBuild.utils.versionsToInstall("python")
+mayaVersions = IEBuild.utils.versionsToInstall("maya")
+nukeVersions = IEBuild.utils.versionsToInstall("nuke")
+houdiniVersions = IEBuild.utils.versionsToInstall("houdini")
+rvVersions = IEBuild.utils.versionsToInstall("rv")
 
 
 for compilerVersion in compilerVersions:
-	for pythonVersion in pythonVersions :
-		build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "DL_VERSION=UNDEFINED" ] )
+    for pythonVersion in pythonVersions:
+        build(
+            [
+                "COMPILER_VERSION=" + compilerVersion,
+                "PYTHON_VERSION=" + pythonVersion,
+                "DL_VERSION=UNDEFINED",
+            ]
+        )
 
-for mayaVersion in mayaVersions :
-	compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
-	build( [ "APP=maya", "APP_VERSION="+mayaVersion ] )
+for mayaVersion in mayaVersions:
+    compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
+    build(["APP=maya", "APP_VERSION=" + mayaVersion])
 
-for nukeVersion in nukeVersions :
-	compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]["compilerVersion"]
-	build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
+for nukeVersion in nukeVersions:
+    compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]["compilerVersion"]
+    build(["APP=nuke", "APP_VERSION=" + nukeVersion])
 
-for houdiniVersion in houdiniVersions :
-	compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]["compilerVersion"]
-	build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
+for houdiniVersion in houdiniVersions:
+    compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]["compilerVersion"]
+    build(["APP=houdini", "APP_VERSION=" + houdiniVersion])
 
-for rvVersion in rvVersions :
-	build( [ "APP=rv", "APP_VERSION="+rvVersion, "DL_VERSION=UNDEFINED" ] )
+for rvVersion in rvVersions:
+    build(["APP=rv", "APP_VERSION=" + rvVersion, "DL_VERSION=UNDEFINED"])
 
 installDocs()

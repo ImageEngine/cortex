@@ -288,7 +288,11 @@ void GEO_CortexPrimitive::reverse()
 {
 }
 
+#if MIN_HOU_VERSION( 19, 5, 0 )
+bool GEO_CortexPrimitive::getBBox( UT_BoundingBox *bbox ) const
+#else
 int GEO_CortexPrimitive::getBBox( UT_BoundingBox *bbox ) const
+#endif
 {
 	if ( !m_object )
 	{
@@ -322,6 +326,13 @@ UT_Vector3 GEO_CortexPrimitive::computeNormal() const
 {
 	return UT_Vector3( 0, 0, 0 );
 }
+
+#if MIN_HOU_VERSION( 19, 5, 0 )
+UT_Vector3D GEO_CortexPrimitive::computeNormalD() const
+{
+	return UT_Vector3D( 0, 0, 0 );
+}
+#endif
 
 int GEO_CortexPrimitive::detachPoints( GA_PointGroup &grp )
 {
@@ -668,6 +679,12 @@ GEO_Primitive *GEO_CortexPrimitive::doConvert( ConvertParms &parms )
 void GEO_CortexPrimitive::normal( NormalComp &output ) const
 {
 }
+
+#if MIN_HOU_VERSION( 19, 5, 0 )
+void GEO_CortexPrimitive::normal( NormalCompD &output ) const
+{
+}
+#endif
 
 #ifdef GA_PRIMITIVE_VERTEXLIST
 

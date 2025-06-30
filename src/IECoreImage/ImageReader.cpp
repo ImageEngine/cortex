@@ -118,7 +118,7 @@ class ImageReader::Implementation
 
 	public :
 
-		Implementation( const ImageReader *reader ) : m_reader( reader ), m_cache( nullptr, &destroyImageCache )
+		Implementation( const ImageReader *reader ) : m_reader( reader )
 		{
 		}
 
@@ -251,11 +251,17 @@ class ImageReader::Implementation
 		Imath::Box2i dataWindow()
 		{
 			open( /* throwOnFailure */ true );
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
+
+			ImageSpec spec;
+#if OIIO_VERSION >= 30000
+				m_cache->get_cache_dimensions( m_inputFileName, spec, /* subimage = */ 0, miplevel() );
+#else
+				spec = *m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
+#endif
 
 			return Imath::Box2i(
-				Imath::V2i( spec->x, spec->y ),
-				Imath::V2i( spec->width + spec->x - 1, spec->height + spec->y - 1 )
+				Imath::V2i( spec.x, spec.y ),
+				Imath::V2i( spec.width + spec.x - 1, spec.height + spec.y - 1 )
 			);
 		}
 
@@ -263,11 +269,15 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
-
+			ImageSpec spec;
+#if OIIO_VERSION >= 30000
+			m_cache->get_cache_dimensions( m_inputFileName, spec, /* subimage = */ 0, miplevel() );
+#else
+			spec = *m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
+#endif
 			return Imath::Box2i(
-				Imath::V2i( spec->full_x, spec->full_y ),
-				Imath::V2i( spec->full_x + spec->full_width - 1, spec->full_y + spec->full_height - 1 )
+				Imath::V2i( spec.full_x, spec.full_y ),
+				Imath::V2i( spec.full_x + spec.full_width - 1, spec.full_y + spec.full_height - 1 )
 			);
 		}
 
@@ -441,8 +451,11 @@ class ImageReader::Implementation
 			}
 
 			m_inputFileName = "";
-			m_cache.reset( ImageCache::create( /* shared */ false ) );
-
+#if OIIO_VERSION >= 30000
+			m_cache = ImageCache::create( /* shared */ false );
+#else
+			m_cache.reset( ImageCache::create( /* shared */ false ), destroyImageCache );
+#endif
 			// Autompip ensures that if a miplevel is requested that the file
 			// doesn't contain, OIIO creates the respective level on the fly.
 			m_cache->attribute( "automip", 1 );
@@ -453,16 +466,6 @@ class ImageReader::Implementation
 			{
 				m_inputFileName = m_reader->fileName();
 
-				// Store the miplevels that the file natively supports. We do
-				// this as OIIO returns a different value once automip is turned
-				// on.
-				m_cache->get_image_info(
-					m_inputFileName,
-					0, 0, // subimage, miplevel
-					ustring( "miplevels" ),
-					TypeDesc::TypeInt, &m_miplevels
-				);
-
 				// Get the fileFormat and store the current and linear color spaces
 				// We do this so we can perform color conversion on the image after
 				// loading the data.
@@ -471,7 +474,7 @@ class ImageReader::Implementation
 					m_inputFileName,
 					0, miplevel(), // subimage, miplevel
 					ustring( "fileformat" ),
-					TypeDesc::TypeString, &fileFormat
+					OIIO::TypeString, &fileFormat
 				);
 
 				if( strcmp( fileFormat, "png" ) == 0 )
@@ -512,17 +515,18 @@ class ImageReader::Implementation
 			return p->getNumericValue();
 		}
 
+#if OIIO_VERSION < 30000
 		static void destroyImageCache( ImageCache *cache )
 		{
 			ImageCache::destroy( cache, /* teardown */ true );
 		}
+#endif
 
 		const ImageReader *m_reader;
-		std::unique_ptr<ImageCache, decltype(&destroyImageCache) > m_cache;
+		std::shared_ptr<ImageCache> m_cache;
 		ustring m_inputFileName;
 		std::string m_currentColorSpace;
 		std::string m_linearColorSpace;
-		int m_miplevels;
 
 };
 

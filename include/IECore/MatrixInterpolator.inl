@@ -120,7 +120,7 @@ struct CubicInterpolator< Imath::Matrix44< T > >
 
 		Imath::Vec3<T> s0( 1 ), s1( 1 ), s2( 1 ), s3( 1 ), sx( 1 );
 		Imath::Vec3<T> h0( 0 ), h1( 0 ), h2( 0 ), h3( 0 ), hx( 0 );
-		Imath::Vec3<T> r0( 0 ), r1( 0 ), r2( 0 ), r3( 0 ), rx( 0 );
+		Imath::Vec3<T> r0( 0 ), r1( 0 ), r2( 0 ), r3( 0 );
 		Imath::Vec3<T> t0( 0 ), t1( 0 ), t2( 0 ), t3( 0 ), tx( 0 );
 
 		extractSHRT(y0, s0, h0, r0, t0);

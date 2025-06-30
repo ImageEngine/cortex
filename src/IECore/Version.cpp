@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2020, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2024, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_VERSION_H
-#define IECORE_VERSION_H
-
-#include "IECore/Export.h"
+#include "IECore/Version.h"
 
 #include "boost/format.hpp"
 
-#include <string>
-
-#define CORTEX_MILESTONE_VERSION IE_CORE_MILESTONEVERSION
-#define CORTEX_MAJOR_VERSION IE_CORE_MAJORVERSION
-#define CORTEX_MINOR_VERSION IE_CORE_MINORVERSION
-#define CORTEX_PATCH_VERSION IE_CORE_PATCHVERSION
-
-#define MAKE_CORTEX_COMPATIBILITY_VERSION( MILESTONE_VERSION, MAJOR_VERSION ) \
-	( MILESTONE_VERSION * 1000 + MAJOR_VERSION  )
-
-#define CORTEX_COMPATIBILITY_VERSION ( MAKE_CORTEX_COMPATIBILITY_VERSION( CORTEX_MILESTONE_VERSION, CORTEX_MAJOR_VERSION ) )
-
-namespace IECore
+int IECore::milestoneVersion()
 {
+	return CORTEX_MILESTONE_VERSION;
+}
 
-/// Returns the milestone version for the IECore library
-IECORE_API int milestoneVersion();
+int IECore::majorVersion()
+{
+	return CORTEX_MAJOR_VERSION;
+}
 
-/// Returns the major version for the IECore library
-IECORE_API int majorVersion();
+int IECore::minorVersion()
+{
+	return CORTEX_MINOR_VERSION;
+}
 
-/// Returns the minor version for the IECore library
-IECORE_API int minorVersion();
+int IECore::patchVersion()
+{
+	return CORTEX_PATCH_VERSION;
+}
 
-/// Returns the patch version for the IECore library
-IECORE_API int patchVersion();
+int IECore::compatibilityVersion()
+{
+	return CORTEX_COMPATIBILITY_VERSION;
+}
 
-/// Returns an integer representation of the compatibility version for the IECore library
-IECORE_API int compatibilityVersion();
+const std::string &IECore::compatibilityVersionString()
+{
+	static std::string v = boost::str( boost::format( "%d.%d" ) % milestoneVersion() % majorVersion() );
+	return v;
+}
 
-/// Returns a string representation of the compatibility version for the IECore library (eg "milestone.major")
-IECORE_API const std::string &compatibilityVersionString();
-
-/// Returns a string of the form "milestone.major.minor.patch"
-IECORE_API const std::string &versionString();
-
-} // namespace IECore
-
-#endif // IECORE_VERSION_H
+const std::string &IECore::versionString()
+{
+	static std::string v = boost::str( boost::format( "%d.%d.%d.%d" ) % milestoneVersion() % majorVersion() % minorVersion() % patchVersion() );
+	return v;
+}

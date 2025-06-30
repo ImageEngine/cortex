@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import IECore
+
 import importlib
 import os
 import math
@@ -40,6 +42,8 @@ import pathlib
 import shutil
 import tempfile
 import imath
+import subprocess
+import sys
 import threading
 import time
 
@@ -2569,6 +2573,64 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertAlmostEqual( arm_10["P"].data[i].y, expected_10[i].y, 5 )
 			self.assertAlmostEqual( arm_10["P"].data[i].z, expected_10[i].z, 5 )
 
+	def testSkinnedFaceVaryingNormals( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/skinnedFaceVaryingNormals.usda", IECore.IndexedIO.OpenMode.Read )
+		cubeLocation = root.scene( [ "main", "pCube1" ] )
+		for timeSample in range( 1, 25 ) :
+
+			cubeMesh = cubeLocation.readObject( timeSample / 24.0 )
+			self.assertIn( "N", cubeMesh )
+			self.assertTrue( cubeMesh.isPrimitiveVariableValid( cubeMesh["N"] ) )
+			self.assertEqual( cubeMesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+			referenceNormals = IECoreScene.MeshAlgo.calculateFaceVaryingNormals( cubeMesh, thresholdAngle = 5 )
+			for referenceNormal, normal in zip( referenceNormals.data, cubeMesh["N"].data ) :
+				self.assertTrue( normal.equalWithAbsError( referenceNormal, 0.000001 ) )
+
+	def testInstancedSkinning( self ) :
+
+		# Skinned meshes can be instanced, but with each instance inheriting different
+		# skeleton animation. Make sure we account for that.
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/instancedSkinning.usda", IECore.IndexedIO.OpenMode.Read )
+
+		# Check that the skinned meshes come out with the expected skinning.
+
+		cube1 = root.scene( [ "Instance1", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube1.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, 0.5 ), imath.V3f( 0.5, 0.5, 1.5 ) ) )
+
+		cube2 = root.scene( [ "Group", "Instance2", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube2.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -1.5 ), imath.V3f( 0.5, 0.5, -0.5 ) ) )
+
+		cube3 = root.scene( [ "Instance3", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube2.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -1.5 ), imath.V3f( 0.5, 0.5, -0.5 ) ) )
+
+		cube4 = root.scene( [ "Instance4", "SkeletonRoot", "SkinnedCube" ] )
+		self.assertEqual( cube2.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -1.5 ), imath.V3f( 0.5, 0.5, -0.5 ) ) )
+
+		# And check that their object hashes match the results above.
+
+		ObjectHash = IECoreScene.SceneInterface.HashType.ObjectHash
+		self.assertNotEqual( cube1.hash( ObjectHash, 0 ), cube2.hash( ObjectHash, 0 ) ) # Different animation
+		self.assertEqual( cube2.hash( ObjectHash, 0 ), cube3.hash( ObjectHash, 0 ) ) # Same animation
+		self.assertEqual( cube2.hash( ObjectHash, 0 ), cube4.hash( ObjectHash, 0 ) ) # Same animation
+
+		# All the unskinned meshes should be the same.
+
+		unskinnedHashes = set()
+		for path in [
+			[ "Instance1", "SkeletonRoot", "UnskinnedCube" ],
+			[ "Group", "Instance2", "SkeletonRoot", "UnskinnedCube" ],
+			[ "Instance3", "SkeletonRoot", "UnskinnedCube" ],
+			[ "Instance4", "SkeletonRoot", "UnskinnedCube" ],
+		] :
+			cube = root.scene( path )
+			self.assertEqual( cube.readObject( 0 ).bound(), imath.Box3f( imath.V3f( -0.5, -0.5, -0.5 ), imath.V3f( 0.5, 0.5, 0.5 ) ) )
+			unskinnedHashes.add( cube.hash( ObjectHash, 0 ) )
+
+		self.assertEqual( len( unskinnedHashes ), 1 )
+
 	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel ( self ) :
 
@@ -2791,6 +2853,41 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( set( root.child( "loc" ).attributeNames() ), set( ['ai:testAttribute' ] ) )
 		self.assertEqual( root.child( "loc" ).readAttribute( 'ai:testAttribute', 0 ), IECore.FloatData( 9 ) )
+
+	def testWriteAnimatedAttribute( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+
+		for t in ( 0.0, 0.5, 1.0 ) :
+			child.writeAttribute( "user:test", IECore.FloatData( t ), t )
+
+		del child, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "child" )
+
+		for t in ( 0.0, 0.5, 1.0 ) :
+			self.assertEqual( child.readAttribute( "user:test", t ), IECore.FloatData( t ) )
+
+	def testWriteAnimatedBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+
+		for t in ( 1.0, 1.5, 2.0 ) :
+			child.writeObject( IECoreScene.SpherePrimitive( t ), t )
+			child.writeBound( imath.Box3d( imath.V3d( -t ), imath.V3d( t ) ), t )
+
+		del child, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "child" )
+
+		for t in ( 1.0, 1.5, 2.0 ) :
+			self.assertEqual( child.readBound( t ), imath.Box3d( imath.V3d( -t ), imath.V3d( t ) ) )
 
 	def testShaders( self ) :
 
@@ -3347,6 +3444,37 @@ class USDSceneTest( unittest.TestCase ) :
 			} )
 		)
 
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testLightAndShadowLinkCollections( self ) :
+
+		# We ignore `lightLink` and `shadowLink` on lights, because they have
+		# a specific meaning in USD that doesn't translate to our definition of a set.
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "sphereLight.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		self.assertNotIn( "lightLink", root.setNames() )
+		self.assertNotIn( "shadowLink", root.setNames() )
+		self.assertEqual( root.readSet( "lightLink" ), IECore.PathMatcher() )
+		self.assertEqual( root.readSet( "shadowLink" ), IECore.PathMatcher() )
+
+		# But that doesn't mean folks can't use those names for sets elsewhere if they
+		# want to.
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		root.writeSet( "lightLink", IECore.PathMatcher( [ "/test1" ] ) )
+		root.writeSet( "shadowLink", IECore.PathMatcher( [ "/test2" ] ) )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertIn( "lightLink", root.setNames() )
+		self.assertIn( "shadowLink", root.setNames() )
+		self.assertEqual( root.readSet( "lightLink" ), IECore.PathMatcher( [ "/test1" ] ) )
+		self.assertEqual( root.readSet( "shadowLink" ), IECore.PathMatcher( [ "/test2" ] ) )
+
 	def testReadDoubleSidedAttribute( self ) :
 
 		root = IECoreScene.SceneInterface.create(
@@ -3485,6 +3613,55 @@ class USDSceneTest( unittest.TestCase ) :
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.child( "object" ).readAttribute( "ai:surface", 0 ), network )
+
+	def testLegacyComponentConnections( self ) :
+
+		expectedNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"source" : IECoreScene.Shader( "noise" ),
+				"output" : IECoreScene.Shader(
+					"color_correct",
+					parameters = {
+						"input" : imath.Color4f( 1 ),
+					}
+				),
+			},
+			connections = [
+				( ( "source", "r" ), ( "output", "input.g" ) ),
+				( ( "source", "g" ), ( "output", "input.b" ) ),
+				( ( "source", "b" ), ( "output", "input.r" ) ),
+				( ( "source", "r" ), ( "output", "input.a" ) ),
+			],
+			output = "output",
+		)
+
+		root = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "legacyComponentConnections.usda" ), IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "object" ).readAttribute( "ai:surface", 0 ), expectedNetwork )
+
+	def testShaderBlindData( self ) :
+
+		shader = IECoreScene.Shader( "test" )
+		shader.blindData()["testInt"] = IECore.IntData( 10 )
+		shader.blindData()["testFloatVector"] = IECore.FloatVectorData( [ 1, 2, 3, ] )
+		shader.blindData()["test:colon"] = IECore.BoolData( True )
+		shader.blindData()["testCompound"] = IECore.CompoundData( {
+			"testString" : "test",
+			"testStringVector" : IECore.StringVectorData( [ "one", "two" ] )
+		} )
+
+		network = IECoreScene.ShaderNetwork(
+			shaders = { "test" : shader },
+			output = ( "test", "out" )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "testShaderBlindData.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		object = root.createChild( "object" )
+		object.writeAttribute( "surface", network, 0.0 )
+		del object, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "object" ).readAttribute( "surface", 0 ), network )
 
 	def testMaterialPurpose( self ) :
 
@@ -3656,10 +3833,10 @@ class USDSceneTest( unittest.TestCase ) :
 
 		fileName = os.path.join( self.temporaryDirectory(), "pointInstancePrimvars.usda" )
 		stage = pxr.Usd.Stage.CreateNew( fileName )
-		points = pxr.UsdGeom.PointInstancer.Define( stage, "/points" )
-		points.CreatePositionsAttr( [ ( v, v, v ) for v in range( 0, 5 ) ] )
+		pointInstancer = pxr.UsdGeom.PointInstancer.Define( stage, "/points" )
+		pointInstancer.CreatePositionsAttr( [ ( v, v, v ) for v in range( 0, 5 ) ] )
 
-		primvars = pxr.UsdGeom.PrimvarsAPI( points )
+		primvars = pxr.UsdGeom.PrimvarsAPI( pointInstancer )
 		primvar = primvars.CreatePrimvar( "myColor", pxr.Sdf.ValueTypeNames.Color3fArray, "vertex" )
 		primvar.Set(
 			[ ( c, c, c ) for c in range( 1, 6 ) ]
@@ -3672,6 +3849,8 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		points = root.child( "points" ).readObject( 0 )
 
+		self.assertEqual( points.keys(), ['P', 'myColor', 'prototypeRoots'] )
+
 		self.assertIsInstance( points, IECoreScene.PointsPrimitive )
 		self.assertIn( "myColor", points )
 		self.assertEqual(
@@ -3680,6 +3859,21 @@ class USDSceneTest( unittest.TestCase ) :
 		)
 		self.assertEqual( points["myColor"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( points["myColor"].indices, None )
+
+		# Now try deactivating some ids
+
+		pointInstancer.DeactivateIds( [ 0, 2 ] )
+		pointInstancer.InvisIds( [ 1, 4 ], 0 )
+
+		stage.GetRootLayer().Save()
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points = root.child( "points" ).readObject( 0 )
+
+		self.assertEqual( points.keys(), ['P', 'inactiveIds', 'invisibleIds', 'myColor', 'prototypeRoots'] )
+
+		self.assertEqual( points["inactiveIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 0, 2 ] ) ) )
+		self.assertEqual( points["invisibleIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 1, 4 ] ) ) )
 
 	def testArnoldArrayInputs( self ) :
 
@@ -4312,6 +4506,84 @@ class USDSceneTest( unittest.TestCase ) :
 		for setIndex, setName in enumerate( expectedSetNames.values() ) :
 			with self.subTest( setName = setName ) :
 				self.assertEqual( root.readSet( setName ), IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
+
+	def testWriteToOpenScene( self ) :
+
+		# Using posix-format filename, because Windows backslashes don't play nicely
+		# with `assertRaisesRegex()`.
+		fileName = ( pathlib.Path( self.temporaryDirectory() ) / "test.usda" ).as_posix()
+		IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		reader = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		with self.assertRaisesRegex( RuntimeError, f"USDScene : Failed to open USD stage : '{fileName}'" ) :
+			IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+	def testAssetPathSlashes ( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "assetPathAttribute.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		xform = root.child( "xform" )
+
+		self.assertEqual( xform.attributeNames(), [ "render:testAsset" ] )
+		self.assertNotIn( "\\", xform.readAttribute( "render:testAsset", 0 ).value )
+		self.assertTrue( pathlib.Path( xform.readAttribute( "render:testAsset", 0 ).value ).is_file() )
+
+	def _testPointInstancerRelativePrototypes( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "pointInstancerWeirdPrototypes.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		pointInstancer = root.child( "inst" )
+		obj = pointInstancer.readObject(0.0)
+
+		if os.environ.get( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", "0" ) != "0" :
+			self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ './Prototypes/sphere', '/cube' ] ) )
+		else :
+			self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ '/inst/Prototypes/sphere', '/cube' ] ) )
+
+	def testPointInstancerRelativePrototypes( self ) :
+
+		for relative in [ "0", "1", None ] :
+
+			with self.subTest( relative = relative ) :
+
+				env = os.environ.copy()
+				if relative is not None :
+					env["IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES"] = relative
+				else :
+					env.pop( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", None )
+
+				try :
+					subprocess.check_output(
+						[ sys.executable, __file__, "USDSceneTest._testPointInstancerRelativePrototypes" ],
+						env = env, stderr = subprocess.STDOUT
+					)
+				except subprocess.CalledProcessError as e :
+					self.fail( e.output )
+
+	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
+	def testUsdVolVolumeSlashes( self ) :
+
+		import IECoreVDB
+
+		fileName = os.path.dirname( __file__ ) + "/data/volume.usda"
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "volume" )
+
+		vdbObject = child.readObject( 0 )
+		self.assertNotIn( "\\", vdbObject.fileName() )
+		self.assertTrue( pathlib.Path( vdbObject.fileName() ).is_file() )
+
+	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
+	def testUsdVolVolumeWithEmptyField( self ) :
+
+		fileName = os.path.dirname( __file__ ) + "/data/volumeWithEmptyField.usda"
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertIsNone( root.child( "volume" ).readObject( 0 ) )
 
 if __name__ == "__main__":
 	unittest.main()

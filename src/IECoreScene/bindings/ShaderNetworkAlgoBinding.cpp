@@ -33,11 +33,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/pointer_cast.hpp"
 
 #include "ShaderNetworkAlgoBinding.h"
 
 #include "IECoreScene/ShaderNetworkAlgo.h"
+
+#include "boost/pointer_cast.hpp"
+#include "boost/python/stl_iterator.hpp"
 
 using namespace boost::python;
 using namespace IECore;
@@ -45,6 +47,23 @@ using namespace IECoreScene;
 
 namespace
 {
+
+void registerJoinAdapterWrapper( const std::string &destinationShaderType, IECore::TypeId destinationParameterType, const Shader *adapter, object pythonInParameters, InternedString outParameter )
+{
+	std::array<InternedString, 4> inParameters;
+	size_t i = 0;
+	for( auto it = stl_input_iterator<object>( pythonInParameters ), eIt = stl_input_iterator<object>(); it != eIt; ++it, ++i )
+	{
+		if( i >= inParameters.size() )
+		{
+			PyErr_SetString( PyExc_IndexError, "Too many input parameters" );
+			throw_error_already_set();
+		}
+		inParameters[i] = extract<InternedString>( *it );
+	}
+
+	ShaderNetworkAlgo::registerJoinAdapter( destinationShaderType, destinationParameterType, adapter, inParameters, outParameter );
+}
 
 void convertOSLComponentConnectionsWrapper( ShaderNetwork *network, int oslVersion )
 {
@@ -78,6 +97,10 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 	def( "removeUnusedShaders", &ShaderNetworkAlgo::removeUnusedShaders );
 	def( "addComponentConnectionAdapters", &ShaderNetworkAlgo::addComponentConnectionAdapters, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
 	def( "removeComponentConnectionAdapters", &ShaderNetworkAlgo::removeComponentConnectionAdapters, ( arg( "network" ) ) );
+	def( "registerSplitAdapter", &ShaderNetworkAlgo::registerSplitAdapter, ( arg( "destinationShaderType" ), arg( "component" ), arg( "adapter" ), arg( "inParameter" ), arg( "outParameter" ) ) );
+	def( "deregisterSplitAdapter", &ShaderNetworkAlgo::deregisterSplitAdapter, ( arg( "destinationShaderType" ), arg( "component" ) ) );
+	def( "registerJoinAdapter", &registerJoinAdapterWrapper, ( arg( "destinationShaderType" ), arg( "destinationParameterType" ), arg( "adapter" ), arg( "inParameters" ), arg( "outParameter" ) ) );
+	def( "deregisterJoinAdapter", &ShaderNetworkAlgo::deregisterJoinAdapter, ( arg( "destinationShaderType" ), arg( "destinationParameterType" ) ) );
 	def( "componentConnectionAdapterLabel", &componentConnectionAdapterLabelWrapper );
 	def( "convertToOSLConventions", &ShaderNetworkAlgo::convertToOSLConventions );
 	def( "convertOSLComponentConnections", &convertOSLComponentConnectionsWrapper, ( arg( "network" ), arg( "oslVersion" ) = 10900 ) );

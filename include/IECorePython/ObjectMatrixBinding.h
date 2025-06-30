@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2020, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_VERSION_H
-#define IECORE_VERSION_H
+#ifndef IECOREPYTHON_OBJECTMATRIXBINDING_H
+#define IECOREPYTHON_OBJECTMATRIXBINDING_H
 
-#include "IECore/Export.h"
+#include "IECorePython/Export.h"
 
-#include "boost/format.hpp"
-
-#include <string>
-
-#define CORTEX_MILESTONE_VERSION IE_CORE_MILESTONEVERSION
-#define CORTEX_MAJOR_VERSION IE_CORE_MAJORVERSION
-#define CORTEX_MINOR_VERSION IE_CORE_MINORVERSION
-#define CORTEX_PATCH_VERSION IE_CORE_PATCHVERSION
-
-#define MAKE_CORTEX_COMPATIBILITY_VERSION( MILESTONE_VERSION, MAJOR_VERSION ) \
-	( MILESTONE_VERSION * 1000 + MAJOR_VERSION  )
-
-#define CORTEX_COMPATIBILITY_VERSION ( MAKE_CORTEX_COMPATIBILITY_VERSION( CORTEX_MILESTONE_VERSION, CORTEX_MAJOR_VERSION ) )
-
-namespace IECore
+namespace IECorePython
 {
+IECOREPYTHON_API void bindObjectMatrix();
+}
 
-/// Returns the milestone version for the IECore library
-IECORE_API int milestoneVersion();
-
-/// Returns the major version for the IECore library
-IECORE_API int majorVersion();
-
-/// Returns the minor version for the IECore library
-IECORE_API int minorVersion();
-
-/// Returns the patch version for the IECore library
-IECORE_API int patchVersion();
-
-/// Returns an integer representation of the compatibility version for the IECore library
-IECORE_API int compatibilityVersion();
-
-/// Returns a string representation of the compatibility version for the IECore library (eg "milestone.major")
-IECORE_API const std::string &compatibilityVersionString();
-
-/// Returns a string of the form "milestone.major.minor.patch"
-IECORE_API const std::string &versionString();
-
-} // namespace IECore
-
-#endif // IECORE_VERSION_H
+#endif // IECOREPYTHON_OBJECTMATRIXBINDING_H

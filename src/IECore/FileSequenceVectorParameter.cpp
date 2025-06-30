@@ -41,7 +41,7 @@
 
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/filesystem/convenience.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -131,7 +131,7 @@ bool FileSequenceVectorParameter::valueValid( const Object *value, std::string *
 
 		if ( m_extensions.size() )
 		{
-			std::string ext = boost::filesystem::extension( boost::filesystem::path( fileSequence->getFileName() ) );
+			std::string ext = boost::filesystem::path( fileSequence->getFileName() ).extension().string();
 			if ( ext.size() && ext[0] == '.' )
 			{
 				ext = ext.substr( 1, ext.size() - 1 );
@@ -257,7 +257,7 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 			frameList = FrameList::parse( tail );
 			found = true;
 		}
-		
+
 		catch ( Exception & )
 		{
 			fileSequenceCopy = fileSequenceCopy.substr( 0, spaceIndex )
@@ -267,7 +267,7 @@ FileSequencePtr FileSequenceVectorParameter::parseFileSequence( const std::strin
 
 			spaceIndex = fileSequenceCopy.find_first_of( " " );
 		}
-		
+
 	}
 
 	return new FileSequence( filename, frameList );

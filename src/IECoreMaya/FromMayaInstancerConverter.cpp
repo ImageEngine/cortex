@@ -141,7 +141,7 @@ IECore::QuatfVectorDataPtr eulerToQuat( IECore::V3fVectorData *eulerData, Imath:
 
 	writableQuatData.reserve( readableEulerData.size() );
 
-	for( const auto rotation : readableEulerData )
+	for( const auto& rotation : readableEulerData )
 	{
 		float x = isDegrees ? IECore::degreesToRadians( rotation.x ) : rotation.x;
 		float y = isDegrees ? IECore::degreesToRadians( rotation.y ) : rotation.y;

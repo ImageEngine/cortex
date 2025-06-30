@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2020, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2025, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,54 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_VERSION_H
-#define IECORE_VERSION_H
+#ifndef IECORE_OBJECTMATRIX_H
+#define IECORE_OBJECTMATRIX_H
 
 #include "IECore/Export.h"
-
-#include "boost/format.hpp"
-
-#include <string>
-
-#define CORTEX_MILESTONE_VERSION IE_CORE_MILESTONEVERSION
-#define CORTEX_MAJOR_VERSION IE_CORE_MAJORVERSION
-#define CORTEX_MINOR_VERSION IE_CORE_MINORVERSION
-#define CORTEX_PATCH_VERSION IE_CORE_PATCHVERSION
-
-#define MAKE_CORTEX_COMPATIBILITY_VERSION( MILESTONE_VERSION, MAJOR_VERSION ) \
-	( MILESTONE_VERSION * 1000 + MAJOR_VERSION  )
-
-#define CORTEX_COMPATIBILITY_VERSION ( MAKE_CORTEX_COMPATIBILITY_VERSION( CORTEX_MILESTONE_VERSION, CORTEX_MAJOR_VERSION ) )
+#include "IECore/Object.h"
 
 namespace IECore
 {
 
-/// Returns the milestone version for the IECore library
-IECORE_API int milestoneVersion();
+/// An Object which holds a matrix of child Objects.
+class IECORE_API ObjectMatrix : public Object
+{
 
-/// Returns the major version for the IECore library
-IECORE_API int majorVersion();
+	public :
 
-/// Returns the minor version for the IECore library
-IECORE_API int minorVersion();
+		ObjectMatrix( size_t rows = 0, size_t columns = 0 );
+		~ObjectMatrix() override;
 
-/// Returns the patch version for the IECore library
-IECORE_API int patchVersion();
+		IE_CORE_DECLAREOBJECT( ObjectMatrix, Object );
 
-/// Returns an integer representation of the compatibility version for the IECore library
-IECORE_API int compatibilityVersion();
+		size_t numRows() const;
+		size_t numColumns() const;
 
-/// Returns a string representation of the compatibility version for the IECore library (eg "milestone.major")
-IECORE_API const std::string &compatibilityVersionString();
+		/// Resizes the matrix, preserving the original positions of its values.
+		void resize( size_t rows, size_t columns );
 
-/// Returns a string of the form "milestone.major.minor.patch"
-IECORE_API const std::string &versionString();
+		ObjectPtr *operator[]( size_t row )
+		{
+			return &m_members[ row * m_columns ];
+		}
+
+		const ObjectPtr *operator[]( size_t row ) const
+		{
+			return &m_members[ row * m_columns ];
+		}
+
+	private :
+
+		using MemberContainer = std::vector<ObjectPtr>;
+
+		MemberContainer m_members;
+		size_t m_rows;
+		size_t m_columns;
+
+};
+
+IE_CORE_DECLAREPTR( ObjectMatrix );
 
 } // namespace IECore
 
-#endif // IECORE_VERSION_H
+#endif // IECORE_OBJECTMATRIX_H

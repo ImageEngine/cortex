@@ -36,14 +36,17 @@
 
 #include "IECoreScene/ShaderNetworkAlgo.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/StringAlgo.h"
 #include "IECore/SplineData.h"
+#include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/MessageHandler.h"
 
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
+#include "boost/container/flat_map.hpp"
 #include "boost/regex.hpp"
 
 #include <unordered_map>
@@ -54,11 +57,9 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
-namespace {
-
-BoolDataPtr g_trueData( new BoolData( true ) );
-
-}
+//////////////////////////////////////////////////////////////////////////
+// `addShaders()`
+//////////////////////////////////////////////////////////////////////////
 
 ShaderNetwork::Parameter ShaderNetworkAlgo::addShaders( ShaderNetwork *network, const ShaderNetwork *sourceNetwork, bool connections )
 {
@@ -90,6 +91,10 @@ ShaderNetwork::Parameter ShaderNetworkAlgo::addShaders( ShaderNetwork *network, 
 		sourceNetwork->getOutput().name
 	);
 }
+
+//////////////////////////////////////////////////////////////////////////
+// `removeUnusedShaders()`
+//////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -126,55 +131,199 @@ void ShaderNetworkAlgo::removeUnusedShaders( ShaderNetwork *network )
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Component connection adapters
+//////////////////////////////////////////////////////////////////////////
+
 namespace
 {
 
-const InternedString g_swizzleHandle( "swizzle" );
-const InternedString g_packHandle( "pack" );
+const InternedString g_splitAdapterHandle( "splitAdapter" );
+const InternedString g_splitAdapterComponent( "splitAdapter:component" );
+const InternedString g_splitAdapterInParameter( "splitAdapter:inParameter" );
+const InternedString g_splitAdapterOutParameter( "splitAdapter:outParameter" );
+
+const InternedString g_joinAdapterHandle( "joinAdapter" );
+const InternedString g_joinAdapterInParameters( "joinAdapter:inParameters" );
+const InternedString g_joinAdapterOutParameter( "joinAdapter:outParameter" );
+
+const boost::regex g_componentRegex( "^(.*)\\.([rgbaxyz])$" );
+array<string, 3> g_vectorComponents = { "x", "y", "z" };
+array<string, 4> g_colorComponents = { "r", "g", "b", "a" };
+BoolDataPtr g_trueData( new BoolData( true ) );
+
 const InternedString g_inParameterName( "in" );
 const InternedString g_outParameterName( "out" );
-const InternedString g_packInParameterNames[4] = { "in1", "in2", "in3", "in4" };
-const boost::regex g_componentRegex( "^(.*)\\.([rgbaxyz])$" );
-const boost::regex g_splineElementRegex( "^(.*)\\[(.*)\\]\\.y(.*)$" );
-const boost::regex g_splineAdapterInRegex( "^in([0-9]+)(\\..*)?$" );
-const char *g_vectorComponents[3] = { "x", "y", "z" };
-const char *g_colorComponents[4] = { "r", "g", "b", "a" };
+array<InternedString, 4> g_packInParameterNames = { "in1", "in2", "in3", "in4" };
 
-ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter &parameter, const std::string &suffix )
+struct SplitAdapter
 {
-	int index;
-	auto it = find( begin( g_vectorComponents ), end( g_vectorComponents ), suffix );
-	if( it != end( g_vectorComponents ) )
+	InternedString component;
+	ConstShaderPtr shader;
+	InternedString inParameter;
+	InternedString outParameter;
+};
+
+// One adapter for each output component.
+using ComponentsToSplitAdapters = boost::container::flat_map<InternedString, SplitAdapter>;
+using SplitAdapterMap = std::unordered_map<string, ComponentsToSplitAdapters>;
+
+SplitAdapterMap &splitAdapters()
+{
+	static SplitAdapterMap g_map;
+	return g_map;
+}
+
+const SplitAdapter &findSplitAdapter( const std::string &destinationShaderType, InternedString component )
+{
+	const auto &map = splitAdapters();
+	const string typePrefix = destinationShaderType.substr( 0, destinationShaderType.find_first_of( ':' ) );
+
+	for( const auto &key : { typePrefix, string( "*" ) } )
 	{
-		index = it - begin( g_vectorComponents );
-	}
-	else
-	{
-		it = find( begin( g_colorComponents ), end( g_colorComponents ), suffix );
-		assert( it != end( g_colorComponents ) );
-		index = it - begin( g_colorComponents );
+		auto it = map.find( key );
+		if( it != map.end() )
+		{
+			auto cIt = it->second.find( component );
+			if( cIt != it->second.end() )
+			{
+				return cIt->second;
+			}
+		}
 	}
 
-	return ShaderNetwork::Parameter(
-		parameter.shader,
-		boost::replace_last_copy( parameter.name.string(), "." + suffix, "[" + to_string( index ) + "]" )
+	throw IECore::Exception(
+		"No component split adapter registered"
 	);
 }
 
+struct JoinAdapter
+{
+	ConstShaderPtr shader;
+	std::array<InternedString, 4> inParameters;
+	InternedString outParameter;
+};
 
-const int maxArrayInputAdapterSize = 32;
-const InternedString g_arrayInputNames[maxArrayInputAdapterSize] = {
-	"in0", "in1", "in2", "in3", "in4", "in5", "in6", "in7", "in8", "in9",
-	"in10", "in11", "in12", "in13", "in14", "in15", "in16", "in17", "in18", "in19",
-	"in20", "in21", "in22", "in23", "in24", "in25", "in26", "in27", "in28", "in29",
-	"in30", "in31"
-};
-const InternedString g_arrayOutputNames[maxArrayInputAdapterSize + 1] = {
-	"unused", "out1", "out2", "out3", "out4", "out5", "out6", "out7", "out8", "out9",
-	"out10", "out11", "out12", "out13", "out14", "out15", "out16", "out17", "out18", "out19",
-	"out20", "out21", "out22", "out23", "out24", "out25", "out26", "out27", "out28", "out29",
-	"out30", "out31", "out32"
-};
+using TypesToJoinAdapters = boost::container::flat_map<IECore::TypeId, JoinAdapter>;
+using JoinAdapterMap = std::unordered_map<string, TypesToJoinAdapters>;
+
+JoinAdapterMap &joinAdapters()
+{
+	static JoinAdapterMap g_map;
+	return g_map;
+}
+
+const JoinAdapter &findJoinAdapter( const std::string &destinationShaderType, IECore::TypeId destinationParameterType )
+{
+	const auto &map = joinAdapters();
+	const string typePrefix = destinationShaderType.substr( 0, destinationShaderType.find_first_of( ':' ) );
+
+	for( const auto &key : { typePrefix, string( "*" ) } )
+	{
+		auto it = map.find( key );
+		if( it != map.end() )
+		{
+			auto tIt = it->second.find( destinationParameterType );
+			if( tIt != it->second.end() )
+			{
+				return tIt->second;
+			}
+		}
+	}
+
+	throw IECore::Exception(
+		"No component join adapter registered"
+	);
+}
+
+const bool g_defaultAdapterRegistrations = [] () {
+
+	ShaderPtr splitter = new Shader(
+		"MaterialX/mx_swizzle_color_float", "osl:shader"
+	);
+
+	for( auto c : string( "rgbaxyz" ) )
+	{
+		splitter->parameters()["channels"] = new StringData( { c } );
+		ShaderNetworkAlgo::registerSplitAdapter(
+			"*", string( { c } ),
+			splitter.get(),
+			g_inParameterName,
+			g_outParameterName
+		);
+	}
+
+	ShaderPtr joiner = new Shader( "MaterialX/mx_pack_color", "osl:shader" );
+	for( auto t : { V2iDataTypeId, V3iDataTypeId, V2fDataTypeId, V3fDataTypeId, Color3fDataTypeId, Color4fDataTypeId } )
+	{
+		ShaderNetworkAlgo::registerJoinAdapter(
+			"*", t,
+			joiner.get(),
+			g_packInParameterNames,
+			g_outParameterName
+		);
+	}
+
+	return true;
+} ();
+
+bool isSplitAdapter( const Shader *shader, InternedString &component, InternedString &inParameter, InternedString &outParameter )
+{
+	if( auto *d = shader->blindData()->member<InternedStringData>( g_splitAdapterComponent ) )
+	{
+		auto inP = shader->blindData()->member<InternedStringData>( g_splitAdapterInParameter );
+		auto outP = shader->blindData()->member<InternedStringData>( g_splitAdapterOutParameter );
+		if( inP && outP )
+		{
+			component = d->readable();
+			inParameter = inP->readable();
+			outParameter = outP->readable();
+		}
+		return true;
+	}
+	else if( auto *b = shader->blindData()->member<BoolData>( ShaderNetworkAlgo::componentConnectionAdapterLabel() ) )
+	{
+		// Legacy format.
+		if( b->readable() && shader->getName() == "MaterialX/mx_swizzle_color_float" )
+		{
+			component = shader->parametersData()->member<StringData>( "channels" )->readable();
+			inParameter = g_inParameterName;
+			outParameter = g_outParameterName;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool isJoinAdapter( const Shader *shader, std::array<InternedString, 4> &inParameters, InternedString &outParameter )
+{
+	if( auto d = shader->blindData()->member<InternedStringVectorData>( g_joinAdapterInParameters ) )
+	{
+		auto o = shader->blindData()->member<InternedStringData>( g_joinAdapterOutParameter );
+		if( o )
+		{
+			for( size_t i = 0; i < inParameters.size(); ++i )
+			{
+				inParameters[i] = i < d->readable().size() ? d->readable()[i] : InternedString();
+			}
+			outParameter = o->readable();
+			return true;
+		}
+	}
+	else if( auto *b = shader->blindData()->member<BoolData>( ShaderNetworkAlgo::componentConnectionAdapterLabel() ) )
+	{
+		// Legacy format.
+		if( b->readable() && shader->getName() == "MaterialX/mx_pack_color" )
+		{
+			inParameters = g_packInParameterNames;
+			outParameter = g_outParameterName;
+			return true;
+		}
+	}
+
+	return false;
+}
 
 } // namespace
 
@@ -202,21 +351,24 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 			boost::cmatch match;
 			if( boost::regex_match( connection.source.name.c_str(), match, g_componentRegex ) )
 			{
-				// Insert a conversion shader to handle connection to component
+				// Insert a conversion shader to handle connection from component.
 				auto inserted = outputConversions.insert( { connection.source, ShaderNetwork::Parameter() } );
 				if( inserted.second )
 				{
-					ShaderPtr swizzle = new Shader( "MaterialX/mx_swizzle_color_float", "osl:shader" );
+					InternedString component = match[2].str();
+					const SplitAdapter &adapter = findSplitAdapter( sourceShader->getType(), component );
 
-					swizzle->blindData()->writable()[ componentConnectionAdapterLabel() ] = g_trueData;
+					ShaderPtr adapterShader = adapter.shader->copy();
+					adapterShader->blindData()->writable()[g_splitAdapterComponent] = new InternedStringData( component );
+					adapterShader->blindData()->writable()[g_splitAdapterInParameter] = new InternedStringData( adapter.inParameter );
+					adapterShader->blindData()->writable()[g_splitAdapterOutParameter] = new InternedStringData( adapter.outParameter );
 
-					swizzle->parameters()["channels"] = new StringData( match[2] );
-					const InternedString swizzleHandle = network->addShader( g_swizzleHandle, std::move( swizzle ) );
+					const InternedString adapterHandle = network->addShader( g_splitAdapterHandle, std::move( adapterShader ) );
 					network->addConnection( ShaderNetwork::Connection(
 						ShaderNetwork::Parameter{ connection.source.shader, InternedString( match[1] ) },
-						ShaderNetwork::Parameter{ swizzleHandle, g_inParameterName }
+						ShaderNetwork::Parameter{ adapterHandle, adapter.inParameter }
 					) );
-					inserted.first->second = { swizzleHandle, g_outParameterName };
+					inserted.first->second = { adapterHandle, adapter.outParameter };
 				}
 				network->removeConnection( connection );
 				network->addConnection( { inserted.first->second, connection.destination } );
@@ -246,10 +398,8 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 			if( boost::regex_match( connection.destination.name.c_str(), match, g_componentRegex ) )
 			{
 				// Connection into a color/vector component
-
-				// Insert a conversion shader to handle connection from component
-
 				const InternedString parameterName = match[1].str();
+
 				auto inserted = convertedParameters.insert( parameterName );
 				if( !inserted.second )
 				{
@@ -259,40 +409,66 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 					continue;
 				}
 
-				// All components won't necessarily have connections, so get
-				// the values to fall back on for those that don't.
-				Color4f value( 0 );
-				const Data *d = shader.second->parametersData()->member<Data>( parameterName );
-				if( const V3fData *vd = runTimeCast<const V3fData>( d ) )
+				// Insert a conversion shader to handle connection from component
+
+				const Data *parameterValue = shader.second->parametersData()->member<Data>( parameterName );
+				if( !parameterValue )
 				{
-					value = Color4f( vd->readable()[0], vd->readable()[1], vd->readable()[2], 0.0f );
-				}
-				else if( const Color3fData *cd = runTimeCast<const Color3fData>( d ) )
-				{
-					value = Color4f( cd->readable()[0], cd->readable()[1], cd->readable()[2], 0.0f );
-				}
-				else if( auto c4d = runTimeCast<const Color4fData>( d ) )
-				{
-					value = c4d->readable();
+					throw IECore::Exception(
+						boost::str( boost::format(
+							"No value found for parameter `%1%.%2%`"
+						) % shader.first % parameterName )
+					);
 				}
 
-				// Make shader and set fallback values
+				// Make adapter shader.
 
-				ShaderPtr packShader = new Shader( "MaterialX/mx_pack_color", "osl:shader" );
-				packShader->blindData()->writable()[ componentConnectionAdapterLabel() ] = g_trueData;
+				const JoinAdapter &adapter = findJoinAdapter( shader.second->getType(), parameterValue->typeId() );
+				ShaderPtr adapterShader = adapter.shader->copy();
+				adapterShader->blindData()->writable()[g_joinAdapterInParameters] = new InternedStringVectorData(
+					vector<InternedString>( adapter.inParameters.begin(), adapter.inParameters.end() )
+				);
+				adapterShader->blindData()->writable()[g_joinAdapterOutParameter] = new InternedStringData( adapter.outParameter );
+
+				// Set fallback values for adapter input parameters (since all may not receive connections).
+
+				dispatch(
+					parameterValue,
+					[&] ( auto *d ) {
+						using DataType = typename std::remove_const_t<std::remove_pointer_t<decltype( d )>>;
+						if constexpr(
+							TypeTraits::IsVecTypedData<DataType>::value ||
+							std::is_same_v<DataType, Color3fData> ||
+							std::is_same_v<DataType, Color4fData>
+						)
+						{
+							using ValueType = typename DataType::ValueType;
+							using BaseType = typename ValueType::BaseType;
+							for( size_t i = 0; i < ValueType::dimensions(); ++i )
+							{
+								if( !adapter.inParameters[i].string().empty() )
+								{
+									adapterShader->parameters()[adapter.inParameters[i]] = new TypedData<BaseType>(
+										d->readable()[i]
+									);
+								}
+							}
+						}
+					}
+				);
+
+				// Add shader to network and make connections.
+
+				const InternedString adapterHandle = network->addShader( g_joinAdapterHandle, std::move( adapterShader ) );
+				network->addConnection( { { adapterHandle, adapter.outParameter }, { shader.first, parameterName } } );
+
 				for( int i = 0; i < 4; ++i )
 				{
-					packShader->parameters()[g_packInParameterNames[i]] = new FloatData( value[i] );
-				}
+					if( adapter.inParameters[i].string().empty() )
+					{
+						continue;
+					}
 
-				const InternedString packHandle = network->addShader( g_packHandle, std::move( packShader ) );
-
-				// Make connections
-
-				network->addConnection( { { packHandle, g_outParameterName }, { shader.first, parameterName } } );
-
-				for( int i = 0; i < 4; ++i )
-				{
 					ShaderNetwork::Parameter source = network->input( { shader.first, parameterName.string() + "." + g_colorComponents[i] } );
 					if( !source && i < 3 )
 					{
@@ -300,7 +476,7 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 					}
 					if( source )
 					{
-						network->addConnection( { source, { packHandle, g_packInParameterNames[i] } } );
+						network->addConnection( { source, { adapterHandle, adapter.inParameters[i] } } );
 					}
 				}
 
@@ -314,111 +490,75 @@ void ShaderNetworkAlgo::removeComponentConnectionAdapters( ShaderNetwork *networ
 {
 	std::vector< IECore::InternedString > toRemove;
 
+	InternedString component;
+	InternedString inParameter;
+	std::array<InternedString, 4> inParameters;
+	InternedString outParameter;
+
 	for( const auto &s : network->shaders() )
 	{
-		ConstBoolDataPtr labelValue = s.second->blindData()->member<BoolData>( componentConnectionAdapterLabel() );
-		if( !labelValue || !labelValue->readable() )
+		if( isSplitAdapter( s.second.get(), component, inParameter, outParameter ) )
 		{
-			continue;
-		}
-
-		bool isPack = s.second->getName() == "MaterialX/mx_pack_color";
-		bool isSwizzle = s.second->getName() == "MaterialX/mx_swizzle_color_float";
-
-		if( !( s.second->getType() == "osl:shader" && ( isSwizzle || isPack ) ) )
-		{
-			throw IECore::Exception( boost::str(
-				boost::format( "removeComponentConnectionAdapters : adapter is not of supported type and name: '%s' %s : %s" ) %
-				s.first % s.second->getType() % s.second->getName()
-			) );
-		}
-
-		toRemove.push_back( s.first );
-
-		ShaderNetwork::ConnectionRange outputConnections = network->outputConnections( s.first );
-
-		for( ShaderNetwork::ConnectionIterator it = outputConnections.begin(); it != outputConnections.end(); )
-		{
-			// Copy and increment now so we still have a valid iterator
-			// if we remove the connection.
-			const ShaderNetwork::Connection connection = *it++;
-			network->removeConnection( connection );
-
-			if( isPack )
+			ShaderNetwork::Parameter source = network->input( ShaderNetwork::Parameter( s.first, inParameter ) );
+			if( !source )
 			{
-				const Shader *targetShader = network->getShader( connection.destination.shader );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"removeComponentConnectionAdapters : \"%1%.%2%\" has no input"
+					) % s.first.string() % inParameter.string()
+				) );
+			}
+			source.name = source.name.string() + "." + component.string();
 
-				ShaderNetwork::ConnectionRange inputConnections = network->inputConnections( s.first );
-				for( ShaderNetwork::ConnectionIterator inputIt = inputConnections.begin(); inputIt != inputConnections.end(); inputIt++ )
+			const ShaderNetwork::ConnectionRange outputConnections = network->outputConnections( s.first );
+			for( auto connectionIt = outputConnections.begin(); connectionIt != outputConnections.end(); )
+			{
+				// Copy and increment now so we still have a valid iterator when we
+				// remove the connection.
+				const ShaderNetwork::Connection connection = *connectionIt++;
+				network->removeConnection( connection );
+				network->addConnection( { source, connection.destination } );
+			}
+
+			toRemove.push_back( s.first );
+		}
+		else if( isJoinAdapter( s.second.get(), inParameters, outParameter ) )
+		{
+			std::array<ShaderNetwork::Parameter, 4> componentInputs;
+			for( size_t i = 0; i < inParameters.size(); ++i )
+			{
+				if( !inParameters[i].string().empty() )
 				{
-					const IECore::InternedString &inputName = inputIt->destination.name;
-					int inputIndex = -1;
-					for( int i = 0; i < 4; i++ )
-					{
-						if( inputName == g_packInParameterNames[i] )
-						{
-							inputIndex = i;
-						}
-					}
-
-					if( inputIndex == -1 )
-					{
-						throw IECore::Exception( boost::str(
-							boost::format(
-								"removeComponentConnectionAdapters : Unrecognized input for mx_pack_color \"%1%\""
-							) % inputName
-						) );
-					}
-
-					ShaderNetwork::Parameter componentDest;
-					if(
-						targetShader->parametersData()->member<Color4fData>( connection.destination.name ) ||
-						targetShader->parametersData()->member<Color3fData>( connection.destination.name )
-					)
-					{
-						componentDest = { connection.destination.shader, IECore::InternedString( connection.destination.name.string() + "." + g_colorComponents[inputIndex] ) };
-					}
-					else if( targetShader->parametersData()->member<V3fData>( connection.destination.name ) )
-					{
-						componentDest = { connection.destination.shader, IECore::InternedString( connection.destination.name.string() + "." + g_vectorComponents[inputIndex] ) };
-					}
-					else
-					{
-						throw IECore::Exception( boost::str(
-							boost::format(
-								"removeComponentConnectionAdapters : Unrecognized type for target parameter \"%1%.%2%\""
-							) % connection.destination.shader.string() % connection.destination.name.string()
-						) );
-					}
-
-					network->addConnection( { inputIt->source, componentDest } );
+					componentInputs[i] = network->input( { s.first, inParameters[i] } );
 				}
 			}
-			else
+
+			const ShaderNetwork::ConnectionRange outputConnections = network->outputConnections( s.first );
+			for( auto connectionIt = outputConnections.begin(); connectionIt != outputConnections.end(); )
 			{
-				const StringData *channelsData = s.second->parametersData()->member<StringData>( "channels" );
-				if( !channelsData )
-				{
-					throw IECore::Exception( boost::str(
-						boost::format(
-							"removeComponentConnectionAdapters : mx_swizzle_color_float \"%1%\"should have \"channels\" parameter"
-						) % s.first.string()
-					) );
-				}
+				// Copy and increment now so we still have a valid iterator when we
+				// remove the connection.
+				const ShaderNetwork::Connection connection = *connectionIt++;
+				network->removeConnection( connection );
 
-				ShaderNetwork::Parameter componentSource = network->input( ShaderNetwork::Parameter( s.first, "in" ) );
-				if( !componentSource )
-				{
-					throw IECore::Exception( boost::str(
-						boost::format(
-							"removeComponentConnectionAdapters : mx_swizzle_color_float \"%1%\" must have an input"
-						) % s.first.string()
-					) );
-				}
-				componentSource.name = componentSource.name.string() + "." + channelsData->readable();
+				const Data *destinationValue = network->getShader( connection.destination.shader )->parametersData()->member<Data>( connection.destination.name );
+				const bool isColor = runTimeCast<const Color3fData>( destinationValue ) || runTimeCast<const Color4fData>( destinationValue );
 
-				network->addConnection( { componentSource, connection.destination } );
+				for( size_t i = 0; i < componentInputs.size(); ++i )
+				{
+					if( !componentInputs[i] )
+					{
+						continue;
+					}
+
+					InternedString component = isColor ? g_colorComponents.at( i ) : g_vectorComponents.at( i );
+					network->addConnection(
+						{ componentInputs[i], { connection.destination.shader, connection.destination.name.string() + "." + component.string() } }
+					);
+				}
 			}
+
+			toRemove.push_back( s.first );
 		}
 	}
 
@@ -428,12 +568,61 @@ void ShaderNetworkAlgo::removeComponentConnectionAdapters( ShaderNetwork *networ
 	}
 }
 
+void ShaderNetworkAlgo::registerSplitAdapter( const std::string &destinationShaderType, IECore::InternedString component, const IECoreScene::Shader *adapter, IECore::InternedString inParameter, IECore::InternedString outParameter )
+{
+	splitAdapters()[destinationShaderType][component] = { component, adapter->copy(), inParameter, outParameter };
+}
+
+void ShaderNetworkAlgo::deregisterSplitAdapter( const std::string &destinationShaderType, IECore::InternedString component )
+{
+	splitAdapters()[destinationShaderType].erase( component );
+}
+
+void ShaderNetworkAlgo::registerJoinAdapter( const std::string &destinationShaderType, IECore::TypeId destinationParameterType, const IECoreScene::Shader *adapter, const std::array<IECore::InternedString, 4> &inParameters, IECore::InternedString outParameter )
+{
+	joinAdapters()[destinationShaderType][destinationParameterType] = { adapter->copy(), inParameters, outParameter };
+}
+
+void ShaderNetworkAlgo::deregisterJoinAdapter( const std::string &destinationShaderType, IECore::TypeId destinationParameterType )
+{
+	joinAdapters()[destinationShaderType].erase( destinationParameterType );
+}
+
 const InternedString &ShaderNetworkAlgo::componentConnectionAdapterLabel()
 {
 	static InternedString ret( "cortex_autoAdapter" );
 	return ret;
 }
 
+//////////////////////////////////////////////////////////////////////////
+// OSL Utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter &parameter, const std::string &suffix )
+{
+	int index;
+	auto it = find( begin( g_vectorComponents ), end( g_vectorComponents ), suffix );
+	if( it != end( g_vectorComponents ) )
+	{
+		index = it - begin( g_vectorComponents );
+	}
+	else
+	{
+		auto cIt = find( begin( g_colorComponents ), end( g_colorComponents ), suffix );
+		assert( cIt != end( g_colorComponents ) );
+		index = cIt - begin( g_colorComponents );
+	}
+
+	return ShaderNetwork::Parameter(
+		parameter.shader,
+		boost::replace_last_copy( parameter.name.string(), "." + suffix, "[" + to_string( index ) + "]" )
+	);
+}
+
+} // namespace
 
 void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 {
@@ -489,6 +678,21 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network, 
 		}
 	}
 }
+
+void ShaderNetworkAlgo::convertToOSLConventions( ShaderNetwork *network, int oslVersion )
+{
+	expandSplines( network, "osl:" );
+
+	// \todo - it would be a bit more efficient to integrate this, and only traverse the network once,
+	// but I don't think it's worth duplicated the code - fix this up once this call is standard and we
+	// deprecate and remove convertOSLComponentConnections
+	convertOSLComponentConnections( network, oslVersion);
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// `convertObjectVector()`
+//////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -573,6 +777,10 @@ ShaderNetworkPtr ShaderNetworkAlgo::convertObjectVector( const ObjectVector *net
 
 	return result;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// Spline handling
+//////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -725,6 +933,23 @@ const std::string g_oslShader( "osl:shader" );
 const std::string g_colorToArrayAdapter( "Utility/__ColorToArray" );
 const std::string g_floatToArrayAdapter( "Utility/__FloatToArray" );
 
+const int maxArrayInputAdapterSize = 32;
+const InternedString g_arrayInputNames[maxArrayInputAdapterSize] = {
+	"in0", "in1", "in2", "in3", "in4", "in5", "in6", "in7", "in8", "in9",
+	"in10", "in11", "in12", "in13", "in14", "in15", "in16", "in17", "in18", "in19",
+	"in20", "in21", "in22", "in23", "in24", "in25", "in26", "in27", "in28", "in29",
+	"in30", "in31"
+};
+const InternedString g_arrayOutputNames[maxArrayInputAdapterSize + 1] = {
+	"unused", "out1", "out2", "out3", "out4", "out5", "out6", "out7", "out8", "out9",
+	"out10", "out11", "out12", "out13", "out14", "out15", "out16", "out17", "out18", "out19",
+	"out20", "out21", "out22", "out23", "out24", "out25", "out26", "out27", "out28", "out29",
+	"out30", "out31", "out32"
+};
+
+const boost::regex g_splineElementRegex( "^(.*)\\[(.*)\\]\\.y(.*)$" );
+const boost::regex g_splineAdapterInRegex( "^in([0-9]+)(\\..*)?$" );
+
 template< typename TypedSpline >
 std::pair< InternedString, int > createSplineInputAdapter(
 	ShaderNetwork *network, const TypedData<TypedSpline> *splineData,
@@ -791,17 +1016,6 @@ void ensureParametersCopy(
 }
 
 } // namespace
-
-void ShaderNetworkAlgo::convertToOSLConventions( ShaderNetwork *network, int oslVersion )
-{
-	expandSplines( network, "osl:" );
-
-	// \todo - it would be a bit more efficient to integrate this, and only traverse the network once,
-	// but I don't think it's worth duplicated the code - fix this up once this call is standard and we
-	// deprecate and remove convertOSLComponentConnections
-	convertOSLComponentConnections( network, oslVersion);
-
-}
 
 void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string targetPrefix )
 {
@@ -968,7 +1182,7 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 			continue;
 		}
 
-		// currentSplineArrayAdapters holds array adaptors that we need to use to hook up inputs to
+		// currentSplineArrayAdapters holds array adapters that we need to use to hook up inputs to
 		// spline plugs. It is indexed by the name of a spline parameter for the shader, and holds
 		// the name of the adapter shader, and the offset we need to use when accessing the knot
 		// vector.

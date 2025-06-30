@@ -53,6 +53,9 @@
 #include "boost/bind/bind.hpp"
 
 #include <thread>
+#include <map>
+#include <utility>
+#include <optional>
 
 #include <fcntl.h>
 #ifndef _MSC_VER
@@ -69,6 +72,14 @@ IE_CORE_DEFINERUNTIMETYPED( DisplayDriverServer );
 
 namespace
 {
+
+struct MergeDriverInfo
+{
+	DisplayDriverPtr mergeDriver = nullptr;
+	int mergeCount = 0;
+};
+
+using MergeMap = std::map<int, MergeDriverInfo>;
 
 /* Set the FD_CLOEXEC flag for the given socket descriptor, so that it will not exist on child processes.*/
 static void fixSocketFlags( int socketDesc )
@@ -95,7 +106,7 @@ class DisplayDriverServer::Session : public RefCounted
 {
 	public:
 
-		Session( boost::asio::io_service& io_service );
+		Session( boost::asio::io_service& io_service, MergeMap& mergeMap );
 		~Session() override;
 
 		boost::asio::ip::tcp::socket& socket();
@@ -114,6 +125,8 @@ class DisplayDriverServer::Session : public RefCounted
 		DisplayDriverPtr m_displayDriver;
 		DisplayDriverServerHeader m_header;
 		CharVectorDataPtr m_buffer;
+		MergeMap& m_mergeMap;
+		std::optional<int> m_mergeId;
 };
 
 class DisplayDriverServer::PrivateData : public RefCounted
@@ -125,6 +138,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 		boost::asio::io_service m_service;
 		boost::asio::ip::tcp::acceptor m_acceptor;
 		std::thread m_thread;
+		MergeMap m_mergeMap;
 
 		PrivateData( DisplayDriverServer::Port portNumber ) :
 			m_service(),
@@ -196,7 +210,7 @@ DisplayDriverServer::DisplayDriverServer( DisplayDriverServer::Port portNumber )
 {
 	m_data = new DisplayDriverServer::PrivateData( portNumber );
 
-	DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_data->m_service ) );
+	DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_data->m_service, m_data->m_mergeMap ) );
 	m_data->m_acceptor.async_accept( newSession->socket(),
 			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
 			boost::asio::placeholders::error));
@@ -280,7 +294,7 @@ void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session,
 {
 	if (!error)
 	{
-		DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_data->m_service ) );
+		DisplayDriverServer::SessionPtr newSession( new DisplayDriverServer::Session( m_data->m_service, m_data->m_mergeMap ) );
 		m_data->m_acceptor.async_accept( newSession->socket(),
 				boost::bind( &DisplayDriverServer::handleAccept,  this, newSession,
 				boost::asio::placeholders::error));
@@ -292,8 +306,8 @@ void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session,
  * DisplayDriverServer::Session functions
  */
 
-DisplayDriverServer::Session::Session( boost::asio::io_service& io_service ) :
-	m_socket( io_service ), m_displayDriver(nullptr), m_buffer( new CharVectorData( ) )
+DisplayDriverServer::Session::Session( boost::asio::io_service& io_service, MergeMap& mergeMap ) :
+	m_socket( io_service ), m_displayDriver(nullptr), m_buffer( new CharVectorData( ) ), m_mergeMap( mergeMap )
 {
 }
 
@@ -363,7 +377,19 @@ void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_
 		{
 			try
 			{
-				m_displayDriver->imageClose();
+				if ( !m_mergeId.has_value() )
+				{
+					m_displayDriver->imageClose();
+				}
+				else
+				{
+					auto &m = m_mergeMap.at(m_mergeId.value()); // Error out if not found
+					if ( --m.mergeCount <= 0 )
+					{
+						m_mergeMap.erase(m_mergeId.value());
+						m_displayDriver->imageClose();
+					}
+				}
 			}
 			catch ( std::exception &e )
 			{
@@ -424,8 +450,31 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 		const StringData *displayType = parameters->member<StringData>( "remoteDisplayType", true /* throw if missing */ );
 
 		// create a displayDriver using the factory function.
-		m_displayDriver = DisplayDriver::create( displayType->readable(), displayWindow->readable(), dataWindow->readable(), channelNames->readable(), parameters );
+		if ( !parameters->member<IntData>( "displayDriverServer:mergeId", false ) )
+		{
+			m_displayDriver = DisplayDriver::create( displayType->readable(), displayWindow->readable(), dataWindow->readable(), channelNames->readable(), parameters );
+		}
+		else
+		{
+			m_mergeId = parameters->member<IntData>( "displayDriverServer:mergeId", false /* throw if missing */ )->readable();
 
+			// Check if merge ID in map, if not then create display driver and session count pair with merge ID.
+			auto &m = m_mergeMap[m_mergeId.value()];
+			if ( !m.mergeDriver )
+			{
+				const IntData *sessionClientsData = parameters->member<IntData>( "displayDriverServer:mergeClients", true /* throw if missing */ );
+				m.mergeDriver= DisplayDriver::create(
+						displayType->readable(),
+						displayWindow->readable(),
+						displayWindow->readable(), // For merge we want dataWindow = displayWindow
+						channelNames->readable(),
+						parameters
+						);
+				m.mergeCount = sessionClientsData->readable();
+			}
+			// Merge ID is now in map, so load the display driver.
+			m_displayDriver = m.mergeDriver;
+		}
 		scanLineOrder = m_displayDriver->scanLineOrderOnly();
 		acceptsRepeatedData = m_displayDriver->acceptsRepeatedData();
 	}
