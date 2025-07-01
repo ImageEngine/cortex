@@ -339,27 +339,6 @@ o.Add(
 	"",
 )
 
-# Nuke options
-
-o.Add(
-	"NUKE_ROOT",
-	"The directory in which Nuke is installed.",
-	""
-)
-
-o.Add(
-	"NUKE_LICENSE_FILE",
-	"The path to the FlexLM license file to use for Nuke. This is necessary to run the tests.",
-	"",
-)
-
-o.Add(
-	"USG_SHIMLIB_PATH",
-	"The path to the FnUsdShim to use for Nuke. This may be necessary to run the tests.",
-	"",
-)
-
-
 # OpenGL options
 
 try :
@@ -555,14 +534,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_NUKELIB_NAME",
-	"The name under which to install the nuke libraries. This "
-	"can be used to build and install the library for multiple "
-	"Nuke versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_ALEMBICLIB_NAME",
 	"The name under which to install the Alembic libraries. This "
 	"can be used to build and install the library for multiple "
@@ -585,12 +556,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_NUKEPYTHON_DIR",
-	"The directory in which to install the nuke python module.",
-	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
-)
-
-o.Add(
 	"INSTALL_GLSL_HEADER_DIR",
 	"The directory in which to install GLSL headers.",
 	"$INSTALL_PREFIX/glsl",
@@ -600,18 +565,6 @@ o.Add(
 	"INSTALL_GLSL_SHADER_DIR",
 	"The directory in which to install GLSL shaders.",
 	"$INSTALL_PREFIX/glsl",
-)
-
-o.Add(
-	"INSTALL_NUKEICON_DIR",
-	"The directory under which to install nuke icons.",
-	"$INSTALL_PREFIX/nuke/icons",
-)
-
-o.Add(
-	"INSTALL_NUKEPLUGIN_NAME",
-	"The name under which to install nuke plugins.",
-	"$INSTALL_PREFIX/nuke/plugins/$IECORE_NAME",
 )
 
 o.Add(
@@ -701,14 +654,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_CORENUKE_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreNuke library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
-o.Add(
 	BoolVariable( "INSTALL_CREATE_SYMLINKS", "Whether to create symlinks post install", True )
 )
 
@@ -745,14 +690,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreGL/All.py"
-)
-
-o.Add(
-	"TEST_NUKE_SCRIPT",
-	"The python script to run for the nuke tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreNuke/All.py"
 )
 
 o.Add(
@@ -2125,242 +2062,6 @@ if env["WITH_GL"] and doConfigure :
 		glTestEnv.Alias( "testGL", glTest )
 
 ###########################################################################################
-# Build and install the coreNuke library, plugin, python module and headers
-###########################################################################################
-
-nukeEnvSets = {
-	"IECORE_NAME" : "IECoreNuke"
-}
-
-nukeEnv = env.Clone( **nukeEnvSets )
-
-nukeEnvAppends = {
-
-	"CPPFLAGS" : [
-		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-
-	"LINKFLAGS" : [
-		"-Wl,-rpath-link=$NUKE_ROOT",
-	],
-
-	"LIBPATH" : [
-		"$NUKE_ROOT",
-	],
-
-	"LIBS" : [
-		"GLEW$GLEW_LIB_SUFFIX",
-	],
-
-	"CXXFLAGS" : [
-		systemIncludeArgument, "$NUKE_ROOT/include",
-		systemIncludeArgument, "$GLEW_INCLUDE_PATH"
-	]
-
-}
-
-if env["PLATFORM"] == "darwin" :
-	# FN_OS_MAC is required to work around isnan errors in DDImage/Matrix4.h
-	nukeEnvAppends["CPPFLAGS"].append( "-DFN_OS_MAC" )
-
-nukeEnv.Append( **nukeEnvAppends )
-nukeEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
-if env["PLATFORM"] == "darwin" :
-	nukeEnv.Append( FRAMEWORKS = [ "OpenGL" ] )
-
-nukePythonModuleEnv = pythonModuleEnv.Clone( **nukeEnvSets )
-nukePythonModuleEnv.Append( **nukeEnvAppends )
-
-nukePluginEnv = nukeEnv.Clone( IECORE_NAME="ieCore" )
-
-nukeTestEnv = testEnv.Clone()
-nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
-nukeTestEnv["ENV"]["foundry_LICENSE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
-nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
-nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
-# prepend OIIO LIB PATH to library path to support custom OIIO with specific dependencies
-nukeTestEnv["ENV"][libraryPathEnvVar] = "{}:{}".format( nukeTestEnv.subst( "$OIIO_LIB_PATH" ), nukeTestEnv["ENV"][libraryPathEnvVar] )
-nukeTestEnv["ENV"]["USG_SHIMLIB_PATH"] = nukeTestEnv["USG_SHIMLIB_PATH"]
-
-if doConfigure :
-
-	c = configureSharedLibrary( nukeEnv )
-
-	if not c.CheckHeader( "DDImage/Vector3.h", "\"\"", "CXX" ) :
-
-		sys.stderr.write( "WARNING : no nuke devkit found, not building IECoreNuke - check NUKE_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		# figure out the nuke version from the headers
-		nukeMajorVersion = None
-		nukeMinorVersion = None
-		nukeVersionHeader = env.FindFile( "DDImage/ddImageVersionNumbers.h", nukeEnv["CXXFLAGS"] )
-		if nukeVersionHeader :
-
-			for line in open( str( nukeVersionHeader ) ) :
-				w = line.split()
-				if len( w ) > 1 :
-					if w[0]=="#define" and w[1]=="kDDImageVersionMajorNum" :
-						nukeMajorVersion = int( w[2] )
-					elif w[0]=="#define" and w[1]=="kDDImageVersionMinorNum" :
-						nukeMinorVersion = int( w[2] )
-
-		else :
-
-			nukeMajorVersion = 4
-			nukeMinorVersion = 8
-
-		if nukeMajorVersion is None or nukeMinorVersion is None :
-
-			sys.stderr.write( "ERROR : unable to determine nuke version - not building IECoreNuke.\n" )
-
-		else :
-
-			nukeEnv["NUKE_MAJOR_VERSION"] = nukeMajorVersion
-			nukeEnv["NUKE_MINOR_VERSION"] = nukeMinorVersion
-
-			nukeTestEnv["NUKE_MAJOR_VERSION"] = nukeMajorVersion
-			nukeTestEnv["NUKE_MINOR_VERSION"] = nukeMinorVersion
-
-			if nukeMajorVersion >=5 and nukeMinorVersion >=0 :
-				nukeLibName = "DDImage"
-			else :
-				nukeLibName = "DDImage%d.%d" % ( nukeMajorVersion, nukeMinorVersion )
-
-			if not c.CheckLibWithHeader( nukeLibName, "DDImage/Vector3.h", "CXX" ) :
-
-				sys.stderr.write( "WARNING : no nuke libraries found, not building IECoreNuke - check NUKE_ROOT.\n" )
-				c.Finish()
-
-			else :
-
-				c.Finish()
-
-				# we can't add this earlier as then it's built during the configure stage, and that's no good
-				nukeEnv.Append( LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-					os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				]	)
-
-				nukeEnv.Append( LIBS = [ nukeLibName, "boost_python" + boostPythonLibSuffix ] )
-
-				nukeEnv.Append(
-					CPPFLAGS = [
-						"-DIECORENUKE_NUKE_MAJOR_VERSION=$NUKE_MAJOR_VERSION",
-						"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
-						"-DIECoreNuke_EXPORTS",
-					]
-				)
-
-				nukePythonModuleEnv.Append( LIBS = [
-					os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-				] )
-
-				nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
-				nukeSources = sorted( glob.glob( "src/IECoreNuke/*.cpp" ) )
-				nukePythonSources = sorted( glob.glob( "src/IECoreNuke/bindings/*.cpp" ) )
-				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
-				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
-				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay", "ieLiveScene", "sccWriter" ]
-
-				# nuke library
-				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
-				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
-				nukeEnv.Alias( "install", nukeLibraryInstall )
-				nukeEnv.Alias( "installNuke", nukeLibraryInstall )
-				nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
-
-				# nuke headers
-
-				nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
-				nukeEnv.Alias( "installNuke", nukeHeaderInstall )
-				nukeEnv.Alias( "install", nukeHeaderInstall )
-
-				# nuke python module
-
-				nukePythonModule = nukePythonModuleEnv.SharedLibrary( "python/IECoreNuke/_IECoreNuke", nukePythonSources )
-				nukePythonModuleInstall = nukePythonModuleEnv.Install( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", nukePythonScripts + nukePythonModule )
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukePythonModuleEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonModuleEnv, nukePythonModuleEnv["INSTALL_NUKEPYTHON_DIR"] ) )
-				nukePythonModuleEnv.Alias( "install", nukePythonModuleInstall )
-				nukePythonModuleEnv.Alias( "installNuke", nukePythonModuleInstall )
-				nukePythonModuleEnv.Depends( nukePythonModule, corePythonModule )
-
-				if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
-					# this is the only way we could find to get a post action to run for an alias
-					nukeEnv.Alias( "install", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" )
-					nukeEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" )
-
-				# nuke plugin
-
-				nukePluginEnv.Append(
-					LIBS = [
-						os.path.basename( coreEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
-						os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
-					]
-				)
-				nukePluginTarget = "plugins/nuke/" + os.path.basename( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) )
-				nukePlugin = nukePluginEnv.SharedLibrary( nukePluginTarget, nukePluginSources, SHLIBPREFIX="" )
-				nukePluginInstall = nukePluginEnv.Install( os.path.dirname( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukePlugin )
-
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukePluginEnv.AddPostAction( nukePluginInstall, lambda target, source, env : makeSymLinks( nukePluginEnv, nukePluginEnv["INSTALL_NUKEPLUGIN_NAME"] ) )
-				nukePluginEnv.Alias( "install", nukePluginInstall )
-				nukePluginEnv.Alias( "installNuke", nukePluginInstall )
-
-				Default( [ nukeLibrary, nukePythonModule, nukePlugin ] )
-
-				# nuke menu
-
-				nukeMenuInstall = nukePluginEnv.Install( os.path.dirname( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), "src/IECoreNuke/plugin/menu.py" )
-				nukePluginEnv.Alias( "install", nukeMenuInstall )
-
-				# stubs for each of the nodes within the plugin
-
-				nukeStubs = []
-				for nodeName in nukeNodeNames :
-
-					nukeStubEnv = nukePluginEnv.Clone( IECORE_NAME=nodeName )
-					# In order to have our custom file format (scc) displayed in the file_type knob of the WriteGeo node, we need to install
-					# a dummy library with "[fileExtension]Writer"
-					if nodeName == "sccWriter":
-						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME$SHLIBSUFFIX" ) )
-					else:
-						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"
-					nukeStub = nukePluginEnv.Command( nukeStubName, nukePlugin, "echo 'load ieCore' > $TARGET" )
-					nukeStubInstall = nukeStubEnv.Install( os.path.dirname( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukeStub )
-					nukeStubEnv.Alias( "install", nukeStubInstall )
-					nukeStubEnv.Alias( "installNuke", nukeStubInstall )
-					nukeStubs.append( nukeStub )
-					Default( [ nukeStub ] )
-
-				# nuke icons
-				nukeIcons = glob.glob( "icons/IECoreNuke/*.png" )
-				nukeIconInstall = nukeEnv.Install( "$INSTALL_NUKEICON_DIR", source=nukeIcons )
-				nukeEnv.Alias( "install", nukeIconInstall )
-				nukeEnv.Alias( "installNuke", nukeIconInstall )
-
-				# nuke tests
-
-				nukeTest = nukeTestEnv.Command( "test/IECoreNuke/resultsPython.txt", nukeLibrary, "$NUKE_ROOT/Nuke${NUKE_MAJOR_VERSION}.${NUKE_MINOR_VERSION} -t $TEST_NUKE_SCRIPT" )
-				NoCache( nukeTest )
-				nukeTestEnv.Depends( nukeTest, glob.glob( "test/IECoreNuke/*.py" ) )
-				nukeTestEnv.Depends( nukeTest, nukePythonModule )
-				nukeTestEnv.Depends( nukeTest, nukePlugin )
-				nukeTestEnv.Depends( nukeTest, nukeStubs )
-				nukeTestEnv.Alias( "testNuke", nukeTest )
-
-###########################################################################################
 # Build, install and test the IECoreUSD library and bindings
 ###########################################################################################
 
@@ -2694,7 +2395,7 @@ if doConfigure :
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN $SOURCE")
 		docEnv.NoCache( docs )
 
-		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke" ) :
+		for modulePath in ( "python/IECore", "python/IECoreGL" ) :
 
 			module = os.path.basename( modulePath )
 			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )
