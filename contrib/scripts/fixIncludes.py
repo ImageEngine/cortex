@@ -87,7 +87,6 @@ includeOrder = [
 	"GafferBindings",
 	"GafferTest",
 	"Gaffer",
-	"IECoreNuke",
 	"IECoreArnold",
 	"IECoreGL",
 	"IECoreAlembic",
