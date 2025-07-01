@@ -429,44 +429,6 @@ except NameError :
 		),
 	)
 
-# Houdini options
-
-o.Add(
-	"HOUDINI_ROOT",
-	"The path to the Houdini install.",
-	os.environ.get( "HFS", "" ),
-)
-
-o.Add(
-	"HOUDINI_INCLUDE_PATH",
-	"The path to the Houdini include directory.",
-	"$HOUDINI_ROOT/toolkit/include",
-)
-
-o.Add(
-	"HOUDINI_LIB_PATH",
-	"The path to the houdini lib directory.",
-	"$HOUDINI_ROOT/dsolib",
-)
-
-o.Add(
-	"HOUDINI_BIN_PATH",
-	"The path to the houdini lib directory.",
-	"$HOUDINI_ROOT/bin",
-)
-
-o.Add(
-	"HOUDINI_CXX_FLAGS",
-	"C++ Flags to pass to the Houdini compilation.",
-	"",
-)
-
-o.Add(
-	"HOUDINI_LINK_FLAGS",
-	"Flags to pass to the Houdini linker.",
-	"",
-)
-
 # USD options
 
 o.Add(
@@ -647,14 +609,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_HOUDINILIB_NAME",
-	"The name under which to install the houdini libraries. This "
-	"can be used to build and install the library for multiple "
-	"Houdini versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_ALEMBICLIB_NAME",
 	"The name under which to install the Alembic libraries. This "
 	"can be used to build and install the library for multiple "
@@ -701,24 +655,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_HOUDINIICON_DIR",
-	"The directory under which to install houdini icons.",
-	"$INSTALL_PREFIX/houdini/icons",
-)
-
-o.Add(
-	"INSTALL_HOUDINITOOLBAR_DIR",
-	"The directory under which to install houdini shelf files.",
-	"$INSTALL_PREFIX/houdini/toolbar",
-)
-
-o.Add(
-	"INSTALL_HOUDINIMENU_DIR",
-	"The directory under which to install houdini menu files.",
-	"$INSTALL_PREFIX/houdini",
-)
-
-o.Add(
 	"INSTALL_MAYAICON_DIR",
 	"The directory under which to install maya icons.",
 	"$INSTALL_PREFIX/maya/icons",
@@ -734,12 +670,6 @@ o.Add(
 	"INSTALL_MAYAPLUGIN_NAME",
 	"The name under which to install maya plugins.",
 	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_HOUDINIPLUGIN_NAME",
-	"The name under which to install houdini plugins.",
-	"$INSTALL_PREFIX/houdini/dso/$IECORE_NAME",
 )
 
 o.Add(
@@ -851,14 +781,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_COREHOUDINI_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreHoudini library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
-o.Add(
 	BoolVariable( "INSTALL_CREATE_SYMLINKS", "Whether to create symlinks post install", True )
 )
 
@@ -903,14 +825,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreMaya/All.py"
-)
-
-o.Add(
-	"TEST_HOUDINI_SCRIPT",
-	"The python script to run for the houdini tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreHoudini/All.py"
 )
 
 o.Add(
@@ -2751,251 +2665,6 @@ if doConfigure :
 				nukeTestEnv.Alias( "testNuke", nukeTest )
 
 ###########################################################################################
-# Build, install and test the coreHoudini library and bindings
-###########################################################################################
-
-houdiniEnvSets = {
-	"IECORE_NAME" : "IECoreHoudini",
-}
-
-houdiniEnv = env.Clone( **houdiniEnvSets )
-
-houdiniEnvAppends = {
-	"CXXFLAGS" : [
-		"$HOUDINI_CXX_FLAGS",
-		"-DMAKING_DSO",
-		"-DIECoreHoudini_EXPORTS",
-		systemIncludeArgument, "$HOUDINI_INCLUDE_PATH"
-	],
-
-	"CPPFLAGS" : [
-		## \todo: libIECoreHoudini should not use python.
-		## Remove it from the src and then remove these flags.
-		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-	"LIBPATH" : [
-		"$HOUDINI_LIB_PATH",
-		"$GLEW_LIB_PATH",
-	],
-	"LIBS" : [
-		"HoudiniUI",
-		"HoudiniOPZ",
-		"HoudiniOP3",
-		"HoudiniOP2",
-		"HoudiniOP1",
-		"HoudiniSIM",
-		"HoudiniGEO",
-		"HoudiniPRM",
-		"HoudiniUT",
-		"HoudiniRAY",
-		"HoudiniAPPS3",
-		## \todo: libIECoreHoudini should not use python.
-		## Remove it from the src and then remove this lib.
-		"boost_python" + boostPythonLibSuffix,
-		"GLEW$GLEW_LIB_SUFFIX"
-	]
-}
-
-if env["WITH_GL"] :
-	houdiniEnvAppends["CXXFLAGS"].append( [ systemIncludeArgument, "$GLEW_INCLUDE_PATH" ] )
-	houdiniEnvAppends["LIBPATH"].append( "$GLEW_LIB_PATH" )
-	houdiniEnvAppends["LIBS"].append( "GLEW$GLEW_LIB_SUFFIX" )
-
-if env["PLATFORM"]=="posix" :
-	houdiniEnvAppends["CPPFLAGS"] += ["-DLINUX"]
-elif env["PLATFORM"]=="darwin" :
-	houdiniEnvAppends["CPPFLAGS"] += ["-D__APPLE__"]
-	houdiniEnvAppends["FRAMEWORKS"] = ["OpenGL"]
-	houdiniEnvAppends["LIBS"] += [ "GR"]
-
-houdiniEnv.Append( **houdiniEnvAppends )
-
-houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
-houdiniEnv.Prepend( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
-# Prepend OIIO path for houdini to allow for non-namespaced includes to be used
-# Houdini ships with a namespaced OpenImageIO (HOIIO) as part of $HOUDINI_INCLUDE_PATH.
-# If you do want to use it, set OIIO_INCLUDE_PATH to that.
-houdiniEnv.Prepend( CXXFLAGS = [ systemIncludeArgument, "$OIIO_INCLUDE_PATH"] )
-
-houdiniPythonModuleEnv = pythonModuleEnv.Clone( **houdiniEnvSets )
-houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
-if env["PLATFORM"] == "posix" :
-	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
-	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
-	# be able to have -Werror but be missing one warning than to have no -Werror.
-	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
-	# fully work. Reenable when we encounter versions that work correctly.
-	houdiniPythonModuleEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
-
-houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
-
-if doConfigure :
-
-	c = configureSharedLibrary( houdiniEnv )
-
-	if not c.CheckLibWithHeader( "HoudiniGEO", "SOP/SOP_API.h", "CXX" ) :
-
-		sys.stderr.write( "WARNING : no houdini devkit found, not building IECoreHoudini - check HOUDINI_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		# Houdini 16.0 and beyond can optionally ship using Qt5.
-		# Since IECoreHoudini makes some UI related calls, we add
-		# a custom define so we can change the logic as needed.
-		if os.path.exists( os.path.join( houdiniEnv.subst( "$HOUDINI_LIB_PATH" ), "libQt5Core.so" ) ) :
-			houdiniPythonModuleEnv.Append( CXXFLAGS = "-DIECOREHOUDINI_WITH_QT5" )
-
-		c.Finish()
-
-		#=====
-		# glob the files
-		#=====
-		houdiniSources = sorted( glob.glob( "src/IECoreHoudini/*.cpp" ) )
-		houdiniHeaders = glob.glob( "include/IECoreHoudini/*.h" ) + glob.glob( "include/IECoreHoudini/*.inl" )
-		houdiniBindingHeaders = glob.glob( "include/IECoreHoudini/bindings/*.h" ) + glob.glob( "include/IECoreHoudini/bindings/*.inl" )
-		houdiniPythonSources = sorted( glob.glob( "src/IECoreHoudini/bindings/*.cpp" ) )
-		houdiniPythonScripts = glob.glob( "python/IECoreHoudini/*.py" )
-		houdiniPluginSources = [ "src/IECoreHoudini/plugin/Plugin.cpp" ]
-		if not env['WITH_GL'] :
-			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
-			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
-		else:
-			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
-
-		# we can't append this before configuring, as then it gets built as
-		# part of the configure process
-		houdiniEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
-		if env['WITH_GL'] :
-			houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
-		#=====
-		# build library
-		#=====
-		houdiniLib = houdiniEnv.SharedLibrary( "lib/" + os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniSources )
-		houdiniLibInstall = houdiniEnv.Install( os.path.dirname( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniLib )
-		houdiniEnv.NoCache( houdiniLibInstall )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniEnv.AddPostAction( houdiniLibInstall, lambda target, source, env : makeLibSymLinks( houdiniEnv, "INSTALL_HOUDINILIB_NAME" ) )
-		houdiniEnv.Alias( "install", houdiniLibInstall )
-		houdiniEnv.Alias( "installHoudini", houdiniLibInstall )
-		houdiniEnv.Alias( "installLib", [ houdiniLibInstall ] )
-
-		#=====
-		# install headers
-		#=====
-		houdiniHeaderInstall = houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini", houdiniHeaders )
-		houdiniHeaderInstall += houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini/bindings", houdiniBindingHeaders )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniEnv, houdiniEnv["INSTALL_HEADER_DIR"] ) )
-		houdiniEnv.Alias( "install", houdiniHeaderInstall )
-		houdiniEnv.Alias( "installHoudini", houdiniHeaderInstall )
-
-		#=====
-		# build houdini plugin
-		#=====
-		houdiniPluginEnv.Append(
-			LIBS=[
-				os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ),
-			],
-		)
-		houdiniPluginTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$INSTALL_HOUDINIPLUGIN_NAME" ) )
-		houdiniPlugin = houdiniPluginEnv.SharedLibrary( houdiniPluginTarget, houdiniPluginSources, SHLIBPREFIX="" )
-		houdiniPluginInstall = houdiniPluginEnv.Install( os.path.dirname( houdiniPluginEnv.subst( "$INSTALL_HOUDINIPLUGIN_NAME" ) ), houdiniPlugin )
-		houdiniPluginEnv.Depends( houdiniPlugin, corePythonModule )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniPluginEnv.AddPostAction( houdiniPluginInstall, lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIPLUGIN_NAME"] ) )
-		houdiniPluginEnv.Alias( "install", houdiniPluginInstall )
-		houdiniPluginEnv.Alias( "installHoudini", houdiniPluginInstall )
-
-		#=====
-		# build python module
-		#=====
-		houdiniPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
-		houdiniPythonModule = houdiniPythonModuleEnv.SharedLibrary( "python/IECoreHoudini/_IECoreHoudini", houdiniPythonSources )
-		houdiniPythonModuleEnv.Depends( houdiniPythonModule, houdiniLib )
-		houdiniPythonModuleInstall = houdiniPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreHoudini", houdiniPythonScripts + houdiniPythonModule )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniPythonModuleEnv, houdiniPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-		houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall )
-		houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall )
-
-		#=====
-		# install icons
-		#=====
-		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" ) + glob.glob( "graphics/CortexLogo*.svg" )
-		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
-		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
-		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )
-
-		#=====
-		# install toolbar
-		#=====
-		houdiniToolbars = glob.glob( "menus/IECoreHoudini/*.shelf" )
-		houdiniToolbarInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINITOOLBAR_DIR", source=houdiniToolbars )
-		houdiniPluginEnv.Alias( "install", houdiniToolbarInstall )
-		houdiniPluginEnv.Alias( "installHoudini", houdiniToolbarInstall )
-
-		if coreEnv["INSTALL_COREHOUDINI_POST_COMMAND"] != "" :
-			# this is the only way we could find to get a post action to run for an alias
-			houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
-			houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
-
-		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule ] )
-
-		#=====
-		# Houdini tests
-		#=====
-		houdiniTestEnv = testEnv.Clone()
-
-		houdiniTestLibPaths = houdiniEnv.subst( os.pathsep.join( houdiniPythonModuleEnv["LIBPATH"] ) )
-		houdiniTestEnv["ENV"][houdiniTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += os.pathsep + houdiniTestLibPaths
-		houdiniTestEnv["ENV"][libraryPathEnvVar] += os.pathsep + houdiniTestLibPaths
-
-		houdiniTestEnv["ENV"]["PATH"] = houdiniEnv.subst( "$HOUDINI_ROOT/bin:" ) + houdiniEnv["ENV"]["PATH"]
-
-		houdiniTestEnv.Append( **houdiniEnvAppends )
-		houdiniTestEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-
-		houdiniTestEnv["ENV"]["PYTHONPATH"] += ":./python"
-		if distutils.version.LooseVersion( pythonEnv["PYTHON_VERSION"] ) > distutils.version.LooseVersion( "2.7" ) :
-			houdiniTestEnv["ENV"]["PYTHONHOME"] = houdiniTestEnv.subst( "$HOUDINI_ROOT/python" )
-		houdiniTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:&"
-		houdiniTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:&"
-
-		houdiniTestEnv["ENV"]["IECORE_OP_PATHS"] = "./test/IECoreHoudini/ops"
-
-		houdiniPythonExecutable = "hython"
-
-		houdiniPythonTest = houdiniTestEnv.Command( "test/IECoreHoudini/resultsPython.txt", houdiniPythonModule, houdiniPythonExecutable + " $TEST_HOUDINI_SCRIPT" )
-		NoCache( houdiniPythonTest )
-		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniLib, houdiniPlugin, houdiniPythonModule ] )
-		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "test/IECoreHoudini/*.py" ) )
-		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "python/IECoreHoudini/*.py" ) )
-		if env["WITH_GL"] :
-			houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
-		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
-		houdiniTestEnv.Alias( "testHoudiniPython", houdiniPythonTest )
-
-###########################################################################################
 # Build, install and test the IECoreUSD library and bindings
 ###########################################################################################
 
@@ -3329,7 +2998,7 @@ if doConfigure :
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN $SOURCE")
 		docEnv.NoCache( docs )
 
-		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :
+		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya" ) :
 
 			module = os.path.basename( modulePath )
 			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )

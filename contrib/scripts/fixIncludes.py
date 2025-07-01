@@ -88,7 +88,6 @@ includeOrder = [
 	"GafferTest",
 	"Gaffer",
 	"IECoreMaya",
-	"IECoreHoudini",
 	"IECoreNuke",
 	"IECoreArnold",
 	"IECoreGL",

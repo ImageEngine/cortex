@@ -641,9 +641,7 @@ INPUT                  = include/IECore \
                          doc/python/IECoreGL \
                          include/IECoreMaya \
                          doc/python/IECoreMaya \
-                         mel/IECoreMaya \
-                         include/IECoreHoudini \
-                         doc/python/IECoreHoudini
+                         mel/IECoreMaya
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
