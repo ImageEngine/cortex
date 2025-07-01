@@ -391,44 +391,6 @@ o.Add(
 	"",
 )
 
-# Maya options
-
-o.Add(
-	"MAYA_ROOT",
-	"The path to the root of the maya installation.",
-	"",
-)
-
-o.Add(
-	"MAYA_LICENSE_FILE",
-	"The path to FlexLM license file to use for Maya.",
-	"",
-)
-
-o.Add(
-	"MAYA_ADLM_ENV_FILE",
-	"The path to ADLM env xml file to use as of Maya 2010.",
-	"",
-)
-
-try :
-	o.Add(
-		BoolVariable(
-			"WITH_MAYA_PLUGIN_LOADER",
-			"Set this to install the Maya plugin with a stub loader.",
-			 False
-		),
-	)
-except NameError :
-	# fallback for old scons versions
-	o.Add(
-		BoolOption(
-			"WITH_MAYA_PLUGIN_LOADER",
-			"Set this to install the Maya plugin with a stub loader.",
-			 False
-		),
-	)
-
 # USD options
 
 o.Add(
@@ -593,14 +555,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_MAYALIB_NAME",
-	"The name under which to install the maya libraries. This "
-	"can be used to build and install the library for multiple "
-	"Maya versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_NUKELIB_NAME",
 	"The name under which to install the nuke libraries. This "
 	"can be used to build and install the library for multiple "
@@ -649,27 +603,9 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_MEL_DIR",
-	"The directory in which to install mel scripts.",
-	"$INSTALL_PREFIX/maya/mel/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_MAYAICON_DIR",
-	"The directory under which to install maya icons.",
-	"$INSTALL_PREFIX/maya/icons",
-)
-
-o.Add(
 	"INSTALL_NUKEICON_DIR",
 	"The directory under which to install nuke icons.",
 	"$INSTALL_PREFIX/nuke/icons",
-)
-
-o.Add(
-	"INSTALL_MAYAPLUGIN_NAME",
-	"The name under which to install maya plugins.",
-	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
 )
 
 o.Add(
@@ -765,14 +701,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_COREMAYA_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreMaya library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
-o.Add(
 	"INSTALL_CORENUKE_POST_COMMAND",
 	"A command which is run following a successful installation of "
 	"the CoreNuke library. This could be used to customise installation "
@@ -817,14 +745,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreGL/All.py"
-)
-
-o.Add(
-	"TEST_MAYA_SCRIPT",
-	"The python script to run for the maya tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreMaya/All.py"
 )
 
 o.Add(
@@ -2205,230 +2125,6 @@ if env["WITH_GL"] and doConfigure :
 		glTestEnv.Alias( "testGL", glTest )
 
 ###########################################################################################
-# Build, install and test the coreMaya library and bindings
-###########################################################################################
-
-mayaEnvSets = {
-	"IECORE_NAME" : "IECoreMaya",
-}
-
-mayaEnv = env.Clone( **mayaEnvSets )
-
-mayaEnvAppends = {
-	"CXXFLAGS" : [
-		"-DIECoreMaya_EXPORTS",
-		## \todo: remove once we've dropped all VP1 code
-		"-Wno-deprecated-declarations",
-		systemIncludeArgument, "$GLEW_INCLUDE_PATH",
-		systemIncludeArgument, "$MAYA_ROOT/include",
-	],
-	"LIBS" : [
-		"OpenMaya",
-		"OpenMayaUI",
-		"OpenMayaAnim",
-		"OpenMayaFX",
-		"boost_python" + boostPythonLibSuffix,
-	],
-	"CPPFLAGS" : [
-		"-D_BOOL",
-		"-DREQUIRE_IOSTREAM",
-		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-}
-
-if env["PLATFORM"]=="posix" :
-	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
-	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
-	if os.path.exists( mayaEnv.subst( "$MAYA_ROOT/lib/libOpenMayalib.a" ) ) :
-		mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
-
-elif env["PLATFORM"]=="darwin" :
-	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
-	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/MacOS"]
-	mayaEnvAppends["CPPPATH"] = ["$MAYA_ROOT/../../devkit/include"]
-	mayaEnvAppends["LIBS"] += ["Foundation", "OpenMayaRender"]
-	mayaEnvAppends["FRAMEWORKS"] = ["AGL", "OpenGL"]
-
-mayaEnv.Append( **mayaEnvAppends )
-
-mayaEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
-
-mayaPythonModuleEnv = pythonModuleEnv.Clone( **mayaEnvSets )
-mayaPythonModuleEnv.Append( **mayaEnvAppends )
-
-mayaPluginEnv = mayaEnv.Clone( IECORE_NAME="ieCore" )
-
-haveMaya = False
-
-if doConfigure :
-
-	c = configureSharedLibrary( mayaEnv )
-
-	if not c.CheckCXXHeader( "maya/MVectorArray.h" ) :
-
-		sys.stderr.write( "WARNING : no maya devkit found, not building IECoreMaya - check MAYA_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		c.Finish()
-
-		haveMaya = True
-
-		mayaSources = sorted( glob.glob( "src/IECoreMaya/*.cpp" ) )
-		mayaHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/*.h" ) + glob.glob( "include/IECoreMaya/*.inl" )
-		mayaBindingHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/bindings/*.inl" )
-		mayaPythonSources = sorted( glob.glob( "src/IECoreMaya/bindings/*.cpp" ) )
-		mayaPythonScripts = glob.glob( "python/IECoreMaya/*.py" )
-		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
-		mayaPluginSources = [ "src/IECoreMaya/plugin/Plugin.cpp" ]
-
-		# we can't append this before configuring, as then it gets built as
-		# part of the configure process
-		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
-
-		# maya library
-		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaSources )
-		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaLibrary )
-		mayaEnv.NoCache( mayaLibraryInstall )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv, "INSTALL_MAYALIB_NAME" ) )
-		mayaEnv.Alias( "install", mayaLibraryInstall )
-		mayaEnv.Alias( "installMaya", mayaLibraryInstall )
-		mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
-
-		# maya headers
-		mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
-		mayaHeaderInstall += mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya/bindings", mayaBindingHeaders )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
-		mayaEnv.Alias( "install", mayaHeaderInstall )
-		mayaEnv.Alias( "installMaya", mayaHeaderInstall )
-
-		# maya mel
-		mayaMelInstall = mayaEnv.Install( "$INSTALL_MEL_DIR", mayaMel )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaEnv.AddPostAction( "$INSTALL_MEL_DIR", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
-		mayaEnv.Alias( "install", mayaMelInstall )
-		mayaEnv.Alias( "installMaya", mayaMelInstall )
-
-		# maya icons
-		mayaIcons = glob.glob( "icons/IECoreMaya/*.xpm" ) + glob.glob( "icons/IECoreMaya/*.png" )
-		mayaIconInstall = mayaEnv.Install( "$INSTALL_MAYAICON_DIR", source=mayaIcons )
-		mayaEnv.Alias( "install", mayaIconInstall )
-		mayaEnv.Alias( "installMaya", mayaIconInstall )
-
-		# maya plugin
-		mayaPluginEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
-				os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
-			]
-		)
-		if env["PLATFORM"]=="darwin" :
-			mayaPluginEnv['SHLINKFLAGS'] = '$LINKFLAGS -bundle'
-			mayaPluginEnv['SHLIBSUFFIX'] =  '.bundle'
-
-		mayaPluginTarget = "plugins/maya/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) )
-
-		if env["WITH_MAYA_PLUGIN_LOADER"] :
-
-			mayaPluginLoaderSources = [ 'src/IECoreMaya/plugin/Loader.cpp' ]
-
-			mayaPluginLoaderEnv = mayaPluginEnv.Clone()
-			mayaPluginLoaderEnv.Append(
-				LIBS = [
-					"dl"
-				]
-			)
-
-			mayaPluginLoader = mayaPluginLoaderEnv.SharedLibrary( mayaPluginTarget, mayaPluginLoaderSources, SHLIBPREFIX="" )
-			mayaPluginLoaderInstall = mayaPluginLoaderEnv.InstallAs( mayaPluginLoaderEnv.subst( "$INSTALL_MAYAPLUGIN_NAME$SHLIBSUFFIX" ), mayaPluginLoader )
-			if env[ "INSTALL_CREATE_SYMLINKS" ] :
-				mayaPluginLoaderEnv.AddPostAction( mayaPluginLoaderInstall, lambda target, source, env : makeSymLinks( mayaPluginLoaderEnv, mayaPluginLoaderEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
-			mayaPluginLoaderEnv.Alias( "install", mayaPluginLoaderInstall )
-			mayaPluginLoaderEnv.Alias( "installMaya", mayaPluginLoaderInstall )
-
-			Default( mayaPluginLoader )
-
-			mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] = os.path.join( os.path.dirname( mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ), 'impl', os.path.basename( mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
-			mayaPluginTarget = "plugins/maya/impl/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) )
-
-		mayaPlugin = mayaPluginEnv.SharedLibrary( mayaPluginTarget, mayaPluginSources, SHLIBPREFIX="" )
-		mayaPluginInstall = mayaPluginEnv.Install( os.path.dirname( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPlugin )
-		mayaPluginEnv.Depends( mayaPlugin, corePythonModule )
-
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
-		mayaPluginEnv.Alias( "install", mayaPluginInstall )
-		mayaPluginEnv.Alias( "installMaya", mayaPluginInstall )
-
-		# maya python
-		mayaPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
-		mayaPythonModule = mayaPythonModuleEnv.SharedLibrary( "python/IECoreMaya/_IECoreMaya", mayaPythonSources )
-		mayaPythonModuleEnv.Depends( mayaPythonModule, mayaLibrary )
-
-		mayaPythonModuleInstall = mayaPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonModuleEnv, mayaPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-		mayaPythonModuleEnv.Alias( "install", mayaPythonModuleInstall )
-		mayaPythonModuleEnv.Alias( "installMaya", mayaPythonModuleInstall )
-
-		if coreEnv["INSTALL_COREMAYA_POST_COMMAND"]!="" :
-			# this is the only way we could find to get a post action to run for an alias
-			mayaPythonModuleEnv.Alias( "install", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" )
-			mayaPythonModuleEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" )
-
-		Default( [ mayaLibrary, mayaPlugin, mayaPythonModule ] )
-
-		mayaTestEnv = testEnv.Clone()
-
-		mayaTestLibPaths = mayaEnv.subst( os.pathsep.join( mayaPythonModuleEnv["LIBPATH"] ) )
-		mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += os.pathsep + mayaTestLibPaths
-		mayaTestEnv["ENV"][libraryPathEnvVar] += os.pathsep + mayaTestLibPaths
-
-		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
-		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya:./test/IECoreMaya/plugins"
-		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
-		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
-		mayaTestEnv["ENV"]["AUTODESK_ADLM_THINCLIENT_ENV"] = env["MAYA_ADLM_ENV_FILE"]
-
-		mayaPythonTestEnv = mayaTestEnv.Clone()
-
-		mayaTestEnv.Append( **mayaEnvAppends )
-		mayaTestEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				"OpenMayalib"
-			]
-		)
-
-		mayaPythonTest = mayaPythonTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, "mayapy $TEST_MAYA_SCRIPT" )
-		NoCache( mayaPythonTest )
-		mayaPythonTestEnv.Depends( mayaPythonTest, [ mayaPlugin, mayaPythonModule, mayaLibrary ] )
-		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "test/IECoreMaya/*.py" ) )
-		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "python/IECoreMaya/*.py" ) )
-		if env["WITH_MAYA_PLUGIN_LOADER"] :
-			mayaPythonTestEnv.Depends( mayaPythonTest, mayaPluginLoader )
-		if env["WITH_GL"] :
-			mayaPythonTestEnv.Depends( mayaPythonTest, [ glLibrary, glPythonModule ] )
-		mayaPythonTestEnv.Alias( "testMaya", mayaPythonTest )
-		mayaPythonTestEnv.Alias( "testMayaPython", mayaPythonTest )
-
-###########################################################################################
 # Build and install the coreNuke library, plugin, python module and headers
 ###########################################################################################
 
@@ -2998,7 +2694,7 @@ if doConfigure :
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN $SOURCE")
 		docEnv.NoCache( docs )
 
-		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya" ) :
+		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke" ) :
 
 			module = os.path.basename( modulePath )
 			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )

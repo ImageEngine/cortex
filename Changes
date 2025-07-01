@@ -12,6 +12,7 @@ Breaking Changes
 ----------------
 
 - IECoreHoudini : Removed.
+- IECoreMaya : Removed.
 
 10.5.x.x (relative to 10.5.15.0)
 ========
