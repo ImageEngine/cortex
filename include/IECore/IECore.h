@@ -66,7 +66,6 @@ IECORE_API bool withFreeType();
 /// \ref mainPageRenderingSection <br>
 /// \ref mainPageAlgorithmsSection <br>
 /// \ref mainPagePythonSection <br>
-/// \ref mainPageApplicationSupportSection <br>
 /// \ref mainPageThreadingSection <br>
 ///
 /// \section mainPageMathSection Math
@@ -231,11 +230,6 @@ IECORE_API bool withFreeType();
 ///
 /// All of the IECore C++ classes are bound into Python using the <a href="http://www.boost.org/libs/python/doc/">boost::python</a> framework.
 /// Many can actually be subclassed in python, making it very quick to implement a new Op for instance.
-///
-/// \section mainPageApplicationSupportSection Application support
-///
-/// The generic functionality contained within IECore is interfaced with specific 3rd party applications and frameworks using additional
-/// libraries. These libraries include \ref IECoreMaya, IECoreHoudini, IECoreNuke and IECoreGL.
 ///
 /// \section mainPageThreadingSection Threading
 ///

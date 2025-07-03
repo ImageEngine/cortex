@@ -9,6 +9,13 @@ Fixes
   - Fixed reading of shutter values from cameras without `shutter:open` and `shutter:close` attributes. The `shutter` parameter is now omitted instead of being created with USD's default 0, 0 shutter values.
 - CurvesPrimitiveEvaluator : Fixed error in `Result::vTangent()` function causing tangent to point in opposite direction for curves with `Linear` interpolation.
 
+Breaking Changes
+----------------
+
+- IECoreHoudini : Removed.
+- IECoreMaya : Removed.
+- IECoreNuke : Removed.
+
 10.5.x.x (relative to 10.5.15.0)
 ========
 

@@ -28,7 +28,6 @@ plugins
 lib
 build
 config.log
-mayaLog
 projects
 test/IECore/IECoreTest
 test/*/results*.txt
