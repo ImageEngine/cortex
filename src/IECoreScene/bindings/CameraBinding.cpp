@@ -150,6 +150,11 @@ void bindCamera()
 		.def( "getShutter", &Camera::getShutter )
 		.def( "removeShutter", &Camera::removeShutter )
 
+		.def( "hasDepthOfField", &Camera::hasDepthOfField )
+		.def( "setDepthOfField", &Camera::setDepthOfField )
+		.def( "getDepthOfField", &Camera::getDepthOfField )
+		.def( "removeDepthOfField", &Camera::removeDepthOfField )
+
 		.def( "fitWindow", &Camera::fitWindow ).staticmethod( "fitWindow" )
 		.def<Imath::Box2f (Camera::*)() const>( "frustum", &Camera::frustum )
 		.def<Imath::Box2f (Camera::*)(Camera::FilmFit) const>( "frustum", &Camera::frustum )

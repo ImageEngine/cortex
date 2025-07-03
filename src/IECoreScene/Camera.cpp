@@ -263,6 +263,7 @@ DECLARE_ACCESSORS_FOR_OPTIONAL( OverscanTop, "overscanTop", FloatData, 0.0f );
 DECLARE_ACCESSORS_FOR_OPTIONAL( OverscanBottom, "overscanBottom", FloatData, 0.0f );
 DECLARE_ACCESSORS_FOR_OPTIONAL( CropWindow, "cropWindow", Box2fData, Box2f() );
 DECLARE_ACCESSORS_FOR_OPTIONAL( Shutter, "shutter", V2fData, V2f( -0.5f, 0.5f ) );
+DECLARE_ACCESSORS_FOR_OPTIONAL( DepthOfField, "depthOfField", BoolData, false );
 
 namespace {
 

@@ -210,6 +210,13 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 		void setShutter( const Imath::V2f &shutter );
 		void removeShutter();
 
+		/// Override whether the camera should render with depth of field blur. The amount of blur
+		/// can be controlled from the fStop parameter.
+		bool hasDepthOfField() const;
+		bool getDepthOfField() const;
+		void setDepthOfField( const bool &depthOfField );
+		void removeDepthOfField();
+
 		/// Given window with an arbitrary aspect, compute a box that fits it with a particular fit mode,
 		/// to achieve a desired target aspect ratio.
 		static Imath::Box2f fitWindow( const Imath::Box2f &window, Camera::FilmFit fitMode, float targetAspect );
