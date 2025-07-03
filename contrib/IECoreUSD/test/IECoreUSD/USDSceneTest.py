@@ -4413,9 +4413,16 @@ class USDSceneTest( unittest.TestCase ) :
 		pxr.UsdGeom.Xform.Define( stage, "/withoutModelAPI" )
 		pxr.UsdGeom.Xform.Define( stage, "/withModelAPI" )
 		pxr.UsdGeom.Xform.Define( stage, "/withModelAPIAndExtent" )
+		pxr.UsdGeom.Xform.Define( stage, "/withKind" )
+		pxr.UsdGeom.Xform.Define( stage, "/withKindAndExtent" )
 
 		pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/withModelAPI" ) )
 		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/withModelAPIAndExtent" ) )
+		modelAPI.SetExtentsHint( [ ( 1, 2, 3 ), ( 4, 5, 6 ) ] )
+
+		stage.GetPrimAtPath( "/withKind" ).SetKind( "group" )
+		stage.GetPrimAtPath( "/withKindAndExtent" ).SetKind( "group" )
+		modelAPI = pxr.UsdGeom.ModelAPI( stage.GetPrimAtPath( "/withKindAndExtent" ) )
 		modelAPI.SetExtentsHint( [ ( 1, 2, 3 ), ( 4, 5, 6 ) ] )
 
 		stage.GetRootLayer().Save()
@@ -4428,6 +4435,9 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertFalse( root.child( "withModelAPI" ).hasBound() )
 		self.assertTrue( root.child( "withModelAPIAndExtent" ).hasBound() )
 		self.assertEqual( root.child( "withModelAPIAndExtent" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
+		self.assertFalse( root.child( "withKind" ).hasBound() )
+		self.assertTrue( root.child( "withKindAndExtent" ).hasBound() )
+		self.assertEqual( root.child( "withKindAndExtent" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
 
 	def testAnimatedModelBound( self ) :
 
