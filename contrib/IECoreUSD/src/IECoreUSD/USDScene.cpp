@@ -627,7 +627,8 @@ pxr::UsdAttribute boundAttribute( const pxr::UsdPrim &prim )
 
 	if( g_useModelAPIBounds )
 	{
-		if( auto modelAPI = pxr::UsdGeomModelAPI( prim ) )
+		pxr::UsdGeomModelAPI modelAPI( prim );
+		if( modelAPI || prim.IsModel() )
 		{
 			return modelAPI.GetExtentsHintAttr();
 		}

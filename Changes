@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.15.0)
 ========
 
+Fixes
+-----
 
+- USDScene : Fixed reading of bounds from prims with `extentsHint` and model `kind` but without UsdGeomModelAPI applied.
 
 10.5.15.0 (relative to 10.5.14.1)
 =========
