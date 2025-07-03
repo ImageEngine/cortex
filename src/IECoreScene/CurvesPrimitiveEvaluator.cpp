@@ -260,8 +260,8 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 	{
 		m_coefficients[0] = 1.0f - m_segmentV;
 		m_coefficients[1] = m_segmentV;
-		m_derivativeCoefficients[0] = 1.0f;
-		m_derivativeCoefficients[1] = -1.0f;
+		m_derivativeCoefficients[0] = -1.0f;
+		m_derivativeCoefficients[1] = 1.0f;
 		m_vertexDataIndices[0] = m_varyingDataIndices[0] = o + i;
 		if( periodic )
 		{
