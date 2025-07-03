@@ -163,6 +163,7 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( c.hasOverscanBottom(), False )
 		self.assertEqual( c.hasCropWindow(), False )
 		self.assertEqual( c.hasShutter(), False )
+		self.assertEqual( c.hasDepthOfField(), False )
 
 		c.setFilmFit( IECoreScene.Camera.FilmFit.Vertical )
 		c.setResolution( imath.V2i( 1280, 720 ) )
@@ -175,6 +176,7 @@ class TestCamera( unittest.TestCase ) :
 		c.setOverscanBottom( 0.4 )
 		c.setCropWindow( imath.Box2f( imath.V2f( 0.1, 0.2 ), imath.V2f( 0.8, 0.9 ) ) )
 		c.setShutter( imath.V2f( -0.7, 0.3 ) )
+		c.setDepthOfField( True )
 
 		self.assertEqual( c.hasFilmFit(), True )
 		self.assertEqual( c.hasResolution(), True )
@@ -187,6 +189,7 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( c.hasOverscanBottom(), True )
 		self.assertEqual( c.hasCropWindow(), True )
 		self.assertEqual( c.hasShutter(), True )
+		self.assertEqual( c.hasDepthOfField(), True )
 
 		self.assertEqual( c.getFilmFit(), IECoreScene.Camera.FilmFit.Vertical )
 		self.assertEqual( c.getResolution(), imath.V2i( 1280, 720 ) )
@@ -199,6 +202,7 @@ class TestCamera( unittest.TestCase ) :
 		self.assertAlmostEqual( c.getOverscanBottom(), 0.4 )
 		self.assertBox2fEqual( c.getCropWindow(), 0.1, 0.2, 0.8, 0.9 )
 		self.assertAlmostEqual( c.getShutter(), imath.V2f( -0.7, 0.3 ) )
+		self.assertEqual( c.getDepthOfField(), True )
 
 		c.removeFilmFit()
 		c.removeResolution()
@@ -211,6 +215,7 @@ class TestCamera( unittest.TestCase ) :
 		c.removeOverscanBottom()
 		c.removeCropWindow()
 		c.removeShutter()
+		c.removeDepthOfField()
 
 		self.assertEqual( c.hasFilmFit(), False )
 		self.assertEqual( c.hasResolution(), False )
@@ -223,6 +228,7 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( c.hasOverscanBottom(), False )
 		self.assertEqual( c.hasCropWindow(), False )
 		self.assertEqual( c.hasShutter(), False )
+		self.assertEqual( c.hasDepthOfField(), False )
 
 	def testHash( self ) :
 		c = IECoreScene.Camera()
