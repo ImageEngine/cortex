@@ -626,7 +626,6 @@ envVarsToImport = [
     "OCIO",
     "IECORE_DEBUG_WAIT",
     "CORTEX_PERFORMANCE_TEST",
-    "IECORE_RTLD_GLOBAL",
 ]
 
 ENV_VARS_TO_IMPORT = " ".join(envVarsToImport)

@@ -59,7 +59,7 @@ USD_LIB_PREFIX = "usd_"
 # Environment
 # ===========
 
-ENV_VARS_TO_IMPORT = "PATH CI IECORE_RTLD_GLOBAL"
+ENV_VARS_TO_IMPORT = "PATH CI"
 
 if platform.system() == "Darwin" :
 	os.environ["DYLD_FRAMEWORK_PATH"] = libs

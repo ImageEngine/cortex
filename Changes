@@ -15,6 +15,7 @@ Breaking Changes
 - IECoreHoudini : Removed.
 - IECoreMaya : Removed.
 - IECoreNuke : Removed.
+- Removed support for `IECORE_RTLD_GLOBAL` environment variable.
 
 10.5.x.x (relative to 10.5.15.0)
 ========
