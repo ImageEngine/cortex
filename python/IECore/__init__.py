@@ -38,23 +38,7 @@
 #
 # Some parts of the IECore library are defined purely in Python. These are shown below.
 
-import os, sys, ctypes, pathlib
-if os.name == "posix" and os.environ.get( "IECORE_RTLD_GLOBAL", "1" ) == "1" :
-	# Historically, we had problems with cross-module RTTI on Linux, whereby
-	# different Python modules and/or libraries could end up with their own
-	# copies of symbols, which would break things like dynamic casts. We worked
-	# around this by using RTLD_GLOBAL so that everything was loaded into the
-	# global symbol table and shared, but this can cause hard-to-diagnose
-	# knock-on effects from unwanted sharing.
-	#
-	# We now manage symbol visibility properly so that RTTI symbols should not
-	# be duplicated between modules, and we intend to remove RTLD_GLOBAL. To aid
-	# the transition, this behaviour can be controlled by the
-	# `IECORE_RTLD_GLOBAL` environment variable, which currently defaults on.
-	## \todo Get everything tested, default to off, and then remove.
-	sys.setdlopenflags(
-		sys.getdlopenflags() | ctypes.RTLD_GLOBAL
-	)
+import os, pathlib
 
 if hasattr( os, "add_dll_directory" ) and "IECORE_DLL_DIRECTORIES" in os.environ :
 	for directory in os.environ.get( "IECORE_DLL_DIRECTORIES" ).split( os.pathsep ) :
@@ -64,7 +48,7 @@ if hasattr( os, "add_dll_directory" ) and "IECORE_DLL_DIRECTORIES" in os.environ
 	del directory
 
 # Remove pollution of IECore namespace
-del os, sys, ctypes, pathlib
+del os, pathlib
 
 __import__( "imath" )
 
