@@ -40,13 +40,8 @@
 #include "IECoreScene/TypedPrimitiveParameter.h"
 #include "IECoreScene/Renderable.h"
 #include "IECoreScene/StateRenderable.h"
-#include "IECoreScene/AttributeState.h"
 #include "IECoreScene/Shader.h"
-#include "IECoreScene/Transform.h"
-#include "IECoreScene/MatrixMotionTransform.h"
-#include "IECoreScene/MatrixTransform.h"
 #include "IECoreScene/VisibleRenderable.h"
-#include "IECoreScene/Group.h"
 #include "IECoreScene/SmoothSkinningData.h"
 #include "IECoreScene/MotionPrimitive.h"
 #include "IECoreScene/Primitive.h"
@@ -96,13 +91,8 @@ void IECoreSceneModule::bindTypedObjectParameter()
 {
 	::bindTypedObjectParameter<Renderable>();
 	::bindTypedObjectParameter<StateRenderable>();
-	::bindTypedObjectParameter<AttributeState>();
 	::bindTypedObjectParameter<Shader>();
-	::bindTypedObjectParameter<Transform>();
-	::bindTypedObjectParameter<MatrixMotionTransform>();
-	::bindTypedObjectParameter<MatrixTransform>();
 	::bindTypedObjectParameter<VisibleRenderable>();
-	::bindTypedObjectParameter<Group>();
 	::bindTypedObjectParameter<SmoothSkinningData>();
 
 	::bindTypedObjectParameter<MotionPrimitive>();

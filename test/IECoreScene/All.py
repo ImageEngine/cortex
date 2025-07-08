@@ -50,8 +50,6 @@ from Shader import *
 from RemovePrimitiveVariables import *
 from RenamePrimitiveVariables import *
 from MotionPrimitive import *
-from Transform import *
-from Group import *
 from Camera import *
 from NURBS import *
 from PrimitiveEvaluator import *
@@ -66,7 +64,6 @@ from MeshNormalsOpTest import *
 from PrimitiveTest import *
 from MeshMergeOpTest import *
 from MeshVertexReorderOpTest import *
-from AttributeStateTest import *
 from CoordinateSystemTest import *
 from OutputTest import OutputTest
 from PatchMeshPrimitiveTest import *
