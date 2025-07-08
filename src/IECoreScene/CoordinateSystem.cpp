@@ -66,7 +66,7 @@ void CoordinateSystem::setName( const std::string &name )
 
 bool CoordinateSystem::isEqualTo( const Object *other ) const
 {
-	if( !StateRenderable::isEqualTo( other ) )
+	if( !Renderable::isEqualTo( other ) )
 	{
 		return false;
 	}
@@ -80,27 +80,27 @@ bool CoordinateSystem::isEqualTo( const Object *other ) const
 
 void CoordinateSystem::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	StateRenderable::memoryUsage( a );
+	Renderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() + sizeof( m_name ) );
 }
 
 void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 {
-	StateRenderable::copyFrom( other, context );
+	Renderable::copyFrom( other, context );
 	const CoordinateSystem *c = static_cast<const CoordinateSystem *>( other );
 	m_name = c->m_name;
 }
 
 void CoordinateSystem::save( SaveContext *context ) const
 {
-	StateRenderable::save( context );
+	Renderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_nameEntry, m_name );
 }
 
 void CoordinateSystem::load( LoadContextPtr context )
 {
-	StateRenderable::load( context );
+	Renderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
@@ -108,6 +108,6 @@ void CoordinateSystem::load( LoadContextPtr context )
 
 void CoordinateSystem::hash( MurmurHash &h ) const
 {
-	StateRenderable::hash( h );
+	Renderable::hash( h );
 	h.append( m_name );
 }

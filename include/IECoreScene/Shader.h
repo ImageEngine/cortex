@@ -36,14 +36,14 @@
 #define IECORESCENE_SHADER_H
 
 #include "IECoreScene/Export.h"
-#include "IECoreScene/StateRenderable.h"
+#include "IECoreScene/Renderable.h"
 
 namespace IECoreScene
 {
 
 /// A class to represent shaders.
 /// \ingroup renderingGroup
-class IECORESCENE_API Shader : public StateRenderable
+class IECORESCENE_API Shader : public Renderable
 {
 	public:
 
@@ -56,7 +56,7 @@ class IECORESCENE_API Shader : public StateRenderable
 
 		~Shader() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Shader, ShaderTypeId, StateRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Shader, ShaderTypeId, Renderable );
 
 		const std::string &getName() const;
 		void setName( const std::string &name );

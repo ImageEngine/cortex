@@ -37,7 +37,6 @@
 #include "IECoreScene/Renderable.h"
 #include "IECoreScene/Shader.h"
 #include "IECoreScene/SmoothSkinningData.h"
-#include "IECoreScene/StateRenderable.h"
 #include "IECoreScene/VisibleRenderable.h"
 
 #include "IECore/TypedObjectParameter.inl"
@@ -46,13 +45,11 @@ namespace IECore
 {
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::RenderableParameter, IECoreScene::RenderableParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::StateRenderableParameter, IECoreScene::StateRenderableParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::ShaderParameter, IECoreScene::ShaderParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::VisibleRenderableParameter, IECoreScene::VisibleRenderableParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::SmoothSkinningDataParameter, IECoreScene::SmoothSkinningDataParameterTypeId );
 
 template class TypedObjectParameter<IECoreScene::Renderable>;
-template class TypedObjectParameter<IECoreScene::StateRenderable>;
 template class TypedObjectParameter<IECoreScene::Shader>;
 template class TypedObjectParameter<IECoreScene::VisibleRenderable>;
 template class TypedObjectParameter<IECoreScene::SmoothSkinningData>;

@@ -59,11 +59,11 @@ enum TypeId
 	GroupTypeId = 108016, // Obsolete, available for reuse
 	AttributeStateTypeId = 108017, // Obsolete, available for reuse
 	VisibleRenderableTypeId = 108018,
-	StateRenderableTypeId = 108019,
+	StateRenderableTypeId = 108019, // Obsolete, available for reuse
 	OBJReaderTypeId = 108020,
 	PointNormalsOpTypeId = 108021, // Obsolete, available for reuse
 	PointDensitiesOpTypeId = 108022, // Obsolete, available for reuse
-	StateRenderableParameterTypeId = 108023,
+	StateRenderableParameterTypeId = 108023, // Obsolete, available for reuse
 	AttributeStateParameterTypeId = 108024, // Obsolete, available for reuse
 	ShaderParameterTypeId = 108025,
 	TransformParameterTypeId = 108026, // Obsolete, available for reuse
