@@ -91,7 +91,6 @@
 #include "PrimitiveVariableBinding.h"
 #include "RemoveSmoothSkinningInfluencesOpBinding.h"
 #include "RenderableBinding.h"
-#include "RendererBinding.h"
 #include "ReorderSmoothSkinningInfluencesOpBinding.h"
 #include "SampledSceneInterfaceBinding.h"
 #include "SceneCacheBinding.h"
@@ -128,7 +127,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindRenderable();
 	bindStateRenderable();
 	bindVisibleRenderable();
-	bindRenderer();
 	bindParticleWriter();
 	bindPDCParticleWriter();
 	bindPrimitive();

@@ -47,7 +47,7 @@ enum TypeId
 	ShaderTypeId = 108004,
 	PDCParticleReaderTypeId = 108005,
 	PDCParticleWriterTypeId = 108006,
-	RendererTypeId = 108007,
+	RendererTypeId = 108007, // Obsolete, available for reuse
 	PrimitiveOpTypeId = 108008,
 	ParticleReaderTypeId = 108009,
 	ParticleWriterTypeId = 108010,
