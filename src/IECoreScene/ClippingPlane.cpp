@@ -49,30 +49,30 @@ ClippingPlane::~ClippingPlane()
 
 void ClippingPlane::copyFrom( const Object *other, CopyContext *context )
 {
-	PreWorldRenderable::copyFrom( other, context );
+	Renderable::copyFrom( other, context );
 }
 
 void ClippingPlane::save( SaveContext *context ) const
 {
-	PreWorldRenderable::save( context );
+	Renderable::save( context );
 }
 
 void ClippingPlane::load( LoadContextPtr context )
 {
-	PreWorldRenderable::load( context );
+	Renderable::load( context );
 }
 
 bool ClippingPlane::isEqualTo( const Object *other ) const
 {
-	return PreWorldRenderable::isEqualTo( other );
+	return Renderable::isEqualTo( other );
 }
 
 void ClippingPlane::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	PreWorldRenderable::memoryUsage( a );
+	Renderable::memoryUsage( a );
 }
 
 void ClippingPlane::hash( MurmurHash &h ) const
 {
-	PreWorldRenderable::hash( h );
+	Renderable::hash( h );
 }

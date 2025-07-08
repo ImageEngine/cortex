@@ -77,7 +77,6 @@
 #include "PointsAlgoBinding.h"
 #include "PointsPrimitiveBinding.h"
 #include "PointsPrimitiveEvaluatorBinding.h"
-#include "PreWorldRenderableBinding.h"
 #include "PrimitiveBinding.h"
 #include "PrimitiveEvaluatorBinding.h"
 #include "PrimitiveOpBinding.h"
@@ -130,7 +129,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindPrimitiveOp();
 	bindMeshPrimitive();
 	bindMotionPrimitive();
-	bindPreWorldRenderable();
 	bindCamera();
 	bindNURBSPrimitive();
 	bindMeshPrimitiveBuilder();
