@@ -36,8 +36,6 @@
 
 #include "IECore/AngleConversion.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -437,10 +435,4 @@ Imath::V2f Camera::calculateFieldOfView() const
 void Camera::setFocalLengthFromFieldOfView( float horizontalFOV )
 {
 	setFocalLength( getAperture()[0] * 0.5f / tan( 0.5f * IECore::degreesToRadians( horizontalFOV ) ) );
-}
-
-void Camera::render( Renderer *renderer ) const
-{
-	// The old renderer interface takes unused name parameter
-	renderer->camera( "", m_parameters->readable() );
 }

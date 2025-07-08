@@ -75,9 +75,6 @@ class IECORESCENE_API MotionPrimitive : public VisibleRenderable
 		void removeSnapshot( PrimitivePtr primitive );
 		//@}
 
-		/// May throw an Exception if the contained Primitives are not
-		/// compatible with each other.
-		void render( Renderer *renderer ) const override;
 		Imath::Box3f bound() const override;
 
 	private:

@@ -54,7 +54,6 @@ class IECORESCENE_API MatrixMotionTransform : public Transform
 		MatrixMotionTransform();
 		~MatrixMotionTransform() override;
 
-		void render( Renderer *renderer ) const override;
 		Imath::M44f transform( float time = 0 ) const override;
 
 		//! @name Snapshots

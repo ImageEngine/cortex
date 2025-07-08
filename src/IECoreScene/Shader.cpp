@@ -34,8 +34,6 @@
 
 #include "IECoreScene/Shader.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 using namespace IECore;
@@ -101,11 +99,6 @@ CompoundData *Shader::parametersData()
 const CompoundData *Shader::parametersData() const
 {
 	return m_parameters.get();
-}
-
-void Shader::render( Renderer *renderer ) const
-{
-	renderer->shader( m_type, m_name, parameters() );
 }
 
 bool Shader::isEqualTo( const Object *other ) const

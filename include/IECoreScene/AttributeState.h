@@ -63,9 +63,6 @@ class IECORESCENE_API AttributeState : public StateRenderable
 		/// (it calls readable() or writable() for you).
 		IECore::CompoundDataPtr attributesData();
 
-		/// Calls renderer->setAttribute() for each name, data pair in attributes()
-		void render( Renderer *renderer ) const override;
-
 	private:
 
 		IECore::CompoundDataPtr m_attributes;

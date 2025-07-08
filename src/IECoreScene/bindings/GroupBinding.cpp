@@ -39,7 +39,6 @@
 #include "GroupBinding.h"
 
 #include "IECoreScene/Group.h"
-#include "IECoreScene/Renderer.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
@@ -72,30 +71,6 @@ static list state( Group &g )
 		result.append( *it );
 	}
 	return result;
-}
-
-static void render( const Group &group, Renderer *renderer )
-{
-	IECorePython::ScopedGILRelease gilRelease;
-	group.render( renderer );
-}
-
-static void render2( const Group &group, Renderer *renderer, bool inAttributeBlock )
-{
-	IECorePython::ScopedGILRelease gilRelease;
-	group.render( renderer, inAttributeBlock );
-}
-
-static void renderState( const Group &group, Renderer *renderer )
-{
-	IECorePython::ScopedGILRelease gilRelease;
-	group.renderState( renderer );
-}
-
-static void renderChildren( const Group &group, Renderer *renderer )
-{
-	IECorePython::ScopedGILRelease gilRelease;
-	group.renderChildren( renderer );
 }
 
 static DataPtr getAttribute( Group &g, const std::string &name )
@@ -132,10 +107,6 @@ void bindGroup()
 		.def( "transformMatrix", &Group::transformMatrix, transformMatrixOverloads() )
 		.def( "globalTransformMatrix", &Group::globalTransformMatrix, globalTransformMatrixOverloads() )
 		.def( "parent", (Group *(Group::*)())&Group::parent, return_value_policy<CastToIntrusivePtr>() )
-		.def( "render", &render )
-		.def( "render", &render2 )
-		.def( "renderState", &renderState )
-		.def( "renderChildren", &renderChildren )
 	;
 }
 

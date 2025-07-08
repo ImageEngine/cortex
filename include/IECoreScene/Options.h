@@ -61,9 +61,6 @@ class IECORESCENE_API Options : public PreWorldRenderable
 		/// (it calls readable() or writable() for you).
 		IECore::CompoundDataPtr optionsData();
 
-		/// Calls renderer->setOptions() for each name, data pair in options()
-		void render( Renderer *renderer ) const override;
-
 	private:
 
 		IECore::CompoundDataPtr m_options;

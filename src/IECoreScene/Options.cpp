@@ -35,8 +35,6 @@
 
 #include "IECoreScene/Options.h"
 
-#include "IECoreScene/Renderer.h"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace boost;
@@ -72,14 +70,6 @@ const CompoundDataMap &Options::options() const
 CompoundDataPtr Options::optionsData()
 {
 	return m_options;
-}
-
-void Options::render( Renderer *renderer ) const
-{
-	for( CompoundDataMap::const_iterator it=options().begin(); it!=options().end(); it++ )
-	{
-		renderer->setOption( it->first, it->second );
-	}
 }
 
 bool Options::isEqualTo( const Object *other ) const

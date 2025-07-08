@@ -50,7 +50,6 @@ class IECORESCENE_API MatrixTransform : public Transform
 		MatrixTransform( const Imath::M44f &matrix = Imath::M44f() );
 		~MatrixTransform() override;
 
-		void render( Renderer *renderer ) const override;
 		Imath::M44f transform( float time = 0 ) const override;
 
 		/// The transform this object applies. It can

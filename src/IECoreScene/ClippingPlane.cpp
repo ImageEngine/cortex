@@ -34,8 +34,6 @@
 
 #include "IECoreScene/ClippingPlane.h"
 
-#include "IECoreScene/Renderer.h"
-
 using namespace IECore;
 using namespace IECoreScene;
 
@@ -77,9 +75,4 @@ void ClippingPlane::memoryUsage( Object::MemoryAccumulator &a ) const
 void ClippingPlane::hash( MurmurHash &h ) const
 {
 	PreWorldRenderable::hash( h );
-}
-
-void ClippingPlane::render( Renderer *renderer ) const
-{
-	renderer->command( "clippingPlane", CompoundDataMap() );
 }

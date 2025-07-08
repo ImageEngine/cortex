@@ -34,9 +34,7 @@
 
 #include "IECoreScene/Group.h"
 
-#include "IECoreScene/AttributeBlock.h"
 #include "IECoreScene/AttributeState.h"
-#include "IECoreScene/Renderer.h"
 
 #include "IECore/MurmurHash.h"
 
@@ -437,41 +435,6 @@ void Group::hash( MurmurHash &h ) const
 	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
 	{
 		(*it)->hash( h );
-	}
-}
-
-void Group::render( Renderer *renderer ) const
-{
-	render( renderer, true );
-}
-
-void Group::render( Renderer *renderer, bool inAttributeBlock ) const
-{
-	/// \todo I wonder if this should just use a transform block if
-	/// the Group doesn't have any state?
-	AttributeBlock attributeBlock( renderer, inAttributeBlock );
-
-	if( m_transform )
-	{
-		m_transform->render( renderer );
-	}
-	renderState( renderer );
-	renderChildren( renderer );
-}
-
-void Group::renderState( Renderer *renderer ) const
-{
-	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
-	{
-		(*it)->render( renderer );
-	}
-}
-
-void Group::renderChildren( Renderer *renderer ) const
-{
-	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
-	{
-		(*it)->render( renderer );
 	}
 }
 

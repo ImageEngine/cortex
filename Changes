@@ -12,6 +12,7 @@ Fixes
 Breaking Changes
 ----------------
 
+- Renderable : Removed `render()` method.
 - IECoreHoudini : Removed.
 - IECoreMaya : Removed.
 - IECoreNuke : Removed.

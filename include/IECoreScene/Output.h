@@ -69,8 +69,6 @@ class IECORESCENE_API Output : public PreWorldRenderable
 		IECore::CompoundData *parametersData();
 		const IECore::CompoundData *parametersData() const;
 
-		void render( Renderer *renderer ) const override;
-
 	private:
 
 		std::string m_name;
