@@ -42,35 +42,20 @@ namespace IECoreScene
 
 IE_CORE_FORWARDDECLARE( Renderable )
 IE_CORE_FORWARDDECLARE( StateRenderable )
-IE_CORE_FORWARDDECLARE( AttributeState )
 IE_CORE_FORWARDDECLARE( Shader )
-IE_CORE_FORWARDDECLARE( Transform )
-IE_CORE_FORWARDDECLARE( MatrixMotionTransform )
-IE_CORE_FORWARDDECLARE( MatrixTransform )
 IE_CORE_FORWARDDECLARE( VisibleRenderable )
-IE_CORE_FORWARDDECLARE( Group )
 IE_CORE_FORWARDDECLARE( SmoothSkinningData )
 
 typedef IECore::TypedObjectParameter<Renderable> RenderableParameter;
 typedef IECore::TypedObjectParameter<StateRenderable> StateRenderableParameter;
-typedef IECore::TypedObjectParameter<AttributeState> AttributeStateParameter;
 typedef IECore::TypedObjectParameter<Shader> ShaderParameter;
-typedef IECore::TypedObjectParameter<Transform> TransformParameter;
-typedef IECore::TypedObjectParameter<MatrixMotionTransform> MatrixMotionTransformParameter;
-typedef IECore::TypedObjectParameter<MatrixTransform> MatrixTransformParameter;
 typedef IECore::TypedObjectParameter<VisibleRenderable> VisibleRenderableParameter;
-typedef IECore::TypedObjectParameter<Group> GroupParameter;
 typedef IECore::TypedObjectParameter<SmoothSkinningData> SmoothSkinningDataParameter;
 
 IE_CORE_DECLAREPTR( RenderableParameter );
 IE_CORE_DECLAREPTR( StateRenderableParameter );
-IE_CORE_DECLAREPTR( AttributeStateParameter );
 IE_CORE_DECLAREPTR( ShaderParameter );
-IE_CORE_DECLAREPTR( TransformParameter );
-IE_CORE_DECLAREPTR( MatrixMotionTransformParameter );
-IE_CORE_DECLAREPTR( MatrixTransformParameter );
 IE_CORE_DECLAREPTR( VisibleRenderableParameter );
-IE_CORE_DECLAREPTR( GroupParameter );
 IE_CORE_DECLAREPTR( SmoothSkinningDataParameter );
 
 } // namespace IECoreScene

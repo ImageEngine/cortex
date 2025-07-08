@@ -37,7 +37,6 @@
 #include "IECoreGL/Camera.h"
 
 #include "IECoreScene/Camera.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/Exception.h"

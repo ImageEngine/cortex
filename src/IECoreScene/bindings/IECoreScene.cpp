@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "AddSmoothSkinningInfluencesOpBinding.h"
-#include "AttributeStateBinding.h"
 #include "CameraBinding.h"
 #include "ClippingPlaneBinding.h"
 #include "CompressSmoothSkinningDataOpBinding.h"
@@ -52,12 +51,9 @@
 #include "ExternalProceduralBinding.h"
 #include "FaceVaryingPromotionOpBinding.h"
 #include "FontBinding.h"
-#include "GroupBinding.h"
 #include "LightBinding.h"
 #include "LimitSmoothSkinningInfluencesOpBinding.h"
 #include "LinkedSceneBinding.h"
-#include "MatrixMotionTransformBinding.h"
-#include "MatrixTransformBinding.h"
 #include "MeshAlgoBinding.h"
 #include "MeshMergeOpBinding.h"
 #include "MeshNormalsOpBinding.h"
@@ -103,7 +99,6 @@
 #include "SpherePrimitiveEvaluatorBinding.h"
 #include "StateRenderableBinding.h"
 #include "TransferSmoothSkinningWeightsOpBinding.h"
-#include "TransformBinding.h"
 #include "TransformOpBinding.h"
 #include "TriangulateOpBinding.h"
 #include "TriangulatorBinding.h"
@@ -136,11 +131,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindPrimitiveOp();
 	bindMeshPrimitive();
 	bindMotionPrimitive();
-	bindTransform();
-	bindMatrixTransform();
-	bindMatrixMotionTransform();
-	bindGroup();
-	bindAttributeState();
 	bindPreWorldRenderable();
 	bindCamera();
 	bindNURBSPrimitive();
