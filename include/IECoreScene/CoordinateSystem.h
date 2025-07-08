@@ -36,21 +36,21 @@
 #define IECORESCENE_COORDINATESYSTEM_H
 
 #include "IECoreScene/Export.h"
-#include "IECoreScene/StateRenderable.h"
+#include "IECoreScene/Renderable.h"
 
 namespace IECoreScene
 {
 
 /// Allows the specification of coordinate systems to Renderers.
 /// \ingroup renderingGroup
-class IECORESCENE_API CoordinateSystem : public StateRenderable
+class IECORESCENE_API CoordinateSystem : public Renderable
 {
 	public:
 
 		CoordinateSystem( const std::string &name = "unspecified" );
 		~CoordinateSystem() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( CoordinateSystem, CoordinateSystemTypeId, StateRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( CoordinateSystem, CoordinateSystemTypeId, Renderable );
 
 		const std::string &getName() const;
 		void setName( const std::string &name );

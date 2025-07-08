@@ -94,7 +94,6 @@
 #include "SmoothSmoothSkinningWeightsOpBinding.h"
 #include "SpherePrimitiveBinding.h"
 #include "SpherePrimitiveEvaluatorBinding.h"
-#include "StateRenderableBinding.h"
 #include "TransferSmoothSkinningWeightsOpBinding.h"
 #include "TransformOpBinding.h"
 #include "TriangulateOpBinding.h"
@@ -115,7 +114,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindParticleReader();
 	bindPDCParticleReader();
 	bindRenderable();
-	bindStateRenderable();
 	bindVisibleRenderable();
 	bindParticleWriter();
 	bindPDCParticleWriter();

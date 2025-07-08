@@ -39,7 +39,6 @@
 #include "IECoreScene/TypedObjectParameter.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
 #include "IECoreScene/Renderable.h"
-#include "IECoreScene/StateRenderable.h"
 #include "IECoreScene/Shader.h"
 #include "IECoreScene/VisibleRenderable.h"
 #include "IECoreScene/SmoothSkinningData.h"
@@ -89,7 +88,6 @@ void bindTypedObjectParameter()
 void IECoreSceneModule::bindTypedObjectParameter()
 {
 	::bindTypedObjectParameter<Renderable>();
-	::bindTypedObjectParameter<StateRenderable>();
 	::bindTypedObjectParameter<Shader>();
 	::bindTypedObjectParameter<VisibleRenderable>();
 	::bindTypedObjectParameter<SmoothSkinningData>();
