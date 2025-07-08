@@ -13,6 +13,7 @@ Breaking Changes
 ----------------
 
 - Renderable : Removed `render()` method.
+- CoordinateSystem : Removed transform.
 - Renderer, AttributeBlock, EditBlock, MotionBlock, TransformBlock, WorldBlock : Removed.
 - IECoreHoudini : Removed.
 - IECoreMaya : Removed.
