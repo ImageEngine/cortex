@@ -49,7 +49,7 @@ enum TypeId
 	RenderableTypeId = 105006,
 	BindableTypeId = 105007,
 	TextureTypeId = 105008,
-	RendererTypeId = 105009,
+	RendererTypeId = 105009, // Obsolete, available for reuse
 	ShaderTypeId = 105010,
 	PrimitiveTypeId = 105011,
 	PointsPrimitiveTypeId = 105012,
@@ -58,8 +58,8 @@ enum TypeId
 	QuadPrimitiveTypeId = 105015,
 	SpherePrimitiveTypeId = 105016,
 	BoxPrimitiveTypeId = 105017,
-	RendererImplementationTypeId = 105018,
-	DeferredRendererImplementationTypeId = 105019,
+	RendererImplementationTypeId = 105018, // Obsolete, available for reuse
+	DeferredRendererImplementationTypeId = 105019, // Obsolete, available for reuse
 	PrimitiveWireframeWidthTypeId = 105020,
 	PrimitiveOutlineWidthTypeId = 105021,
 	PrimitivePointsTypeId = 105022,
@@ -69,7 +69,7 @@ enum TypeId
 	FrameBufferTypeId = 105026,
 	DepthTextureTypeId = 105027,
 	ColorTextureTypeId = 105028,
-	ImmediateRendererImplementationTypeId = 105029,
+	ImmediateRendererImplementationTypeId = 105029, // Obsolete, available for reuse
 	BlendFuncStateComponentTypeId = 105030,
 	BlendColorStateComponentTypeId = 105031,
 	BlendEquationStateComponentTypeId = 105032,
