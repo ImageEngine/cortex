@@ -51,7 +51,6 @@
 #include "ExternalProceduralBinding.h"
 #include "FaceVaryingPromotionOpBinding.h"
 #include "FontBinding.h"
-#include "LightBinding.h"
 #include "LimitSmoothSkinningInfluencesOpBinding.h"
 #include "LinkedSceneBinding.h"
 #include "MeshAlgoBinding.h"
@@ -178,7 +177,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindRemoveSmoothSkinningInfluencesOp();
 	bindTransferSmoothSkinningWeightsOp();
 	bindPointsPrimitiveEvaluator();
-	bindLight();
 	bindContrastSmoothSkinningWeightsOp();
 	bindDiskPrimitive();
 	bindSceneInterface();

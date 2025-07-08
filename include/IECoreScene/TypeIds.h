@@ -124,7 +124,7 @@ enum TypeId
 	PointsPrimitiveEvaluatorTypeId = 108081,
 	PointsMotionOpTypeId = 108082, // Obsolete, available for reuse
 	ShaderNetworkTypeId = 108083,
-	LightTypeId = 108084,
+	LightTypeId = 108084, // Obsolete, available for reuse
 	ContrastSmoothSkinningWeightsOpTypeId = 108085,
 	PointDistributionOpTypeId = 108086,
 	DiskPrimitiveTypeId = 108087,
