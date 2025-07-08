@@ -14,6 +14,7 @@ Breaking Changes
 
 - Renderable : Removed `render()` method.
 - CoordinateSystem : Removed transform.
+- Font : Removed `meshGroup()` method.
 - Options : Removed.
 - CurveExtrudeOp, IDXReader : Removed.
 - Renderer, AttributeBlock, EditBlock, MotionBlock, TransformBlock, WorldBlock : Removed.
