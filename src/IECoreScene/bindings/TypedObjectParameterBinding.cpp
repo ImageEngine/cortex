@@ -43,7 +43,6 @@
 #include "IECoreScene/Shader.h"
 #include "IECoreScene/VisibleRenderable.h"
 #include "IECoreScene/SmoothSkinningData.h"
-#include "IECoreScene/MotionPrimitive.h"
 #include "IECoreScene/Primitive.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/CurvesPrimitive.h"
@@ -95,7 +94,6 @@ void IECoreSceneModule::bindTypedObjectParameter()
 	::bindTypedObjectParameter<VisibleRenderable>();
 	::bindTypedObjectParameter<SmoothSkinningData>();
 
-	::bindTypedObjectParameter<MotionPrimitive>();
 	::bindTypedObjectParameter<Primitive>();
 	::bindTypedObjectParameter<MeshPrimitive>();
 	::bindTypedObjectParameter<CurvesPrimitive>();

@@ -62,7 +62,6 @@
 #include "MeshPrimitiveShrinkWrapOpBinding.h"
 #include "MeshVertexReorderOpBinding.h"
 #include "MixSmoothSkinningWeightsOpBinding.h"
-#include "MotionPrimitiveBinding.h"
 #include "NParticleReaderBinding.h"
 #include "NURBSPrimitiveBinding.h"
 #include "NormalizeSmoothSkinningWeightsOpBinding.h"
@@ -128,7 +127,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindShaderNetworkAlgo();
 	bindPrimitiveOp();
 	bindMeshPrimitive();
-	bindMotionPrimitive();
 	bindCamera();
 	bindNURBSPrimitive();
 	bindMeshPrimitiveBuilder();

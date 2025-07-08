@@ -49,7 +49,6 @@ from MeshPrimitive import *
 from Shader import *
 from RemovePrimitiveVariables import *
 from RenamePrimitiveVariables import *
-from MotionPrimitive import *
 from Camera import *
 from NURBS import *
 from PrimitiveEvaluator import *
