@@ -34,8 +34,6 @@
 
 #include "IECoreScene/Font.h"
 
-#include "IECoreScene/Group.h"
-#include "IECoreScene/MatrixTransform.h"
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TransformOp.h"
@@ -397,44 +395,6 @@ class Font::Implementation : public IECore::RefCounted
 			return MeshAlgo::merge( meshes );
 		}
 
-		GroupPtr meshGroup( const std::string &text ) const
-		{
-			GroupPtr result = new Group;
-
-			if( !text.size() )
-			{
-				return result;
-			}
-
-			V3f translate( 0.0f );
-			for( unsigned i=0; i<text.size(); i++ )
-			{
-				if( text[i] == '\n' )
-				{
-					translate.x = 0;
-					translate.y -= bound().size().y * m_lineSpacing;
-					continue;
-				}
-
-				const Mesh *character = cachedMesh( text[i] );
-				if( character->primitive->variableSize( PrimitiveVariable::Uniform ) )
-				{
-					GroupPtr g = new Group;
-					g->addChild( character->primitive->copy() );
-					g->setTransform( new MatrixTransform( M44f().setTranslation( translate ) ) );
-					result->addChild( g );
-				}
-
-				if( i<text.size()-1 )
-				{
-					const V2f a = advance( text[i], text[i+1] );
-					translate += V3f( a.x, a.y, 0 );
-				}
-			}
-
-			return result;
-		}
-
 		Imath::V2f advance( char first, char second ) const
 		{
 			V2f a = cachedMesh( first )->advance;
@@ -640,11 +600,6 @@ const MeshPrimitive *Font::mesh( char c ) const
 MeshPrimitivePtr Font::mesh( const std::string &text ) const
 {
 	return m_implementation->mesh( text );
-}
-
-GroupPtr Font::meshGroup( const std::string &text ) const
-{
-	return m_implementation->meshGroup( text );
 }
 
 Imath::V2f Font::advance( char first, char second ) const
