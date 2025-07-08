@@ -73,7 +73,6 @@
 #include "NURBSPrimitiveBinding.h"
 #include "NormalizeSmoothSkinningWeightsOpBinding.h"
 #include "OBJReaderBinding.h"
-#include "OptionsBinding.h"
 #include "OutputBinding.h"
 #include "PDCParticleReaderBinding.h"
 #include "PDCParticleWriterBinding.h"
@@ -194,7 +193,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindLight();
 	bindContrastSmoothSkinningWeightsOp();
 	bindDiskPrimitive();
-	bindOptions();
 	bindSceneInterface();
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();

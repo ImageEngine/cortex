@@ -94,7 +94,6 @@ from LightTest import LightTest
 from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
 from DiskPrimitiveTest import DiskPrimitiveTest
 from SWAReaderTest import SWAReaderTest
-from OptionsTest import OptionsTest
 from SceneCacheTest import SceneCacheTest
 from LinkedSceneTest import LinkedSceneTest
 from ExternalProceduralTest import ExternalProceduralTest

@@ -129,7 +129,7 @@ enum TypeId
 	PointDistributionOpTypeId = 108086,
 	DiskPrimitiveTypeId = 108087,
 	MeshFaceFilterOpTypeId = 108088,
-	OptionsTypeId = 108089,
+	OptionsTypeId = 108089, // Obsolete, available for reuse
 	SceneInterfaceTypeId = 108090,
 	SampledSceneInterfaceTypeId = 108091,
 	LinkedSceneTypeId = 108092,
