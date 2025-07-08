@@ -34,8 +34,6 @@
 
 #include "IECoreScene/AttributeState.h"
 
-#include "IECoreScene/Renderer.h"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace boost;
@@ -71,14 +69,6 @@ const CompoundDataMap &AttributeState::attributes() const
 CompoundDataPtr AttributeState::attributesData()
 {
 	return m_attributes;
-}
-
-void AttributeState::render( Renderer *renderer ) const
-{
-	for( CompoundDataMap::const_iterator it=attributes().begin(); it!=attributes().end(); it++ )
-	{
-		renderer->setAttribute( it->first, it->second );
-	}
 }
 
 bool AttributeState::isEqualTo( const Object *other ) const

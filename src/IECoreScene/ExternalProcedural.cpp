@@ -34,8 +34,6 @@
 
 #include "IECoreScene/ExternalProcedural.h"
 
-#include "IECoreScene/Renderer.h"
-
 using namespace IECore;
 using namespace IECoreScene;
 
@@ -84,11 +82,6 @@ CompoundData *ExternalProcedural::parameters()
 const CompoundData *ExternalProcedural::parameters() const
 {
 	return m_parameters.get();
-}
-
-void ExternalProcedural::render( Renderer *renderer ) const
-{
-	renderer->procedural( new Renderer::ExternalProcedural( m_fileName, m_bound, m_parameters->readable() ) );
 }
 
 Imath::Box3f ExternalProcedural::bound() const

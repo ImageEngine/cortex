@@ -65,7 +65,6 @@ class IECORESCENE_API ExternalProcedural : public VisibleRenderable
 		IECore::CompoundData *parameters();
 		const IECore::CompoundData *parameters() const;
 
-		void render( Renderer *renderer ) const override;
 		Imath::Box3f bound() const override;
 
 	private :

@@ -121,18 +121,6 @@ class IECORESCENE_API Group : public VisibleRenderable
 		Group *parent();
 		const Group *parent() const;
 
-		/// Renders all the children in an attribute block along
-		/// with the transform and state.
-		void render( Renderer *renderer ) const override;
-		/// As above, but can optionally omit the
-		/// attribute block scoping.
-		void render( Renderer *renderer, bool inAttributeBlock ) const;
-		/// Renders all the held state, without any attributeBegin/End.
-		/// Doesn't render the transform.
-		void renderState( Renderer *renderer ) const;
-		/// Renders all the held children, without any attributeBegin/End.
-		void renderChildren( Renderer *renderer ) const;
-
 		/// Returns the union of the bounds of the children, transformed
 		/// by transformMatrix().
 		Imath::Box3f bound() const override;

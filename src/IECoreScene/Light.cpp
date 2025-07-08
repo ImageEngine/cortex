@@ -34,8 +34,6 @@
 
 #include "IECoreScene/Light.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"
@@ -103,11 +101,6 @@ CompoundDataPtr Light::parametersData()
 const CompoundDataPtr Light::parametersData() const
 {
 	return m_parameters;
-}
-
-void Light::render( Renderer *renderer ) const
-{
-	renderer->light( m_name, m_handle, parameters() );
 }
 
 bool Light::isEqualTo( const Object *other ) const

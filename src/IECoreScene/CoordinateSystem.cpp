@@ -34,9 +34,7 @@
 
 #include "IECoreScene/CoordinateSystem.h"
 
-#include "IECoreScene/Renderer.h"
 #include "IECoreScene/Transform.h"
-#include "IECoreScene/TransformBlock.h"
 
 #include "IECore/MurmurHash.h"
 
@@ -86,18 +84,6 @@ const Transform *CoordinateSystem::getTransform() const
 void CoordinateSystem::setTransform( TransformPtr transform )
 {
 	m_transform = transform;
-}
-
-void CoordinateSystem::render( Renderer *renderer ) const
-{
-	TransformBlock transformBlock( renderer, static_cast<bool>( m_transform ) );
-
-	if( m_transform )
-	{
-		m_transform->render( renderer );
-	}
-
-	renderer->coordinateSystem( m_name );
 }
 
 bool CoordinateSystem::isEqualTo( const Object *other ) const

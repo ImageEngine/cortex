@@ -68,9 +68,6 @@ class IECORESCENE_API Light : public StateRenderable
 		IECore::CompoundDataPtr parametersData();
 		const IECore::CompoundDataPtr parametersData() const;
 
-		/// Sets this light in Renderer.
-		void render( Renderer *renderer ) const override;
-
 	private:
 
 		static TypeDescription<Light> m_description;

@@ -74,8 +74,6 @@ class IECORESCENE_API PointsPrimitive : public Primitive
 		/// and 1 for all other types.
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
-		void render( Renderer *renderer ) const override;
-
 		void topologyHash( IECore::MurmurHash &h ) const override;
 
 	private:

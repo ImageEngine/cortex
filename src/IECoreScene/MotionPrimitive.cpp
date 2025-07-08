@@ -34,8 +34,6 @@
 
 #include "IECoreScene/MotionPrimitive.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"
@@ -94,51 +92,6 @@ const MotionPrimitive::SnapshotMap &MotionPrimitive::snapshots() const
 MotionPrimitive::SnapshotMap &MotionPrimitive::snapshots()
 {
 	return m_snapshots;
-}
-
-void MotionPrimitive::render( Renderer *renderer ) const
-{
-	if( !m_snapshots.size() )
-	{
-		return;
-	}
-	if( m_snapshots.size()==1 )
-	{
-		m_snapshots.begin()->second->render( renderer );
-		return;
-	}
-
-	IECore::TypeId t = m_snapshots.begin()->second->typeId();
-	size_t cs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Constant );
-	size_t us = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Uniform );
-	size_t vs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Varying );
-	size_t ves = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Vertex );
-	size_t fs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::FaceVarying );
-
-	set<float> times;
-	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
-	{
-		if( it->second->typeId()!=t )
-		{
-			throw Exception( "Primitive types do not match." );
-		}
-		if( it->second->variableSize( PrimitiveVariable::Constant )!=cs ||
-			it->second->variableSize( PrimitiveVariable::Uniform )!=us ||
-			it->second->variableSize( PrimitiveVariable::Varying )!=vs ||
-			it->second->variableSize( PrimitiveVariable::Vertex )!=ves ||
-			it->second->variableSize( PrimitiveVariable::FaceVarying )!=fs
-		)
-		{
-			throw Exception( "Primitive variable sizes do not match." );
-		}
-		times.insert( it->first );
-	}
-	renderer->motionBegin( times );
-		for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
-		{
-			it->second->render( renderer );
-		}
-	renderer->motionEnd();
 }
 
 Imath::Box3f MotionPrimitive::bound() const

@@ -82,8 +82,6 @@ class IECORESCENE_API PatchMeshPrimitive : public Primitive
 		bool uPeriodic() const;
 		bool vPeriodic() const;
 
-		void render( Renderer *renderer ) const override;
-
 		/// Follows the RenderMan specification for variable sizes.
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 

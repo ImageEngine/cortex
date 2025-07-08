@@ -242,9 +242,6 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 		/// horizontal field of view ( in degrees )
 		void setFocalLengthFromFieldOfView( float horizontalFOV );
 
-		void render( Renderer *renderer ) const override;
-
-
 	private:
 
 		Imath::Box2f defaultApertureRect() const;

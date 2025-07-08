@@ -68,12 +68,6 @@ class IECORESCENE_API CoordinateSystem : public StateRenderable
 		/// Sets the Transform applied to the coordinate system.
 		void setTransform( TransformPtr transform );
 
-		/// Calls renderer->coordinateSystem( name ). If a transform
-		/// has been applied then also scopes this in a
-		/// transformBegin/transformEnd with the appropriate
-		/// transformation.
-		void render( Renderer *renderer ) const override;
-
 	private:
 
 		std::string m_name;

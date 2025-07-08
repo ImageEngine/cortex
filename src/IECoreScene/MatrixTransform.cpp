@@ -34,8 +34,6 @@
 
 #include "IECoreScene/MatrixTransform.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 using namespace IECore;
@@ -53,11 +51,6 @@ MatrixTransform::MatrixTransform( const Imath::M44f &m )
 
 MatrixTransform::~MatrixTransform()
 {
-}
-
-void MatrixTransform::render( Renderer *renderer ) const
-{
-	renderer->concatTransform( matrix );
 }
 
 Imath::M44f MatrixTransform::transform( float time ) const

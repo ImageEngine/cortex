@@ -72,9 +72,6 @@ class IECORESCENE_API Shader : public StateRenderable
 		IECore::CompoundData *parametersData();
 		const IECore::CompoundData *parametersData() const;
 
-		/// Sets this shader as the current shader in Renderer.
-		void render( Renderer *renderer ) const override;
-
 	private:
 
 		std::string m_name;

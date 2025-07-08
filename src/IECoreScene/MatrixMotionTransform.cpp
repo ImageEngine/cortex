@@ -34,8 +34,6 @@
 
 #include "IECoreScene/MatrixMotionTransform.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 #include "Imath/ImathFun.h"
@@ -61,31 +59,6 @@ MatrixMotionTransform::MatrixMotionTransform()
 
 MatrixMotionTransform::~MatrixMotionTransform()
 {
-}
-
-void MatrixMotionTransform::render( Renderer *renderer ) const
-{
-	if( !m_snapshots.size() )
-	{
-		return;
-	}
-	if( m_snapshots.size()==1 )
-	{
-		renderer->concatTransform( m_snapshots.begin()->second );
-		return;
-	}
-
-	set<float> times;
-	for( SnapshotMap::const_iterator it = m_snapshots.begin(); it!=m_snapshots.end(); it++ )
-	{
-		times.insert( it->first );
-	}
-	renderer->motionBegin( times );
-		for( SnapshotMap::const_iterator it = m_snapshots.begin(); it!=m_snapshots.end(); it++ )
-		{
-			renderer->concatTransform( it->second );
-		}
-	renderer->motionEnd();
 }
 
 Imath::M44f MatrixMotionTransform::transform( float time ) const
