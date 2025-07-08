@@ -40,19 +40,16 @@
 namespace IECoreScene
 {
 
-IE_CORE_FORWARDDECLARE( MotionPrimitive )
 IE_CORE_FORWARDDECLARE( Primitive )
 IE_CORE_FORWARDDECLARE( MeshPrimitive )
 IE_CORE_FORWARDDECLARE( CurvesPrimitive )
 IE_CORE_FORWARDDECLARE( PointsPrimitive )
 
-typedef IECore::TypedObjectParameter<MotionPrimitive> MotionPrimitiveParameter;
 typedef IECore::TypedObjectParameter<Primitive> PrimitiveParameter;
 typedef IECore::TypedObjectParameter<MeshPrimitive> MeshPrimitiveParameter;
 typedef IECore::TypedObjectParameter<CurvesPrimitive> CurvesPrimitiveParameter;
 typedef IECore::TypedObjectParameter<PointsPrimitive> PointsPrimitiveParameter;
 
-IE_CORE_DECLAREPTR( MotionPrimitiveParameter );
 IE_CORE_DECLAREPTR( PrimitiveParameter );
 IE_CORE_DECLAREPTR( MeshPrimitiveParameter );
 IE_CORE_DECLAREPTR( CurvesPrimitiveParameter );

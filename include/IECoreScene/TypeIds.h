@@ -51,7 +51,7 @@ enum TypeId
 	PrimitiveOpTypeId = 108008,
 	ParticleReaderTypeId = 108009,
 	ParticleWriterTypeId = 108010,
-	MotionPrimitiveTypeId = 108011,
+	MotionPrimitiveTypeId = 108011, // Obsolete, available for reuse
 	TransformTypeId = 108012, // Obsolete, available for reuse
 	MatrixTransformTypeId = 108013, // Obsolete, available for reuse
 	MotionTransformTypeId = 108014, // Obsolete, available for reuse
@@ -71,7 +71,7 @@ enum TypeId
 	MatrixTransformParameterTypeId = 108028, // Obsolete, available for reuse
 	VisibleRenderableParameterTypeId = 108029,
 	GroupParameterTypeId = 108030, // Obsolete, available for reuse
-	MotionPrimitiveParameterTypeId = 108031,
+	MotionPrimitiveParameterTypeId = 108031, // Obsolete, available for reuse
 	PrimitiveParameterTypeId = 108032,
 	MeshPrimitiveParameterTypeId = 108033,
 	PointsPrimitiveParameterTypeId = 108034,
