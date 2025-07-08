@@ -41,17 +41,13 @@
 namespace IECoreScene
 {
 
-IE_CORE_FORWARDDECLARE( Transform )
-
-/// This calls allows the specification of coordinate systems to
-/// Renderers.
+/// Allows the specification of coordinate systems to Renderers.
 /// \ingroup renderingGroup
 class IECORESCENE_API CoordinateSystem : public StateRenderable
 {
 	public:
 
-		CoordinateSystem();
-		CoordinateSystem( const std::string &name, TransformPtr transform=nullptr );
+		CoordinateSystem( const std::string &name = "unspecified" );
 		~CoordinateSystem() override;
 
 		IE_CORE_DECLAREEXTENSIONOBJECT( CoordinateSystem, CoordinateSystemTypeId, StateRenderable );
@@ -59,19 +55,9 @@ class IECORESCENE_API CoordinateSystem : public StateRenderable
 		const std::string &getName() const;
 		void setName( const std::string &name );
 
-		/// Returns the Transform applied to the coordinate system.
-		/// This is the local transform relative to the parent of
-		/// the coordinate system (usually a Group). May return 0
-		/// if no transform has been applied.
-		Transform *getTransform();
-		const Transform *getTransform() const;
-		/// Sets the Transform applied to the coordinate system.
-		void setTransform( TransformPtr transform );
-
 	private:
 
 		std::string m_name;
-		TransformPtr m_transform;
 
 		static const unsigned int m_ioVersion;
 };
