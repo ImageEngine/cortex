@@ -98,7 +98,7 @@ enum TypeId
 	MeshTangentsOpTypeId = 108055,
 	PatchMeshPrimitiveTypeId = 108056,
 	CurvesPrimitiveParameterTypeId = 108057,
-	CurveExtrudeOpTypeId = 108058,
+	CurveExtrudeOpTypeId = 108058, // Obsolete, available for reuse
 	ParameterisedProceduralTypeId = 108059,
 	NParticleReaderTypeId = 108060,
 	CurvesMergeOpTypeId = 108061,

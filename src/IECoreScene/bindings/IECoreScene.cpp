@@ -41,7 +41,6 @@
 #include "CompressSmoothSkinningDataOpBinding.h"
 #include "ContrastSmoothSkinningWeightsOpBinding.h"
 #include "CoordinateSystemBinding.h"
-#include "CurveExtrudeOpBinding.h"
 #include "CurveLineariserBinding.h"
 #include "CurveTangentsOpBinding.h"
 #include "CurvesAlgoBinding.h"
@@ -170,7 +169,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindOBJReader();
 	bindOutput();
 	bindPatchMeshPrimitive();
-	bindCurveExtrudeOp();
 	bindNParticleReader();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
