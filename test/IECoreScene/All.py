@@ -70,7 +70,6 @@ from AttributeStateTest import *
 from CoordinateSystemTest import *
 from OutputTest import OutputTest
 from PatchMeshPrimitiveTest import *
-from CurveExtrudeOp import *
 from NParticleReader import *
 from OBJReaderTest import TestOBJReader
 from CurvesMergeOpTest import CurvesMergeOpTest
