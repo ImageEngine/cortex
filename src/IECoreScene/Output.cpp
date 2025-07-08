@@ -60,7 +60,7 @@ Output::~Output()
 
 void Output::copyFrom( const Object *other, CopyContext *context )
 {
-	PreWorldRenderable::copyFrom( other, context );
+	Renderable::copyFrom( other, context );
 	const Output *tOther = static_cast<const Output *>( other );
 	m_name = tOther->m_name;
 	m_type = tOther->m_type;
@@ -70,7 +70,7 @@ void Output::copyFrom( const Object *other, CopyContext *context )
 
 void Output::save( SaveContext *context ) const
 {
-	PreWorldRenderable::save( context );
+	Renderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_nameEntry, m_name );
 	container->write( g_typeEntry, m_type );
@@ -80,7 +80,7 @@ void Output::save( SaveContext *context ) const
 
 void Output::load( LoadContextPtr context )
 {
-	PreWorldRenderable::load( context );
+	Renderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
@@ -91,7 +91,7 @@ void Output::load( LoadContextPtr context )
 
 bool Output::isEqualTo( const Object *other ) const
 {
-	if( !PreWorldRenderable::isEqualTo( other ) )
+	if( !Renderable::isEqualTo( other ) )
 	{
 		return false;
 	}
@@ -127,7 +127,7 @@ bool Output::isEqualTo( const Object *other ) const
 
 void Output::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	PreWorldRenderable::memoryUsage( a );
+	Renderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() );
 	a.accumulate( m_type.capacity() );
 	a.accumulate( m_data.capacity() );
@@ -136,7 +136,7 @@ void Output::memoryUsage( Object::MemoryAccumulator &a ) const
 
 void Output::hash( MurmurHash &h ) const
 {
-	PreWorldRenderable::hash( h );
+	Renderable::hash( h );
 	h.append( m_name );
 	h.append( m_type );
 	h.append( m_data );

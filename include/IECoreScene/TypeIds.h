@@ -75,7 +75,7 @@ enum TypeId
 	PrimitiveParameterTypeId = 108032,
 	MeshPrimitiveParameterTypeId = 108033,
 	PointsPrimitiveParameterTypeId = 108034,
-	PreWorldRenderableTypeId = 108035,
+	PreWorldRenderableTypeId = 108035, // Obsolete, available for reuse
 	CameraTypeId = 108036,
 	NURBSPrimitiveTypeId = 108037,
 	PointBoundsOpTypeId = 108038, // Obsolete, available for reuse

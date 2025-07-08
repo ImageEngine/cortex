@@ -17,6 +17,7 @@ Breaking Changes
 - Font : Removed `meshGroup()` method.
 - Options, Group, Transform, MatrixTransform, MatrixMotionTransform, AttributeState, Light : Removed.
 - CurveExtrudeOp, IDXReader : Removed.
+- PreWorldRenderable : Removed. All derived classes now derive directly from Renderable.
 - Renderer, AttributeBlock, EditBlock, MotionBlock, TransformBlock, WorldBlock : Removed.
 - IECoreHoudini : Removed.
 - IECoreMaya : Removed.

@@ -94,21 +94,21 @@ Camera::~Camera()
 
 void Camera::copyFrom( const Object *other, CopyContext *context )
 {
-	PreWorldRenderable::copyFrom( other, context );
+	Renderable::copyFrom( other, context );
 	const Camera *tOther = static_cast<const Camera *>( other );
 	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
 
 void Camera::save( SaveContext *context ) const
 {
-	PreWorldRenderable::save( context );
+	Renderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
 void Camera::load( LoadContextPtr context )
 {
-	PreWorldRenderable::load( context );
+	Renderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
@@ -117,7 +117,7 @@ void Camera::load( LoadContextPtr context )
 
 bool Camera::isEqualTo( const Object *other ) const
 {
-	if( !PreWorldRenderable::isEqualTo( other ) )
+	if( !Renderable::isEqualTo( other ) )
 	{
 		return false;
 	}
@@ -135,13 +135,13 @@ bool Camera::isEqualTo( const Object *other ) const
 
 void Camera::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	PreWorldRenderable::memoryUsage( a );
+	Renderable::memoryUsage( a );
 	a.accumulate( m_parameters.get() );
 }
 
 void Camera::hash( MurmurHash &h ) const
 {
-	PreWorldRenderable::hash( h );
+	Renderable::hash( h );
 	m_parameters->hash( h );
 }
 
