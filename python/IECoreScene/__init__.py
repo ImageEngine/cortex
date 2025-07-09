@@ -38,7 +38,6 @@ from ._IECoreScene import *
 
 from .RemovePrimitiveVariables import RemovePrimitiveVariables
 from .RenamePrimitiveVariables import RenamePrimitiveVariables
-from .IDXReader import IDXReader
 from .SWAReader import SWAReader
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreScene" )

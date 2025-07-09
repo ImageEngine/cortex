@@ -75,7 +75,6 @@ from OBJReaderTest import TestOBJReader
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from CurveLineariserTest import CurveLineariserTest
-from IDXReaderTest import IDXReaderTest
 from CurveTangentsOpTest import CurveTangentsOpTest
 from SmoothSkinningDataTest import *
 from PrimitiveVariableTest import PrimitiveVariableTest

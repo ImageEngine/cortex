@@ -15,7 +15,7 @@ Breaking Changes
 - Renderable : Removed `render()` method.
 - CoordinateSystem : Removed transform.
 - Options : Removed.
-- CurveExtrudeOp : Removed.
+- CurveExtrudeOp, IDXReader : Removed.
 - Renderer, AttributeBlock, EditBlock, MotionBlock, TransformBlock, WorldBlock : Removed.
 - IECoreHoudini : Removed.
 - IECoreMaya : Removed.
