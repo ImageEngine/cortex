@@ -13,6 +13,7 @@ Breaking Changes
 ----------------
 
 - Renderable : Removed `render()` method.
+- AttributeBlock, EditBlock, MotionBlock, TransformBlock, WorldBlock : Removed.
 - IECoreHoudini : Removed.
 - IECoreMaya : Removed.
 - IECoreNuke : Removed.

@@ -38,11 +38,6 @@ from ._IECoreScene import *
 
 from .RemovePrimitiveVariables import RemovePrimitiveVariables
 from .RenamePrimitiveVariables import RenamePrimitiveVariables
-from .AttributeBlock import AttributeBlock
-from .TransformBlock import TransformBlock
-from .WorldBlock import WorldBlock
-from .EditBlock import EditBlock
-from .MotionBlock import MotionBlock
 from .IDXReader import IDXReader
 from .SWAReader import SWAReader
 
