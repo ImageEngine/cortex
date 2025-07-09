@@ -38,41 +38,22 @@ import IECore
 
 from Shader import *
 from State import *
-from Renderer import *
 from Group import *
-from Texture import *
-from ImmediateRenderer import *
 from NameStateComponent import *
 from HitRecord import *
-from Selection import *
-from Camera import *
-from PointsPrimitive import *
-from Orientation import *
-from CurvesPrimitiveTest import *
-from MeshPrimitiveTest import *
 from AlphaTextureTest import *
 from LuminanceTextureTest import *
-from UserAttributesTest import *
-from DeferredRenderer import *
-from DiskPrimitiveTest import DiskPrimitiveTest
 from ToGLTextureConverter import TestToGLTexureConverter
 from PrimitiveTest import *
-from CoordinateSystemTest import CoordinateSystemTest
 from TextureLoaderTest import TextureLoaderTest
 from FontTest import FontTest
 from FontLoaderTest import FontLoaderTest
 from ToGLConverterTest import ToGLConverterTest
 from CachedConverterTest import CachedConverterTest
-from InstancingTest import InstancingTest
 from BufferTest import BufferTest
-from ShadingTest import ShadingTest
 from ShaderLoaderTest import ShaderLoaderTest
 from ShaderStateComponentTest import ShaderStateComponentTest
 from ToGLStateConverterTest import ToGLStateConverterTest
-
-if IECore.withFreeType() :
-
-	from TextTest import *
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
