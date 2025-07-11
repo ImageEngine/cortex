@@ -49,7 +49,7 @@ import IECoreScene
 
 class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
-	def runPointAtVTest( self, curvesPrimitive, expectedPositions=None, expectedLengths=None, visualTest=False, printPoints=False ) :
+	def runPointAtVTest( self, curvesPrimitive, expectedPositions=None, expectedLengths=None, printPoints=False ) :
 
 		e = IECoreScene.CurvesPrimitiveEvaluator( curvesPrimitive )
 		r = e.createResult()
@@ -83,34 +83,6 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 		if printPoints :
 
 			print( repr( p ).replace( "),", "),\n" ) )
-
-		if visualTest :
-
-			import IECoreGL
-			IECoreGL.init( False )
-
-			r = IECoreGL.Renderer()
-			r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-
-			pointsPrimitive = IECoreScene.PointsPrimitive( p )
-			pointsPrimitive["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.1 ) )
-
-			with IECoreScene.WorldBlock( r ) :
-
-				w = IECoreGL.SceneViewer( "scene", r.scene() )
-
-				with IECoreScene.AttributeBlock( r ) :
-
-					r.shader( "surface", "red", { "gl:fragmentSource" : IECore.StringData( "void main() { gl_FragColor = vec4( 1, 0, 0, 1 ); }" ) } )
-					r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
-					curvesPrimitive.render( r )
-
-				with IECoreScene.AttributeBlock( r ) :
-
-					r.shader( "surface", "blue", { "gl:fragmentSource" : IECore.StringData( "void main() { gl_FragColor = vec4( 0, 0, 1, 1 ); }" ) } )
-					pointsPrimitive.render( r )
-
-			w.start()
 
 	def testLinearSubsetLength( self ) :
 
@@ -267,7 +239,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 2.2106194496154785 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test3SegmentBSplineDoubledEndpoints( self ) :
 
@@ -345,7 +317,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 3.61808 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test2Curve3SegmentBSpline( self ) :
 
@@ -478,7 +450,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 2.2106194496154785, 2.2106194496154785 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def testPeriodicBSpline( self ) :
 
@@ -553,7 +525,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 2.917539119 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test2CurvePeriodicBSpline( self ) :
 
@@ -682,7 +654,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 2.917539119, 2.917539119 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test3SegmentLinear( self ) :
 
@@ -757,7 +729,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 5.0 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test3SegmentLinearDoubledEndpoints( self ) :
 
@@ -835,7 +807,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 5.0 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test2Curve3SegmentLinear( self ) :
 
@@ -967,7 +939,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 5.0, 5.0 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test3SegmentPeriodicLinear( self ) :
 
@@ -1042,7 +1014,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 7.23606777 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def test2Curve3SegmentPeriodicLinear( self ) :
 
@@ -1173,7 +1145,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		lengths = IECore.FloatVectorData( [ 7.23606777, 7.23606777 ] )
 
-		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, visualTest=False, printPoints=False )
+		self.runPointAtVTest( c, expectedPositions=expected, expectedLengths=lengths, printPoints=False )
 
 	def testClosestPoint( self ) :
 

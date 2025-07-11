@@ -36,7 +36,6 @@
 
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/MotionPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/Primitive.h"
 
@@ -45,13 +44,11 @@
 namespace IECore
 {
 
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MotionPrimitiveParameter, IECoreScene::MotionPrimitiveParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::PrimitiveParameter, IECoreScene::PrimitiveParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MeshPrimitiveParameter, IECoreScene::MeshPrimitiveParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::CurvesPrimitiveParameter, IECoreScene::CurvesPrimitiveParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::PointsPrimitiveParameter, IECoreScene::PointsPrimitiveParameterTypeId );
 
-template class TypedObjectParameter<IECoreScene::MotionPrimitive>;
 template class TypedObjectParameter<IECoreScene::Primitive>;
 template class TypedObjectParameter<IECoreScene::MeshPrimitive>;
 template class TypedObjectParameter<IECoreScene::CurvesPrimitive>;

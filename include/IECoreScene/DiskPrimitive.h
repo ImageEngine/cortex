@@ -67,7 +67,6 @@ class IECORESCENE_API DiskPrimitive : public Primitive
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
 		Imath::Box3f bound() const override;
-		void render( Renderer *renderer ) const override;
 
 		void topologyHash( IECore::MurmurHash &h ) const override;
 

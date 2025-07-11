@@ -34,8 +34,6 @@
 
 #include "IECoreScene/SpherePrimitive.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/Exception.h"
 #include "IECore/MurmurHash.h"
 #include "IECore/SimpleTypedData.h"
@@ -153,12 +151,6 @@ Imath::Box3f SpherePrimitive::bound() const
 		V3f( -m_radius, -m_radius, m_radius * m_zMin ),
 		V3f( m_radius, m_radius, m_radius * m_zMax )
 	);
-}
-
-void SpherePrimitive::render( Renderer *renderer ) const
-{
-	assert( renderer );
-	renderer->sphere( m_radius, m_zMin, m_zMax, m_thetaMax, variables );
 }
 
 void SpherePrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )

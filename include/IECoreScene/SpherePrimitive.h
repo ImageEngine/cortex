@@ -84,8 +84,6 @@ class IECORESCENE_API SpherePrimitive : public Primitive
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
 		Imath::Box3f bound() const override;
-		/// Render the sphere
-		void render( Renderer *renderer ) const override;
 
 		void topologyHash( IECore::MurmurHash &h ) const override;
 

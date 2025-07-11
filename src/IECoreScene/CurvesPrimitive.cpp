@@ -34,8 +34,6 @@
 
 #include "IECoreScene/CurvesPrimitive.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 using namespace IECore;
@@ -213,11 +211,6 @@ void CurvesPrimitive::setTopology( ConstIntVectorDataPtr verticesPerCurve, const
 
 		m_numVerts += v[i];
 	}
-}
-
-void CurvesPrimitive::render( Renderer *renderer ) const
-{
-	renderer->curves( m_basis, m_periodic, m_vertsPerCurve, variables );
 }
 
 size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const

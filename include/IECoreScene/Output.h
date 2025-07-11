@@ -36,21 +36,21 @@
 #define IECORESCENE_OUTPUT_H
 
 #include "IECoreScene/Export.h"
-#include "IECoreScene/PreWorldRenderable.h"
+#include "IECoreScene/Renderable.h"
 
 namespace IECoreScene
 {
 
 /// Describes an output image to be rendered.
 /// \ingroup renderingGroup
-class IECORESCENE_API Output : public PreWorldRenderable
+class IECORESCENE_API Output : public Renderable
 {
 	public:
 
 		Output( const std::string &name="default", const std::string &type="exr", const std::string &data="rgba", IECore::CompoundDataPtr parameters = new IECore::CompoundData );
 		~Output() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Output, OutputTypeId, PreWorldRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Output, OutputTypeId, Renderable );
 
 		void setName( const std::string &name );
 		const std::string &getName() const;
@@ -68,8 +68,6 @@ class IECORESCENE_API Output : public PreWorldRenderable
 		/// (it calls readable() or writable() for you).
 		IECore::CompoundData *parametersData();
 		const IECore::CompoundData *parametersData() const;
-
-		void render( Renderer *renderer ) const override;
 
 	private:
 
