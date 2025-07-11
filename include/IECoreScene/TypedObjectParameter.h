@@ -41,19 +41,16 @@ namespace IECoreScene
 {
 
 IE_CORE_FORWARDDECLARE( Renderable )
-IE_CORE_FORWARDDECLARE( StateRenderable )
 IE_CORE_FORWARDDECLARE( Shader )
 IE_CORE_FORWARDDECLARE( VisibleRenderable )
 IE_CORE_FORWARDDECLARE( SmoothSkinningData )
 
 typedef IECore::TypedObjectParameter<Renderable> RenderableParameter;
-typedef IECore::TypedObjectParameter<StateRenderable> StateRenderableParameter;
 typedef IECore::TypedObjectParameter<Shader> ShaderParameter;
 typedef IECore::TypedObjectParameter<VisibleRenderable> VisibleRenderableParameter;
 typedef IECore::TypedObjectParameter<SmoothSkinningData> SmoothSkinningDataParameter;
 
 IE_CORE_DECLAREPTR( RenderableParameter );
-IE_CORE_DECLAREPTR( StateRenderableParameter );
 IE_CORE_DECLAREPTR( ShaderParameter );
 IE_CORE_DECLAREPTR( VisibleRenderableParameter );
 IE_CORE_DECLAREPTR( SmoothSkinningDataParameter );
