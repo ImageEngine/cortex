@@ -36,21 +36,19 @@
 #define IECORESCENE_CLIPPINGPLANE_H
 
 #include "IECoreScene/Export.h"
-#include "IECoreScene/PreWorldRenderable.h"
+#include "IECoreScene/Renderable.h"
 
 namespace IECoreScene
 {
 
-class IECORESCENE_API ClippingPlane : public PreWorldRenderable
+class IECORESCENE_API ClippingPlane : public Renderable
 {
 	public:
 
 		ClippingPlane();
 		~ClippingPlane() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( ClippingPlane, ClippingPlaneTypeId, PreWorldRenderable );
-
-		void render( Renderer *renderer ) const override;
+		IE_CORE_DECLAREEXTENSIONOBJECT( ClippingPlane, ClippingPlaneTypeId, Renderable );
 
 };
 

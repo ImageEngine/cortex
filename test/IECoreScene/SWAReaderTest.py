@@ -101,7 +101,6 @@ class SWAReaderTest( unittest.TestCase ) :
 	def testCanRead( self ) :
 
 		self.assertTrue( IECoreScene.SWAReader.canRead( os.path.join( "test", "IECore", "data", "swaFiles", "test.swa" ) ) )
-		self.assertFalse( IECoreScene.IDXReader.canRead( os.path.join( "test", "IECore", "data", "cobFiles/ball.cob" ) ) )
 		self.assertFalse( IECoreScene.SWAReader.canRead( os.path.join( "test", "IECore", "data", "idxFiles", "test.idx" ) ) )
 		self.assertFalse( IECoreScene.SWAReader.canRead( os.path.join( "test", "IECore", "data", "empty" ) ) )
 

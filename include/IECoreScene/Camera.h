@@ -36,12 +36,12 @@
 #define IECORESCENE_CAMERA_H
 
 #include "IECoreScene/Export.h"
-#include "IECoreScene/PreWorldRenderable.h"
+#include "IECoreScene/Renderable.h"
 
 namespace IECoreScene
 {
 
-class IECORESCENE_API Camera : public PreWorldRenderable
+class IECORESCENE_API Camera : public Renderable
 {
 	public:
 		enum FilmFit
@@ -56,7 +56,7 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 		Camera( IECore::CompoundDataPtr parameters = new IECore::CompoundData );
 		~Camera() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Camera, CameraTypeId, PreWorldRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Camera, CameraTypeId, Renderable );
 
 		IECore::CompoundDataMap &parameters();
 		const IECore::CompoundDataMap &parameters() const;
@@ -241,9 +241,6 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 		/// Set the focal length so that based on the current aperture, we get the specified
 		/// horizontal field of view ( in degrees )
 		void setFocalLengthFromFieldOfView( float horizontalFOV );
-
-		void render( Renderer *renderer ) const override;
-
 
 	private:
 

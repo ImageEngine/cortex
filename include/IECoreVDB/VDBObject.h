@@ -81,7 +81,6 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 		std::vector<std::string> gridNames() const;
 
 		Imath::Box3f bound() const override;
-		void render( IECoreScene::Renderer *renderer ) const override;
 
 		IECore::CompoundObjectPtr metadata( const std::string &name );
 

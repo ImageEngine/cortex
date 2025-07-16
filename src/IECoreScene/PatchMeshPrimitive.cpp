@@ -34,8 +34,6 @@
 
 #include "IECoreScene/PatchMeshPrimitive.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -325,19 +323,6 @@ bool PatchMeshPrimitive::uPeriodic() const
 bool PatchMeshPrimitive::vPeriodic() const
 {
 	return m_vPeriodic;
-}
-
-void PatchMeshPrimitive::render( Renderer *renderer ) const
-{
-	renderer->patchMesh(
-		m_uBasis,
-		m_vBasis,
-		m_uPoints,
-		m_uPeriodic,
-		m_vPoints,
-		m_vPeriodic,
-		Primitive::variables
-	);
 }
 
 size_t PatchMeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const

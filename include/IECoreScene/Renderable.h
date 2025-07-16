@@ -43,8 +43,6 @@
 namespace IECoreScene
 {
 
-IE_CORE_FORWARDDECLARE( Renderer );
-
 /// An abstract class to define objects which are renderable
 /// \ingroup renderingGroup
 class IECORESCENE_API Renderable : public IECore::BlindDataHolder
@@ -55,9 +53,6 @@ class IECORESCENE_API Renderable : public IECore::BlindDataHolder
 		~Renderable() override;
 
 		IE_CORE_DECLAREEXTENSIONOBJECT( Renderable, RenderableTypeId, IECore::BlindDataHolder );
-
-		/// Render the object held by this instance via the given renderer.
-		virtual void render( Renderer *renderer ) const = 0;
 
 	private:
 

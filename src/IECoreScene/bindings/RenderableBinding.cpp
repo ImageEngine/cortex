@@ -39,7 +39,6 @@
 #include "RenderableBinding.h"
 
 #include "IECoreScene/Renderable.h"
-#include "IECoreScene/Renderer.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
@@ -51,16 +50,9 @@ using namespace IECoreScene;
 namespace IECoreSceneModule
 {
 
-static void render( const Renderable &renderable, Renderer *renderer )
-{
-	IECorePython::ScopedGILRelease gilRelease;
-	renderable.render( renderer );
-}
-
 void bindRenderable()
 {
 	RunTimeTypedClass<Renderable>( "An abstract class to define objects which are renderable" )
-		.def( "render", &render )
 	;
 }
 

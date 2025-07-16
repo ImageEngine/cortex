@@ -50,24 +50,8 @@ class FontTest( unittest.TestCase ) :
 	def test( self ) :
 
 		f = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
-
-		g = f.meshGroup( "hello world" )
 		m = f.mesh( "hello world" )
-
-		self.assertTrue( g.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
 		self.assertTrue( m.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
-
-		v = 0
-		for c in g.children() :
-
-			self.assertTrue( c.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
-			self.assertEqual( len( c.children() ), 1 )
-			self.assertTrue( c.children()[0].isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
-			self.assertEqual( c.children()[0]["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-
-			v += c.children()[0]["P"].data.size()
-
-		self.assertEqual( v, m["P"].data.size() )
 
 	def testCharBound( self ) :
 

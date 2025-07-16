@@ -35,7 +35,6 @@
 #include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreScene/PolygonIterator.h"
-#include "IECoreScene/Renderer.h"
 
 #include "IECore/ClassData.h"
 #include "IECore/MurmurHash.h"
@@ -452,11 +451,6 @@ size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolati
 			return 0;
 
 	}
-}
-
-void MeshPrimitive::render( Renderer *renderer ) const
-{
-	renderer->mesh( m_verticesPerFace, m_vertexIds, m_interpolation, variables );
 }
 
 void MeshPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )
