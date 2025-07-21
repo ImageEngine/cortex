@@ -1,6 +1,10 @@
 10.5.x.x (relative to 10.5.15.1)
 ========
 
+Fixes
+-----
+
+VDBObject : metadata() now just returns existing metadata, without modifying it.
 
 
 10.5.15.1 (relative to 10.5.15.0)
