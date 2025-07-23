@@ -36,7 +36,6 @@
 #include "IECoreAlembic/ObjectReader.h"
 
 #include "IECoreScene/Camera.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECore/SimpleTypedData.h"
 

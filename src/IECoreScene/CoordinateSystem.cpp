@@ -34,10 +34,6 @@
 
 #include "IECoreScene/CoordinateSystem.h"
 
-#include "IECoreScene/Renderer.h"
-#include "IECoreScene/Transform.h"
-#include "IECoreScene/TransformBlock.h"
-
 #include "IECore/MurmurHash.h"
 
 using namespace IECore;
@@ -49,13 +45,8 @@ static IndexedIO::EntryID g_transformEntry("transform");
 const unsigned int CoordinateSystem::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CoordinateSystem );
 
-CoordinateSystem::CoordinateSystem()
-	: m_name( "unspecified" ), m_transform( nullptr )
-{
-}
-
-CoordinateSystem::CoordinateSystem( const std::string &name, TransformPtr transform )
-	: m_name( name ), m_transform( transform )
+CoordinateSystem::CoordinateSystem( const std::string &name )
+	:	m_name( name )
 {
 }
 
@@ -73,36 +64,9 @@ void CoordinateSystem::setName( const std::string &name )
 	m_name = name;
 }
 
-Transform *CoordinateSystem::getTransform()
-{
-	return m_transform.get();
-}
-
-const Transform *CoordinateSystem::getTransform() const
-{
-	return m_transform.get();
-}
-
-void CoordinateSystem::setTransform( TransformPtr transform )
-{
-	m_transform = transform;
-}
-
-void CoordinateSystem::render( Renderer *renderer ) const
-{
-	TransformBlock transformBlock( renderer, static_cast<bool>( m_transform ) );
-
-	if( m_transform )
-	{
-		m_transform->render( renderer );
-	}
-
-	renderer->coordinateSystem( m_name );
-}
-
 bool CoordinateSystem::isEqualTo( const Object *other ) const
 {
-	if( !StateRenderable::isEqualTo( other ) )
+	if( !Renderable::isEqualTo( other ) )
 	{
 		return false;
 	}
@@ -111,75 +75,39 @@ bool CoordinateSystem::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
-	if( (bool)m_transform != (bool)c->m_transform )
-	{
-		return false;
-	}
-	if( m_transform )
-	{
-		return m_transform->isEqualTo( c->m_transform.get() );
-	}
 	return true;
 }
 
 void CoordinateSystem::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	StateRenderable::memoryUsage( a );
+	Renderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() + sizeof( m_name ) );
-	if( m_transform )
-	{
-		a.accumulate( m_transform.get() );
-	}
 }
 
 void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 {
-	StateRenderable::copyFrom( other, context );
+	Renderable::copyFrom( other, context );
 	const CoordinateSystem *c = static_cast<const CoordinateSystem *>( other );
 	m_name = c->m_name;
-	if( c->m_transform )
-	{
-		m_transform = context->copy<Transform>( c->m_transform.get() );
-	}
-	else
-	{
-		m_transform = nullptr;
-	}
 }
 
 void CoordinateSystem::save( SaveContext *context ) const
 {
-	StateRenderable::save( context );
+	Renderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_nameEntry, m_name );
-	if( m_transform )
-	{
-		context->save( m_transform.get(), container.get(), g_transformEntry );
-	}
 }
 
 void CoordinateSystem::load( LoadContextPtr context )
 {
-	StateRenderable::load( context );
+	Renderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
-	m_transform = nullptr;
-	try
-	{
-		m_transform = context->load<Transform>( container.get(), g_transformEntry );
-	}
-	catch( ... )
-	{
-	}
 }
 
 void CoordinateSystem::hash( MurmurHash &h ) const
 {
-	StateRenderable::hash( h );
+	Renderable::hash( h );
 	h.append( m_name );
-	if( m_transform )
-	{
-		m_transform->hash( h );
-	}
 }

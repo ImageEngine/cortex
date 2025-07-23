@@ -34,8 +34,6 @@
 
 #include "IECoreScene/PointsPrimitive.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MessageHandler.h"
 #include "IECore/MurmurHash.h"
 #include "IECore/SimpleTypedData.h"
@@ -250,9 +248,4 @@ size_t PointsPrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 		default :
 			return 1;
 	}
-}
-
-void PointsPrimitive::render( Renderer *renderer ) const
-{
-	renderer->points( getNumPoints(), variables );
 }

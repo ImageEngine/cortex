@@ -39,7 +39,6 @@
 #include "FontBinding.h"
 
 #include "IECoreScene/Font.h"
-#include "IECoreScene/Group.h"
 #include "IECoreScene/MeshPrimitive.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -89,7 +88,6 @@ void bindFont()
 		.def( "getLineSpacing", &Font::getLineSpacing )
 		.def( "mesh", &mesh1 )
 		.def( "mesh", &mesh2 )
-		.def( "meshGroup", &Font::meshGroup )
 		.def( "advance", &Font::advance )
 		.def( "bound", (Imath::Box2f (Font::*)( )const)&Font::bound )
 		.def( "bound", (Imath::Box2f (Font::*)( char )const)&Font::bound )

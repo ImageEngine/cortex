@@ -34,8 +34,6 @@
 
 #include "IECoreScene/Shader.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 using namespace IECore;
@@ -103,14 +101,9 @@ const CompoundData *Shader::parametersData() const
 	return m_parameters.get();
 }
 
-void Shader::render( Renderer *renderer ) const
-{
-	renderer->shader( m_type, m_name, parameters() );
-}
-
 bool Shader::isEqualTo( const Object *other ) const
 {
-	if( !StateRenderable::isEqualTo( other ) )
+	if( !Renderable::isEqualTo( other ) )
 	{
 		return false;
 	}
@@ -128,7 +121,7 @@ bool Shader::isEqualTo( const Object *other ) const
 
 void Shader::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	StateRenderable::memoryUsage( a );
+	Renderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() );
 	a.accumulate( m_type.capacity() );
 	a.accumulate( m_parameters.get() );
@@ -136,7 +129,7 @@ void Shader::memoryUsage( Object::MemoryAccumulator &a ) const
 
 void Shader::copyFrom( const Object *other, CopyContext *context )
 {
-	StateRenderable::copyFrom( other, context );
+	Renderable::copyFrom( other, context );
 	const Shader *s = static_cast<const Shader *>( other );
 	m_name = s->m_name;
 	m_type = s->m_type;
@@ -145,7 +138,7 @@ void Shader::copyFrom( const Object *other, CopyContext *context )
 
 void Shader::save( SaveContext *context ) const
 {
-	StateRenderable::save( context );
+	Renderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_nameEntry, m_name );
 	container->write( g_typeEntry, m_type );
@@ -154,7 +147,7 @@ void Shader::save( SaveContext *context ) const
 
 void Shader::load( LoadContextPtr context )
 {
-	StateRenderable::load( context );
+	Renderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
@@ -164,7 +157,7 @@ void Shader::load( LoadContextPtr context )
 
 void Shader::hash( MurmurHash &h ) const
 {
-	StateRenderable::hash( h );
+	Renderable::hash( h );
 	h.append( m_name );
 	h.append( m_type );
 	m_parameters->hash( h );

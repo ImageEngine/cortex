@@ -152,9 +152,6 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
-		/// Render the mesh
-		void render( Renderer *renderer ) const override;
-
 		/// Creates a box mesh.
 		/// \todo Add subdivisions and texture coordinates.
 		static MeshPrimitivePtr createBox( const Imath::Box3f &b );

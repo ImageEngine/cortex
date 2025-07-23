@@ -81,8 +81,6 @@ class IECORESCENE_API NURBSPrimitive : public Primitive
 
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
-		void render( Renderer *renderer ) const override;
-
 		void topologyHash( IECore::MurmurHash &h ) const override;
 
 	private:

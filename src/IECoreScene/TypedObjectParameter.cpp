@@ -34,15 +34,9 @@
 
 #include "IECoreScene/TypedObjectParameter.h"
 
-#include "IECoreScene/AttributeState.h"
-#include "IECoreScene/Group.h"
-#include "IECoreScene/MatrixMotionTransform.h"
-#include "IECoreScene/MatrixTransform.h"
 #include "IECoreScene/Renderable.h"
 #include "IECoreScene/Shader.h"
 #include "IECoreScene/SmoothSkinningData.h"
-#include "IECoreScene/StateRenderable.h"
-#include "IECoreScene/Transform.h"
 #include "IECoreScene/VisibleRenderable.h"
 
 #include "IECore/TypedObjectParameter.inl"
@@ -51,25 +45,13 @@ namespace IECore
 {
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::RenderableParameter, IECoreScene::RenderableParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::StateRenderableParameter, IECoreScene::StateRenderableParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::AttributeStateParameter, IECoreScene::AttributeStateParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::ShaderParameter, IECoreScene::ShaderParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::TransformParameter, IECoreScene::TransformParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MatrixMotionTransformParameter, IECoreScene::MatrixMotionTransformParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MatrixTransformParameter, IECoreScene::MatrixTransformParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::VisibleRenderableParameter, IECoreScene::VisibleRenderableParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::GroupParameter, IECoreScene::GroupParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::SmoothSkinningDataParameter, IECoreScene::SmoothSkinningDataParameterTypeId );
 
 template class TypedObjectParameter<IECoreScene::Renderable>;
-template class TypedObjectParameter<IECoreScene::StateRenderable>;
-template class TypedObjectParameter<IECoreScene::AttributeState>;
 template class TypedObjectParameter<IECoreScene::Shader>;
-template class TypedObjectParameter<IECoreScene::Transform>;
-template class TypedObjectParameter<IECoreScene::MatrixMotionTransform>;
-template class TypedObjectParameter<IECoreScene::MatrixTransform>;
 template class TypedObjectParameter<IECoreScene::VisibleRenderable>;
-template class TypedObjectParameter<IECoreScene::Group>;
 template class TypedObjectParameter<IECoreScene::SmoothSkinningData>;
 
 }
