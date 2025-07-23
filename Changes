@@ -1,6 +1,11 @@
 10.6.x.x (relative to 10.6.0.0a1)
 ========
 
+Improvements
+------------
+
+- RefCounted, RunTimeTyped : Inlined constructor and destructor.
+
 Breaking Changes
 ----------------
 

@@ -218,8 +218,8 @@ class IECORE_API RunTimeTyped : public RefCounted
 
 		IE_CORE_DECLAREMEMBERPTR( RunTimeTyped );
 
-		RunTimeTyped();
-		~RunTimeTyped() override;
+		RunTimeTyped() {}
+		~RunTimeTyped() override {}
 
 		//! @name Type identification functions.
 		/// These functions provide useful queries about the typing
