@@ -600,16 +600,6 @@ o.Add(
 		( "IECoreScene.MeshMergeOp", os.path.join( "common", "primitive", "mesh", "merge"  ) ),
 		( "IECoreScene.MeshVertexReorderOp", os.path.join( "common", "primitive", "mesh", "vertexReorder" ) ),
 		( "IECoreScene.MeshPrimitiveShrinkWrapOp", os.path.join( "common", "primitive", "mesh", "shrinkWrap" ) ),
-		( "IECoreScene.AddSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "addInfluences" ) ),
-		( "IECoreScene.RemoveSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "removeInfluences" ) ),
-		( "IECoreScene.CompressSmoothSkinningDataOp", os.path.join( "rigging", "smoothSkinning", "compress" ) ),
-		( "IECoreScene.DecompressSmoothSkinningDataOp", os.path.join( "rigging", "smoothSkinning", "decompress" ) ),
-		( "IECoreScene.NormalizeSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "normalizeWeights" ) ),
-		( "IECoreScene.ReorderSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "reorderInfluences" ) ),
-		( "IECoreScene.SmoothSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "smoothWeights" ) ),
-		( "IECoreScene.ContrastSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "contrastWeights" ) ),
-		( "IECoreScene.LimitSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "limitInfluences" ) ),
-		( "IECoreScene.TransferSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "transferWeights" ) ),
 	]
 )
 

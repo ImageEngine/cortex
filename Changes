@@ -1,3 +1,11 @@
+10.6.x.x (relative to 10.6.0.0a1)
+========
+
+Breaking Changes
+----------------
+
+- SmoothSkinningData : Removed, along with all associated Ops and Parameters.
+
 10.6.0.0a1 (relative to 10.5.15.1)
 ==========
 
