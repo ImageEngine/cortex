@@ -44,15 +44,19 @@
 // OpenVDB 10.0 and earlier used `boost::python` for its Python bindings, but
 // this was switched to PyBind11 in OpenVDB 10.1. We need to take a different
 // approach to binding VDBObject's grid accessors in each case.
-#if OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER > 10 || OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER == 10 && OPENVDB_LIBRARY_MINOR_VERSION_NUMBER >= 1
+// For OpenVDB 12 they yet again changed bindings to nanobind instead.
+#if OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER == 11 || OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER == 10 && OPENVDB_LIBRARY_MINOR_VERSION_NUMBER >= 1
 #include "IECorePython/PyBindConverter.h"
 #define IECOREVDB_USE_PYBIND
+#elif OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER > 11
+#include "IECorePython/NanoBindConverter.h"
+#define IECOREVDB_USE_NANOBIND
 #endif
 
 using namespace boost::python;
 using namespace IECoreVDB;
 
-#ifndef IECOREVDB_USE_PYBIND
+#if !defined( IECOREVDB_USE_PYBIND ) && !defined( IECOREVDB_USE_NANOBIND )
 
 namespace
 {
@@ -148,7 +152,7 @@ void insertGrid( VDBObject::Ptr vdbObject, boost::python::object pyObject )
 
 } // namespace
 
-#endif // #ifndef IECOREVDB_USE_PYBIND
+#endif // #if !defined( IECOREVDB_USE_PYBIND ) && !defined( IECOREVDB_USE_NANOBIND )
 
 namespace
 {
@@ -169,8 +173,10 @@ boost::python::list gridNames( VDBObject::Ptr vdbObject )
 BOOST_PYTHON_MODULE( _IECoreVDB )
 {
 
-#ifdef IECOREVDB_USE_PYBIND
+#if defined( IECOREVDB_USE_PYBIND )
 	IECorePython::PyBindConverter<openvdb::GridBase::Ptr>::registerConverters();
+#elif defined( IECOREVDB_USE_NANOBIND )
+	IECorePython::NanoBindConverter<openvdb::GridBase::Ptr>::registerConverters();
 #endif
 
 	IECorePython::RunTimeTypedClass<VDBObject>()
@@ -179,7 +185,7 @@ BOOST_PYTHON_MODULE( _IECoreVDB )
 		.def("gridNames", &::gridNames)
 		.def("metadata", &VDBObject::metadata)
 		.def("removeGrid", &VDBObject::removeGrid)
-#ifdef IECOREVDB_USE_PYBIND
+#if defined( IECOREVDB_USE_PYBIND ) || defined( IECOREVDB_USE_NANOBIND )
 		.def( "findGrid", (openvdb::GridBase::Ptr (VDBObject::*)( const std::string &name ))&VDBObject::findGrid )
 		.def( "insertGrid", &VDBObject::insertGrid )
 #else

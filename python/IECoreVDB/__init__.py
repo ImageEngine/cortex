@@ -41,7 +41,10 @@ import warnings
 # we use the warnings module to suppress these during the import
 with warnings.catch_warnings():
 	warnings.simplefilter("ignore")
-	import pyopenvdb
+	try:
+		import pyopenvdb
+	except:
+		import openvdb
 
 from ._IECoreVDB import *
 
