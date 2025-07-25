@@ -46,14 +46,6 @@ using namespace IECore;
 RunTimeTyped::Mutex RunTimeTyped::g_baseTypeIdsMutex;
 RunTimeTyped::Mutex RunTimeTyped::g_derivedTypeIdsMutex;
 
-RunTimeTyped::RunTimeTyped()
-{
-}
-
-RunTimeTyped::~RunTimeTyped()
-{
-}
-
 TypeId RunTimeTyped::typeId() const
 {
 	return staticTypeId();
