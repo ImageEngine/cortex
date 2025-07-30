@@ -1907,6 +1907,7 @@ if doConfigure :
 		# source list
 		imageSources = sorted( glob.glob( "src/IECoreImage/*.cpp" ) )
 		imageHeaders = sorted( glob.glob( "include/IECoreImage/*.h" ) + glob.glob( "include/IECoreImage/*.inl" ) )
+		imagePrivateHeaders =  glob.glob( "include/IECoreImage/Private/*.h" )
 		imagePythonHeaders = sorted( glob.glob( "include/IECoreImageBindings/*.h" ) + glob.glob( "include/IECoreImageBindings/*.inl" ) )
 		imagePythonSources = sorted( glob.glob( "src/IECoreImageBindings/*.cpp" ) )
 		imagePythonModuleSources = sorted( glob.glob( "src/IECoreImageModule/*.cpp" ) )
@@ -1930,10 +1931,12 @@ if doConfigure :
 
 		# headers
 		imageHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImage", imageHeaders )
+		imagePrivateHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImage/Private", imagePrivateHeaders )
+
 		if env[ "INSTALL_CREATE_SYMLINKS" ] :
 			imageEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imageEnv, imageEnv["INSTALL_HEADER_DIR"] ) )
-		imageEnv.Alias( "install", imageHeaderInstall )
-		imageEnv.Alias( "installImage", imageHeaderInstall )
+		imageEnv.Alias( "install", [ imageHeaderInstall, imagePrivateHeaderInstall ] )
+		imageEnv.Alias( "installImage", [ imageHeaderInstall, imagePrivateHeaderInstall ] )
 
 		# python headers
 		imagePythonHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImageBindings", imagePythonHeaders )
@@ -1990,6 +1993,7 @@ scenePythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreScene" )
 
 sceneSources = sorted( glob.glob( "src/IECoreScene/*.cpp" ) )
 sceneHeaders = glob.glob( "include/IECoreScene/*.h" ) + glob.glob( "include/IECoreScene/*.inl" )
+scenePrivateHeaders =  glob.glob( "include/IECoreScene/private/*.h" )
 scenePythonModuleSources = sorted( glob.glob( "src/IECoreScene/bindings/*.cpp" ) )
 scenePythonScripts = glob.glob( "python/IECoreScene/*.py" )
 
@@ -2018,10 +2022,11 @@ if doConfigure :
 
 	# headers
 	sceneHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreScene", sceneHeaders )
+	scenePrivateHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreScene/private", scenePrivateHeaders )
 	if env[ "INSTALL_CREATE_SYMLINKS" ] :
 		sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreScene", lambda target, source, env : makeSymLinks( sceneEnv, sceneEnv["INSTALL_HEADER_DIR"] ) )
-	sceneEnv.Alias( "install", sceneHeaderInstall )
-	sceneEnv.Alias( "installScene", sceneHeaderInstall )
+	sceneEnv.Alias( "install", [ sceneHeaderInstall, scenePrivateHeaderInstall ] )
+	sceneEnv.Alias( "installScene", [ sceneHeaderInstall, scenePrivateHeaderInstall ] )
 
 	# python module
 	scenePythonModuleEnv.Append( LIBS = os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ) )
@@ -2256,11 +2261,13 @@ if env["WITH_GL"] and doConfigure :
 		glEnv.Alias( "installLib", [ glLibraryInstall ] )
 
 		glHeaders = glob.glob( "include/IECoreGL/*.h" ) + glob.glob( "include/IECoreGL/*.inl" )
+		glPrivateHeaders = glob.glob( "include/IECoreGL/private/*.h" )
 		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
+		glPrivateHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL/private", glPrivateHeaders )
 		if env[ "INSTALL_CREATE_SYMLINKS" ] :
 			glEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_HEADER_DIR"] ) )
-		glEnv.Alias( "install", glHeaderInstall )
-		glEnv.Alias( "installGL", glHeaderInstall )
+		glEnv.Alias( "install", [ glHeaderInstall, glPrivateHeaderInstall ] )
+		glEnv.Alias( "installGL", [ glHeaderInstall, glPrivateHeaderInstall ] )
 
 		glslHeaders = glob.glob( "glsl/IECoreGL/*.h" )
 		glslHeaderInstall = glEnv.Install( "$INSTALL_GLSL_HEADER_DIR/IECoreGL", glslHeaders )
