@@ -88,6 +88,12 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 		Imath::Box3f bound() const override;
 		void render( IECoreScene::Renderer *renderer ) const override;
 
+		// \deprecated
+		// Not threadsafe ( it computes statistics if not present and stores them on the grids ).
+		// Instead, use the VDB api, for example:
+		// findGrid( name )->beginMeta() to iterate the metadata,
+		// or
+		// findGrid( name )->evalActiveVoxelBoundingBox() or activeVoxelCount() to compute statistics
 		IECore::CompoundObjectPtr metadata( const std::string &name );
 
 		//! Are the grids in this VDBObject unmodified from the vdb file in filename?
