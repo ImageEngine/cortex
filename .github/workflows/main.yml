@@ -82,7 +82,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     - name: Install Windows SDK
       run: |
@@ -91,7 +91,7 @@ jobs:
       shell: pwsh
       if: runner.os == 'Windows'
 
-    - uses: ilammy/msvc-dev-cmd@v1.13.0
+    - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       with:
         sdk: 10.0.20348.0
 
@@ -148,7 +148,7 @@ jobs:
       shell: bash
 
     - name: Cache
-      uses: actions/cache@v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: sconsCache
         key: ${{ runner.os }}-${{ matrix.containerImage }}-${{env.CORTEX_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-${{ github.sha }}
@@ -174,7 +174,7 @@ jobs:
        ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: ${{ env.CORTEX_BUILD_NAME }}
         path: ${{ env.CORTEX_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}
