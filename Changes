@@ -1,18 +1,15 @@
-10.6.x.x (relative to 10.6.0.0a1)
+10.6.x.x (relative to 10.6.0.0)
+========
+
+
+
+10.6.0.0 (relative to 10.5.15.2)
 ========
 
 Improvements
 ------------
 
 - RefCounted, RunTimeTyped : Inlined constructor and destructor.
-
-Breaking Changes
-----------------
-
-- SmoothSkinningData : Removed, along with all associated Ops and Parameters.
-
-10.6.0.0a1 (relative to 10.5.15.1)
-==========
 
 Fixes
 -----
@@ -36,6 +33,7 @@ Breaking Changes
 - IECoreMaya : Removed.
 - IECoreNuke : Removed.
 - Removed support for `IECORE_RTLD_GLOBAL` environment variable.
+- SmoothSkinningData : Removed, along with all associated Ops and Parameters.
 
 10.5.x.x (relative to 10.5.15.2)
 ========
