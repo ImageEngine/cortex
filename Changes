@@ -1,5 +1,10 @@
-10.5.x.x (relative to 10.5.15.1)
+10.5.x.x (relative to 10.5.15.2)
 ========
+
+
+
+10.5.15.2 (relative to 10.5.15.1)
+=========
 
 Fixes
 -----
@@ -10,7 +15,7 @@ API
 ---
 
 - SConstruct : Install "private" headers.
-- VDBObject : Marked metadata() as deprecated
+- VDBObject : Marked metadata() as deprecated.
 
 10.5.15.1 (relative to 10.5.15.0)
 =========
