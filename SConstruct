@@ -55,7 +55,7 @@ EnsureSConsVersion( 3, 0, 2 )  # Substfile is a default builder as of 3.0.2
 SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
-ieCoreMajorVersion = 6 # backwards-incompatible changes
+ieCoreMajorVersion = 7 # backwards-incompatible changes
 ieCoreMinorVersion = 0 # new backwards-compatible features
 ieCorePatchVersion = 0 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
