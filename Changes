@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.15.2)
 ========
 
+Fixes
+-----
 
+- USDScene : Worked around numerical imprecision when converting between time and UsdTimeCode.
 
 10.5.15.2 (relative to 10.5.15.1)
 =========
