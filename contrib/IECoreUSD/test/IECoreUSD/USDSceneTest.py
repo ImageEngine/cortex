@@ -4607,5 +4607,44 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertIsNone( root.child( "volume" ).readObject( 0 ) )
 
+	def testTimeCodeClamping( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		fileName = "test.usda"
+
+		# Create a stage with a fairly common timesampling setup.
+		# TimeCodesPerSecond and FramesPerSecond are equal, so that integer
+		# timecodes correspond to whole frames.
+
+		framesPerSecond = 30.0
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		stage.SetTimeCodesPerSecond( framesPerSecond )
+		stage.SetFramesPerSecond( framesPerSecond )
+
+		# Keyframe a boolean value, alternating on and off each frame.
+
+		prim = pxr.UsdGeom.Xform.Define( stage, "/child" )
+		primVar = pxr.UsdGeom.PrimvarsAPI( prim ).CreatePrimvar( "test", pxr.Sdf.ValueTypeNames.Bool )
+
+		frameRange = range( 1, 50000 )
+		for frame in frameRange :
+			primVar.Set( bool( frame % 2 ), frame )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		# Read back the values for each frame, asserting they are as expected.
+		# Because boolean values can't be interpolated, we have to hit the
+		# _exact_ timecode for the frame - if we're under, then we'll get the
+		# held value from the previous frame.
+
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = scene.child( "child" )
+
+		for frame in frameRange :
+			timeInSeconds = frame / framesPerSecond
+			self.assertEqual( child.readAttribute( "render:test", timeInSeconds ), IECore.BoolData( frame % 2 ) )
+
 if __name__ == "__main__":
 	unittest.main()
