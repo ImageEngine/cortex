@@ -19,7 +19,7 @@ LIBPATH = libs
 
 PYTHON = deps + "/bin/python"
 
-pythonABIVersion = "3.10"
+pythonABIVersion = "3.11"
 
 PYTHON_LINK_FLAGS = "-lpython" + pythonABIVersion
 

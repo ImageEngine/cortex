@@ -715,7 +715,28 @@ class USDScene::IO : public RefCounted
 
 		pxr::UsdTimeCode timeCode( double timeSeconds ) const
 		{
-			return timeSeconds * m_timeCodesPerSecond;
+			const double timeCode = timeSeconds * m_timeCodesPerSecond;
+
+			// It's common for `timeSeconds` to have been converted from a
+			// `frame` value (by Gaffer's SceneReader for example), and it's
+			// also common for USD's `timeCodesPerSecond` to match the FPS used
+			// in the conversion, meaning that integer timecodes correspond to
+			// integer frames.
+			//
+			// But numerical imprecision means that `timeCode` may no longer be
+			// the exact same integer `frame` we started with. Compute the
+			// integer version of the timecode, and if it is an equally
+			// plausible conversion of `timeSeconds`, then prefer it.
+			//
+			// This is important because timesamples and value clips are commonly
+			// placed on integer timecodes, and we want to hit them exactly.
+			const double integerTimeCode = std::round( timeCode );
+			if( integerTimeCode / m_timeCodesPerSecond == timeSeconds )
+			{
+				return integerTimeCode;
+			}
+
+			return timeCode;
 		}
 
 		// Tags
