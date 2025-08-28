@@ -33,8 +33,7 @@ jobs:
           linux-gcc11,
           linux-debug-gcc11,
           windows,
-          windows-debug,
-          macos-arm64
+          windows-debug
         ]
 
         include:
@@ -44,7 +43,7 @@ jobs:
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:3.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/9.1.0/gafferDependencies-9.1.0-linux-gcc11.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/10.0.0/gafferDependencies-10.0.0-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 4
@@ -54,7 +53,7 @@ jobs:
             buildType: DEBUG
             containerImage: ghcr.io/gafferhq/build/build:3.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/9.1.0/gafferDependencies-9.1.0-linux-gcc11.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/10.0.0/gafferDependencies-10.0.0-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
             jobs: 4
@@ -63,7 +62,7 @@ jobs:
             os: windows-2022
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/9.1.0/gafferDependencies-9.1.0-windows.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/10.0.0/gafferDependencies-10.0.0-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 4
@@ -72,19 +71,10 @@ jobs:
             os: windows-2022
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/9.1.0/gafferDependencies-9.1.0-windows.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/10.0.0/gafferDependencies-10.0.0-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
             jobs: 4
-
-          - name: macos-arm64
-            os: macos-14
-            buildType: RELEASE
-            options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/9.1.0/gafferDependencies-9.1.0-macos-arm64.tar.gz
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
-            publish: true
-            jobs: 3
 
     runs-on: ${{ matrix.os }}
 
@@ -92,11 +82,18 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - uses: ilammy/msvc-dev-cmd@v1.13.0
+    - name: Install Windows SDK
+      run: |
+        curl.exe -L --output winsdksetup.exe --url https://download.microsoft.com/download/9/7/9/97982c1d-d687-41be-9dd3-6d01e52ceb68/windowssdk/winsdksetup.exe
+        Start-Process ./winsdksetup.exe -ArgumentList "/Features OptionId.DesktopCPPx64 /Quiet /NoRestart" -NoNewWindow -Wait
+      shell: pwsh
+      if: runner.os == 'Windows'
+
+    - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       with:
-        sdk: 10.0.17763.0
+        sdk: 10.0.20348.0
 
     - name: Install toolchain (Windows)
       run: |
@@ -151,7 +148,7 @@ jobs:
       shell: bash
 
     - name: Cache
-      uses: actions/cache@v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: sconsCache
         key: ${{ runner.os }}-${{ matrix.containerImage }}-${{env.CORTEX_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-${{ github.sha }}
@@ -177,7 +174,7 @@ jobs:
        ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: ${{ env.CORTEX_BUILD_NAME }}
         path: ${{ env.CORTEX_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}

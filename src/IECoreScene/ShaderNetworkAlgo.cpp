@@ -49,6 +49,7 @@
 #include "boost/container/flat_map.hpp"
 #include "boost/regex.hpp"
 
+#include <array>
 #include <unordered_map>
 #include <unordered_set>
 

@@ -1167,28 +1167,28 @@ def pythonVersion( pythonEnv ) :
 		universal_newlines = True
 	).strip()
 
-pythonEnv = env.Clone()
+basePythonEnv = env.Clone()
 
 # decide where python is
-if pythonEnv["PYTHON"]=="" :
+if basePythonEnv["PYTHON"]=="" :
 	if env["PLATFORM"] == "win32" :
 		sys.stderr.write( "ERROR : Python executable path must be set with PYTHON option.\n" )
 		Exit( 1 )
 	else:
-		pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
+		basePythonEnv["PYTHON"] = getPythonConfig( basePythonEnv, "--exec-prefix" ) + "/bin/python"
 
 # run it to determine version
-pythonEnv["PYTHON_VERSION"] = pythonVersion( pythonEnv )
+basePythonEnv["PYTHON_VERSION"] = pythonVersion( basePythonEnv )
 
 # get the include path for python if we haven't been told it explicitly
 # Windows does not have python-config so rely the user setting the appropriate options
 if env["PLATFORM"] != "win32" :
-	if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
-		pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
+	if basePythonEnv["PYTHON_INCLUDE_PATH"]=="" :
+		basePythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( basePythonEnv, "--includes" ).split()
 	else :
-		pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ systemIncludeArgument, "$PYTHON_INCLUDE_PATH" ]
+		basePythonEnv["PYTHON_INCLUDE_FLAGS"] = [ systemIncludeArgument, "$PYTHON_INCLUDE_PATH" ]
 
-	pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
+	basePythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
 
 	if env["PLATFORM"] == "posix" :
 		## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
@@ -1196,17 +1196,18 @@ if env["PLATFORM"] != "win32" :
 		# be able to have -Werror but be missing one warning than to have no -Werror.
 		## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
 		# fully work. Reenable when we encounter versions that work correctly.
-		pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
+		basePythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
 
 	# get the python link flags
-	if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
-		pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
-		pythonEnv["PYTHON_LINK_FLAGS"] = pythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + pythonEnv["PYTHON_VERSION"] + "/Python", "" )
+	if basePythonEnv["PYTHON_LINK_FLAGS"]=="" :
+		basePythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( basePythonEnv, "--ldflags" )
+		basePythonEnv["PYTHON_LINK_FLAGS"] = basePythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + basePythonEnv["PYTHON_VERSION"] + "/Python", "" )
 
-	pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+	basePythonEnv.Append( SHLINKFLAGS = basePythonEnv["PYTHON_LINK_FLAGS"].split() )
 else :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = ""
+	basePythonEnv["PYTHON_INCLUDE_FLAGS"] = ""
 
+pythonEnv = basePythonEnv.Clone()
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
 
 # if BOOST_PYTHON_LIB_SUFFIX is provided, use it
@@ -2066,9 +2067,9 @@ usdEnvSets = {
 	"IECORE_NAME" : "IECoreUSD"
 }
 
-# We are deliberately cloning from `pythonEnv` rather than
+# We are deliberately cloning from `basePythonEnv` rather than
 # `env` because USD itself has dependencies on Python.
-usdEnv = pythonEnv.Clone( **usdEnvSets )
+usdEnv = basePythonEnv.Clone( **usdEnvSets )
 
 if usdEnv["WITH_USD_MONOLITHIC"] :
 	usdLibs = [ "usd_ms" ]
@@ -2097,10 +2098,20 @@ else :
 if usdEnv["USD_LIB_PREFIX"] :
 	usdLibs = [ usdEnv["USD_LIB_PREFIX"] + x for x in usdLibs ]
 
+usdPythonLib = env.subst( "boost_python$BOOST_PYTHON_LIB_SUFFIX" )
+pxrVersionHeader = env.FindFile( "pxr/pxr.h", dependencyIncludes )
+if pxrVersionHeader is not None and "#define PXR_USE_INTERNAL_BOOST_PYTHON\n" in open( str( pxrVersionHeader ) ) :
+	usdPythonLib = usdEnv["USD_LIB_PREFIX"] + "python"
+
+usdLibs.append( usdPythonLib )
+
 usdEnvAppends = {
 	"CXXFLAGS" : [
 		"-Wno-deprecated" if env["PLATFORM"] != "win32" else "",
 		"/Zc:inline-" if env["PLATFORM"] == "win32" else "",
+		# This warning is already disabled generally for release builds,
+		# but also requires disabling for debug builds with USD.
+		"/wd4702" if env["PLATFORM"] == "win32" else "",
 		"-DIECoreUSD_EXPORTS",
 		systemIncludeArgument, "$USD_INCLUDE_PATH",
 		systemIncludeArgument, "$PYTHON_INCLUDE_PATH",

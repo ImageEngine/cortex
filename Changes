@@ -6,6 +6,11 @@ Fixes
 
 - USDScene : Worked around numerical imprecision when converting between time and UsdTimeCode.
 
+Build
+-----
+
+- CI : Updated to GafferHQ/dependencies 10.0.0.
+
 10.6.0.0 (relative to 10.5.15.2)
 ========
 
