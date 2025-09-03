@@ -375,6 +375,18 @@ void UsdSceneCacheFileFormat::writeLocation(
 			}
 		}
 	}
+	// internal root is mapped to the SceneInterface root '/'
+	else
+	{
+		SceneInterface::NameList tags;
+		inChild->readTags( tags );
+		// round trip internal tag name
+		for ( auto& tag : tags )
+		{
+			tag = SceneCacheDataAlgo::fromInternalName( tag );
+		}
+		outChild->writeTags( tags );
+	}
 
 	// recursion
 	SceneInterface::NameList grandChildNames;
