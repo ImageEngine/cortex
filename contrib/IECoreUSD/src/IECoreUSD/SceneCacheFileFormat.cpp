@@ -175,6 +175,11 @@ bool UsdSceneCacheFileFormat::WriteToFile( const SdfLayer& layer, const std::str
 	SceneInterfacePtr outScene;
 
 	outScene = SdfFileFormatSharedSceneWriters::get( filePath );
+	if ( !outScene )
+	{
+		IECore::msg( IECore::Msg::Error, "UsdSceneCacheFileFormat::WriteToFile", boost::format( "Invalid file path \"%s\" for layer \"%s\"." ) % filePath % layer.GetIdentifier() );
+		return false;
+	}
 
 	SceneInterface::NameList childNames;
 	usdScene->childNames( childNames );
