@@ -320,6 +320,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# includes
 		fileName = os.path.join( self.temporaryDirectory(), "testUSDTags.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
+		m.writeTags( ["geoId:chessy"] )
 		t = m.createChild( "t" )
 		s = t.createChild( "s" )
 		t.writeTags( ["t1", "all", "asset-(12)"] )
@@ -329,6 +330,16 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
+
+		tagInternalRootPrim = root.GetPrimAtPath( f"/{IECoreUSD.SceneCacheDataAlgo.internalRootName()}" )
+		self.assertEqual(
+			tagInternalRootPrim.GetRelationship(
+				"collection:{}:includes".format(
+					IECoreUSD.SceneCacheDataAlgo.toInternalName( "geoId:chessy" )
+				)
+			).GetTargets(),
+			[ pxr.Sdf.Path( f"/{IECoreUSD.SceneCacheDataAlgo.internalRootName()}" ) ]
+		)
 
 		tagPrim = root.GetPrimAtPath( "/{}/t".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 		self.assertTrue( tagPrim )
@@ -346,6 +357,10 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
+		# check root tags
+		self.assertTrue( "geoId:chessy" in scene.readTags() )
+
+		# check children tags
 		for tag, paths in tags.items():
 			for path in paths:
 				child = scene.scene( IECoreScene.SceneInterface.stringToPath( path ) )
