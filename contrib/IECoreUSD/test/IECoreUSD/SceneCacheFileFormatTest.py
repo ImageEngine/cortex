@@ -939,6 +939,17 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		stage.Export( exportPath )
 		self.assertTrue( os.path.exists( exportPath ) )
 
+        # invalid path
+		invalidExportPath = os.path.join( self.temporaryDirectory(), "invalid", "invalid.scc" )
+		with IECore.CapturingMessageHandler() as mh :
+			stage.Export( invalidExportPath )
+
+		self.assertEqual( len( mh.messages ), 2 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[0].context, "SdfFileFormatSharedSceneWriters::SceneLRUCache" )
+		self.assertEqual( mh.messages[1].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[1].context, "UsdSceneCacheFileFormat::WriteToFile" )
+
 		# root
 		layer = pxr.Sdf.Layer.FindOrOpen( linkFileName )
 
