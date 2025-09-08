@@ -63,4 +63,5 @@ ENV_VARS_TO_IMPORT = "PATH CI"
 
 if platform.system() == "Darwin" :
 	os.environ["DYLD_FRAMEWORK_PATH"] = libs
-	ENV_VARS_TO_IMPORT += " DYLD_FRAMEWORK_PATH"
+	os.environ["PYTHONHOME"] = libs + "/Python.framework/Versions/" + pythonABIVersion
+	ENV_VARS_TO_IMPORT += " DYLD_FRAMEWORK_PATH PYTHONHOME"
