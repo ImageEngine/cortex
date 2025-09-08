@@ -1,7 +1,15 @@
 10.5.x.x (relative to 10.5.15.3)
 ========
 
+Improvements
+-----
 
+- IECoreUSD: Added support for root level tags (reading/writing) to our IECoreUSD::SceneCacheData plugin.
+
+Fixes
+-----
+
+- IECoreUSD: Fixed crash when using invalid file path with IECoreUSD::SceneCacheFileFormat.
 
 10.5.15.3 (relative to 10.5.15.2)
 =========
