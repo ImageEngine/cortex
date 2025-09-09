@@ -49,9 +49,6 @@ from MeshPrimitive import *
 from Shader import *
 from RemovePrimitiveVariables import *
 from RenamePrimitiveVariables import *
-from MotionPrimitive import *
-from Transform import *
-from Group import *
 from Camera import *
 from NURBS import *
 from PrimitiveEvaluator import *
@@ -66,35 +63,20 @@ from MeshNormalsOpTest import *
 from PrimitiveTest import *
 from MeshMergeOpTest import *
 from MeshVertexReorderOpTest import *
-from AttributeStateTest import *
 from CoordinateSystemTest import *
 from OutputTest import OutputTest
 from PatchMeshPrimitiveTest import *
-from CurveExtrudeOp import *
 from NParticleReader import *
 from OBJReaderTest import TestOBJReader
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from CurveLineariserTest import CurveLineariserTest
-from IDXReaderTest import IDXReaderTest
 from CurveTangentsOpTest import CurveTangentsOpTest
-from SmoothSkinningDataTest import *
 from PrimitiveVariableTest import PrimitiveVariableTest
 from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
-from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest
-from ReorderSmoothSkinningInfluencesOpTest import ReorderSmoothSkinningInfluencesOpTest
-from NormalizeSmoothSkinningWeightsOpTest import NormalizeSmoothSkinningWeightsOpTest
-from LimitSmoothSkinningInfluencesOpTest import LimitSmoothSkinningInfluencesOpTest
-from MixSmoothSkinningWeightsOpTest import MixSmoothSkinningWeightsOpTest
-from SmoothSmoothSkinningWeightsOpTest import SmoothSmoothSkinningWeightsOpTest
-from PointSmoothSkinningOpTest import PointSmoothSkinningOpTest
-from AddAndRemoveSmoothSkinningInfluencesOpTest import AddAndRemoveSmoothSkinningInfluencesOpTest
 from PointsPrimitiveEvaluatorTest import PointsPrimitiveEvaluatorTest
-from LightTest import LightTest
-from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
 from DiskPrimitiveTest import DiskPrimitiveTest
 from SWAReaderTest import SWAReaderTest
-from OptionsTest import OptionsTest
 from SceneCacheTest import SceneCacheTest
 from LinkedSceneTest import LinkedSceneTest
 from ExternalProceduralTest import ExternalProceduralTest
@@ -108,7 +90,6 @@ from ShaderNetworkTest import ShaderNetworkTest
 from ShaderNetworkAlgoTest import ShaderNetworkAlgoTest
 from SharedSceneInterfacesTest import SharedSceneInterfacesTest
 from SceneInterfaceTest import SceneInterfaceTest
-from TransferSmoothSkinningWeightsOpTest import TransferSmoothSkinningWeightsOpTest
 from TypedPrimitiveOp import TestTypedPrimitiveOp
 
 if IECore.withFreeType() :

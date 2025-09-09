@@ -55,9 +55,9 @@ EnsureSConsVersion( 3, 0, 2 )  # Substfile is a default builder as of 3.0.2
 SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
-ieCoreMajorVersion = 5 # backwards-incompatible changes
-ieCoreMinorVersion = 15 # new backwards-compatible features
-ieCorePatchVersion = 4 # bug fixes
+ieCoreMajorVersion = 6 # backwards-incompatible changes
+ieCoreMinorVersion = 0 # new backwards-compatible features
+ieCorePatchVersion = 1 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
@@ -339,27 +339,6 @@ o.Add(
 	"",
 )
 
-# Nuke options
-
-o.Add(
-	"NUKE_ROOT",
-	"The directory in which Nuke is installed.",
-	""
-)
-
-o.Add(
-	"NUKE_LICENSE_FILE",
-	"The path to the FlexLM license file to use for Nuke. This is necessary to run the tests.",
-	"",
-)
-
-o.Add(
-	"USG_SHIMLIB_PATH",
-	"The path to the FnUsdShim to use for Nuke. This may be necessary to run the tests.",
-	"",
-)
-
-
 # OpenGL options
 
 try :
@@ -388,82 +367,6 @@ o.Add(
 	"GLEW_LIB_SUFFIX",
 	"The suffix appended to the names of the GLEW library. You can modify this "
 	"to link against libraries installed with non-defalt names.",
-	"",
-)
-
-# Maya options
-
-o.Add(
-	"MAYA_ROOT",
-	"The path to the root of the maya installation.",
-	"",
-)
-
-o.Add(
-	"MAYA_LICENSE_FILE",
-	"The path to FlexLM license file to use for Maya.",
-	"",
-)
-
-o.Add(
-	"MAYA_ADLM_ENV_FILE",
-	"The path to ADLM env xml file to use as of Maya 2010.",
-	"",
-)
-
-try :
-	o.Add(
-		BoolVariable(
-			"WITH_MAYA_PLUGIN_LOADER",
-			"Set this to install the Maya plugin with a stub loader.",
-			 False
-		),
-	)
-except NameError :
-	# fallback for old scons versions
-	o.Add(
-		BoolOption(
-			"WITH_MAYA_PLUGIN_LOADER",
-			"Set this to install the Maya plugin with a stub loader.",
-			 False
-		),
-	)
-
-# Houdini options
-
-o.Add(
-	"HOUDINI_ROOT",
-	"The path to the Houdini install.",
-	os.environ.get( "HFS", "" ),
-)
-
-o.Add(
-	"HOUDINI_INCLUDE_PATH",
-	"The path to the Houdini include directory.",
-	"$HOUDINI_ROOT/toolkit/include",
-)
-
-o.Add(
-	"HOUDINI_LIB_PATH",
-	"The path to the houdini lib directory.",
-	"$HOUDINI_ROOT/dsolib",
-)
-
-o.Add(
-	"HOUDINI_BIN_PATH",
-	"The path to the houdini lib directory.",
-	"$HOUDINI_ROOT/bin",
-)
-
-o.Add(
-	"HOUDINI_CXX_FLAGS",
-	"C++ Flags to pass to the Houdini compilation.",
-	"",
-)
-
-o.Add(
-	"HOUDINI_LINK_FLAGS",
-	"Flags to pass to the Houdini linker.",
 	"",
 )
 
@@ -631,30 +534,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_MAYALIB_NAME",
-	"The name under which to install the maya libraries. This "
-	"can be used to build and install the library for multiple "
-	"Maya versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_NUKELIB_NAME",
-	"The name under which to install the nuke libraries. This "
-	"can be used to build and install the library for multiple "
-	"Nuke versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_HOUDINILIB_NAME",
-	"The name under which to install the houdini libraries. This "
-	"can be used to build and install the library for multiple "
-	"Houdini versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_ALEMBICLIB_NAME",
 	"The name under which to install the Alembic libraries. This "
 	"can be used to build and install the library for multiple "
@@ -677,12 +556,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_NUKEPYTHON_DIR",
-	"The directory in which to install the nuke python module.",
-	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
-)
-
-o.Add(
 	"INSTALL_GLSL_HEADER_DIR",
 	"The directory in which to install GLSL headers.",
 	"$INSTALL_PREFIX/glsl",
@@ -692,60 +565,6 @@ o.Add(
 	"INSTALL_GLSL_SHADER_DIR",
 	"The directory in which to install GLSL shaders.",
 	"$INSTALL_PREFIX/glsl",
-)
-
-o.Add(
-	"INSTALL_MEL_DIR",
-	"The directory in which to install mel scripts.",
-	"$INSTALL_PREFIX/maya/mel/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_HOUDINIICON_DIR",
-	"The directory under which to install houdini icons.",
-	"$INSTALL_PREFIX/houdini/icons",
-)
-
-o.Add(
-	"INSTALL_HOUDINITOOLBAR_DIR",
-	"The directory under which to install houdini shelf files.",
-	"$INSTALL_PREFIX/houdini/toolbar",
-)
-
-o.Add(
-	"INSTALL_HOUDINIMENU_DIR",
-	"The directory under which to install houdini menu files.",
-	"$INSTALL_PREFIX/houdini",
-)
-
-o.Add(
-	"INSTALL_MAYAICON_DIR",
-	"The directory under which to install maya icons.",
-	"$INSTALL_PREFIX/maya/icons",
-)
-
-o.Add(
-	"INSTALL_NUKEICON_DIR",
-	"The directory under which to install nuke icons.",
-	"$INSTALL_PREFIX/nuke/icons",
-)
-
-o.Add(
-	"INSTALL_MAYAPLUGIN_NAME",
-	"The name under which to install maya plugins.",
-	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_HOUDINIPLUGIN_NAME",
-	"The name under which to install houdini plugins.",
-	"$INSTALL_PREFIX/houdini/dso/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_NUKEPLUGIN_NAME",
-	"The name under which to install nuke plugins.",
-	"$INSTALL_PREFIX/nuke/plugins/$IECORE_NAME",
 )
 
 o.Add(
@@ -781,16 +600,6 @@ o.Add(
 		( "IECoreScene.MeshMergeOp", os.path.join( "common", "primitive", "mesh", "merge"  ) ),
 		( "IECoreScene.MeshVertexReorderOp", os.path.join( "common", "primitive", "mesh", "vertexReorder" ) ),
 		( "IECoreScene.MeshPrimitiveShrinkWrapOp", os.path.join( "common", "primitive", "mesh", "shrinkWrap" ) ),
-		( "IECoreScene.AddSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "addInfluences" ) ),
-		( "IECoreScene.RemoveSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "removeInfluences" ) ),
-		( "IECoreScene.CompressSmoothSkinningDataOp", os.path.join( "rigging", "smoothSkinning", "compress" ) ),
-		( "IECoreScene.DecompressSmoothSkinningDataOp", os.path.join( "rigging", "smoothSkinning", "decompress" ) ),
-		( "IECoreScene.NormalizeSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "normalizeWeights" ) ),
-		( "IECoreScene.ReorderSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "reorderInfluences" ) ),
-		( "IECoreScene.SmoothSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "smoothWeights" ) ),
-		( "IECoreScene.ContrastSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "contrastWeights" ) ),
-		( "IECoreScene.LimitSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "limitInfluences" ) ),
-		( "IECoreScene.TransferSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "transferWeights" ) ),
 	]
 )
 
@@ -835,30 +644,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_COREMAYA_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreMaya library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
-o.Add(
-	"INSTALL_CORENUKE_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreNuke library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
-o.Add(
-	"INSTALL_COREHOUDINI_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreHoudini library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
-o.Add(
 	BoolVariable( "INSTALL_CREATE_SYMLINKS", "Whether to create symlinks post install", True )
 )
 
@@ -895,30 +680,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreGL/All.py"
-)
-
-o.Add(
-	"TEST_MAYA_SCRIPT",
-	"The python script to run for the maya tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreMaya/All.py"
-)
-
-o.Add(
-	"TEST_HOUDINI_SCRIPT",
-	"The python script to run for the houdini tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreHoudini/All.py"
-)
-
-o.Add(
-	"TEST_NUKE_SCRIPT",
-	"The python script to run for the nuke tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreNuke/All.py"
 )
 
 o.Add(
@@ -1327,23 +1088,6 @@ if doConfigure :
 		sys.stderr.write( "ERROR : unable to determine boost version from \"%s\".\n" % boostVersionHeader )
 		Exit( 1 )
 
-	# Figure out the OpenEXR version
-
-	exrVersionHeader = env.FindFile( "OpenEXR/OpenEXRConfig.h", dependencyIncludes )
-	if exrVersionHeader is None :
-		sys.stderr.write( "ERROR : unable to find `OpenEXR/OpenEXRConfig.h`, check OPENEXR_INCLUDE_PATH.\n" )
-		Exit( 1 )
-
-	exrMajorVersion = None
-	for line in open( str( exrVersionHeader ) ) :
-		m = re.match( r'^#define OPENEXR_VERSION_STRING "(\d)\.(\d)\.(\d+)"$', line )
-		if m :
-			exrMajorVersion = int( m.group( 1 ) )
-
-	if exrMajorVersion is None :
-		sys.stderr.write( "ERROR : unable to determine OpenEXR version from \"{}\".\n".format( exrVersionHeader ) )
-		Exit( 1 )
-
 	env.Append( LIBS = [
 			"boost_filesystem" + env["BOOST_LIB_SUFFIX"],
 			"boost_regex" + env["BOOST_LIB_SUFFIX"],
@@ -1383,23 +1127,13 @@ if doConfigure :
 
 	c.Finish()
 
-if exrMajorVersion >= 3 :
-	env.Append( LIBS = [ "OpenEXR" + env["OPENEXR_LIB_SUFFIX"] ] )
-else :
-	env.Append(
-		LIBS = [
-			"IlmImf" + env["OPENEXR_LIB_SUFFIX"],
-			# Windows OpenEXR adds version numbers to all libraries except Half.
-			"Half" + ( env["OPENEXR_LIB_SUFFIX"] if env["PLATFORM"] != "win32" else "" )
-		]
-	)
-
 env.Append( LIBS = [
 		"tbb" + env["TBB_LIB_SUFFIX"],
 		"blosc" + env["BLOSC_LIB_SUFFIX"],
 		"Iex" + env["OPENEXR_LIB_SUFFIX"],
 		"Imath" + env["OPENEXR_LIB_SUFFIX"],
 		"IlmThread" + env["OPENEXR_LIB_SUFFIX"],
+		"OpenEXR" + env["OPENEXR_LIB_SUFFIX"],
 		# Link Windows zlib against static library to avoid potential conflicts
 		# with system provided version.
 		"z" if env["PLATFORM"] != "win32" else "zlibstatic"
@@ -1433,28 +1167,28 @@ def pythonVersion( pythonEnv ) :
 		universal_newlines = True
 	).strip()
 
-pythonEnv = env.Clone()
+basePythonEnv = env.Clone()
 
 # decide where python is
-if pythonEnv["PYTHON"]=="" :
+if basePythonEnv["PYTHON"]=="" :
 	if env["PLATFORM"] == "win32" :
 		sys.stderr.write( "ERROR : Python executable path must be set with PYTHON option.\n" )
 		Exit( 1 )
 	else:
-		pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
+		basePythonEnv["PYTHON"] = getPythonConfig( basePythonEnv, "--exec-prefix" ) + "/bin/python"
 
 # run it to determine version
-pythonEnv["PYTHON_VERSION"] = pythonVersion( pythonEnv )
+basePythonEnv["PYTHON_VERSION"] = pythonVersion( basePythonEnv )
 
 # get the include path for python if we haven't been told it explicitly
 # Windows does not have python-config so rely the user setting the appropriate options
 if env["PLATFORM"] != "win32" :
-	if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
-		pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
+	if basePythonEnv["PYTHON_INCLUDE_PATH"]=="" :
+		basePythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( basePythonEnv, "--includes" ).split()
 	else :
-		pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ systemIncludeArgument, "$PYTHON_INCLUDE_PATH" ]
+		basePythonEnv["PYTHON_INCLUDE_FLAGS"] = [ systemIncludeArgument, "$PYTHON_INCLUDE_PATH" ]
 
-	pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
+	basePythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
 
 	if env["PLATFORM"] == "posix" :
 		## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
@@ -1462,17 +1196,18 @@ if env["PLATFORM"] != "win32" :
 		# be able to have -Werror but be missing one warning than to have no -Werror.
 		## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
 		# fully work. Reenable when we encounter versions that work correctly.
-		pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
+		basePythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
 
 	# get the python link flags
-	if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
-		pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
-		pythonEnv["PYTHON_LINK_FLAGS"] = pythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + pythonEnv["PYTHON_VERSION"] + "/Python", "" )
+	if basePythonEnv["PYTHON_LINK_FLAGS"]=="" :
+		basePythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( basePythonEnv, "--ldflags" )
+		basePythonEnv["PYTHON_LINK_FLAGS"] = basePythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + basePythonEnv["PYTHON_VERSION"] + "/Python", "" )
 
-	pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+	basePythonEnv.Append( SHLINKFLAGS = basePythonEnv["PYTHON_LINK_FLAGS"].split() )
 else :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = ""
+	basePythonEnv["PYTHON_INCLUDE_FLAGS"] = ""
 
+pythonEnv = basePythonEnv.Clone()
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
 
 # if BOOST_PYTHON_LIB_SUFFIX is provided, use it
@@ -2325,711 +2060,6 @@ if env["WITH_GL"] and doConfigure :
 		glTestEnv.Alias( "testGL", glTest )
 
 ###########################################################################################
-# Build, install and test the coreMaya library and bindings
-###########################################################################################
-
-mayaEnvSets = {
-	"IECORE_NAME" : "IECoreMaya",
-}
-
-mayaEnv = env.Clone( **mayaEnvSets )
-
-mayaEnvAppends = {
-	"CXXFLAGS" : [
-		"-DIECoreMaya_EXPORTS",
-		## \todo: remove once we've dropped all VP1 code
-		"-Wno-deprecated-declarations",
-		systemIncludeArgument, "$GLEW_INCLUDE_PATH",
-		systemIncludeArgument, "$MAYA_ROOT/include",
-	],
-	"LIBS" : [
-		"OpenMaya",
-		"OpenMayaUI",
-		"OpenMayaAnim",
-		"OpenMayaFX",
-		"boost_python" + boostPythonLibSuffix,
-	],
-	"CPPFLAGS" : [
-		"-D_BOOL",
-		"-DREQUIRE_IOSTREAM",
-		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-}
-
-if env["PLATFORM"]=="posix" :
-	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
-	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
-	if os.path.exists( mayaEnv.subst( "$MAYA_ROOT/lib/libOpenMayalib.a" ) ) :
-		mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
-
-elif env["PLATFORM"]=="darwin" :
-	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
-	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/MacOS"]
-	mayaEnvAppends["CPPPATH"] = ["$MAYA_ROOT/../../devkit/include"]
-	mayaEnvAppends["LIBS"] += ["Foundation", "OpenMayaRender"]
-	mayaEnvAppends["FRAMEWORKS"] = ["AGL", "OpenGL"]
-
-mayaEnv.Append( **mayaEnvAppends )
-
-mayaEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
-
-mayaPythonModuleEnv = pythonModuleEnv.Clone( **mayaEnvSets )
-mayaPythonModuleEnv.Append( **mayaEnvAppends )
-
-mayaPluginEnv = mayaEnv.Clone( IECORE_NAME="ieCore" )
-
-haveMaya = False
-
-if doConfigure :
-
-	c = configureSharedLibrary( mayaEnv )
-
-	if not c.CheckCXXHeader( "maya/MVectorArray.h" ) :
-
-		sys.stderr.write( "WARNING : no maya devkit found, not building IECoreMaya - check MAYA_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		c.Finish()
-
-		haveMaya = True
-
-		mayaSources = sorted( glob.glob( "src/IECoreMaya/*.cpp" ) )
-		mayaHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/*.h" ) + glob.glob( "include/IECoreMaya/*.inl" )
-		mayaBindingHeaders = glob.glob( "include/IECoreMaya/bindings/*.h" ) + glob.glob( "include/IECoreMaya/bindings/*.inl" )
-		mayaPythonSources = sorted( glob.glob( "src/IECoreMaya/bindings/*.cpp" ) )
-		mayaPythonScripts = glob.glob( "python/IECoreMaya/*.py" )
-		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
-		mayaPluginSources = [ "src/IECoreMaya/plugin/Plugin.cpp" ]
-
-		# we can't append this before configuring, as then it gets built as
-		# part of the configure process
-		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mayaEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
-
-		# maya library
-		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaSources )
-		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaLibrary )
-		mayaEnv.NoCache( mayaLibraryInstall )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv, "INSTALL_MAYALIB_NAME" ) )
-		mayaEnv.Alias( "install", mayaLibraryInstall )
-		mayaEnv.Alias( "installMaya", mayaLibraryInstall )
-		mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
-
-		# maya headers
-		mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
-		mayaHeaderInstall += mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya/bindings", mayaBindingHeaders )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
-		mayaEnv.Alias( "install", mayaHeaderInstall )
-		mayaEnv.Alias( "installMaya", mayaHeaderInstall )
-
-		# maya mel
-		mayaMelInstall = mayaEnv.Install( "$INSTALL_MEL_DIR", mayaMel )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaEnv.AddPostAction( "$INSTALL_MEL_DIR", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
-		mayaEnv.Alias( "install", mayaMelInstall )
-		mayaEnv.Alias( "installMaya", mayaMelInstall )
-
-		# maya icons
-		mayaIcons = glob.glob( "icons/IECoreMaya/*.xpm" ) + glob.glob( "icons/IECoreMaya/*.png" )
-		mayaIconInstall = mayaEnv.Install( "$INSTALL_MAYAICON_DIR", source=mayaIcons )
-		mayaEnv.Alias( "install", mayaIconInstall )
-		mayaEnv.Alias( "installMaya", mayaIconInstall )
-
-		# maya plugin
-		mayaPluginEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
-				os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ),
-			]
-		)
-		if env["PLATFORM"]=="darwin" :
-			mayaPluginEnv['SHLINKFLAGS'] = '$LINKFLAGS -bundle'
-			mayaPluginEnv['SHLIBSUFFIX'] =  '.bundle'
-
-		mayaPluginTarget = "plugins/maya/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) )
-
-		if env["WITH_MAYA_PLUGIN_LOADER"] :
-
-			mayaPluginLoaderSources = [ 'src/IECoreMaya/plugin/Loader.cpp' ]
-
-			mayaPluginLoaderEnv = mayaPluginEnv.Clone()
-			mayaPluginLoaderEnv.Append(
-				LIBS = [
-					"dl"
-				]
-			)
-
-			mayaPluginLoader = mayaPluginLoaderEnv.SharedLibrary( mayaPluginTarget, mayaPluginLoaderSources, SHLIBPREFIX="" )
-			mayaPluginLoaderInstall = mayaPluginLoaderEnv.InstallAs( mayaPluginLoaderEnv.subst( "$INSTALL_MAYAPLUGIN_NAME$SHLIBSUFFIX" ), mayaPluginLoader )
-			if env[ "INSTALL_CREATE_SYMLINKS" ] :
-				mayaPluginLoaderEnv.AddPostAction( mayaPluginLoaderInstall, lambda target, source, env : makeSymLinks( mayaPluginLoaderEnv, mayaPluginLoaderEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
-			mayaPluginLoaderEnv.Alias( "install", mayaPluginLoaderInstall )
-			mayaPluginLoaderEnv.Alias( "installMaya", mayaPluginLoaderInstall )
-
-			Default( mayaPluginLoader )
-
-			mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] = os.path.join( os.path.dirname( mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ), 'impl', os.path.basename( mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
-			mayaPluginTarget = "plugins/maya/impl/" + os.path.basename( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) )
-
-		mayaPlugin = mayaPluginEnv.SharedLibrary( mayaPluginTarget, mayaPluginSources, SHLIBPREFIX="" )
-		mayaPluginInstall = mayaPluginEnv.Install( os.path.dirname( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPlugin )
-		mayaPluginEnv.Depends( mayaPlugin, corePythonModule )
-
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
-		mayaPluginEnv.Alias( "install", mayaPluginInstall )
-		mayaPluginEnv.Alias( "installMaya", mayaPluginInstall )
-
-		# maya python
-		mayaPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
-		mayaPythonModule = mayaPythonModuleEnv.SharedLibrary( "python/IECoreMaya/_IECoreMaya", mayaPythonSources )
-		mayaPythonModuleEnv.Depends( mayaPythonModule, mayaLibrary )
-
-		mayaPythonModuleInstall = mayaPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			mayaPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonModuleEnv, mayaPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-		mayaPythonModuleEnv.Alias( "install", mayaPythonModuleInstall )
-		mayaPythonModuleEnv.Alias( "installMaya", mayaPythonModuleInstall )
-
-		if coreEnv["INSTALL_COREMAYA_POST_COMMAND"]!="" :
-			# this is the only way we could find to get a post action to run for an alias
-			mayaPythonModuleEnv.Alias( "install", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" )
-			mayaPythonModuleEnv.Alias( "installMaya", mayaPythonModuleInstall, "$INSTALL_COREMAYA_POST_COMMAND" )
-
-		Default( [ mayaLibrary, mayaPlugin, mayaPythonModule ] )
-
-		mayaTestEnv = testEnv.Clone()
-
-		mayaTestLibPaths = mayaEnv.subst( os.pathsep.join( mayaPythonModuleEnv["LIBPATH"] ) )
-		mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += os.pathsep + mayaTestLibPaths
-		mayaTestEnv["ENV"][libraryPathEnvVar] += os.pathsep + mayaTestLibPaths
-
-		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
-		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya:./test/IECoreMaya/plugins"
-		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
-		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
-		mayaTestEnv["ENV"]["AUTODESK_ADLM_THINCLIENT_ENV"] = env["MAYA_ADLM_ENV_FILE"]
-
-		mayaPythonTestEnv = mayaTestEnv.Clone()
-
-		mayaTestEnv.Append( **mayaEnvAppends )
-		mayaTestEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( mayaEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				"OpenMayalib"
-			]
-		)
-
-		mayaPythonTest = mayaPythonTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, "mayapy $TEST_MAYA_SCRIPT" )
-		NoCache( mayaPythonTest )
-		mayaPythonTestEnv.Depends( mayaPythonTest, [ mayaPlugin, mayaPythonModule, mayaLibrary ] )
-		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "test/IECoreMaya/*.py" ) )
-		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "python/IECoreMaya/*.py" ) )
-		if env["WITH_MAYA_PLUGIN_LOADER"] :
-			mayaPythonTestEnv.Depends( mayaPythonTest, mayaPluginLoader )
-		if env["WITH_GL"] :
-			mayaPythonTestEnv.Depends( mayaPythonTest, [ glLibrary, glPythonModule ] )
-		mayaPythonTestEnv.Alias( "testMaya", mayaPythonTest )
-		mayaPythonTestEnv.Alias( "testMayaPython", mayaPythonTest )
-
-###########################################################################################
-# Build and install the coreNuke library, plugin, python module and headers
-###########################################################################################
-
-nukeEnvSets = {
-	"IECORE_NAME" : "IECoreNuke"
-}
-
-nukeEnv = env.Clone( **nukeEnvSets )
-
-nukeEnvAppends = {
-
-	"CPPFLAGS" : [
-		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-
-	"LINKFLAGS" : [
-		"-Wl,-rpath-link=$NUKE_ROOT",
-	],
-
-	"LIBPATH" : [
-		"$NUKE_ROOT",
-	],
-
-	"LIBS" : [
-		"GLEW$GLEW_LIB_SUFFIX",
-	],
-
-	"CXXFLAGS" : [
-		systemIncludeArgument, "$NUKE_ROOT/include",
-		systemIncludeArgument, "$GLEW_INCLUDE_PATH"
-	]
-
-}
-
-if env["PLATFORM"] == "darwin" :
-	# FN_OS_MAC is required to work around isnan errors in DDImage/Matrix4.h
-	nukeEnvAppends["CPPFLAGS"].append( "-DFN_OS_MAC" )
-
-nukeEnv.Append( **nukeEnvAppends )
-nukeEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
-if env["PLATFORM"] == "darwin" :
-	nukeEnv.Append( FRAMEWORKS = [ "OpenGL" ] )
-
-nukePythonModuleEnv = pythonModuleEnv.Clone( **nukeEnvSets )
-nukePythonModuleEnv.Append( **nukeEnvAppends )
-
-nukePluginEnv = nukeEnv.Clone( IECORE_NAME="ieCore" )
-
-nukeTestEnv = testEnv.Clone()
-nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
-nukeTestEnv["ENV"]["foundry_LICENSE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
-nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
-nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
-# prepend OIIO LIB PATH to library path to support custom OIIO with specific dependencies
-nukeTestEnv["ENV"][libraryPathEnvVar] = "{}:{}".format( nukeTestEnv.subst( "$OIIO_LIB_PATH" ), nukeTestEnv["ENV"][libraryPathEnvVar] )
-nukeTestEnv["ENV"]["USG_SHIMLIB_PATH"] = nukeTestEnv["USG_SHIMLIB_PATH"]
-
-if doConfigure :
-
-	c = configureSharedLibrary( nukeEnv )
-
-	if not c.CheckHeader( "DDImage/Vector3.h", "\"\"", "CXX" ) :
-
-		sys.stderr.write( "WARNING : no nuke devkit found, not building IECoreNuke - check NUKE_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		# figure out the nuke version from the headers
-		nukeMajorVersion = None
-		nukeMinorVersion = None
-		nukeVersionHeader = env.FindFile( "DDImage/ddImageVersionNumbers.h", nukeEnv["CXXFLAGS"] )
-		if nukeVersionHeader :
-
-			for line in open( str( nukeVersionHeader ) ) :
-				w = line.split()
-				if len( w ) > 1 :
-					if w[0]=="#define" and w[1]=="kDDImageVersionMajorNum" :
-						nukeMajorVersion = int( w[2] )
-					elif w[0]=="#define" and w[1]=="kDDImageVersionMinorNum" :
-						nukeMinorVersion = int( w[2] )
-
-		else :
-
-			nukeMajorVersion = 4
-			nukeMinorVersion = 8
-
-		if nukeMajorVersion is None or nukeMinorVersion is None :
-
-			sys.stderr.write( "ERROR : unable to determine nuke version - not building IECoreNuke.\n" )
-
-		else :
-
-			nukeEnv["NUKE_MAJOR_VERSION"] = nukeMajorVersion
-			nukeEnv["NUKE_MINOR_VERSION"] = nukeMinorVersion
-
-			nukeTestEnv["NUKE_MAJOR_VERSION"] = nukeMajorVersion
-			nukeTestEnv["NUKE_MINOR_VERSION"] = nukeMinorVersion
-
-			if nukeMajorVersion >=5 and nukeMinorVersion >=0 :
-				nukeLibName = "DDImage"
-			else :
-				nukeLibName = "DDImage%d.%d" % ( nukeMajorVersion, nukeMinorVersion )
-
-			if not c.CheckLibWithHeader( nukeLibName, "DDImage/Vector3.h", "CXX" ) :
-
-				sys.stderr.write( "WARNING : no nuke libraries found, not building IECoreNuke - check NUKE_ROOT.\n" )
-				c.Finish()
-
-			else :
-
-				c.Finish()
-
-				# we can't add this earlier as then it's built during the configure stage, and that's no good
-				nukeEnv.Append( LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-					os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				]	)
-
-				nukeEnv.Append( LIBS = [ nukeLibName, "boost_python" + boostPythonLibSuffix ] )
-
-				nukeEnv.Append(
-					CPPFLAGS = [
-						"-DIECORENUKE_NUKE_MAJOR_VERSION=$NUKE_MAJOR_VERSION",
-						"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
-						"-DIECoreNuke_EXPORTS",
-					]
-				)
-
-				nukePythonModuleEnv.Append( LIBS = [
-					os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-				] )
-
-				nukeHeaders = glob.glob( "include/IECoreNuke/*.h" ) + glob.glob( "include/IECoreNuke/*.inl" )
-				nukeSources = sorted( glob.glob( "src/IECoreNuke/*.cpp" ) )
-				nukePythonSources = sorted( glob.glob( "src/IECoreNuke/bindings/*.cpp" ) )
-				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
-				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
-				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay", "ieLiveScene", "sccWriter" ]
-
-				# nuke library
-				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
-				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
-				nukeEnv.Alias( "install", nukeLibraryInstall )
-				nukeEnv.Alias( "installNuke", nukeLibraryInstall )
-				nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
-
-				# nuke headers
-
-				nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
-				nukeEnv.Alias( "installNuke", nukeHeaderInstall )
-				nukeEnv.Alias( "install", nukeHeaderInstall )
-
-				# nuke python module
-
-				nukePythonModule = nukePythonModuleEnv.SharedLibrary( "python/IECoreNuke/_IECoreNuke", nukePythonSources )
-				nukePythonModuleInstall = nukePythonModuleEnv.Install( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", nukePythonScripts + nukePythonModule )
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukePythonModuleEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonModuleEnv, nukePythonModuleEnv["INSTALL_NUKEPYTHON_DIR"] ) )
-				nukePythonModuleEnv.Alias( "install", nukePythonModuleInstall )
-				nukePythonModuleEnv.Alias( "installNuke", nukePythonModuleInstall )
-				nukePythonModuleEnv.Depends( nukePythonModule, corePythonModule )
-
-				if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
-					# this is the only way we could find to get a post action to run for an alias
-					nukeEnv.Alias( "install", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" )
-					nukeEnv.Alias( "installNuke", nukeLibraryInstall, "$INSTALL_CORENUKE_POST_COMMAND" )
-
-				# nuke plugin
-
-				nukePluginEnv.Append(
-					LIBS = [
-						os.path.basename( coreEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
-						os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ),
-					]
-				)
-				nukePluginTarget = "plugins/nuke/" + os.path.basename( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) )
-				nukePlugin = nukePluginEnv.SharedLibrary( nukePluginTarget, nukePluginSources, SHLIBPREFIX="" )
-				nukePluginInstall = nukePluginEnv.Install( os.path.dirname( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukePlugin )
-
-				if env[ "INSTALL_CREATE_SYMLINKS" ] :
-					nukePluginEnv.AddPostAction( nukePluginInstall, lambda target, source, env : makeSymLinks( nukePluginEnv, nukePluginEnv["INSTALL_NUKEPLUGIN_NAME"] ) )
-				nukePluginEnv.Alias( "install", nukePluginInstall )
-				nukePluginEnv.Alias( "installNuke", nukePluginInstall )
-
-				Default( [ nukeLibrary, nukePythonModule, nukePlugin ] )
-
-				# nuke menu
-
-				nukeMenuInstall = nukePluginEnv.Install( os.path.dirname( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), "src/IECoreNuke/plugin/menu.py" )
-				nukePluginEnv.Alias( "install", nukeMenuInstall )
-
-				# stubs for each of the nodes within the plugin
-
-				nukeStubs = []
-				for nodeName in nukeNodeNames :
-
-					nukeStubEnv = nukePluginEnv.Clone( IECORE_NAME=nodeName )
-					# In order to have our custom file format (scc) displayed in the file_type knob of the WriteGeo node, we need to install
-					# a dummy library with "[fileExtension]Writer"
-					if nodeName == "sccWriter":
-						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME$SHLIBSUFFIX" ) )
-					else:
-						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"
-					nukeStub = nukePluginEnv.Command( nukeStubName, nukePlugin, "echo 'load ieCore' > $TARGET" )
-					nukeStubInstall = nukeStubEnv.Install( os.path.dirname( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukeStub )
-					nukeStubEnv.Alias( "install", nukeStubInstall )
-					nukeStubEnv.Alias( "installNuke", nukeStubInstall )
-					nukeStubs.append( nukeStub )
-					Default( [ nukeStub ] )
-
-				# nuke icons
-				nukeIcons = glob.glob( "icons/IECoreNuke/*.png" )
-				nukeIconInstall = nukeEnv.Install( "$INSTALL_NUKEICON_DIR", source=nukeIcons )
-				nukeEnv.Alias( "install", nukeIconInstall )
-				nukeEnv.Alias( "installNuke", nukeIconInstall )
-
-				# nuke tests
-
-				nukeTest = nukeTestEnv.Command( "test/IECoreNuke/resultsPython.txt", nukeLibrary, "$NUKE_ROOT/Nuke${NUKE_MAJOR_VERSION}.${NUKE_MINOR_VERSION} -t $TEST_NUKE_SCRIPT" )
-				NoCache( nukeTest )
-				nukeTestEnv.Depends( nukeTest, glob.glob( "test/IECoreNuke/*.py" ) )
-				nukeTestEnv.Depends( nukeTest, nukePythonModule )
-				nukeTestEnv.Depends( nukeTest, nukePlugin )
-				nukeTestEnv.Depends( nukeTest, nukeStubs )
-				nukeTestEnv.Alias( "testNuke", nukeTest )
-
-###########################################################################################
-# Build, install and test the coreHoudini library and bindings
-###########################################################################################
-
-houdiniEnvSets = {
-	"IECORE_NAME" : "IECoreHoudini",
-}
-
-houdiniEnv = env.Clone( **houdiniEnvSets )
-
-houdiniEnvAppends = {
-	"CXXFLAGS" : [
-		"$HOUDINI_CXX_FLAGS",
-		"-DMAKING_DSO",
-		"-DIECoreHoudini_EXPORTS",
-		systemIncludeArgument, "$HOUDINI_INCLUDE_PATH"
-	],
-
-	"CPPFLAGS" : [
-		## \todo: libIECoreHoudini should not use python.
-		## Remove it from the src and then remove these flags.
-		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-	"LIBPATH" : [
-		"$HOUDINI_LIB_PATH",
-		"$GLEW_LIB_PATH",
-	],
-	"LIBS" : [
-		"HoudiniUI",
-		"HoudiniOPZ",
-		"HoudiniOP3",
-		"HoudiniOP2",
-		"HoudiniOP1",
-		"HoudiniSIM",
-		"HoudiniGEO",
-		"HoudiniPRM",
-		"HoudiniUT",
-		"HoudiniRAY",
-		"HoudiniAPPS3",
-		## \todo: libIECoreHoudini should not use python.
-		## Remove it from the src and then remove this lib.
-		"boost_python" + boostPythonLibSuffix,
-		"GLEW$GLEW_LIB_SUFFIX"
-	]
-}
-
-if env["WITH_GL"] :
-	houdiniEnvAppends["CXXFLAGS"].append( [ systemIncludeArgument, "$GLEW_INCLUDE_PATH" ] )
-	houdiniEnvAppends["LIBPATH"].append( "$GLEW_LIB_PATH" )
-	houdiniEnvAppends["LIBS"].append( "GLEW$GLEW_LIB_SUFFIX" )
-
-if env["PLATFORM"]=="posix" :
-	houdiniEnvAppends["CPPFLAGS"] += ["-DLINUX"]
-elif env["PLATFORM"]=="darwin" :
-	houdiniEnvAppends["CPPFLAGS"] += ["-D__APPLE__"]
-	houdiniEnvAppends["FRAMEWORKS"] = ["OpenGL"]
-	houdiniEnvAppends["LIBS"] += [ "GR"]
-
-houdiniEnv.Append( **houdiniEnvAppends )
-
-houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
-houdiniEnv.Prepend( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
-# Prepend OIIO path for houdini to allow for non-namespaced includes to be used
-# Houdini ships with a namespaced OpenImageIO (HOIIO) as part of $HOUDINI_INCLUDE_PATH.
-# If you do want to use it, set OIIO_INCLUDE_PATH to that.
-houdiniEnv.Prepend( CXXFLAGS = [ systemIncludeArgument, "$OIIO_INCLUDE_PATH"] )
-
-houdiniPythonModuleEnv = pythonModuleEnv.Clone( **houdiniEnvSets )
-houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
-if env["PLATFORM"] == "posix" :
-	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
-	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
-	# be able to have -Werror but be missing one warning than to have no -Werror.
-	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
-	# fully work. Reenable when we encounter versions that work correctly.
-	houdiniPythonModuleEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
-
-houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
-
-if doConfigure :
-
-	c = configureSharedLibrary( houdiniEnv )
-
-	if not c.CheckLibWithHeader( "HoudiniGEO", "SOP/SOP_API.h", "CXX" ) :
-
-		sys.stderr.write( "WARNING : no houdini devkit found, not building IECoreHoudini - check HOUDINI_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		# Houdini 16.0 and beyond can optionally ship using Qt5.
-		# Since IECoreHoudini makes some UI related calls, we add
-		# a custom define so we can change the logic as needed.
-		if os.path.exists( os.path.join( houdiniEnv.subst( "$HOUDINI_LIB_PATH" ), "libQt5Core.so" ) ) :
-			houdiniPythonModuleEnv.Append( CXXFLAGS = "-DIECOREHOUDINI_WITH_QT5" )
-
-		c.Finish()
-
-		#=====
-		# glob the files
-		#=====
-		houdiniSources = sorted( glob.glob( "src/IECoreHoudini/*.cpp" ) )
-		houdiniHeaders = glob.glob( "include/IECoreHoudini/*.h" ) + glob.glob( "include/IECoreHoudini/*.inl" )
-		houdiniBindingHeaders = glob.glob( "include/IECoreHoudini/bindings/*.h" ) + glob.glob( "include/IECoreHoudini/bindings/*.inl" )
-		houdiniPythonSources = sorted( glob.glob( "src/IECoreHoudini/bindings/*.cpp" ) )
-		houdiniPythonScripts = glob.glob( "python/IECoreHoudini/*.py" )
-		houdiniPluginSources = [ "src/IECoreHoudini/plugin/Plugin.cpp" ]
-		if not env['WITH_GL'] :
-			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
-			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
-		else:
-			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
-
-		# we can't append this before configuring, as then it gets built as
-		# part of the configure process
-		houdiniEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
-		if env['WITH_GL'] :
-			houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
-		#=====
-		# build library
-		#=====
-		houdiniLib = houdiniEnv.SharedLibrary( "lib/" + os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniSources )
-		houdiniLibInstall = houdiniEnv.Install( os.path.dirname( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniLib )
-		houdiniEnv.NoCache( houdiniLibInstall )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniEnv.AddPostAction( houdiniLibInstall, lambda target, source, env : makeLibSymLinks( houdiniEnv, "INSTALL_HOUDINILIB_NAME" ) )
-		houdiniEnv.Alias( "install", houdiniLibInstall )
-		houdiniEnv.Alias( "installHoudini", houdiniLibInstall )
-		houdiniEnv.Alias( "installLib", [ houdiniLibInstall ] )
-
-		#=====
-		# install headers
-		#=====
-		houdiniHeaderInstall = houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini", houdiniHeaders )
-		houdiniHeaderInstall += houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini/bindings", houdiniBindingHeaders )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniEnv, houdiniEnv["INSTALL_HEADER_DIR"] ) )
-		houdiniEnv.Alias( "install", houdiniHeaderInstall )
-		houdiniEnv.Alias( "installHoudini", houdiniHeaderInstall )
-
-		#=====
-		# build houdini plugin
-		#=====
-		houdiniPluginEnv.Append(
-			LIBS=[
-				os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ),
-			],
-		)
-		houdiniPluginTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$INSTALL_HOUDINIPLUGIN_NAME" ) )
-		houdiniPlugin = houdiniPluginEnv.SharedLibrary( houdiniPluginTarget, houdiniPluginSources, SHLIBPREFIX="" )
-		houdiniPluginInstall = houdiniPluginEnv.Install( os.path.dirname( houdiniPluginEnv.subst( "$INSTALL_HOUDINIPLUGIN_NAME" ) ), houdiniPlugin )
-		houdiniPluginEnv.Depends( houdiniPlugin, corePythonModule )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniPluginEnv.AddPostAction( houdiniPluginInstall, lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIPLUGIN_NAME"] ) )
-		houdiniPluginEnv.Alias( "install", houdiniPluginInstall )
-		houdiniPluginEnv.Alias( "installHoudini", houdiniPluginInstall )
-
-		#=====
-		# build python module
-		#=====
-		houdiniPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
-		houdiniPythonModule = houdiniPythonModuleEnv.SharedLibrary( "python/IECoreHoudini/_IECoreHoudini", houdiniPythonSources )
-		houdiniPythonModuleEnv.Depends( houdiniPythonModule, houdiniLib )
-		houdiniPythonModuleInstall = houdiniPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreHoudini", houdiniPythonScripts + houdiniPythonModule )
-		if env[ "INSTALL_CREATE_SYMLINKS" ] :
-			houdiniPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniPythonModuleEnv, houdiniPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-		houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall )
-		houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall )
-
-		#=====
-		# install icons
-		#=====
-		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" ) + glob.glob( "graphics/CortexLogo*.svg" )
-		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
-		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
-		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )
-
-		#=====
-		# install toolbar
-		#=====
-		houdiniToolbars = glob.glob( "menus/IECoreHoudini/*.shelf" )
-		houdiniToolbarInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINITOOLBAR_DIR", source=houdiniToolbars )
-		houdiniPluginEnv.Alias( "install", houdiniToolbarInstall )
-		houdiniPluginEnv.Alias( "installHoudini", houdiniToolbarInstall )
-
-		if coreEnv["INSTALL_COREHOUDINI_POST_COMMAND"] != "" :
-			# this is the only way we could find to get a post action to run for an alias
-			houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
-			houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
-
-		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule ] )
-
-		#=====
-		# Houdini tests
-		#=====
-		houdiniTestEnv = testEnv.Clone()
-
-		houdiniTestLibPaths = houdiniEnv.subst( os.pathsep.join( houdiniPythonModuleEnv["LIBPATH"] ) )
-		houdiniTestEnv["ENV"][houdiniTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += os.pathsep + houdiniTestLibPaths
-		houdiniTestEnv["ENV"][libraryPathEnvVar] += os.pathsep + houdiniTestLibPaths
-
-		houdiniTestEnv["ENV"]["PATH"] = houdiniEnv.subst( "$HOUDINI_ROOT/bin:" ) + houdiniEnv["ENV"]["PATH"]
-
-		houdiniTestEnv.Append( **houdiniEnvAppends )
-		houdiniTestEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-
-		houdiniTestEnv["ENV"]["PYTHONPATH"] += ":./python"
-		if distutils.version.LooseVersion( pythonEnv["PYTHON_VERSION"] ) > distutils.version.LooseVersion( "2.7" ) :
-			houdiniTestEnv["ENV"]["PYTHONHOME"] = houdiniTestEnv.subst( "$HOUDINI_ROOT/python" )
-		houdiniTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:&"
-		houdiniTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:&"
-
-		houdiniTestEnv["ENV"]["IECORE_OP_PATHS"] = "./test/IECoreHoudini/ops"
-
-		houdiniPythonExecutable = "hython"
-
-		houdiniPythonTest = houdiniTestEnv.Command( "test/IECoreHoudini/resultsPython.txt", houdiniPythonModule, houdiniPythonExecutable + " $TEST_HOUDINI_SCRIPT" )
-		NoCache( houdiniPythonTest )
-		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniLib, houdiniPlugin, houdiniPythonModule ] )
-		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "test/IECoreHoudini/*.py" ) )
-		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "python/IECoreHoudini/*.py" ) )
-		if env["WITH_GL"] :
-			houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
-		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
-		houdiniTestEnv.Alias( "testHoudiniPython", houdiniPythonTest )
-
-###########################################################################################
 # Build, install and test the IECoreUSD library and bindings
 ###########################################################################################
 
@@ -3037,9 +2067,9 @@ usdEnvSets = {
 	"IECORE_NAME" : "IECoreUSD"
 }
 
-# We are deliberately cloning from `pythonEnv` rather than
+# We are deliberately cloning from `basePythonEnv` rather than
 # `env` because USD itself has dependencies on Python.
-usdEnv = pythonEnv.Clone( **usdEnvSets )
+usdEnv = basePythonEnv.Clone( **usdEnvSets )
 
 if usdEnv["WITH_USD_MONOLITHIC"] :
 	usdLibs = [ "usd_ms" ]
@@ -3068,10 +2098,20 @@ else :
 if usdEnv["USD_LIB_PREFIX"] :
 	usdLibs = [ usdEnv["USD_LIB_PREFIX"] + x for x in usdLibs ]
 
+usdPythonLib = env.subst( "boost_python$BOOST_PYTHON_LIB_SUFFIX" )
+pxrVersionHeader = env.FindFile( "pxr/pxr.h", dependencyIncludes )
+if pxrVersionHeader is not None and "#define PXR_USE_INTERNAL_BOOST_PYTHON\n" in open( str( pxrVersionHeader ) ) :
+	usdPythonLib = usdEnv["USD_LIB_PREFIX"] + "python"
+
+usdLibs.append( usdPythonLib )
+
 usdEnvAppends = {
 	"CXXFLAGS" : [
 		"-Wno-deprecated" if env["PLATFORM"] != "win32" else "",
 		"/Zc:inline-" if env["PLATFORM"] == "win32" else "",
+		# This warning is already disabled generally for release builds,
+		# but also requires disabling for debug builds with USD.
+		"/wd4702" if env["PLATFORM"] == "win32" else "",
 		"-DIECoreUSD_EXPORTS",
 		systemIncludeArgument, "$USD_INCLUDE_PATH",
 		systemIncludeArgument, "$PYTHON_INCLUDE_PATH",
@@ -3363,7 +2403,7 @@ if doConfigure :
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN $SOURCE")
 		docEnv.NoCache( docs )
 
-		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :
+		for modulePath in ( "python/IECore", "python/IECoreGL" ) :
 
 			module = os.path.basename( modulePath )
 			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )

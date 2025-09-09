@@ -49,14 +49,8 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathFun.h"
-#include "OpenEXR/ImathMatrixAlgo.h"
-#else
 #include "Imath/ImathFun.h"
 #include "Imath/ImathMatrixAlgo.h"
-#endif
 
 using namespace IECoreGL;
 using namespace IECore;

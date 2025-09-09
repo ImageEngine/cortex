@@ -34,8 +34,6 @@
 
 #include "IECoreScene/NURBSPrimitive.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/MurmurHash.h"
 
 using namespace std;
@@ -251,11 +249,6 @@ size_t NURBSPrimitive::variableSize( PrimitiveVariable::Interpolation interpolat
 			return 0;
 
 	}
-}
-
-void NURBSPrimitive::render( Renderer *renderer ) const
-{
-	renderer->nurbs( m_uOrder, m_uKnot, m_uMin, m_uMax, m_vOrder, m_vKnot, m_vMin, m_vMax, variables );
 }
 
 void NURBSPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )

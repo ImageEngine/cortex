@@ -111,9 +111,14 @@ IECore::ObjectPtr readCamera( pxr::UsdGeomCamera &camera, pxr::UsdTimeCode time,
 	result->setFocusDistance( focusDistance );
 
 	Imath::V2d shutter;
-	camera.GetShutterOpenAttr().Get( &shutter[0], time );
-	camera.GetShutterCloseAttr().Get( &shutter[1], time );
-	result->setShutter( shutter );
+	auto shutterOpenAttr = camera.GetShutterOpenAttr();
+	auto shutterCloseAttr = camera.GetShutterCloseAttr();
+	if( shutterOpenAttr.HasAuthoredValue() || shutterCloseAttr.HasAuthoredValue() )
+	{
+		shutterOpenAttr.Get( &shutter[0], time );
+		shutterCloseAttr.Get( &shutter[1], time );
+		result->setShutter( shutter );
+	}
 
 	return result;
 }
@@ -188,14 +193,17 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	usdCamera.GetFStopAttr().Set( camera->getFStop() );
 	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance() );
 
-	/// \todo This is documented as being specified in UsdTimeCode units,
-	/// in which case I think we should be converting from seconds using
-	/// `stage->GetTimeCodesPerSecond()`. Having looked at both the Maya
-	/// and Houdini plugin sources, I've been unable to find evidence for
-	/// anyone else doing this though, so maybe it's one of those things
-	/// everyone is just getting wrong?
-	usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
-	usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
+	if( camera->hasShutter() )
+	{
+		/// \todo This is documented as being specified in UsdTimeCode units,
+		/// in which case I think we should be converting from seconds using
+		/// `stage->GetTimeCodesPerSecond()`. Having looked at both the Maya
+		/// and Houdini plugin sources, I've been unable to find evidence for
+		/// anyone else doing this though, so maybe it's one of those things
+		/// everyone is just getting wrong?
+		usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
+		usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
+	}
 
 	return true;
 }

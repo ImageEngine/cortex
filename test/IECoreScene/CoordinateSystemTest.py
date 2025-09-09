@@ -70,57 +70,10 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		b.setName( "a" )
 		self.assertEqual( a.hash(), b.hash() )
 
-		b.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1 ) ) ) )
-		self.assertNotEqual( a.hash(), b.hash() )
-
-	def testTransform( self ) :
-
-		c = IECoreScene.CoordinateSystem()
-		self.assertEqual( c.getTransform(), None )
-
-		c = IECoreScene.CoordinateSystem( "test" )
-		self.assertEqual( c.getName(), "test" )
-		self.assertEqual( c.getTransform(), None )
-		self.assertEqual( c, c.copy() )
-
-		c = IECoreScene.CoordinateSystem( "test", IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.assertEqual( c.getName(), "test" )
-		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.assertEqual( c, c.copy() )
-
-		cc = c.copy()
-		self.assertEqual( cc.getTransform(), IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.assertFalse( c.getTransform().isSame( cc.getTransform() ) )
-
-		c.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1 ) ) ) )
-		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1 ) ) ) )
-
-		c.setTransform( None )
-		self.assertEqual( c.getTransform(), None )
-
-		cc = c.copy()
-		self.assertEqual( cc.getTransform(), None )
-
 	def testLoadCobFromBeforeTransforms( self ) :
 
 		c = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "cobFiles", "coordinateSystemBeforeTransforms.cob" ) ).read()
-
 		self.assertEqual( c.getName(), "test" )
-		self.assertEqual( c.getTransform(), None )
-
-	def testLoadCobWithTransform( self ) :
-
-		c = IECoreScene.CoordinateSystem( "test", IECoreScene.MatrixTransform( imath.M44f() ) )
-		IECore.ObjectWriter( c, os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).write()
-		c = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).read()
-
-		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f() ) )
-
-		c = IECoreScene.CoordinateSystem( "test", None )
-		IECore.ObjectWriter( c, os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).write()
-		c = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).read()
-
-		self.assertEqual( c.getTransform(), None )
 
 	def testEquality( self ) :
 
@@ -133,21 +86,6 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		self.assertNotEqual( c1, c2 )
 		self.assertNotEqual( c2, c1 )
 		c1.setName( "test" )
-
-		c1.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.assertNotEqual( c1, c2 )
-		self.assertNotEqual( c2, c1 )
-
-		c2.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.assertEqual( c1, c2 )
-		self.assertEqual( c2, c1 )
-
-	def testMemoryUsage( self ) :
-
-		c = IECoreScene.CoordinateSystem( "test" )
-		m = c.memoryUsage()
-		c.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.assertTrue( c.memoryUsage() > m )
 
 	def tearDown( self ) :
 

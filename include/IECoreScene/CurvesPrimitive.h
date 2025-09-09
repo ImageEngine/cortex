@@ -64,7 +64,6 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 		bool periodic() const;
 		void setTopology( IECore::ConstIntVectorDataPtr verticesPerCurve, const IECore::CubicBasisf &basis, bool periodic );
 
-		void render( Renderer *renderer ) const override;
 		/// Follows the RenderMan specification for variable sizes.
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 		/// Returns the variable size for a single curve.

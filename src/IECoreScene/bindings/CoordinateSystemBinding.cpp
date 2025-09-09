@@ -37,7 +37,6 @@
 #include "CoordinateSystemBinding.h"
 
 #include "IECoreScene/CoordinateSystem.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
@@ -51,13 +50,9 @@ namespace IECoreSceneModule
 void bindCoordinateSystem()
 {
 	RunTimeTypedClass<CoordinateSystem>()
-		.def( init<>() )
-		.def( init<const std::string &>() )
-		.def( init<const std::string &, TransformPtr>() )
+		.def( init<const std::string &>( ( arg( "name" ) = "unspecified" ) ) )
 		.def( "getName", &CoordinateSystem::getName, return_value_policy<copy_const_reference>() )
 		.def( "setName", &CoordinateSystem::setName )
-		.def( "getTransform", (Transform *(CoordinateSystem::*)())&CoordinateSystem::getTransform, return_value_policy<CastToIntrusivePtr>() )
-		.def( "setTransform", &CoordinateSystem::setTransform )
 	;
 }
 

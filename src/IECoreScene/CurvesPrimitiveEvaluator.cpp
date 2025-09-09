@@ -42,12 +42,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathFun.h"
-#else
 #include "Imath/ImathFun.h"
-#endif
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -265,8 +260,8 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 	{
 		m_coefficients[0] = 1.0f - m_segmentV;
 		m_coefficients[1] = m_segmentV;
-		m_derivativeCoefficients[0] = 1.0f;
-		m_derivativeCoefficients[1] = -1.0f;
+		m_derivativeCoefficients[0] = -1.0f;
+		m_derivativeCoefficients[1] = 1.0f;
 		m_vertexDataIndices[0] = m_varyingDataIndices[0] = o + i;
 		if( periodic )
 		{

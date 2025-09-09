@@ -50,12 +50,7 @@
 #include "openvdb/openvdb.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathBox.h"
-#else
 #include "Imath/ImathBox.h"
-#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "tbb/recursive_mutex.h"
@@ -86,7 +81,6 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 		std::vector<std::string> gridNames() const;
 
 		Imath::Box3f bound() const override;
-		void render( IECoreScene::Renderer *renderer ) const override;
 
 		// \deprecated
 		// Not threadsafe ( it computes statistics if not present and stores them on the grids ).

@@ -207,10 +207,6 @@ Imath::Box3f VDBObject::bound() const
 	return combinedBounds;
 }
 
-void VDBObject::render( IECoreScene::Renderer *renderer ) const
-{
-}
-
 IECore::CompoundObjectPtr VDBObject::metadata( const std::string &name )
 {
 	CompoundObjectPtr metadata = new CompoundObject();

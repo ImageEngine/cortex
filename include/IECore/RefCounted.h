@@ -132,7 +132,7 @@ class IECORE_API RefCounted : private boost::noncopyable
 
 		typedef size_t RefCount;
 
-		RefCounted();
+		RefCounted() : m_numRefs( 0 ) {}
 
 		/// Add a reference to the current object
 		inline void addRef() const { m_numRefs++; };
@@ -152,7 +152,7 @@ class IECORE_API RefCounted : private boost::noncopyable
 
 	protected:
 
-		virtual ~RefCounted();
+		virtual ~RefCounted() {}
 
 	private :
 
