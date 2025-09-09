@@ -34,31 +34,20 @@
 
 #include "boost/python.hpp"
 
-#include "AddSmoothSkinningInfluencesOpBinding.h"
-#include "AttributeStateBinding.h"
 #include "CameraBinding.h"
 #include "ClippingPlaneBinding.h"
-#include "CompressSmoothSkinningDataOpBinding.h"
-#include "ContrastSmoothSkinningWeightsOpBinding.h"
 #include "CoordinateSystemBinding.h"
-#include "CurveExtrudeOpBinding.h"
 #include "CurveLineariserBinding.h"
 #include "CurveTangentsOpBinding.h"
 #include "CurvesAlgoBinding.h"
 #include "CurvesMergeOpBinding.h"
 #include "CurvesPrimitiveBinding.h"
 #include "CurvesPrimitiveEvaluatorBinding.h"
-#include "DecompressSmoothSkinningDataOpBinding.h"
 #include "DiskPrimitiveBinding.h"
 #include "ExternalProceduralBinding.h"
 #include "FaceVaryingPromotionOpBinding.h"
 #include "FontBinding.h"
-#include "GroupBinding.h"
-#include "LightBinding.h"
-#include "LimitSmoothSkinningInfluencesOpBinding.h"
 #include "LinkedSceneBinding.h"
-#include "MatrixMotionTransformBinding.h"
-#include "MatrixTransformBinding.h"
 #include "MeshAlgoBinding.h"
 #include "MeshMergeOpBinding.h"
 #include "MeshNormalsOpBinding.h"
@@ -67,32 +56,23 @@
 #include "MeshPrimitiveEvaluatorBinding.h"
 #include "MeshPrimitiveShrinkWrapOpBinding.h"
 #include "MeshVertexReorderOpBinding.h"
-#include "MixSmoothSkinningWeightsOpBinding.h"
-#include "MotionPrimitiveBinding.h"
 #include "NParticleReaderBinding.h"
 #include "NURBSPrimitiveBinding.h"
-#include "NormalizeSmoothSkinningWeightsOpBinding.h"
 #include "OBJReaderBinding.h"
-#include "OptionsBinding.h"
 #include "OutputBinding.h"
 #include "PDCParticleReaderBinding.h"
 #include "PDCParticleWriterBinding.h"
 #include "ParticleReaderBinding.h"
 #include "ParticleWriterBinding.h"
 #include "PatchMeshPrimitiveBinding.h"
-#include "PointSmoothSkinningOpBinding.h"
 #include "PointsAlgoBinding.h"
 #include "PointsPrimitiveBinding.h"
 #include "PointsPrimitiveEvaluatorBinding.h"
-#include "PreWorldRenderableBinding.h"
 #include "PrimitiveBinding.h"
 #include "PrimitiveEvaluatorBinding.h"
 #include "PrimitiveOpBinding.h"
 #include "PrimitiveVariableBinding.h"
-#include "RemoveSmoothSkinningInfluencesOpBinding.h"
 #include "RenderableBinding.h"
-#include "RendererBinding.h"
-#include "ReorderSmoothSkinningInfluencesOpBinding.h"
 #include "SampledSceneInterfaceBinding.h"
 #include "SceneCacheBinding.h"
 #include "SceneInterfaceBinding.h"
@@ -100,13 +80,8 @@
 #include "ShaderNetworkBinding.h"
 #include "ShaderNetworkAlgoBinding.h"
 #include "SharedSceneInterfacesBinding.h"
-#include "SmoothSkinningDataBinding.h"
-#include "SmoothSmoothSkinningWeightsOpBinding.h"
 #include "SpherePrimitiveBinding.h"
 #include "SpherePrimitiveEvaluatorBinding.h"
-#include "StateRenderableBinding.h"
-#include "TransferSmoothSkinningWeightsOpBinding.h"
-#include "TransformBinding.h"
 #include "TransformOpBinding.h"
 #include "TriangulateOpBinding.h"
 #include "TriangulatorBinding.h"
@@ -126,9 +101,7 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindParticleReader();
 	bindPDCParticleReader();
 	bindRenderable();
-	bindStateRenderable();
 	bindVisibleRenderable();
-	bindRenderer();
 	bindParticleWriter();
 	bindPDCParticleWriter();
 	bindPrimitive();
@@ -139,13 +112,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindShaderNetworkAlgo();
 	bindPrimitiveOp();
 	bindMeshPrimitive();
-	bindMotionPrimitive();
-	bindTransform();
-	bindMatrixTransform();
-	bindMatrixMotionTransform();
-	bindGroup();
-	bindAttributeState();
-	bindPreWorldRenderable();
 	bindCamera();
 	bindNURBSPrimitive();
 	bindMeshPrimitiveBuilder();
@@ -173,30 +139,14 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindOBJReader();
 	bindOutput();
 	bindPatchMeshPrimitive();
-	bindCurveExtrudeOp();
 	bindNParticleReader();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
 	bindCurveLineariser();
 	bindCurveTangentsOp();
-	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
-	bindCompressSmoothSkinningDataOp();
-	bindDecompressSmoothSkinningDataOp();
-	bindReorderSmoothSkinningInfluencesOp();
-	bindNormalizeSmoothSkinningWeightsOp();
-	bindLimitSmoothSkinningInfluencesOp();
-	bindMixSmoothSkinningWeightsOp();
-	bindSmoothSmoothSkinningWeightsOp();
-	bindPointSmoothSkinningOp();
-	bindAddSmoothSkinningInfluencesOp();
-	bindRemoveSmoothSkinningInfluencesOp();
-	bindTransferSmoothSkinningWeightsOp();
 	bindPointsPrimitiveEvaluator();
-	bindLight();
-	bindContrastSmoothSkinningWeightsOp();
 	bindDiskPrimitive();
-	bindOptions();
 	bindSceneInterface();
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();

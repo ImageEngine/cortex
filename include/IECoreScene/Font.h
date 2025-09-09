@@ -42,21 +42,14 @@
 #include "IECore/RunTimeTyped.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathVec.h"
-#else
 #include "Imath/ImathBox.h"
 #include "Imath/ImathVec.h"
-#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreScene
 {
 
 IE_CORE_FORWARDDECLARE( MeshPrimitive );
-IE_CORE_FORWARDDECLARE( Group );
 
 /// The Font class allows the loading of fonts and their
 /// conversion to MeshPrimitives.
@@ -97,9 +90,6 @@ class IECORESCENE_API Font : public IECore::RunTimeTyped
 		/// Returns a mesh representing the specified string,
 		/// using the current curve tolerance and kerning.
 		MeshPrimitivePtr mesh( const std::string &text ) const;
-		/// Returns a group representing the specified string,
-		/// using the current curve tolerance and kerning.
-		GroupPtr meshGroup( const std::string &text ) const;
 		/// Returns the necessary appropriate offset between the
 		/// origins of the first and second characters, taking
 		/// into account the current kerning.

@@ -82,11 +82,3 @@ void Renderable::hash( MurmurHash &h ) const
 {
 	BlindDataHolder::hash( h );
 }
-
-void Renderable::render( Renderer *renderer ) const
-{
-#ifndef NDEBUG
-	bool unimplemented = false;
-	assert(unimplemented);
-#endif
-}

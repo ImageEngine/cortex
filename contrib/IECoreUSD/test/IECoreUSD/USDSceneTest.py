@@ -1285,6 +1285,13 @@ class USDSceneTest( unittest.TestCase ) :
 			name = formatCameraName( scale = scale )
 			testCameras[name] = c
 
+		for shutterOpen in [ 0, -0.25, -1.0 ] :
+			for shutterClose in [ 0, 0.25, 1.0 ] :
+				c = IECoreScene.Camera()
+				c.setShutter( imath.V2f( shutterOpen, shutterClose ) )
+				name = formatCameraName( shutterOpen = shutterOpen, shutterClose = shutterClose )
+				testCameras[name] = c
+
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
 		for name, c in testCameras.items() :
@@ -1321,8 +1328,12 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertEqual( c.clippingRange.max, cortexCam.getClippingPlanes()[1] )
 			self.assertEqual( c.fStop, cortexCam.getFStop() )
 			self.assertEqual( c.focusDistance, cortexCam.getFocusDistance() )
-			self.assertEqual( cG.GetShutterOpenAttr().Get(), cortexCam.getShutter()[0] )
-			self.assertEqual( cG.GetShutterCloseAttr().Get(), cortexCam.getShutter()[1] )
+			if cortexCam.hasShutter() :
+				self.assertEqual( cG.GetShutterOpenAttr().Get(), cortexCam.getShutter()[0] )
+				self.assertEqual( cG.GetShutterCloseAttr().Get(), cortexCam.getShutter()[1] )
+			else :
+				self.assertFalse( cG.GetShutterOpenAttr().HasAuthoredValue() )
+				self.assertFalse( cG.GetShutterCloseAttr().HasAuthoredValue() )
 
 			try :
 				from pxr import CameraUtil
@@ -1389,6 +1400,7 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertEqual( c2.getClippingPlanes(), c.getClippingPlanes() )
 			self.assertEqual( c2.getFStop(), c.getFStop() )
 			self.assertEqual( c2.getFocusDistance(), c.getFocusDistance() )
+			self.assertEqual( c2.hasShutter(), c.hasShutter() )
 			self.assertEqual( c2.getShutter(), c.getShutter() )
 
 			assertVectorsAlmostEqual( c2.frustum().min(), c.frustum().min(), places = 6 )

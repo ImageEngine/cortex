@@ -34,8 +34,6 @@
 
 #include "IECoreScene/DiskPrimitive.h"
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECore/Exception.h"
 #include "IECore/MurmurHash.h"
 
@@ -124,12 +122,6 @@ Imath::Box3f DiskPrimitive::bound() const
 		V3f( -m_radius, -m_radius, m_z ),
 		V3f( m_radius, m_radius, m_z )
 	);
-}
-
-void DiskPrimitive::render( Renderer *renderer ) const
-{
-	assert( renderer );
-	renderer->disk( m_radius, m_z, m_thetaMax, variables );
 }
 
 void DiskPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *context )

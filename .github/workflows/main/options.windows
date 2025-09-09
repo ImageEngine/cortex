@@ -47,10 +47,6 @@ USD_LIB_PATH = libs
 USD_LIB_PREFIX = "usd_"
 DOXYGEN = deps + "\\doxygen\\doxygen.exe"
 
-# DCC Integrations
-# ================
-NUKE_ROOT = ""
-
 # Environment
 # ===========
 

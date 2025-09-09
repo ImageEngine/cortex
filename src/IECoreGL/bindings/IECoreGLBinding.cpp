@@ -55,7 +55,6 @@
 #include "IECoreGL/bindings/PointsPrimitiveBinding.h"
 #include "IECoreGL/bindings/PrimitiveBinding.h"
 #include "IECoreGL/bindings/RenderableBinding.h"
-#include "IECoreGL/bindings/RendererBinding.h"
 #include "IECoreGL/bindings/SceneBinding.h"
 #include "IECoreGL/bindings/SelectorBinding.h"
 #include "IECoreGL/bindings/ShaderBinding.h"
@@ -80,7 +79,6 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE( _IECoreGL )
 {
-	bindRenderer();
 	bindBindable();
 	bindShader();
 	bindTexture();

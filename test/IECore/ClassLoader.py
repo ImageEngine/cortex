@@ -42,7 +42,7 @@ class TestClassLoader( unittest.TestCase ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
 
-		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", os.path.join( "maths", "multiply" ), "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", os.path.join( "maths", "multiply" ), "matrixParameter", "meshMerge", "objectVectorInOut", "parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
 		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing"] )
 		self.assertEqual( l.getDefaultVersion( os.path.join( "maths", "multiply" ) ), 2 )
 		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
@@ -57,7 +57,7 @@ class TestClassLoader( unittest.TestCase ) :
 	def testFinalSlash( self ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) + os.path.sep ) )
-		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", os.path.join( "maths", "multiply" ), "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", os.path.join( "maths", "multiply" ), "matrixParameter", "meshMerge", "objectVectorInOut", "parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
 
 	def testStaticLoaders( self ) :
 
