@@ -35,6 +35,7 @@
 #include "SdfFileFormatSharedSceneWriters.h"
 
 #include "IECore/LRUCache.h"
+#include "IECore/MessageHandler.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -61,7 +62,15 @@ class Cache : public SceneLRUCache
 
 		static SceneInterfacePtr fileCacheGetter( const std::string &fileName, size_t &cost )
 		{
-			SceneInterfacePtr result = SceneInterface::create( fileName, IECore::IndexedIO::Write );
+			SceneInterfacePtr result = nullptr;
+			try
+			{
+				result = SceneInterface::create( fileName, IECore::IndexedIO::Write );
+			}
+			catch ( ... )
+			{
+				IECore::msg( IECore::Msg::Error, "SdfFileFormatSharedSceneWriters::SceneLRUCache", boost::format( "Unable to open file path \"%s\" for writing IndexedIo data." ) % fileName );
+			}
 			cost = 1;
 			return result;
 		}
