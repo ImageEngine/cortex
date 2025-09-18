@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.0.1)
 ========
 
+API
+---
 
+- TypeIds : Claimed range for AtomsGaffer.
 
 10.6.0.1 (relative to 10.6.0.0)
 ========
