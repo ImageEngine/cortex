@@ -5,6 +5,7 @@ Fixes
 -----
 
 - ConfigLoader : Fixed UnicodeDecodeErrors in non-UTF8 locales.
+- USDScene : Fixed identifiers for exported RenderMan shaders, by omitting the `ri:` type prefix.
 
 10.6.0.2 (relative to 10.6.0.1)
 ========
