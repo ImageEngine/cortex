@@ -1,6 +1,11 @@
 10.6.x.x (relative to 10.6.0.2)
 ========
 
+Improvements
+------------
+
+- ShaderNetworkAlgo : Added support for RenderMan's spline convention in `expandSplines()` and `collapseSplines()`.
+
 Fixes
 -----
 
