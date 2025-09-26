@@ -190,7 +190,8 @@ class DisplayDriverServer::PrivateData : public RefCounted
 		void openPort( DisplayDriverServer::Port portNumber )
 		{
 			boost::system::error_code errorCode;
-			m_acceptor.open( tcp::v6(), errorCode );
+			tcp protocol = tcp::v6();
+			m_acceptor.open( protocol, errorCode );
 			if( !errorCode )
 			{
 				// Got IPv6. Allow v4 too.
@@ -200,7 +201,8 @@ class DisplayDriverServer::PrivateData : public RefCounted
 			{
 				// Fall back to IPv4 only.
 				m_acceptor.close();
-				m_acceptor.open( tcp::v4() );
+				protocol = tcp::v4();
+				m_acceptor.open( protocol );
 			}
 
 #ifdef _MSC_VER
@@ -210,7 +212,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 #else
 			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ) );
 #endif
-			m_endpoint = boost::asio::ip::tcp::endpoint( m_acceptor.local_endpoint().protocol(), portNumber );
+			m_endpoint = boost::asio::ip::tcp::endpoint( protocol, portNumber );
 			m_acceptor.bind( m_endpoint );
 			m_acceptor.listen();
 		}
