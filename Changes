@@ -1,6 +1,11 @@
 10.6.x.x (relative to 10.6.0.1)
 ========
 
+Fixes
+-----
+
+- DisplayDriverServer : Fixed to support IPv4-only environments.
+
 API
 ---
 
