@@ -244,6 +244,16 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( valueAttribute ) ) )
 		{
 			parameters[fromUSDParameterName( i.GetBaseName() )] = d;
+			// If there's colorspace data on the parameter, we can store this as
+			// `<name>_colorspace`, this is how MaterialX stores colorspace on
+			// generated OSL nodes so we match here the same behaviour.
+			if( pxr::UsdAttribute( valueAttribute ).HasColorSpace() )
+			{
+				const IECore::InternedString colorSpace( pxr::UsdAttribute( valueAttribute ).GetColorSpace().GetString() );
+				const IECore::InternedString paramName(
+					( boost::format( "%s_colorspace" ) % fromUSDParameterName( i.GetBaseName() ).string() ).str() );
+				parameters[paramName] = new IECore::InternedStringData( colorSpace );
+			}
 		}
 	}
 
@@ -334,6 +344,13 @@ void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShad
 			continue;
 		}
 
+		// Skip colorspace parameters, these will be set using SetColorSpace() on the
+		// USD attribue that it corresponds to.
+		if( boost::ends_with( p.first.string(), "_colorspace" ) )
+		{
+			continue;
+		}
+
 		const pxr::TfToken usdParameterName = toUSDParameterName( p.first );
 		pxr::UsdShadeInput input = usdShader.GetInput( usdParameterName );
 		if( !input )
@@ -364,6 +381,17 @@ void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShad
 			}
 		}
 		input.Set( IECoreUSD::DataAlgo::toUSD( p.second.get() ) );
+
+		// Make sure to set any colorspace parameters onto the attribute
+		// if any exist.
+		auto it = shader->parameters().find( ( boost::format( "%s_colorspace" ) % p.first.string() ).str() );
+		if( it != shader->parameters().end() )
+		{
+			if( auto *s = IECore::runTimeCast<IECore::InternedStringData>( it->second.get() ) )
+			{
+				pxr::UsdAttribute( input ).SetColorSpace( pxr::TfToken( s->readable().string() ) );
+			}
+		}
 	}
 
 	if( shader->blindData()->readable().size() )

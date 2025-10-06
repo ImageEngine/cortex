@@ -29,14 +29,18 @@ def "model"
 			def Shader "relativeTexture"
 			{
 				uniform token info:id = "UsdUVTexture"
-				asset inputs:file = @../myTexture.tx@
+				asset inputs:file = @../myTexture.tx@ (
+					colorSpace = "ACEScg"
+				)
 				vector3f outputs:rgb
 			}
 
 			def Shader "relativeUDIMTexture"
 			{
 				uniform token info:id = "UsdUVTexture"
-				asset inputs:file = @../myTexture.<UDIM>.tx@
+				asset inputs:file = @../myTexture.<UDIM>.tx@ (
+					colorSpace = "lin_rec709_scene"
+				)
 				vector3f outputs:rgb
 
 			}
@@ -44,7 +48,9 @@ def "model"
 			def Shader "udimTexture"
 			{
 				uniform token info:id = "UsdUVTexture"
-				asset inputs:file = @/full/path/to/myTexture.<UDIM>.tx@
+				asset inputs:file = @/full/path/to/myTexture.<UDIM>.tx@ (
+					colorSpace = "srgb_rec709_scene"
+				)
 				float outputs:r
 			}
 		}
