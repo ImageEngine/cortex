@@ -1,6 +1,11 @@
 10.6.x.x (relative to 10.6.0.1)
 ========
 
+Build
+-----
+
+- SConstruct : Added `BOOST_CMAKE` option to support Boost that was built with CMake.
+
 API
 ---
 

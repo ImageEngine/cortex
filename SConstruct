@@ -178,6 +178,10 @@ o.Add(
 	"likely related to the specific python version.",
 )
 
+o.Add(
+	BoolVariable( "BOOST_CMAKE", "Enable this if Boost was built with CMake", False )
+)
+
 # OpenEXR options
 
 o.Add(
@@ -1090,16 +1094,15 @@ if doConfigure :
 
 	env.Append( LIBS = [
 			"boost_filesystem" + env["BOOST_LIB_SUFFIX"],
-			"boost_regex" + env["BOOST_LIB_SUFFIX"],
 			"boost_iostreams" + env["BOOST_LIB_SUFFIX"],
 			"boost_date_time" + env["BOOST_LIB_SUFFIX"],
 			"boost_thread" + env["BOOST_LIB_SUFFIX"],
 			"boost_timer" + env["BOOST_LIB_SUFFIX"],
 			"boost_chrono" + env["BOOST_LIB_SUFFIX"]
-		]
+		] + ["boost_regex" + env["BOOST_LIB_SUFFIX"]] if not env["BOOST_CMAKE"] else []
 	)
 
-	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
+	if int( env["BOOST_MINOR_VERSION"] ) >=35 and not env["BOOST_CMAKE"] :
 		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
 
 	c = configureSharedLibrary( env )
