@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.0.2)
 ========
 
+Fixes
+-----
 
+- ConfigLoader : Fixed UnicodeDecodeErrors in non-UTF8 locales.
 
 10.6.0.2 (relative to 10.6.0.1)
 ========
