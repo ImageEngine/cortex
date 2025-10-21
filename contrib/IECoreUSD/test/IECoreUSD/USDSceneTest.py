@@ -3055,6 +3055,13 @@ class USDSceneTest( unittest.TestCase ) :
 		) )
 		manualComponentNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "dest", "" ) )
 
+
+		rmanSurface = IECoreScene.Shader( "PxrFoo", "osl:surface", surface.parameters )
+		rmanNetwork = IECoreScene.ShaderNetwork()
+		rmanNetwork.addShader( "out", rmanSurface )
+		rmanNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "out", "" ) )
+
+
 		writerRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		shaderLocation = writerRoot.createChild( "shaderLocation" )
 		shaderLocation.writeAttribute( "ai:surface", oneShaderNetwork, 0 )
@@ -3063,6 +3070,7 @@ class USDSceneTest( unittest.TestCase ) :
 		shaderLocation.writeAttribute( "complex:surface", complexNetwork, 0 )
 		shaderLocation.writeAttribute( "componentConnection:surface", componentConnectionNetwork, 0 )
 		shaderLocation.writeAttribute( "manualComponent:surface", manualComponentNetwork, 0 )
+		shaderLocation.writeAttribute( "ri:surface", rmanNetwork, 0 )
 
 		shaderLocation.writeAttribute( "volume", oneShaderNetwork, 0 ) # USD supports shaders without a prefix
 
@@ -3121,11 +3129,26 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( textureUsd.GetInput( "filename" ).Get(), "sometexture.tx" )
 
 
+
+
+		riShaderSource = mat.GetOutput( "ri:surface" ).GetConnectedSource()
+		self.assertEqual( riShaderSource[1], "DEFAULT_OUTPUT" )
+		riShaderUsd = pxr.UsdShade.Shader( riShaderSource[0].GetPrim() )
+		self.assertEqual( riShaderUsd.GetShaderId(), "PxrFoo" )
+		self.assertEqual( riShaderUsd.GetInput( "c" ).Get(), "42" )
+		self.assertEqual( riShaderUsd.GetInput( "a" ).Get(), 42.0 )
+		self.assertEqual( riShaderUsd.GetInput( "g" ).Get(), 5 )
+		self.assertEqual( riShaderUsd.GetInput( "g_Knots" ).Get(), pxr.Vt.FloatArray( [0, 0, 10, 20, 20] ) )
+		self.assertEqual( riShaderUsd.GetInput( "g_Colors" ).Get(), pxr.Vt.Vec3fArray(
+			[pxr.Gf.Vec3f( 1 ), pxr.Gf.Vec3f( 1 ), pxr.Gf.Vec3f( 2 ), pxr.Gf.Vec3f( 0 ), pxr.Gf.Vec3f( 0 )]
+		) )
+		self.assertEqual( riShaderUsd.GetInput( "g_Interpolation" ).Get(), 'linear' )
+
 		# Read via SceneInterface, and check that we've round-tripped successfully.
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
-		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'volume', 'componentConnection:surface', 'manualComponent:surface' ] ) )
+		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'volume', 'componentConnection:surface', 'manualComponent:surface', "ri:surface" ] ) )
 
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader().parameters, oneShaderNetwork.outputShader().parameters )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader(), oneShaderNetwork.outputShader() )
@@ -3149,6 +3172,13 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "complex:surface", 0 ), complexNetwork )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "componentConnection:surface", 0 ), componentConnectionNetwork )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "manualComponent:surface", 0 ), manualComponentNetwork )
+
+		rmanSurfaceWithoutTypePrefix = IECoreScene.Shader( "PxrFoo", "surface", surface.parameters )
+		rmanNetworkWithoutTypePrefix = IECoreScene.ShaderNetwork()
+		rmanNetworkWithoutTypePrefix.addShader( "out", rmanSurfaceWithoutTypePrefix )
+		rmanNetworkWithoutTypePrefix.setOutput( IECoreScene.ShaderNetwork.Parameter( "out", "" ) )
+
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ri:surface", 0 ), rmanNetworkWithoutTypePrefix )
 
 	def testManyShaders( self ) :
 
