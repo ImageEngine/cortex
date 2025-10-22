@@ -591,6 +591,8 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		} ) )
 		( h6, sSubst6 ) = self.__hashAndSubstitution( s, {} )
 		( h7, sSubst7 ) = self.__hashAndSubstitution( s, allAttributes )
+		self.assertNotEqual( h6, IECore.MurmurHash() )
+		self.assertNotEqual( h7, IECore.MurmurHash() )
 		self.assertEqual( h6, h7 )
 		self.assertEqual( sSubst6, sSubst7 )
 		self.assertEqual( sSubst6.parameters["a"].value, "pre<attr:fred>post" )

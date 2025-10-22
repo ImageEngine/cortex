@@ -6,6 +6,11 @@ Improvements
 
 - ShaderNetwork : Optimised applySubstitutions() for cases where not all shaders need them.
 
+Fixes
+-----
+
+ - ShaderNetwork::hashSubstitutions : Fixed shader string substitutions that are escaped with backslashes ( ie. `myText\<substitutionHandledByArnold\>` ).
+
 10.6.1.0 (relative to 10.6.0.2)
 ========
 

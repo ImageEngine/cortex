@@ -197,7 +197,7 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		///
 		/// We support special syntax that allows you to substitute string attributes
 		/// into the values of string parameters on shaders.
-		/// 
+		///
 		/// If a string parameter, or string vector parameter, contains the token
 		/// <attr:PARAMETER_NAME>, then it will be subsituted with the value of a
 		/// string attribute named PARAMETER_NAME.  If there is no attribute named
@@ -208,7 +208,7 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		/// you can escape the angle brackets with backslashes, like
 		/// "\<attr:PARAMETER_NAME\>"
 
-		/// Appends all attributes used by `applySubstitutions()` into the hash.
+		/// Appends to the hash to reflect all changes made by applySubstitutions( attributes ).
 		void hashSubstitutions( const IECore::CompoundObject *attributes, IECore::MurmurHash &h ) const;
 
 		/// Apply substitutions to all string and string vector parameters in the network,

@@ -447,6 +447,13 @@ class ShaderNetwork::Implementation
 					h.append( 0 );
 				}
 			}
+
+			if( m_parmsNeedingSubstitution.size() && !m_neededSubstitutions.size() )
+			{
+				// We don't depend on any attributes, but some parameters have escaped substitutions.
+				// Modify hash to reflect the fact that applySubstitutions() will remove the escaping.
+				h.append( true );
+			}
 		}
 
 		void applySubstitutions( const CompoundObject *attributes )
