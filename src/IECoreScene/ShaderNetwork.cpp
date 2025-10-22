@@ -745,7 +745,10 @@ class ShaderNetwork::Implementation
 						}
 					}
 
-					m_parmsNeedingSubstitution[ node.handle ] = parmsNeedingSub;
+					if( parmsNeedingSub.size() )
+					{
+						m_parmsNeedingSubstitution[ node.handle ] = parmsNeedingSub;
+					}
 				}
 
 				m_hash.append( m_output.shader );

@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.1.0)
 ========
 
+Improvements
+------------
 
+- ShaderNetwork : Optimised applySubstitutions() for cases where not all shaders need them.
 
 10.6.1.0 (relative to 10.6.0.2)
 ========
