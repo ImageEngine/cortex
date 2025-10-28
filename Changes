@@ -5,6 +5,7 @@ Improvements
 ------------
 
 - ShaderNetwork : Optimised applySubstitutions() for cases where not all shaders need them.
+- CurvesPrimitiveEvaluator : Added accessors for getting interpolation coefficients and data indices from Result.
 
 Fixes
 -----

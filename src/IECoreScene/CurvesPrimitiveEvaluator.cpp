@@ -136,7 +136,7 @@ T CurvesPrimitiveEvaluator::Result::primVar( const PrimitiveVariable &primVar, c
 
 Imath::V3f CurvesPrimitiveEvaluator::Result::point() const
 {
-	return primVar<V3f>( m_p, m_coefficients );
+	return primVar<V3f>( m_p, m_coefficients.data() );
 }
 
 Imath::V3f CurvesPrimitiveEvaluator::Result::normal() const
@@ -156,7 +156,7 @@ Imath::V3f CurvesPrimitiveEvaluator::Result::uTangent() const
 
 Imath::V3f CurvesPrimitiveEvaluator::Result::vTangent() const
 {
-	return primVar<V3f>( m_p, m_derivativeCoefficients );
+	return primVar<V3f>( m_p, m_derivativeCoefficients.data() );
 }
 
 unsigned CurvesPrimitiveEvaluator::Result::curveIndex() const
@@ -164,24 +164,49 @@ unsigned CurvesPrimitiveEvaluator::Result::curveIndex() const
 	return m_curveIndex;
 }
 
+const std::array<float, 4> &CurvesPrimitiveEvaluator::Result::coefficients() const
+{
+	return m_coefficients;
+}
+
+const std::array<float, 4> &CurvesPrimitiveEvaluator::Result::derivativeCoefficients() const
+{
+	return m_derivativeCoefficients;
+}
+
+const std::array<unsigned, 4> &CurvesPrimitiveEvaluator::Result::vertexDataIndices() const
+{
+	return m_vertexDataIndices;
+}
+
+const std::array<unsigned, 2> &CurvesPrimitiveEvaluator::Result::varyingDataIndices() const
+{
+	return m_varyingDataIndices;
+}
+
+bool CurvesPrimitiveEvaluator::Result::linear() const
+{
+	return m_linear;
+}
+
 Imath::V3f CurvesPrimitiveEvaluator::Result::vectorPrimVar( const PrimitiveVariable &pv ) const
 {
-	return primVar<V3f>( pv, m_coefficients );
+	return primVar<V3f>( pv, m_coefficients.data() );
 }
 
 V2f CurvesPrimitiveEvaluator::Result::vec2PrimVar( const PrimitiveVariable &pv ) const
 {
-	return primVar<V2f>( pv, m_coefficients );
+	return primVar<V2f>( pv, m_coefficients.data() );
 }
 
 float CurvesPrimitiveEvaluator::Result::floatPrimVar( const PrimitiveVariable &pv ) const
 {
-	return primVar<float>( pv, m_coefficients );
+	return primVar<float>( pv, m_coefficients.data() );
 }
 
 int CurvesPrimitiveEvaluator::Result::intPrimVar( const PrimitiveVariable &pv ) const
 {
-	return primVar<int>( pv, m_coefficients );
+	return primVar<int>( pv, m_coefficients.data() );
 }
 
 const std::string &CurvesPrimitiveEvaluator::Result::stringPrimVar( const PrimitiveVariable &pv ) const
@@ -208,12 +233,12 @@ const std::string &CurvesPrimitiveEvaluator::Result::stringPrimVar( const Primit
 
 Imath::Color3f CurvesPrimitiveEvaluator::Result::colorPrimVar( const PrimitiveVariable &pv ) const
 {
-	return primVar<Color3f>( pv, m_coefficients );
+	return primVar<Color3f>( pv, m_coefficients.data() );
 }
 
 half CurvesPrimitiveEvaluator::Result::halfPrimVar( const PrimitiveVariable &pv ) const
 {
-	return primVar<half>( pv, m_coefficients );
+	return primVar<half>( pv, m_coefficients.data() );
 }
 
 template<bool linear, bool periodic>
@@ -274,8 +299,8 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 	}
 	else
 	{
-		basis.coefficients( m_segmentV, m_coefficients );
-		basis.derivativeCoefficients( m_segmentV, m_derivativeCoefficients );
+		basis.coefficients( m_segmentV, m_coefficients.data() );
+		basis.derivativeCoefficients( m_segmentV, m_derivativeCoefficients.data() );
 
 		if( periodic )
 		{
