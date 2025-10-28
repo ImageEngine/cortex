@@ -10,7 +10,7 @@ Improvements
 Fixes
 -----
 
- - ShaderNetwork::hashSubstitutions : Fixed shader string substitutions that are escaped with backslashes ( ie. `myText\<substitutionHandledByArnold\>` ).
+- ShaderNetwork::hashSubstitutions : Fixed shader string substitutions that are escaped with backslashes (ie. `myText\<substitutionHandledByArnold\>`).
 
 10.6.1.0 (relative to 10.6.0.2)
 ========
