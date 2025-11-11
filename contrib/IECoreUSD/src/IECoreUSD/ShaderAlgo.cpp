@@ -309,15 +309,33 @@ pxr::UsdShadeConnectableAPI createShaderPrim( const IECoreScene::Shader *shader,
 	{
 		throw IECore::Exception( "Could not create shader at " + path.GetAsString() );
 	}
+
 	const std::string type = shader->getType();
+
 	std::string typePrefix;
-	size_t typeColonPos = type.find( ":" );
-	if( typeColonPos != std::string::npos )
+	if( boost::starts_with( shader->getName(), "Pxr" ) || boost::starts_with( shader->getName(), "Lama" ) )
 	{
-		typePrefix = type.substr( 0, typeColonPos ) + ":";
-		if( typePrefix == "ai:" )
+		// Leave the type prefix empty. This should be the default, but we are currently only doing this
+		// for a small number of shaders that we can be completely confident require it, in order to
+		// preserve backwards compatibility.
+	}
+	else
+	{
+		size_t typeColonPos = type.find( ":" );
+		if( typeColonPos != std::string::npos )
 		{
-			typePrefix = "arnold:";
+			// According to our current understanding, this is almost completely wrong. Renderer's like
+			// PRMan won't accept shaders with type prefixes, and Arnold apparently requires all shaders
+			// to be prefixed with "arnold:", including OSL. This code prefixes OSL shaders with "osl:",
+			// which fails in all renderers we're aware of - we're keeping this behaviour for now for
+			// backwards compatibility reasons.
+			typePrefix = type.substr( 0, typeColonPos ) + ":";
+
+			// This is the one case that actually works
+			if( typePrefix == "ai:" )
+			{
+				typePrefix = "arnold:";
+			}
 		}
 	}
 	usdShader.SetShaderId( pxr::TfToken( typePrefix + shader->getName() ) );

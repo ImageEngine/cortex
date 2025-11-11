@@ -312,6 +312,9 @@ enum TypeId
 	FirstGafferTypeId = 118000, // Used by Gaffer 1.6 and later
 	LastGafferTypeId = 127999,
 
+	FirstAtomsGafferTypeId = 128000,  // Used by AtomsGaffer
+	LastAtomsGafferTypeId = 128999,
+
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,
 	LastDynamicTypeId = 399999,

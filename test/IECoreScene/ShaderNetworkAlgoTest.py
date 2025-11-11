@@ -406,7 +406,10 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) ) ) )
 
 		shaderNetworkOrig = IECoreScene.ShaderNetwork(
-			shaders = { "test" : IECoreScene.Shader( "test", "osl:shader", parms ) },
+			shaders = {
+				"test" : IECoreScene.Shader( "test", "osl:shader", parms ),
+				"riTest" : IECoreScene.Shader( "PxrTest", "osl:shader", parms )
+			 },
 			output = "test"
 		)
 		shaderNetwork = shaderNetworkOrig.copy()
@@ -428,6 +431,21 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			( "testffconstant", 3 )
 		]:
 			self.assertEqual( len( parms[name].value.keys() ) + extra, len( parmsExpanded[name + "Positions"] ) )
+
+		riParmsExpanded = shaderNetwork.getShader( "riTest" ).parameters
+
+		# Test a few things in the PRMan convention, and that we've got the extra "count" plugs
+		self.assertEqual( set( riParmsExpanded.keys() ), set( [ i + suffix for suffix in [ "", "_Interpolation", "_Knots" ] for i in parms.keys() ] + [ 'testffbSpline_Floats',  'testffbezier_Floats', 'testfColor3fcatmullRom_Colors', 'testfColor3flinear_Colors', 'testffconstant_Floats'] ) )
+		self.assertEqual( riParmsExpanded["testffbSpline_Interpolation"], IECore.StringData( "bspline" ) )
+		self.assertEqual( riParmsExpanded["testffbSpline_Knots"], IECore.FloatVectorData( [ 0, 10, 20, 21 ] ) )
+		self.assertEqual( riParmsExpanded["testffbSpline_Floats"], IECore.FloatVectorData( [ 1, 2, 0, 2 ] ) )
+		self.assertEqual( riParmsExpanded["testffbSpline"], IECore.IntData( 4 ) )
+		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom_Knots"],  IECore.FloatVectorData( [ 0, 10, 20, 30, 40, 50 ] ) )
+		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom_Colors"],  IECore.Color3fVectorData( [ imath.Color3f( i ) for i in [ 1, 2, 0, 5, 2, 6 ] ] ) )
+		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom"], IECore.IntData( 6 ) )
+		self.assertEqual( riParmsExpanded["testfColor3flinear_Colors"],  IECore.Color3fVectorData( [ imath.Color3f( i ) for i in [ 1, 1, 2, 0, 0 ] ] ) )
+		self.assertEqual( riParmsExpanded["testfColor3flinear"], IECore.IntData( 5 ) )
+
 
 		IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetwork )
 
@@ -489,6 +507,30 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		shaderNetworkInvalid = shaderNetworkInvalidOrig.copy()
 		IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetworkInvalid )
 		self.assertEqual( shaderNetworkInvalid, shaderNetworkInvalidOrig )
+
+		riParmsExpandedBadCounts = riParmsExpanded.copy()
+		del riParmsExpandedBadCounts["testffbSpline"]
+		riParmsExpandedBadCounts["testffbezier"] = IECore.IntData( 10 )
+
+		riShaderNetworkBadCounts = IECoreScene.ShaderNetwork(
+			shaders = { "test" : IECoreScene.Shader( "PxrTest", "osl:shader", riParmsExpandedBadCounts ) },
+			output = "test"
+		)
+		messageHandler = IECore.CapturingMessageHandler()
+		with messageHandler:
+			IECoreScene.ShaderNetworkAlgo.collapseSplines( riShaderNetworkBadCounts )
+
+		self.assertEqual(
+			set( [ i.message for i in messageHandler.messages ] ),
+			set( [
+				'Using spline format that expects count parameter, but no int count parameter found matching "testffbSpline"',
+				'Spline count "testffbezier" does not match length of data: 10 != 5"'
+			] )
+		 )
+
+		# IF we re-expand things, the counts have just been recomputed, and everything is back the way it was before
+		IECoreScene.ShaderNetworkAlgo.expandSplines( riShaderNetworkBadCounts )
+		self.assertEqual( riShaderNetworkBadCounts.getShader( "test" ).parameters, riParmsExpanded )
 
 	def testSplineInputs( self ):
 

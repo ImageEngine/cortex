@@ -217,7 +217,7 @@ void SceneCacheData::addReference( ConstSceneInterfacePtr scene, SpecData& spec,
 	addValueClip( spec, times, actives, linkFileName, linkRootPath.GetText() );
 }
 
-void SceneCacheData::addInternalRoot( TfTokenVector children )
+void SceneCacheData::addInternalRoot( TfTokenVector children, IECoreScene::ConstSceneInterfacePtr scene )
 {
 	// add transform for internal root.
 	SdfPath internalRootPath = SdfPath::AbsoluteRootPath().AppendChild( SceneCacheDataAlgo::internalRootNameToken() );
@@ -236,6 +236,26 @@ void SceneCacheData::addInternalRoot( TfTokenVector children )
 
 	// steal root children
 	internalRootSpec.fields.push_back( FieldValuePair( SdfChildrenKeys->PrimChildren, children ) );
+
+	// add collection
+	FieldValuePair propertyChildren;
+	propertyChildren.first = SdfChildrenKeys->PropertyChildren;
+	TfTokenVector properties;
+
+	// we don't want to keep children tags in this case.
+	m_collections.clear();
+
+	SceneInterface::NameList tags;
+	scene->readTags( tags );
+	for ( auto& tag : tags )
+	{
+		m_collections[tag].push_back( internalRootPath );
+	}
+
+	addCollections( internalRootSpec, properties, internalRootPath );
+
+	propertyChildren.second = properties;
+	internalRootSpec.fields.push_back( propertyChildren );
 
 	m_data[internalRootPath] = internalRootSpec;
 }
@@ -344,7 +364,7 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		// end timecode
 		spec.fields.push_back( FieldValuePair( SdfFieldKeys->EndTimeCode, lastFrame ) );
 
-		addInternalRoot( children );
+		addInternalRoot( children, scene );
 
 		// add internal root as single child
 		children.clear();

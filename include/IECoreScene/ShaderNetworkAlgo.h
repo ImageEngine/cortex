@@ -148,10 +148,12 @@ IECORESCENE_API void collapseSplines( ShaderNetwork *network, std::string target
 IECORESCENE_API void expandSplines( ShaderNetwork *network, std::string targetPrefix = "" );
 
 
-/// \deprecated: Use collapseSplines on the whole network, which can handle input connections
+/// \deprecated: Use collapseSplines on the whole network, which can handle input connections, and supports
+/// different spline conventions for different renderers' shader libraries
 IECORESCENE_API IECore::ConstCompoundDataPtr collapseSplineParameters( const IECore::ConstCompoundDataPtr& parametersData );
 
-/// \deprecated: Use expandSplines on the whole network, which can handle input connections
+/// \deprecated: Use expandSplines on the whole network, which can handle input connections, and supports
+/// different spline conventions for different renderers' shader libraries
 IECORESCENE_API IECore::ConstCompoundDataPtr expandSplineParameters( const IECore::ConstCompoundDataPtr& parametersData );
 
 

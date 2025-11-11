@@ -50,6 +50,7 @@
 #include "boost/regex.hpp"
 
 #include <array>
+#include <filesystem>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -811,8 +812,36 @@ std::pair< size_t, size_t > getEndPointDuplication( const T &basis )
 	return std::make_pair( 0, 0 );
 }
 
+std::tuple< const std::string*, const std::string*, const std::string*, const std::string*, const std::string* >
+lookupSplinePlugSuffixes( const std::string &shaderName )
+{
+	// We seem to be able to identify shaders that should use the PRMan convention by whether they start
+	// with one of the PRMan prefixes.
+	// NOTE : This will fail if a shader is loaded from an explicit path, rather than being found in the
+	// search path, because the shader name will include the full file path. We consider this an
+	// acceptable failure, because shaders should be found in the search paths.
+	if( boost::starts_with( shaderName, "Pxr" ) ||  boost::starts_with( shaderName, "Lama" ) )
+	{
+		// The convention used by the PRMan shader library.
+		static const std::string positions( "_Knots" );
+		static const std::string floatValues( "_Floats" );
+		static const std::string colorValues( "_Colors" );
+		static const std::string basis( "_Interpolation" );
+		static const std::string count( "" );
+		return { &positions, &floatValues, &colorValues, &basis, &count };
+	}
+	else
+	{
+		// The convention used by the OSL shaders that we ship with Gaffer.
+		static const std::string positions( "Positions" );
+		static const std::string values( "Values" );
+		static const std::string basis( "Basis" );
+		return { &positions, &values, &values, &basis, nullptr };
+	}
+}
+
 template<typename Spline>
-void expandSpline( const InternedString &name, const Spline &spline, CompoundDataMap &newParameters )
+void expandSpline( const InternedString &name, const Spline &spline, CompoundDataMap &newParameters, const std::string &shaderName )
 {
 	const char *basis = "catmull-rom";
 	if( spline.basis == Spline::Basis::bezier() )
@@ -866,9 +895,23 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 		}
 	}
 
-	newParameters[ name.string() + "Positions" ] = positionsData;
-	newParameters[ name.string() + "Values" ] = valuesData;
-	newParameters[ name.string() + "Basis" ] = new StringData( basis );
+	auto [ positionsSuffix, floatValuesSuffix, colorValuesSuffix, basisSuffix, countSuffix ] = lookupSplinePlugSuffixes( shaderName );
+
+	newParameters[ name.string() + *positionsSuffix ] = positionsData;
+	if constexpr( std::is_same_v< typename Spline::YType, float > )
+	{
+		newParameters[ name.string() + *floatValuesSuffix ] = valuesData;
+	}
+	else
+	{
+		newParameters[ name.string() + *colorValuesSuffix ] = valuesData;
+	}
+	newParameters[ name.string() + *basisSuffix ] = new StringData( basis );
+
+	if( countSuffix )
+	{
+		newParameters[ name.string() + *countSuffix ] = new IntData( positionsData->readable().size() );
+	}
 }
 
 template<typename SplineData>
@@ -927,6 +970,122 @@ IECore::DataPtr loadSpline(
 	}
 
 	return resultData;
+}
+
+void ensureParametersCopy(
+	const IECore::CompoundDataMap &parameters,
+	IECore::CompoundDataPtr &parametersDataCopy, CompoundDataMap *&parametersCopy
+)
+{
+	if( !parametersDataCopy )
+	{
+		parametersDataCopy = new CompoundData();
+		parametersCopy = &parametersDataCopy->writable();
+		*parametersCopy = parameters;
+	}
+}
+
+IECore::ConstCompoundDataPtr collapseSplineParametersInternal( const IECore::ConstCompoundDataPtr &parametersData, const std::string &shaderName )
+{
+
+	auto [ positionsSuffix, floatValuesSuffix, colorValuesSuffix, basisSuffix, countSuffix ] = lookupSplinePlugSuffixes( shaderName );
+
+	const CompoundDataMap &parameters( parametersData->readable() );
+	CompoundDataPtr newParametersData;
+	CompoundDataMap *newParameters = nullptr;
+
+	for( const auto &maybeBasis : parameters )
+	{
+		if( !boost::ends_with( maybeBasis.first.string(), *basisSuffix ) )
+		{
+			continue;
+		}
+		const StringData *basis = runTimeCast<const StringData>( maybeBasis.second.get() );
+		if( !basis )
+		{
+			continue;
+		}
+
+
+		std::string prefix = maybeBasis.first.string().substr( 0, maybeBasis.first.string().size() - basisSuffix->size() );
+		const IECore::InternedString positionsName = prefix + *positionsSuffix;
+		const FloatVectorData *floatPositions = parametersData->member<const FloatVectorData>( positionsName );
+		if( !floatPositions )
+		{
+			continue;
+		}
+
+		IECore::InternedString countName;
+		const IntData *countData = nullptr;
+
+		if( countSuffix )
+		{
+			countName = prefix + *countSuffix;
+			countData = parametersData->member<const IntData>( countName );
+
+			if( !countData )
+			{
+				IECore::msg(
+					Msg::Error, "ShaderNetworkAlgo",
+					"Using spline format that expects count parameter, but no int count parameter found matching \"" + countName.string() + "\""
+				);
+			}
+			else
+			{
+				if( (int)floatPositions->readable().size() != countData->readable() )
+				{
+					IECore::msg(
+						Msg::Error, "ShaderNetworkAlgo",
+						"Spline count \"" + countName.string() + "\" does not match length of data: " + std::to_string( countData->readable() ) + " != " + std::to_string( floatPositions->readable().size() ) + "\""
+					);
+				}
+			}
+		}
+
+		IECore::InternedString valuesName = prefix + *floatValuesSuffix;
+		IECore::DataPtr foundSpline;
+		if( const FloatVectorData *floatValues = parametersData->member<const FloatVectorData>( valuesName ) )
+		{
+			foundSpline = loadSpline<SplineffData>( basis, floatPositions, floatValues );
+		}
+		else
+		{
+			valuesName = prefix + *colorValuesSuffix;
+			if( const Color3fVectorData *color3Values = parametersData->member<const Color3fVectorData>( valuesName ) )
+			{
+				foundSpline = loadSpline<SplinefColor3fData>( basis, floatPositions, color3Values );
+			}
+			else if( const Color4fVectorData *color4Values = parametersData->member<const Color4fVectorData>( valuesName ) )
+			{
+				foundSpline = loadSpline<SplinefColor4fData>( basis, floatPositions, color4Values );
+			}
+
+		}
+
+		if( foundSpline )
+		{
+			ensureParametersCopy( parameters, newParametersData, newParameters );
+			newParameters->erase( maybeBasis.first );
+			newParameters->erase( positionsName );
+			newParameters->erase( valuesName );
+			if( countData )
+			{
+				newParameters->erase( countName );
+			}
+
+			(*newParameters)[prefix] = foundSpline;
+
+		}
+	}
+
+	if( newParametersData )
+	{
+		return newParametersData;
+	}
+	else
+	{
+		return parametersData;
+	}
 }
 
 const std::string g_oslShader( "osl:shader" );
@@ -1003,19 +1162,6 @@ std::pair< InternedString, int > createSplineInputAdapter(
 	return std::make_pair( adapterHandle, getEndPointDuplication( splineData->readable().basis ).first );
 }
 
-void ensureParametersCopy(
-	const IECore::CompoundDataMap &parameters,
-	IECore::CompoundDataPtr &parametersDataCopy, CompoundDataMap *&parametersCopy
-)
-{
-	if( !parametersDataCopy )
-	{
-		parametersDataCopy = new CompoundData();
-		parametersCopy = &parametersDataCopy->writable();
-		*parametersCopy = parameters;
-	}
-}
-
 } // namespace
 
 void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string targetPrefix )
@@ -1040,12 +1186,12 @@ void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string tar
 		}
 
 		// For nodes which aren't spline adapters, we just need to deal with any parameters that are splines
-		ConstCompoundDataPtr collapsed = collapseSplineParameters( shader->parametersData() );
+		ConstCompoundDataPtr collapsed = collapseSplineParametersInternal( shader->parametersData(), shader->getName() );
 		if( collapsed != shader->parametersData() )
 		{
-			// \todo - this const_cast is ugly, although safe because if the return from collapseSplineParameters
+			// \todo - this const_cast is ugly, although safe because if the return from collapseSplineParameterInternals
 			// doesn't match the input, it is freshly allocated. Once collapseSplineParameters is fully
-			// deprecated, and no longer visible publicly, an internal version of collapseSplineParameters could
+			// deprecated, and no longer visible publicly, collapseSplineParametersInternal could
 			// just return a non-const new parameter data, or nullptr if no changes are needed.
 			network->setShader( name, std::move( new Shader( shader->getName(), shader->getType(), const_cast< CompoundData *>( collapsed.get() ) ) ) );
 		}
@@ -1167,13 +1313,13 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 			{
 				ensureParametersCopy( origParameters, newParametersData, newParameters );
 				newParameters->erase( name );
-				expandSpline( name, colorSpline->readable(), *newParameters );
+				expandSpline( name, colorSpline->readable(), *newParameters, s.second->getName() );
 			}
 			else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( value.get() ) )
 			{
 				ensureParametersCopy( origParameters, newParametersData, newParameters );
 				newParameters->erase( name );
-				expandSpline( name, floatSpline->readable(), *newParameters );
+				expandSpline( name, floatSpline->readable(), *newParameters, s.second->getName() );
 			}
 		}
 
@@ -1291,76 +1437,7 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 
 IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
 {
-	const CompoundDataMap &parameters( parametersData->readable() );
-	CompoundDataPtr newParametersData;
-	CompoundDataMap *newParameters = nullptr;
-
-	for( const auto &maybeBasis : parameters )
-	{
-		if( !boost::ends_with( maybeBasis.first.string(), "Basis" ) )
-		{
-			continue;
-		}
-		const StringData *basis = runTimeCast<const StringData>( maybeBasis.second.get() );
-		if( !basis )
-		{
-			continue;
-		}
-
-
-		std::string prefix = maybeBasis.first.string().substr( 0, maybeBasis.first.string().size() - 5 );
-		IECore::InternedString positionsName = prefix + "Positions";
-		const auto positionsIter = parameters.find( positionsName );
-		const FloatVectorData *floatPositions = nullptr;
-
-		if( positionsIter != parameters.end() )
-		{
-			floatPositions = runTimeCast<const FloatVectorData>( positionsIter->second.get() );
-		}
-
-		if( !floatPositions )
-		{
-			continue;
-		}
-
-		IECore::InternedString valuesName = prefix + "Values";
-		const auto valuesIter = parameters.find( valuesName );
-
-		IECore::DataPtr foundSpline;
-		if( valuesIter != parameters.end() )
-		{
-			if( const FloatVectorData *floatValues = runTimeCast<const FloatVectorData>( valuesIter->second.get() ) )
-			{
-				foundSpline = loadSpline<SplineffData>( basis, floatPositions, floatValues );
-			}
-			else if( const Color3fVectorData *color3Values = runTimeCast<const Color3fVectorData>( valuesIter->second.get() ) )
-			{
-				foundSpline = loadSpline<SplinefColor3fData>( basis, floatPositions, color3Values );
-			}
-			else if( const Color4fVectorData *color4Values = runTimeCast<const Color4fVectorData>( valuesIter->second.get() ) )
-			{
-				foundSpline = loadSpline<SplinefColor4fData>( basis, floatPositions, color4Values );
-			}
-		}
-
-		if( foundSpline )
-		{
-			ensureParametersCopy( parameters, newParametersData, newParameters );
-			(*newParameters)[prefix] = foundSpline;
-			newParameters->erase( maybeBasis.first );
-			newParameters->erase( positionsName );
-			newParameters->erase( valuesName );
-		}
-	}
-
-	if( newParametersData )
-	{
-		return newParametersData;
-	}
-	else
-	{
-		return parametersData;
-	}
+	return collapseSplineParametersInternal( parametersData, "" );
 }
 
 IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
@@ -1376,13 +1453,13 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IE
 		{
 			ensureParametersCopy( parameters, newParametersData, newParameters );
 			newParameters->erase( i.first );
-			expandSpline( i.first, colorSpline->readable(), *newParameters );
+			expandSpline( i.first, colorSpline->readable(), *newParameters, "" );
 		}
 		else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( i.second.get() ) )
 		{
 			ensureParametersCopy( parameters, newParametersData, newParameters );
 			newParameters->erase( i.first );
-			expandSpline( i.first, floatSpline->readable(), *newParameters );
+			expandSpline( i.first, floatSpline->readable(), *newParameters, "" );
 		}
 	}
 

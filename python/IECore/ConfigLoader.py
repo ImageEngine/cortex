@@ -72,7 +72,7 @@ def loadConfig( searchPaths, contextDict = {}, raiseExceptions = False, subdirec
 				fileContextDict["__file__"] = fullFileName
 
 				try :
-					with open( fullFileName ) as f :
+					with open( fullFileName, encoding = "utf-8" ) as f :
 						exec(
 							compile( f.read(), fullFileName, "exec" ),
 							fileContextDict, fileContextDict

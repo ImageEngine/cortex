@@ -83,6 +83,30 @@ IntVectorDataPtr varyingDataOffsets( const CurvesPrimitiveEvaluator &e )
 	return new IntVectorData( e.varyingDataOffsets() );
 }
 
+tuple coefficients( const CurvesPrimitiveEvaluator::Result &r )
+{
+	const std::array<float, 4> &c = r.coefficients();
+	return make_tuple( c[0], c[1], c[2], c[3] );
+}
+
+tuple derivativeCoefficients( const CurvesPrimitiveEvaluator::Result &r )
+{
+	const std::array<float, 4> &c = r.derivativeCoefficients();
+	return make_tuple( c[0], c[1], c[2], c[3] );
+}
+
+tuple vertexDataIndices( const CurvesPrimitiveEvaluator::Result &r )
+{
+	const std::array<unsigned, 4> &o = r.vertexDataIndices();
+	return make_tuple( o[0], o[1], o[2], o[3] );
+}
+
+tuple varyingDataIndices( const CurvesPrimitiveEvaluator::Result &r )
+{
+	const std::array<unsigned, 2> &o = r.varyingDataIndices();
+	return make_tuple( o[0], o[1] );
+}
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -233,6 +257,11 @@ void bindCurvesPrimitiveEvaluator()
 
 	RefCountedClass<CurvesPrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
 		.def( "curveIndex", &CurvesPrimitiveEvaluator::Result::curveIndex )
+		.def( "coefficients", &coefficients )
+		.def( "derivativeCoefficients", &derivativeCoefficients )
+		.def( "vertexDataIndices", &vertexDataIndices )
+		.def( "varyingDataIndices", &varyingDataIndices )
+		.def( "linear", &CurvesPrimitiveEvaluator::Result::linear )
 	;
 
 }

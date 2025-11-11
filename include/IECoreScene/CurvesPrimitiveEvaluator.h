@@ -40,6 +40,7 @@
 
 #include "IECore/BoundedKDTree.h"
 
+#include <array>
 #include <mutex>
 
 namespace IECoreScene
@@ -74,6 +75,11 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 				Imath::V3f uTangent() const override;
 				Imath::V3f vTangent() const override;
 				unsigned curveIndex() const;
+				const std::array<float, 4> &coefficients() const;
+				const std::array<float, 4> &derivativeCoefficients() const;
+				const std::array<unsigned, 4> &vertexDataIndices() const;
+				const std::array<unsigned, 2> &varyingDataIndices() const;
+				bool linear() const;
 
 				Imath::V3f vectorPrimVar( const PrimitiveVariable &pv ) const override;
 				Imath::V2f vec2PrimVar( const PrimitiveVariable &pv ) const override;
@@ -100,10 +106,10 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 				unsigned m_curveIndex;
 				float m_v;
 				float m_segmentV;
-				float m_coefficients[4];
-				float m_derivativeCoefficients[4];
-				unsigned m_vertexDataIndices[4];
-				unsigned m_varyingDataIndices[2];
+				std::array<float, 4> m_coefficients;
+				std::array<float, 4> m_derivativeCoefficients;
+				std::array<unsigned, 4> m_vertexDataIndices;
+				std::array<unsigned, 2> m_varyingDataIndices;
 				PrimitiveVariable m_p;
 				bool m_linear;
 				InitFunction m_init;

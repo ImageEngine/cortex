@@ -179,7 +179,7 @@ private:
 	void addCollections( SpecData& spec, TfTokenVector& properties, const SdfPath& primPath );
 	void addReference( IECoreScene::ConstSceneInterfacePtr scene, SpecData& spec, TfTokenVector& children );
 	void addValueClip( SpecData& spec, const VtVec2dArray times, const VtVec2dArray actives, const std::string& assetPath, const std::string& primPath);
-	void addInternalRoot( TfTokenVector children );
+	void addInternalRoot( TfTokenVector children, IECoreScene::ConstSceneInterfacePtr scene );
 
 	VtValue getTimeSampleMap( const SdfPath& path, const TfToken& field, const VtValue& value ) const;
 
