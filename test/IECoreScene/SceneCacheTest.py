@@ -39,6 +39,7 @@ import unittest
 import shutil
 import os
 import tempfile
+import pathlib
 
 import IECore
 import IECoreScene
@@ -1199,6 +1200,40 @@ class SceneCacheTest( unittest.TestCase ) :
 			self.assertEqual( c.readAttribute( a, 0 ), shaderNetwork )
 		for a in nonShaderAttributes :
 			self.assertEqual( c.readAttribute( a, 0 ), objectVector )
+
+	def testDeprecatedSplines( self ) :
+
+		fileName = pathlib.Path( __file__ ).parent / "data" / "oldSplines.scc"
+		root = IECoreScene.SceneInterface.create( str( fileName ), IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "cube" )
+
+		shaderNetwork = child.readAttribute( "ai:surface", 0 )
+		self.assertEqual(
+			shaderNetwork.getShader( "ColorSpline" ).parameters["spline"],
+			IECore.SplinefColor3fData( IECore.SplinefColor3f(
+				IECore.CubicBasisf.linear(),
+				(
+					( 0, imath.Color3f( 0, 0, 0 ) ),
+					( 0.4, imath.Color3f( 0.3, 0.5, 0.9 ) ),
+					( 0.7, imath.Color3f( 0.8, 0.7, 0.3) ),
+					( 1, imath.Color3f( 1, 1, 1 ) )
+				)
+			) )
+		)
+
+		self.assertEqual(
+			shaderNetwork.getShader( "FloatSpline" ).parameters["spline"],
+			IECore.SplineffData(IECore.Splineff(
+				IECore.CubicBasisf.bSpline(),
+				(
+					( 0, 0 ), ( 0, 0 ), ( 0, 0 ),
+					( 0.3, 0.8 ),
+					( 0.7, 0.7 ),
+					( 0.9, 0.1 ),
+					( 1, 1 ), ( 1, 1 ), ( 1, 1 )
+				)
+			) )
+		)
 
 	def testCopyReturnValues( self ):
 
