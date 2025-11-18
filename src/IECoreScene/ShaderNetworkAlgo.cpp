@@ -269,6 +269,12 @@ const bool g_defaultAdapterRegistrations = [] () {
 	return true;
 } ();
 
+const InternedString &componentConnectionAdapterLabel()
+{
+	static InternedString ret( "cortex_autoAdapter" );
+	return ret;
+}
+
 bool isSplitAdapter( const Shader *shader, InternedString &component, InternedString &inParameter, InternedString &outParameter )
 {
 	if( auto *d = shader->blindData()->member<InternedStringData>( g_splitAdapterComponent ) )
@@ -283,7 +289,7 @@ bool isSplitAdapter( const Shader *shader, InternedString &component, InternedSt
 		}
 		return true;
 	}
-	else if( auto *b = shader->blindData()->member<BoolData>( ShaderNetworkAlgo::componentConnectionAdapterLabel() ) )
+	else if( auto *b = shader->blindData()->member<BoolData>( componentConnectionAdapterLabel() ) )
 	{
 		// Legacy format.
 		if( b->readable() && shader->getName() == "MaterialX/mx_swizzle_color_float" )
@@ -313,7 +319,7 @@ bool isJoinAdapter( const Shader *shader, std::array<InternedString, 4> &inParam
 			return true;
 		}
 	}
-	else if( auto *b = shader->blindData()->member<BoolData>( ShaderNetworkAlgo::componentConnectionAdapterLabel() ) )
+	else if( auto *b = shader->blindData()->member<BoolData>( componentConnectionAdapterLabel() ) )
 	{
 		// Legacy format.
 		if( b->readable() && shader->getName() == "MaterialX/mx_pack_color" )
@@ -590,12 +596,6 @@ void ShaderNetworkAlgo::deregisterJoinAdapter( const std::string &destinationSha
 	joinAdapters()[destinationShaderType].erase( destinationParameterType );
 }
 
-const InternedString &ShaderNetworkAlgo::componentConnectionAdapterLabel()
-{
-	static InternedString ret( "cortex_autoAdapter" );
-	return ret;
-}
-
 //////////////////////////////////////////////////////////////////////////
 // OSL Utilities
 //////////////////////////////////////////////////////////////////////////
@@ -624,20 +624,13 @@ ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter 
 	);
 }
 
-} // namespace
-
-void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
-{
-	convertOSLComponentConnections( network, 10900 /* OSL 1.9 */ );
-}
-
-void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network, int oslVersion )
+void convertOSLComponentConnections( ShaderNetwork *network, int oslVersion )
 {
 	if( oslVersion < 11000 )
 	{
 		// OSL doesn't support component-level connections,
 		// so we emulate them by inserting conversion shaders for OSL nodes.
-		addComponentConnectionAdapters( network, "osl:" );
+		ShaderNetworkAlgo::addComponentConnectionAdapters( network, "osl:" );
 		return;
 	}
 
@@ -680,6 +673,9 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network, 
 		}
 	}
 }
+
+} // namespace
+
 
 void ShaderNetworkAlgo::convertToOSLConventions( ShaderNetwork *network, int oslVersion )
 {
@@ -1432,43 +1428,5 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 
 		network->setShader( s.first, std::move( new Shader( s.second->getName(), s.second->getType(), newParametersData.get() ) ) );
 
-	}
-}
-
-IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
-{
-	return collapseSplineParametersInternal( parametersData, "" );
-}
-
-IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
-{
-	const CompoundDataMap &parameters( parametersData->readable() );
-
-	CompoundDataPtr newParametersData;
-	CompoundDataMap *newParameters = nullptr;
-
-	for( const auto &i : parameters )
-	{
-		if( const SplinefColor3fData *colorSpline = runTimeCast<const SplinefColor3fData>( i.second.get() ) )
-		{
-			ensureParametersCopy( parameters, newParametersData, newParameters );
-			newParameters->erase( i.first );
-			expandSpline( i.first, colorSpline->readable(), *newParameters, "" );
-		}
-		else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( i.second.get() ) )
-		{
-			ensureParametersCopy( parameters, newParametersData, newParameters );
-			newParameters->erase( i.first );
-			expandSpline( i.first, floatSpline->readable(), *newParameters, "" );
-		}
-	}
-
-	if( newParametersData )
-	{
-		return newParametersData;
-	}
-	else
-	{
-		return parametersData;
 	}
 }

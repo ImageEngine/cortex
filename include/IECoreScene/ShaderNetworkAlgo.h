@@ -95,9 +95,6 @@ IECORESCENE_API void registerJoinAdapter( const std::string &destinationShaderTy
 /// Removes an adapter registration.
 IECORESCENE_API void deregisterJoinAdapter( const std::string &destinationShaderType, IECore::TypeId destinationParameterType );
 
-/// \deprecated
-IECORESCENE_API const IECore::InternedString &componentConnectionAdapterLabel();
-
 /// Converts various aspects of how shaders are stored to be ready to pass directly to OSL.
 /// The `oslVersion` argument is used to determine how conversion is performed, and should be passed a
 /// value of `OSL_VERSION`. Conversions include:
@@ -112,15 +109,6 @@ IECORESCENE_API const IECore::InternedString &componentConnectionAdapterLabel();
 ///     connections to spline Y values, specified as `<splineName>[N].y`, which currently must be implemented
 ///     using an adapter shader.
 IECORESCENE_API void convertToOSLConventions( ShaderNetwork *network, int oslVersion );
-
-/// Finds connections involving the individual components of point/color parameters, and converts them
-/// for use with OSL. The `oslVersion` argument is used to determine how conversion is performed,
-/// and should be passed a value of `OSL_VERSION`. For OSL prior to 1.10, intermediate shaders are
-/// inserted to emulate connections between components. For later versions, no new shaders are inserted, but
-/// components are renamed from our `.x, .y, .z` suffixes to OSL's `[0], [1], [2]` suffixes.
-/// \deprecated: Use convertToOSLConventions instead
-IECORESCENE_API void convertOSLComponentConnections( ShaderNetwork *network );
-IECORESCENE_API void convertOSLComponentConnections( ShaderNetwork *network, int oslVersion );
 
 /// Converts from the legacy ObjectVector format previously used to represent shader networks.
 IECORESCENE_API ShaderNetworkPtr convertObjectVector( const IECore::ObjectVector *network );
@@ -146,16 +134,6 @@ IECORESCENE_API void collapseSplines( ShaderNetwork *network, std::string target
 /// must be implemented by inserting an adapter shader.
 /// If `targetPrefix` is given, only translates connections to shaders with a type starting with this string
 IECORESCENE_API void expandSplines( ShaderNetwork *network, std::string targetPrefix = "" );
-
-
-/// \deprecated: Use collapseSplines on the whole network, which can handle input connections, and supports
-/// different spline conventions for different renderers' shader libraries
-IECORESCENE_API IECore::ConstCompoundDataPtr collapseSplineParameters( const IECore::ConstCompoundDataPtr& parametersData );
-
-/// \deprecated: Use expandSplines on the whole network, which can handle input connections, and supports
-/// different spline conventions for different renderers' shader libraries
-IECORESCENE_API IECore::ConstCompoundDataPtr expandSplineParameters( const IECore::ConstCompoundDataPtr& parametersData );
-
 
 } // namespace ShaderNetworkAlgo
 

@@ -1,7 +1,10 @@
 10.x.x.x (relative to 10.6.x.x)
 ========
 
+Breaking Changes
+----------------
 
+- IECoreScene::ShaderNetworkAlgo : Removed deprecated functions componentConnectionAdapterLabel, convertOSLComponentConnections, collapseSplineParameters, expandSplineParameters.
 
 10.6.x.x (relative to 10.6.1.0)
 ========

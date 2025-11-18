@@ -65,7 +65,12 @@ namespace
 {
 
 const pxr::TfToken g_blindDataToken( "cortex:blindData" );
-pxr::TfToken g_legacyAdapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
+
+// Hardcoded to match an old name used by Cortex when writing USD with OSL version earlier than 1.10 (
+// ie. a pre-2021 version of gafferDependencies ). We no longer expose this in the API, but I'm not sure
+// if we're ready to drop support for loading these old files.
+IECore::InternedString g_legacyAdapterLabelString( "cortex_autoAdapter" );
+pxr::TfToken g_legacyAdapterLabelToken( g_legacyAdapterLabelString.string() );
 
 std::pair<pxr::TfToken, std::string> shaderIdAndType( const pxr::UsdShadeConnectableAPI &connectable )
 {
@@ -267,7 +272,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 	pxr::VtValue metadataValue;
 	if( usdShader.GetPrim().GetMetadata( g_legacyAdapterLabelToken, &metadataValue ) && metadataValue.Get<bool>() )
 	{
-		newShader->blindData()->writable()[ IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() ] = new IECore::BoolData( true );
+		newShader->blindData()->writable()[ g_legacyAdapterLabelString ] = new IECore::BoolData( true );
 	}
 
 	shaderNetwork.addShader( handle, std::move( newShader ) );
