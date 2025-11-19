@@ -37,6 +37,7 @@
 import math
 import os
 import unittest
+import struct
 import imath
 
 import IECore
@@ -1365,6 +1366,91 @@ class TestSourceDataEquality( unittest.TestCase ) :
 		a[0] = 99
 		self.assertFalse( a._dataSourceEqual( ca2 ) )
 		self.assertTrue( ca2._dataSourceEqual( ca3 ) )
+
+class TestBufferProtocol( unittest.TestCase ) :
+
+	def testSimpleTypes( self ) :
+
+		for elementType, vectorType, elementFormat in [
+			# It would be nice to test for `IECore.HalfVectorData: "e"`
+			# but that is not supported in our Python.
+			( float, IECore.FloatVectorData, "f" ),
+			( float, IECore.DoubleVectorData, "d" ),
+			( int, IECore.IntVectorData, "i" ),
+			( int, IECore.UIntVectorData, "I" ),
+			( chr, IECore.CharVectorData, "b" ),
+			( int, IECore.UCharVectorData, "B" ),
+			( int, IECore.ShortVectorData, "h" ),
+			( int, IECore.UShortVectorData, "H" ),
+			( int, IECore.Int64VectorData, "q" ),
+			( int, IECore.UInt64VectorData, "Q" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType( [ elementType( 1 ), elementType( 2 ), elementType( 3 ) ] )
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				# `memoryview` returns `int` for C `char` / Python `chr` types. Cast to `chr`
+				self.assertEqual( list( m ) if elementType != chr else [ chr(i) for i in m ], list( v ) )
+				self.assertIs( m.obj, b )
+				self.assertTrue( m.readonly )
+				self.assertEqual( m.format, elementFormat )
+				self.assertEqual( m.ndim, 1 )
+				self.assertEqual( m.shape, ( len( v ), ) )
+				self.assertEqual( m.itemsize, struct.calcsize( elementFormat ) )
+				self.assertEqual( m.strides, ( m.itemsize, ) )
+				self.assertTrue( m.c_contiguous )
+				self.assertTrue( m.contiguous )
+
+	def testReadOnlyBuffer( self ) :
+
+		v = IECore.FloatVectorData( [ 1, 2, 3 ] )
+		buffer = v.asReadOnlyBuffer()
+		bufferData = buffer.asData()
+		self.assertFalse( buffer.isWritable() )
+		self.assertTrue( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		m = memoryview( buffer )
+
+		self.assertTrue( m.readonly )
+		self.assertTrue( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# We can modify `v` without affecting our buffer.
+		v.append( 99 )
+		self.assertEqual( list( m ), [ 1, 2, 3 ] )
+		self.assertFalse( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# We can modify `bufferData`. It's a copy so writing to it results
+		# in a deep copy of the source data.
+		bufferData[0] = 42
+		self.assertEqual( list( bufferData ), [ 42, 2, 3 ] )
+		self.assertFalse( bufferData._dataSourceEqual( buffer.asData() ) )
+		self.assertEqual( list( buffer.asData() ), [ 1, 2, 3 ] )
+
+	def testReadWriteBuffer( self ) :
+
+		v = IECore.FloatVectorData( [ 1, 2, 3 ] )
+		buffer = v.asReadWriteBuffer()
+		bufferData = buffer.asData()
+		self.assertTrue( buffer.isWritable() )
+		self.assertTrue( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# Creating a writable `memoryview` makes `bufferData` unique.
+		m = memoryview( buffer )
+		self.assertFalse( m.readonly )
+		self.assertFalse( v._dataSourceEqual( buffer.asData() ) )
+		self.assertFalse( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# Modify the memoryview, which is reflected in the buffer.
+		m[0] = 42
+		self.assertEqual( list( m ), [ 42, 2, 3 ] )
+		self.assertEqual( list( buffer.asData() ), list( m ) )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -39,6 +39,7 @@
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/VectorTypedDataBinding.h"
 
 #include "boost/numeric/conversion/cast.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
@@ -546,6 +547,16 @@ class VectorTypedDataFunctions
 			return &x.readable() == &y.readable();
 		}
 
+		static IECorePython::BufferPtr asReadOnlyBuffer( ThisClass &x )
+		{
+			return new Buffer( &x, /* writable = */ false );
+		}
+
+		static IECorePython::BufferPtr asReadWriteBuffer( ThisClass &x )
+		{
+			return new Buffer( &x, /* writable = */ true );
+		}
+
 
 	protected:
 		/*
@@ -700,7 +711,7 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 #define BASIC_VECTOR_BINDING(ThisClass, Tname)																	\
 		typedef VectorTypedDataFunctions< ThisClass > ThisBinder;												\
 																													\
-		RunTimeTypedClass<ThisClass>(																							\
+		RunTimeTypedClass<ThisClass>(																				\
 			Tname "-type vector class derived from Data class.\n"													\
 			"This class behaves like the native python lists, except that it only accepts " Tname " values.\n"		\
 			"The copy constructor accepts another instance of this class or a python list containing " Tname		\
@@ -742,6 +753,10 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 			;																						\
 		}
 
+#define BIND_BUFFER_PROTOCOL_METHODS	\
+				.def("asReadOnlyBuffer", &ThisBinder::asReadOnlyBuffer, "Returns a read-only Buffer object that can be passed to Python objects that support the buffer protocol." )	\
+				.def("asReadWriteBuffer", &ThisBinder::asReadWriteBuffer, "Returns a writable Buffer object that can be passed to Python objects that support the buffer protocol." )	\
+
 // bind a VectorTypedData class that supports simple Math operators (+=, -= and *=)
 #define BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA(T, Tname)									\
 		{																							\
@@ -755,6 +770,7 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname)		\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
+				BIND_BUFFER_PROTOCOL_METHODS														\
 			;																						\
 		}
 
@@ -775,6 +791,7 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__itruediv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
+				BIND_BUFFER_PROTOCOL_METHODS																											\
 			;																						\
 		}
 
@@ -799,6 +816,7 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__gt__", &ThisBinder::gt, "The comparison is element-wise, like a string comparison. \n")	\
 				.def("__ge__", &ThisBinder::ge, "The comparison is element-wise, like a string comparison. \n")	\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
+				BIND_BUFFER_PROTOCOL_METHODS																		\
 			; \
 		}
 

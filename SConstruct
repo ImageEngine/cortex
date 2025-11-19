@@ -90,10 +90,13 @@ o.Add(
 # https://developercommunity.visualstudio.com/content/problem/756694/including-windowsh-and-boostinterprocess-headers-l.html
 # /DBOOST_ALL_NO_LIB is needed to find Boost when it is built without
 # verbose system information added to file and directory names.
+# /DZc:strictStrings- fixes a compilation error when setting the `Py_buffer.format` member in `VectorTypedDataBinding.inl`
+# `getBuffer()` method. Python declares that member as `char *` but MSVC requires `const char *` for string literals.
+# Disabling strict strings relaxes that requirement.
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Wextra", "-Wsuggest-override" ] if Environment()["PLATFORM"] != "win32" else [ "/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-", "/DBOOST_ALL_NO_LIB" ],
+	[ "-pipe", "-Wall", "-Wextra", "-Wsuggest-override" ] if Environment()["PLATFORM"] != "win32" else [ "/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-", "/DBOOST_ALL_NO_LIB", "/Zc:strictStrings-" ],
 )
 
 o.Add(
