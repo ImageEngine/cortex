@@ -647,6 +647,11 @@ o.Add(
 	BoolVariable( "INSTALL_CREATE_SYMLINKS", "Whether to create symlinks post install", True )
 )
 
+o.Add(
+	"INCLUDE_PATHS",
+	"Locations on which to search for include files for the dependencies.",
+	[],
+)
 
 # Test options
 
@@ -788,20 +793,41 @@ env.Append(
 		"-DBOOST_BIND_GLOBAL_PLACEHOLDERS",
 	]
 )
-systemIncludeArgument = "/external:I" if env[ "PLATFORM" ] == "win32" else "-isystem"
+
+def includeFlags( includeEnv, includeVar ) :
+	systemIncludeArgument = "/external:I" if includeEnv[ "PLATFORM" ] == "win32" else "-isystem"
+	value = includeEnv.get( includeVar )
+	if not value :
+		return []
+
+	if isinstance( value, list ) :
+		result = []
+		for v in value :
+			result.extend( [ systemIncludeArgument, v ] )
+
+		return result
+
+	result = [ systemIncludeArgument, value ]
+
+	# we use "OpenEXR/x.h" and they use "x.h"
+	if includeVar == "OPENEXR_INCLUDE_PATH":
+		result.extend( [ systemIncludeArgument, os.path.join( value, "OpenEXR" ) ] )
+	elif includeVar == "ILMBASE_INCLUDE_PATH":
+		result.extend( [ systemIncludeArgument, os.path.join( value, "Imath" ) ] )
+
+	return result
+
 
 # update the include and lib paths
-dependencyIncludes = [
-	systemIncludeArgument, "$BOOST_INCLUDE_PATH",
-	systemIncludeArgument, "$OPENEXR_INCLUDE_PATH",
-	systemIncludeArgument, "$ILMBASE_INCLUDE_PATH",
-	systemIncludeArgument, "$TBB_INCLUDE_PATH",
-	systemIncludeArgument, "$BLOSC_INCLUDE_PATH",
-	# we use "OpenEXR/x.h" and they use "x.h"
-	systemIncludeArgument, os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
-	systemIncludeArgument, os.path.join( "$ILMBASE_INCLUDE_PATH","Imath" ),
-	systemIncludeArgument, "$FREETYPE_INCLUDE_PATH",
-]
+dependencyIncludes = []
+dependencyIncludes.extend( includeFlags( env, "BOOST_INCLUDE_PATH" ) )
+dependencyIncludes.extend( includeFlags( env, "OPENEXR_INCLUDE_PATH" ) )
+dependencyIncludes.extend( includeFlags( env, "ILMBASE_INCLUDE_PATH" ) )
+dependencyIncludes.extend( includeFlags( env, "TBB_INCLUDE_PATH" ) )
+dependencyIncludes.extend( includeFlags( env, "BLOSC_INCLUDE_PATH" ) )
+dependencyIncludes.extend( includeFlags( env, "FREETYPE_INCLUDE_PATH" ) )
+
+dependencyIncludes.extend( includeFlags( env, "INCLUDE_PATHS" ) )
 
 env.Prepend(
 	LIBPATH = [
@@ -1186,7 +1212,8 @@ if env["PLATFORM"] != "win32" :
 	if basePythonEnv["PYTHON_INCLUDE_PATH"]=="" :
 		basePythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( basePythonEnv, "--includes" ).split()
 	else :
-		basePythonEnv["PYTHON_INCLUDE_FLAGS"] = [ systemIncludeArgument, "$PYTHON_INCLUDE_PATH" ]
+
+		basePythonEnv["PYTHON_INCLUDE_FLAGS"] = includeFlags( env, "PYTHON_INCLUDE_PATH" )
 
 	basePythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
 
@@ -1611,9 +1638,8 @@ imageEnvPrepends = {
 		"OpenImageIO$OIIO_LIB_SUFFIX",
 	],
 	"CXXFLAGS" : [
-		"-DIECoreImage_EXPORTS",
-		systemIncludeArgument, "$OIIO_INCLUDE_PATH"
-	]
+		"-DIECoreImage_EXPORTS"
+	] + includeFlags( imageEnv, "OIIO_INCLUDE_PATH" )
 }
 if imageEnv.get( "WITH_OIIO_UTIL", True ):
 	imageEnvPrepends["LIBS"].append( "OpenImageIO_Util$OIIO_LIB_SUFFIX" )
@@ -1807,10 +1833,7 @@ vdbEnvPrepends = {
 		"$VDB_LIB_PATH",
 	],
 	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"],
-	"CXXFLAGS" : [
-		systemIncludeArgument, "$VDB_INCLUDE_PATH",
-		systemIncludeArgument, "$PYBIND11_INCLUDE_PATH",
-	]
+	"CXXFLAGS" : includeFlags( vdbEnv, "VDB_INCLUDE_PATH" )  + includeFlags( vdbEnv, "PYBIND11_INCLUDE_PATH" )
 }
 
 vdbEnv.Prepend( **vdbEnvPrepends)
@@ -1908,10 +1931,8 @@ if env["WITH_GL"] and doConfigure :
 			# while still using -Werror.
 			"-Wno-format" if env["PLATFORM"] != "win32" else "",
 			"-Wno-strict-aliasing" if env["PLATFORM"] != "win32" else "",
-			"/wd4701" if env["PLATFORM"] == "win32" else "",
-			systemIncludeArgument, "$GLEW_INCLUDE_PATH",
-			systemIncludeArgument, "$OIIO_INCLUDE_PATH",
-		],
+			"/wd4701" if env["PLATFORM"] == "win32" else ""
+		] + includeFlags( glEnv, "GLEW_INCLUDE_PATH" ) + includeFlags( glEnv, "OIIO_INCLUDE_PATH" ),
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
 			"$OIIO_LIB_PATH",
@@ -2112,10 +2133,8 @@ usdEnvAppends = {
 		# This warning is already disabled generally for release builds,
 		# but also requires disabling for debug builds with USD.
 		"/wd4702" if env["PLATFORM"] == "win32" else "",
-		"-DIECoreUSD_EXPORTS",
-		systemIncludeArgument, "$USD_INCLUDE_PATH",
-		systemIncludeArgument, "$PYTHON_INCLUDE_PATH",
-	],
+		"-DIECoreUSD_EXPORTS"
+	] + includeFlags( usdEnv, "USD_INCLUDE_PATH" ) + includeFlags( usdEnv, "PYTHON_INCLUDE_PATH" ),
 	"CPPPATH" : [
 		"contrib/IECoreUSD/include",
 		"contrib/IECoreUSD/src",
@@ -2267,10 +2286,7 @@ alembicEnvSets = {
 alembicEnv = env.Clone( **alembicEnvSets )
 
 alembicEnvPrepends = {
-	"CXXFLAGS" : [
-		systemIncludeArgument, "$ALEMBIC_INCLUDE_PATH",
-		systemIncludeArgument, "$HDF5_INCLUDE_PATH",
-	],
+	"CXXFLAGS" : includeFlags( alembicEnv, "ALEMBIC_INCLUDE_PATH" ) + includeFlags( alembicEnv, "HDF5_INCLUDE_PATH" ),
 	"CPPPATH" : [
 		"contrib/IECoreAlembic/include",
 	],
