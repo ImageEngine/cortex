@@ -40,6 +40,8 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Spline.h"
 #include "IECore/SplineData.h"
+#include "IECore/Ramp.h"
+#include "IECore/RampData.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/VectorTypedData.h"
 
@@ -292,6 +294,14 @@ template<typename T, typename U> struct IsSpline< const Spline<T, U> > : public 
 
 /// IsSplineTypedData
 template< typename T > struct IsSplineTypedData : boost::mpl::and_< IsTypedData<T>, IsSpline< typename ValueType<T>::type > > {};
+
+/// IsRamp
+template<typename T, typename U = void > struct IsRamp : public boost::false_type {};
+template<typename T, typename U> struct IsRamp< Ramp<T, U> > : public boost::true_type {};
+template<typename T, typename U> struct IsRamp< const Ramp<T, U> > : public boost::true_type {};
+
+/// IsRampTypedData
+template< typename T > struct IsRampTypedData : boost::mpl::and_< IsTypedData<T>, IsRamp< typename ValueType<T>::type > > {};
 
 /// IsStringVectorTypeData
 template<typename T> struct IsStringVectorTypedData : public boost::false_type {};

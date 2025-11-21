@@ -152,6 +152,8 @@ from PathMatcherTest import PathMatcherTest
 from PathMatcherDataTest import PathMatcherDataTest
 from CancellerTest import CancellerTest
 from ObjectMatrixTest import ObjectMatrixTest
+from RampTest import *
+from RampDataTest import *
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
