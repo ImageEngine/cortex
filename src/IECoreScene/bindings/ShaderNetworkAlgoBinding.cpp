@@ -83,7 +83,7 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 	def( "deregisterJoinAdapter", &ShaderNetworkAlgo::deregisterJoinAdapter, ( arg( "destinationShaderType" ), arg( "destinationParameterType" ) ) );
 	def( "convertToOSLConventions", &ShaderNetworkAlgo::convertToOSLConventions );
 	def( "convertObjectVector", &ShaderNetworkAlgo::convertObjectVector );
-	def( "collapseSplines", &ShaderNetworkAlgo::collapseSplines, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
-	def( "expandSplines", &ShaderNetworkAlgo::expandSplines, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
+	def( "collapseRamps", &ShaderNetworkAlgo::collapseRamps, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
+	def( "expandRamps", &ShaderNetworkAlgo::expandRamps, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
 
 }

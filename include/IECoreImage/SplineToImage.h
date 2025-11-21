@@ -54,6 +54,8 @@ namespace IECoreImage
 
 /// This Op creates ImagePrimitives from SplineData.
 /// \todo Different projections would be nice.
+/// \todo If we wanted to keep this up to date, it should probably take RampData instead
+/// of SplineData, but ImagePrimitive is on the path to deprecation anyway.
 /// \ingroup imageProcessingGroup
 class IECOREIMAGE_API SplineToImage : public IECore::Op
 {

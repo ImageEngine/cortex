@@ -2917,12 +2917,13 @@ class USDSceneTest( unittest.TestCase ) :
 		surface.parameters["c"] = IECore.StringData( "42" )
 		surface.parameters["d"] = IECore.Color3fData( imath.Color3f( 3 ) )
 		surface.parameters["e"] = IECore.V3fVectorData( [ imath.V3f( 7 ) ] )
-		surface.parameters["f"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bSpline(),
-			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) )
-		)
-		surface.parameters["g"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
-			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) )
-		)
+		surface.parameters["f"] = IECore.RampffData( IECore.Rampff(
+			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ), IECore.RampInterpolation.BSpline
+		) )
+		surface.parameters["g"] = IECore.RampfColor3fData( IECore.RampfColor3f(
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ),
+			IECore.RampInterpolation.Linear
+		) )
 
 		add1 = IECoreScene.Shader( "add", "ai:shader" )
 		add1.parameters["b"] = IECore.FloatData( 3.0 )
@@ -2978,11 +2979,13 @@ class USDSceneTest( unittest.TestCase ) :
 		dest.parameters["a"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
 		dest.parameters["b"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
 		dest.parameters["c"] = IECore.FloatData( 0.0 )
-		dest.parameters["sf"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.catmullRom(),
-			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 30, 1 ) )
+		dest.parameters["sf"] = IECore.RampffData( IECore.Rampff(
+			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 30, 1 ) ),
+			IECore.RampInterpolation.CatmullRom
 		) )
-		dest.parameters["sc"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
-			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) )
+		dest.parameters["sc"] = IECore.RampfColor3fData( IECore.RampfColor3f(
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ),
+			IECore.RampInterpolation.Linear
 		) )
 
 		componentConnectionNetwork = IECoreScene.ShaderNetwork()
@@ -3016,19 +3019,19 @@ class USDSceneTest( unittest.TestCase ) :
 		) )
 		componentConnectionNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "dest", "" ) )
 
-		# Float to spline element connection
+		# Float to ramp element connection
 		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
 			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
 			IECoreScene.ShaderNetwork.Parameter( "dest", "sf[3].y" )
 		) )
 
-		# Color to spline element connection
+		# Color to ramp element connection
 		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
 			IECoreScene.ShaderNetwork.Parameter( "source3", "out" ),
 			IECoreScene.ShaderNetwork.Parameter( "dest", "sc[2].y" )
 		) )
 
-		# Float to spline element component connection
+		# Float to ramp element component connection
 		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
 			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
 			IECoreScene.ShaderNetwork.Parameter( "dest", "sc[0].y.g" )

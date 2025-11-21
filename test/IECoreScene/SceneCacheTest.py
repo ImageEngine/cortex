@@ -1203,6 +1203,7 @@ class SceneCacheTest( unittest.TestCase ) :
 
 	def testDeprecatedSplines( self ) :
 
+		# Test with a file saved from old Gaffer, this hopefully makes sure this is working in practice
 		fileName = pathlib.Path( __file__ ).parent / "data" / "oldSplines.scc"
 		root = IECoreScene.SceneInterface.create( str( fileName ), IECore.IndexedIO.OpenMode.Read )
 		child = root.child( "cube" )
@@ -1210,30 +1211,70 @@ class SceneCacheTest( unittest.TestCase ) :
 		shaderNetwork = child.readAttribute( "ai:surface", 0 )
 		self.assertEqual(
 			shaderNetwork.getShader( "ColorSpline" ).parameters["spline"],
-			IECore.SplinefColor3fData( IECore.SplinefColor3f(
-				IECore.CubicBasisf.linear(),
+			IECore.RampfColor3fData( IECore.RampfColor3f(
 				(
 					( 0, imath.Color3f( 0, 0, 0 ) ),
 					( 0.4, imath.Color3f( 0.3, 0.5, 0.9 ) ),
 					( 0.7, imath.Color3f( 0.8, 0.7, 0.3) ),
 					( 1, imath.Color3f( 1, 1, 1 ) )
-				)
+				),
+				IECore.RampInterpolation.Linear
 			) )
 		)
 
 		self.assertEqual(
 			shaderNetwork.getShader( "FloatSpline" ).parameters["spline"],
-			IECore.SplineffData(IECore.Splineff(
-				IECore.CubicBasisf.bSpline(),
+			IECore.RampffData(IECore.Rampff(
 				(
-					( 0, 0 ), ( 0, 0 ), ( 0, 0 ),
+					( 0, 0 ),
 					( 0.3, 0.8 ),
 					( 0.7, 0.7 ),
 					( 0.9, 0.1 ),
-					( 1, 1 ), ( 1, 1 ), ( 1, 1 )
-				)
+					( 1, 1 ),
+				),
+				IECore.RampInterpolation.BSpline
 			) )
 		)
+
+		# A more synthetic test to exercise the compatibility for all spline types
+
+		for interp in IECore.RampInterpolation.values.keys():
+			ramp = IECore.RampfColor3f(
+				(
+					( 0, imath.Color3f( 0 ) ),
+					( 0.3, imath.Color3f( 0.8, 0.5, 0.4 ) ),
+					( 0.7, imath.Color3f( 0.7, 0.1, 0.2 ) ),
+					( 0.9, imath.Color3f( 0.1, 0.4, 0.6 ) ),
+					( 1, imath.Color3f( 1 ) ),
+				),
+				IECore.RampInterpolation( interp )
+			)
+
+			s = IECoreScene.Shader( "standard_surface" )
+
+			# Instead of writing out the Ramp, write out the Ramp's evaluator. This is wrong, but it matches
+			# how things used to work, when Spline was the primary representation.
+			s.parameters["test"] = IECore.SplinefColor3fData( ramp.evaluator() )
+			shaderNetwork = IECoreScene.ShaderNetwork(
+				shaders = {
+					"shader" : s
+				},
+				output = "shader",
+			)
+
+			io = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIO.OpenMode.Write )
+			scc = IECoreScene.SceneCache( io )
+			c = scc.createChild( "c" )
+
+			c.writeAttribute( "testShader", shaderNetwork, 0 )
+
+			del c, scc
+
+			io = IECore.MemoryIndexedIO( io.buffer(), IECore.IndexedIO.OpenMode.Read )
+			scc = IECoreScene.SceneCache( io )
+			c = scc.child( "c" )
+
+			self.assertEqual( c.readAttribute( "testShader", 0 ).getShader( "shader" ).parameters["test"].value, ramp )
 
 	def testCopyReturnValues( self ):
 

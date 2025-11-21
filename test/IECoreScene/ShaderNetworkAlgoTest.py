@@ -309,18 +309,28 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( IECoreScene.ShaderNetworkAlgo.convertObjectVector( objectVector ), shaderNetwork )
 
-	def testSplineConversion( self ):
+	def testRampConversion( self ):
 		parms = IECore.CompoundData()
-		parms["testffbSpline"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bSpline(),
-			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) ) )
-		parms["testffbezier"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bSpline(),
-			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ), ( 0.4, 4 ), ( 0.5, 5 ) ) ) )
-		parms["testfColor3fcatmullRom"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.catmullRom(),
-( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ), ( 50, imath.Color3f(6) ) ) ) )
-		parms["testfColor3flinear"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
-( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) ) )
-		parms["testffconstant"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.constant(),
-			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) ) ) )
+		parms["testffbSpline"] = IECore.RampffData( IECore.Rampff(
+			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ),
+			IECore.RampInterpolation.BSpline
+		) )
+		parms["testffmonotoneCubic"] = IECore.RampffData( IECore.Rampff(
+			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ), ( 0.4, 4 ), ( 0.5, 5 ) ),
+			IECore.RampInterpolation.MonotoneCubic
+		) )
+		parms["testfColor3fcatmullRom"] = IECore.RampfColor3fData( IECore.RampfColor3f(
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ), ( 50, imath.Color3f(6) ) ),
+			IECore.RampInterpolation.CatmullRom
+		) )
+		parms["testfColor3flinear"] = IECore.RampfColor3fData( IECore.RampfColor3f(
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ),
+			IECore.RampInterpolation.Linear
+		) )
+		parms["testffconstant"] = IECore.RampffData( IECore.Rampff(
+			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) ),
+			IECore.RampInterpolation.Constant
+		) )
 
 		shaderNetworkOrig = IECoreScene.ShaderNetwork(
 			shaders = {
@@ -330,7 +340,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "test"
 		)
 		shaderNetwork = shaderNetworkOrig.copy()
-		IECoreScene.ShaderNetworkAlgo.expandSplines( shaderNetwork )
+		IECoreScene.ShaderNetworkAlgo.expandRamps( shaderNetwork )
 
 		parmsExpanded = shaderNetwork.outputShader().parameters
 
@@ -341,30 +351,31 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		self.assertEqual( type( parmsExpanded["testfColor3fcatmullRomValues"] ), IECore.Color3fVectorData )
 
 		for name, extra in [
-			( "testffbSpline", 0 ),
-			( "testffbezier", 0 ),
-			( "testfColor3fcatmullRom", 0 ),
+			( "testffbSpline", 4 ),
+			( "testffmonotoneCubic", 8 ),
+			( "testfColor3fcatmullRom", 2 ),
 			( "testfColor3flinear", 2 ),
 			( "testffconstant", 3 )
 		]:
-			self.assertEqual( len( parms[name].value.keys() ) + extra, len( parmsExpanded[name + "Positions"] ) )
+			with self.subTest( name = name ):
+				self.assertEqual( len( parms[name].value.points() ) + extra, len( parmsExpanded[name + "Positions"] ) )
 
 		riParmsExpanded = shaderNetwork.getShader( "riTest" ).parameters
 
 		# Test a few things in the PRMan convention, and that we've got the extra "count" plugs
-		self.assertEqual( set( riParmsExpanded.keys() ), set( [ i + suffix for suffix in [ "", "_Interpolation", "_Knots" ] for i in parms.keys() ] + [ 'testffbSpline_Floats',  'testffbezier_Floats', 'testfColor3fcatmullRom_Colors', 'testfColor3flinear_Colors', 'testffconstant_Floats'] ) )
+		self.assertEqual( set( riParmsExpanded.keys() ), set( [ i + suffix for suffix in [ "", "_Interpolation", "_Knots" ] for i in parms.keys() ] + [ 'testffbSpline_Floats',  'testffmonotoneCubic_Floats', 'testfColor3fcatmullRom_Colors', 'testfColor3flinear_Colors', 'testffconstant_Floats'] ) )
 		self.assertEqual( riParmsExpanded["testffbSpline_Interpolation"], IECore.StringData( "bspline" ) )
-		self.assertEqual( riParmsExpanded["testffbSpline_Knots"], IECore.FloatVectorData( [ 0, 10, 20, 21 ] ) )
-		self.assertEqual( riParmsExpanded["testffbSpline_Floats"], IECore.FloatVectorData( [ 1, 2, 0, 2 ] ) )
-		self.assertEqual( riParmsExpanded["testffbSpline"], IECore.IntData( 4 ) )
-		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom_Knots"],  IECore.FloatVectorData( [ 0, 10, 20, 30, 40, 50 ] ) )
-		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom_Colors"],  IECore.Color3fVectorData( [ imath.Color3f( i ) for i in [ 1, 2, 0, 5, 2, 6 ] ] ) )
-		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom"], IECore.IntData( 6 ) )
+		self.assertEqual( riParmsExpanded["testffbSpline_Knots"], IECore.FloatVectorData( [ 0, 0, 0, 10, 20, 21, 21, 21 ] ) )
+		self.assertEqual( riParmsExpanded["testffbSpline_Floats"], IECore.FloatVectorData( [ 1, 1, 1, 2, 0, 2, 2, 2 ] ) )
+		self.assertEqual( riParmsExpanded["testffbSpline"], IECore.IntData( 8 ) )
+		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom_Knots"],  IECore.FloatVectorData( [ 0, 0, 10, 20, 30, 40, 50, 50 ] ) )
+		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom_Colors"],  IECore.Color3fVectorData( [ imath.Color3f( i ) for i in [ 1, 1, 2, 0, 5, 2, 6, 6 ] ] ) )
+		self.assertEqual( riParmsExpanded["testfColor3fcatmullRom"], IECore.IntData( 8 ) )
 		self.assertEqual( riParmsExpanded["testfColor3flinear_Colors"],  IECore.Color3fVectorData( [ imath.Color3f( i ) for i in [ 1, 1, 2, 0, 0 ] ] ) )
 		self.assertEqual( riParmsExpanded["testfColor3flinear"], IECore.IntData( 5 ) )
 
 
-		IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetwork )
+		IECoreScene.ShaderNetworkAlgo.collapseRamps( shaderNetwork )
 
 		self.assertEqual( shaderNetwork, shaderNetworkOrig )
 
@@ -380,39 +391,39 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "test"
 		)
 
-		shaderNetworkBadSplineConnection = shaderNetworkExpandedGood.copy()
-		shaderNetworkBadSplineConnection.addConnection( ( ( "adapt", "out4" ), ( "test", "notASpline" ) ) )
+		shaderNetworkBadRampConnection = shaderNetworkExpandedGood.copy()
+		shaderNetworkBadRampConnection.addConnection( ( ( "adapt", "out4" ), ( "test", "notARamp" ) ) )
 
 		with IECore.CapturingMessageHandler() as mh :
-			IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetworkBadSplineConnection )
+			IECoreScene.ShaderNetworkAlgo.collapseRamps( shaderNetworkBadRampConnection )
 		self.assertEqual( len( mh.messages ), 1 )
 		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
-		self.assertEqual( mh.messages[0].message, 'Invalid spline plug name "notASpline"' )
+		self.assertEqual( mh.messages[0].message, 'Invalid spline parameter name "notARamp"' )
 
-		shaderNetworkBadSplineConnection = shaderNetworkExpandedGood.copy()
-		shaderNetworkBadSplineConnection.addConnection( ( ( "adapt", "out4" ), ( "test", "notASplineValues" ) ) )
+		shaderNetworkBadRampConnection = shaderNetworkExpandedGood.copy()
+		shaderNetworkBadRampConnection.addConnection( ( ( "adapt", "out4" ), ( "test", "notARampValues" ) ) )
 
 		with IECore.CapturingMessageHandler() as mh :
-			IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetworkBadSplineConnection )
+			IECoreScene.ShaderNetworkAlgo.collapseRamps( shaderNetworkBadRampConnection )
 		self.assertEqual( len( mh.messages ), 1 )
 		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
-		self.assertEqual( mh.messages[0].message, 'Invalid connection to spline parameter that doesn\'t exist "test.notASplineValues"' )
+		self.assertEqual( mh.messages[0].message, 'Invalid connection to spline parameter that doesn\'t exist or can\'t accept connections "test.notARampValues"' )
 
-		shaderNetworkBadSplineConnection = shaderNetworkExpandedGood.copy()
-		shaderNetworkBadSplineConnection.addConnection( ( ( "adapt", "out4" ), ( "test", "testffbSplineValues" ) ) )
-		shaderNetworkBadSplineConnection.addConnection( ( ( "source", "out" ), ( "adapt", "inX" ) ) )
+		shaderNetworkBadRampConnection = shaderNetworkExpandedGood.copy()
+		shaderNetworkBadRampConnection.addConnection( ( ( "adapt", "out4" ), ( "test", "testffbSplineValues" ) ) )
+		shaderNetworkBadRampConnection.addConnection( ( ( "source", "out" ), ( "adapt", "inX" ) ) )
 
 		with IECore.CapturingMessageHandler() as mh :
-			IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetworkBadSplineConnection )
+			IECoreScene.ShaderNetworkAlgo.collapseRamps( shaderNetworkBadRampConnection )
 		self.assertEqual( len( mh.messages ), 1 )
 		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
 		self.assertEqual( mh.messages[0].message, 'Invalid spline adapter input name "inX"' )
 
 
-		# Test with partial splines that don't have the right parameters to be valid ( these silently do
-		# nothing, because maybe you just happen to have some parameters that look a bit like splines )
+		# Test with partial ramps that don't have the right parameters to be valid ( these silently do
+		# nothing, because maybe you just happen to have some parameters that look a bit like ramps )
 		del parmsExpanded["testffbSplineBasis"]
-		del parmsExpanded["testffbezierValues"]
+		del parmsExpanded["testffmonotoneCubicValues"]
 		del parmsExpanded["testfColor3fcatmullRomPositions"]
 		del parmsExpanded["testfColor3flinearBasis"]
 		del parmsExpanded["testffconstantPositions"]
@@ -422,12 +433,12 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "test"
 		)
 		shaderNetworkInvalid = shaderNetworkInvalidOrig.copy()
-		IECoreScene.ShaderNetworkAlgo.collapseSplines( shaderNetworkInvalid )
+		IECoreScene.ShaderNetworkAlgo.collapseRamps( shaderNetworkInvalid )
 		self.assertEqual( shaderNetworkInvalid, shaderNetworkInvalidOrig )
 
 		riParmsExpandedBadCounts = riParmsExpanded.copy()
 		del riParmsExpandedBadCounts["testffbSpline"]
-		riParmsExpandedBadCounts["testffbezier"] = IECore.IntData( 10 )
+		riParmsExpandedBadCounts["testffmonotoneCubic"] = IECore.IntData( 10 )
 
 		riShaderNetworkBadCounts = IECoreScene.ShaderNetwork(
 			shaders = { "test" : IECoreScene.Shader( "PxrTest", "osl:shader", riParmsExpandedBadCounts ) },
@@ -435,39 +446,39 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		)
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler:
-			IECoreScene.ShaderNetworkAlgo.collapseSplines( riShaderNetworkBadCounts )
+			IECoreScene.ShaderNetworkAlgo.collapseRamps( riShaderNetworkBadCounts )
 
 		self.assertEqual(
 			set( [ i.message for i in messageHandler.messages ] ),
 			set( [
 				'Using spline format that expects count parameter, but no int count parameter found matching "testffbSpline"',
-				'Spline count "testffbezier" does not match length of data: 10 != 5"'
+				'Spline count "testffmonotoneCubic" does not match length of data: 10 != 13"'
 			] )
 		 )
 
 		# IF we re-expand things, the counts have just been recomputed, and everything is back the way it was before
-		IECoreScene.ShaderNetworkAlgo.expandSplines( riShaderNetworkBadCounts )
+		IECoreScene.ShaderNetworkAlgo.expandRamps( riShaderNetworkBadCounts )
 		self.assertEqual( riShaderNetworkBadCounts.getShader( "test" ).parameters, riParmsExpanded )
 
-	def testSplineInputs( self ):
+	def testRampInputs( self ):
 
-		fC3fcatmullRom = IECore.SplinefColor3fData( IECore.SplinefColor3f(
-			IECore.CubicBasisf.catmullRom(),
-			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ), ( 50, imath.Color3f(6) ) )
+		fC3fcatmullRom = IECore.RampfColor3fData( IECore.RampfColor3f(
+			( ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ) ),
+			IECore.RampInterpolation.CatmullRom
 		) )
-		fC3flinear = IECore.SplinefColor3fData( IECore.SplinefColor3f(
-			IECore.CubicBasisf.linear(),
-			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ) )
+		fC3flinear = IECore.RampfColor3fData( IECore.RampfColor3f(
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ) ),
+			IECore.RampInterpolation.Linear
 		) )
-		ffconstant = IECore.SplineffData( IECore.Splineff(
-			IECore.CubicBasisf.constant(),
-			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) )
+		ffconstant = IECore.RampffData( IECore.Rampff(
+			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) ),
+			IECore.RampInterpolation.Constant
 		) )
 
 		nOrig = IECoreScene.ShaderNetwork(
 			shaders = {
-				"testSplines" : IECoreScene.Shader(
-					"testSplines", "osl:shader",
+				"testRamps" : IECoreScene.Shader(
+					"testRamps", "osl:shader",
 					parameters = {
 						"fC3fcatmullRom" : fC3fcatmullRom,
 						"fC3flinear" : fC3flinear,
@@ -478,12 +489,12 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 				"colorSource" : IECoreScene.Shader( "colorSource", "osl:shader" ),
 			},
 			connections = [
-				( ( "colorSource", "out" ), ( "testSplines", "fC3fcatmullRom[1].y" ) ),
-				( ( "floatSource", "out" ), ( "testSplines", "fC3fcatmullRom[3].y.b" ) ),
-				( ( "floatSource", "out" ), ( "testSplines", "fC3flinear[0].y.g" ) ),
-				( ( "floatSource", "out" ), ( "testSplines", "ffconstant[2].y" ) ),
+				( ( "colorSource", "out" ), ( "testRamps", "fC3fcatmullRom[1].y" ) ),
+				( ( "floatSource", "out" ), ( "testRamps", "fC3fcatmullRom[3].y.b" ) ),
+				( ( "floatSource", "out" ), ( "testRamps", "fC3flinear[0].y.g" ) ),
+				( ( "floatSource", "out" ), ( "testRamps", "ffconstant[2].y" ) ),
 			],
-			output = "testSplines"
+			output = "testRamps"
 		)
 
 		n = nOrig.copy()
@@ -491,134 +502,153 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		self.assertEqual( len( nOrig ), 3 )
 		self.assertEqual( len( n ), 6 )
 
-		convertedSplineParameters = n.getShader( "testSplines" ).parameters
-		self.assertEqual( convertedSplineParameters["fC3fcatmullRomPositions"], IECore.FloatVectorData( [ 0, 10, 20, 30, 40, 50 ] ) )
-		self.assertEqual( convertedSplineParameters["fC3flinearPositions"], IECore.FloatVectorData( [ 0, 0, 10, 10 ] ) )
-		self.assertEqual( convertedSplineParameters["ffconstantPositions"], IECore.FloatVectorData( [ 0, 0, 0.2, 0.3, 0.3, 0.3 ] ) )
+		convertedRampParameters = n.getShader( "testRamps" ).parameters
+		self.assertEqual( convertedRampParameters["fC3fcatmullRomPositions"], IECore.FloatVectorData( [ 10, 10, 20, 30, 40, 40 ] ) )
+		self.assertEqual( convertedRampParameters["fC3flinearPositions"], IECore.FloatVectorData( [ 0, 0, 10, 10 ] ) )
+		self.assertEqual( convertedRampParameters["ffconstantPositions"], IECore.FloatVectorData( [ 0, 0, 0.2, 0.3, 0.3, 0.3 ] ) )
 
 
-		self.assertEqual( n.input( ( "testSplines", "fC3fcatmullRomValues" ) ), ( "testSplines_fC3fcatmullRomInputArrayAdapter", "out6" ) )
-		self.assertEqual( n.input( ( "testSplines", "fC3flinearValues" ) ), ( "testSplines_fC3flinearInputArrayAdapter", "out4" ) )
-		self.assertEqual( n.input( ( "testSplines", "ffconstantValues" ) ), ( "testSplines_ffconstantInputArrayAdapter", "out6" ) )
+		self.assertEqual( n.input( ( "testRamps", "fC3fcatmullRomValues" ) ), ( "testRamps_fC3fcatmullRomInputArrayAdapter", "out6" ) )
+		self.assertEqual( n.input( ( "testRamps", "fC3flinearValues" ) ), ( "testRamps_fC3flinearInputArrayAdapter", "out4" ) )
+		self.assertEqual( n.input( ( "testRamps", "ffconstantValues" ) ), ( "testRamps_ffconstantInputArrayAdapter", "out6" ) )
 
-		adapterParameters = n.getShader( "testSplines_fC3fcatmullRomInputArrayAdapter" ).parameters
+		adapterParameters = n.getShader( "testRamps_fC3fcatmullRomInputArrayAdapter" ).parameters
 		self.assertEqual(
 			[ adapterParameters["in%i"%i].value for i in range( 6 ) ],
-			[ imath.Color3f(1), imath.Color3f(2), imath.Color3f(0), imath.Color3f(5), imath.Color3f(2), imath.Color3f(6) ]
+			[ imath.Color3f(2), imath.Color3f(2), imath.Color3f(0), imath.Color3f(5), imath.Color3f(2), imath.Color3f(2) ]
 		)
-		self.assertEqual( len( n.inputConnections( "testSplines_fC3fcatmullRomInputArrayAdapter" ) ), 2 )
-		self.assertEqual( n.input( ( "testSplines_fC3fcatmullRomInputArrayAdapter", "in1" ) ), ( "colorSource", "out" ) )
-		self.assertEqual( n.input( ( "testSplines_fC3fcatmullRomInputArrayAdapter", "in3[2]" ) ), ( "floatSource", "out" ) )
 
-		adapter1Parameters = n.getShader( "testSplines_fC3flinearInputArrayAdapter" ).parameters
+		# The connections have been offset to match the resulting spline, and the end point connection
+		# has been duplicated
+		self.assertEqual( len( n.inputConnections( "testRamps_fC3fcatmullRomInputArrayAdapter" ) ), 3 )
+		self.assertEqual( n.input( ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in2" ) ), ( "colorSource", "out" ) )
+		self.assertEqual( n.input( ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in4[2]" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( n.input( ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in5[2]" ) ), ( "floatSource", "out" ) )
+
+		adapter1Parameters = n.getShader( "testRamps_fC3flinearInputArrayAdapter" ).parameters
+
+		adapter1Parameters = n.getShader( "testRamps_fC3flinearInputArrayAdapter" ).parameters
 		self.assertEqual(
 			[ adapter1Parameters["in%i"%i].value for i in range( 4 ) ],
 			[ imath.Color3f(1), imath.Color3f(1), imath.Color3f(2), imath.Color3f(2) ]
 		)
-		self.assertEqual( len( n.inputConnections( "testSplines_fC3flinearInputArrayAdapter" ) ), 1 )
-		self.assertEqual( n.input( ( "testSplines_fC3flinearInputArrayAdapter", "in1[1]" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( len( n.inputConnections( "testRamps_fC3flinearInputArrayAdapter" ) ), 2 )
+		self.assertEqual( n.input( ( "testRamps_fC3flinearInputArrayAdapter", "in0[1]" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( n.input( ( "testRamps_fC3flinearInputArrayAdapter", "in1[1]" ) ), ( "floatSource", "out" ) )
 
-		adapter2Parameters = n.getShader( "testSplines_ffconstantInputArrayAdapter" ).parameters
+		adapter2Parameters = n.getShader( "testRamps_ffconstantInputArrayAdapter" ).parameters
 		self.assertEqual(
 			[ adapter2Parameters["in%i"%i].value for i in range( 6 ) ],
 			[ 1, 1, 6, 7, 7, 7 ]
 		)
-		self.assertEqual( len( n.inputConnections( "testSplines_ffconstantInputArrayAdapter" ) ), 1 )
-		self.assertEqual( n.input( ( "testSplines_ffconstantInputArrayAdapter", "in3" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( len( n.inputConnections( "testRamps_ffconstantInputArrayAdapter" ) ), 3 )
+		self.assertEqual( n.input( ( "testRamps_ffconstantInputArrayAdapter", "in3" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( n.input( ( "testRamps_ffconstantInputArrayAdapter", "in4" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( n.input( ( "testRamps_ffconstantInputArrayAdapter", "in5" ) ), ( "floatSource", "out" ) )
 
-		# Check that we can get the same results using expandSplines, aside from convertToOSLConventions
+		# Check that we can get the same results using expandRamps, aside from convertToOSLConventions
 		# also changing the component syntax
-		nSplinesOnly = nOrig.copy()
-		IECoreScene.ShaderNetworkAlgo.expandSplines( nSplinesOnly )
-		self.assertEqual( nSplinesOnly.input( ( "testSplines_fC3fcatmullRomInputArrayAdapter", "in3.b" ) ), ( "floatSource", "out" ) )
-		self.assertEqual( nSplinesOnly.input( ( "testSplines_fC3flinearInputArrayAdapter", "in1.g" ) ), ( "floatSource", "out" ) )
-		nSplinesOnly.removeConnection( ( ( "floatSource", "out" ), ( "testSplines_fC3fcatmullRomInputArrayAdapter", "in3.b" ) ) )
-		nSplinesOnly.removeConnection( ( ( "floatSource", "out" ), ( "testSplines_fC3flinearInputArrayAdapter", "in1.g" ) ) )
-		nSplinesOnly.addConnection( ( ( "floatSource", "out" ), ( "testSplines_fC3fcatmullRomInputArrayAdapter", "in3[2]" ) ) )
-		nSplinesOnly.addConnection( ( ( "floatSource", "out" ), ( "testSplines_fC3flinearInputArrayAdapter", "in1[1]" ) ) )
-		self.assertEqual( n, nSplinesOnly )
+		nRampsOnly = nOrig.copy()
+		IECoreScene.ShaderNetworkAlgo.expandRamps( nRampsOnly )
+		self.assertEqual( nRampsOnly.input( ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in4.b" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( nRampsOnly.input( ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in5.b" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( nRampsOnly.input( ( "testRamps_fC3flinearInputArrayAdapter", "in0.g" ) ), ( "floatSource", "out" ) )
+		self.assertEqual( nRampsOnly.input( ( "testRamps_fC3flinearInputArrayAdapter", "in1.g" ) ), ( "floatSource", "out" ) )
+		nRampsOnly.removeConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in4.b" ) ) )
+		nRampsOnly.removeConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in5.b" ) ) )
+		nRampsOnly.removeConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3flinearInputArrayAdapter", "in0.g" ) ) )
+		nRampsOnly.removeConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3flinearInputArrayAdapter", "in1.g" ) ) )
+		nRampsOnly.addConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in4[2]" ) ) )
+		nRampsOnly.addConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3fcatmullRomInputArrayAdapter", "in5[2]" ) ) )
+		nRampsOnly.addConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3flinearInputArrayAdapter", "in0[1]" ) ) )
+		nRampsOnly.addConnection( ( ( "floatSource", "out" ), ( "testRamps_fC3flinearInputArrayAdapter", "in1[1]" ) ) )
+		self.assertEqual( n, nRampsOnly )
 
-		# But expandSplines won't do anything if the prefix is wrong
+		# But expandRamps won't do anything if the prefix is wrong
 		nWrongPrefix = nOrig.copy()
-		IECoreScene.ShaderNetworkAlgo.expandSplines( nWrongPrefix, "foo:" )
+		IECoreScene.ShaderNetworkAlgo.expandRamps( nWrongPrefix, "foo:" )
 		self.assertEqual( nOrig, nWrongPrefix )
 
-		# Check that collapseSplines does the reverse
+		# Check that collapseRamps does the reverse
 		nReverse = nOrig.copy()
-		IECoreScene.ShaderNetworkAlgo.expandSplines( nReverse )
-		IECoreScene.ShaderNetworkAlgo.collapseSplines( nReverse )
+		IECoreScene.ShaderNetworkAlgo.expandRamps( nReverse )
+		IECoreScene.ShaderNetworkAlgo.collapseRamps( nReverse )
 		self.assertEqual( nOrig, nReverse )
 
 		n = IECoreScene.ShaderNetwork(
 			shaders = {
-				"testSplines" : IECoreScene.Shader(
-					"testSplines", "osl:shader",
+				"testRamps" : IECoreScene.Shader(
+					"testRamps", "osl:shader",
 					parameters = {
-						"fC3fcatmullRom" : IECore.SplinefColor3fData(
-							IECore.SplinefColor3f( IECore.CubicBasisf.catmullRom(), [ ( 0, imath.Color3f(0) ) ] * 33 )
+						"fC3fcatmullRom" : IECore.RampfColor3fData(
+							IECore.RampfColor3f( [ ( 0, imath.Color3f(0) ) ] * 33, IECore.RampInterpolation.CatmullRom )
 						),
 					}
 				),
 				"floatSource" : IECoreScene.Shader( "floatSource", "osl:shader" ),
 			},
 			connections = [
-				( ( "floatSource", "out" ), ( "testSplines", "fC3fcatmullRom[0].y.b" ) ),
+				( ( "floatSource", "out" ), ( "testRamps", "fC3fcatmullRom[0].y.b" ) ),
 			],
-			output = "testSplines"
+			output = "testRamps"
 		)
 
-		with self.assertRaisesRegex( Exception, r".*Cannot handle input to testSplines.fC3fcatmullRom\[0\].y.b : expanded spline has 33 control points, but max input adapter size is 32.*" ):
+		with IECore.CapturingMessageHandler() as mh :
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[0].message, "Cannot handle input to testRamps.fC3fcatmullRom[0].y.b : expanded spline has 35 control points, but max input adapter size is 32" )
 
 		n = IECoreScene.ShaderNetwork(
 			shaders = {
-				"testSplines" : IECoreScene.Shader(
-					"testSplines", "osl:shader",
+				"testRamps" : IECoreScene.Shader(
+					"testRamps", "osl:shader",
 					parameters = { "fC3fcatmullRom" : fC3fcatmullRom }
 				),
 				"floatSource" : IECoreScene.Shader( "floatSource", "osl:shader" ),
 			},
 			connections = [
-				( ( "floatSource", "out" ), ( "testSplines", "fC3fcatmullRom[xx].y.b" ) ),
+				( ( "floatSource", "out" ), ( "testRamps", "fC3fcatmullRom[xx].y.b" ) ),
 			],
-			output = "testSplines"
+			output = "testRamps"
 		)
 
-		with self.assertRaisesRegex( Exception, "Invalid spline point index xx" ):
+		with self.assertRaisesRegex( Exception, "Invalid ramp point index xx" ):
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
 
 		n = IECoreScene.ShaderNetwork(
 			shaders = {
-				"testSplines" : IECoreScene.Shader(
-					"testSplines", "osl:shader",
+				"testRamps" : IECoreScene.Shader(
+					"testRamps", "osl:shader",
 					parameters = { "fC3fcatmullRom" : fC3fcatmullRom }
 				),
 				"floatSource" : IECoreScene.Shader( "floatSource", "osl:shader" ),
 			},
 			connections = [
-				( ( "floatSource", "out" ), ( "testSplines", "fC3fcatmullRom[-1].y.b" ) ),
+				( ( "floatSource", "out" ), ( "testRamps", "fC3fcatmullRom[-1].y.b" ) ),
 			],
-			output = "testSplines"
+			output = "testRamps"
 		)
 
-		with self.assertRaisesRegex( Exception, "Spline index -1 is out of range in spline with 6 points." ):
+		with self.assertRaisesRegex( Exception, "Connection to ramp index -1 is out of range in ramp with 4 points." ):
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
 
 		n = IECoreScene.ShaderNetwork(
 			shaders = {
-				"testSplines" : IECoreScene.Shader(
-					"testSplines", "osl:shader",
+				"testRamps" : IECoreScene.Shader(
+					"testRamps", "osl:shader",
 					parameters = { "fC3fcatmullRom" : fC3fcatmullRom }
 				),
 				"floatSource" : IECoreScene.Shader( "floatSource", "osl:shader" ),
 			},
 			connections = [
-				( ( "floatSource", "out" ), ( "testSplines", "fC3fcatmullRom[100].y.b" ) ),
+				( ( "floatSource", "out" ), ( "testRamps", "fC3fcatmullRom[100].y.b" ) ),
 			],
-			output = "testSplines"
+			output = "testRamps"
 		)
 
-		with self.assertRaisesRegex( Exception, "Spline index 100 is out of range in spline with 6 points." ):
+		with self.assertRaisesRegex( Exception, "Connection to ramp index 100 is out of range in ramp with 4 points." ):
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
 
 	def testColor4ComponentConnections( self ) :
