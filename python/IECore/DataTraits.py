@@ -203,6 +203,10 @@ __dataTypesConversionDict = {
 	IECore.SplinefColor3fData: ( IECore.SplinefColor3f, True ),
 	IECore.SplinefColor4fData: ( IECore.SplinefColor4f, True ),
 
+	IECore.RampffData: ( IECore.Rampff, True ),
+	IECore.RampfColor3fData: ( IECore.RampfColor3f, True ),
+	IECore.RampfColor4fData: ( IECore.RampfColor4f, True ),
+
 	IECore.DateTimeData: ( datetime.datetime, True ),
 	IECore.TimeCodeData: ( IECore.TimeCode, True ),
 	IECore.PathMatcherData: ( IECore.PathMatcher, True ),

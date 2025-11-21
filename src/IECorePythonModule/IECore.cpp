@@ -114,6 +114,8 @@
 #include "IECorePython/AngleConversionBinding.h"
 #include "IECorePython/SplineBinding.h"
 #include "IECorePython/SplineDataBinding.h"
+#include "IECorePython/RampBinding.h"
+#include "IECorePython/RampDataBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
@@ -263,6 +265,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindAngleConversion();
 	bindSpline();
 	bindSplineData();
+	bindRamp();
+	bindRampData();
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindDateTimeData();
