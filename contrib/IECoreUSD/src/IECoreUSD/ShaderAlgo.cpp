@@ -302,7 +302,7 @@ IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath 
 IECoreScene::ConstShaderNetworkPtr adaptShaderNetworkForWriting( const IECoreScene::ShaderNetwork *shaderNetwork )
 {
 	IECoreScene::ShaderNetworkPtr result = shaderNetwork->copy();
-	IECoreScene::ShaderNetworkAlgo::expandSplines( result.get() );
+	IECoreScene::ShaderNetworkAlgo::expandRamps( result.get() );
 	IECoreScene::ShaderNetworkAlgo::addComponentConnectionAdapters( result.get() );
 	return result;
 }
@@ -529,7 +529,7 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 	result->setOutput( outputHandle );
 
 	IECoreScene::ShaderNetworkAlgo::removeComponentConnectionAdapters( result.get() );
-	IECoreScene::ShaderNetworkAlgo::collapseSplines( result.get() );
+	IECoreScene::ShaderNetworkAlgo::collapseRamps( result.get() );
 
 	return result;
 }

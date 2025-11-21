@@ -47,6 +47,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ObjectInterpolator.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/SplineData.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/PathMatcherData.h"
 
@@ -1154,6 +1155,11 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				{
 					result = ShaderNetworkAlgo::convertObjectVector( objectVector );
 				}
+			}
+
+			if( ShaderNetwork *shaderNetwork = runTimeCast<ShaderNetwork>( result.get() ) )
+			{
+				ShaderNetworkAlgo::convertDeprecatedSplines( shaderNetwork );
 			}
 
 			return result;

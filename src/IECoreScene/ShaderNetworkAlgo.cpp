@@ -39,7 +39,7 @@
 #include "IECore/DataAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/StringAlgo.h"
-#include "IECore/SplineData.h"
+#include "IECore/RampData.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/MessageHandler.h"
@@ -679,7 +679,7 @@ void convertOSLComponentConnections( ShaderNetwork *network, int oslVersion )
 
 void ShaderNetworkAlgo::convertToOSLConventions( ShaderNetwork *network, int oslVersion )
 {
-	expandSplines( network, "osl:" );
+	expandRamps( network, "osl:" );
 
 	// \todo - it would be a bit more efficient to integrate this, and only traverse the network once,
 	// but I don't think it's worth duplicated the code - fix this up once this call is standard and we
@@ -777,7 +777,7 @@ ShaderNetworkPtr ShaderNetworkAlgo::convertObjectVector( const ObjectVector *net
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Spline handling
+// Ramp handling
 //////////////////////////////////////////////////////////////////////////
 
 namespace
@@ -788,28 +788,8 @@ std::string_view stringViewFromMatch( const std::string &s, const boost::smatch 
 	return std::string_view( s.data() + match.position( index ), match.length( index ) );
 }
 
-template <typename T>
-std::pair< size_t, size_t > getEndPointDuplication( const T &basis )
-{
-	if( basis == T::linear() )
-	{
-		// OSL discards the first and last segment of linear curves
-		// "To maintain consistency with the other spline types"
-		// so we need to duplicate the end points to preserve all provided segments
-		return std::make_pair( 1, 1 );
-	}
-	else if( basis == T::constant() )
-	{
-		// Also, "To maintain consistency", "constant splines ignore the first and the two last
-		// data values."
-		return std::make_pair( 1, 2 );
-	}
-
-	return std::make_pair( 0, 0 );
-}
-
 std::tuple< const std::string*, const std::string*, const std::string*, const std::string*, const std::string* >
-lookupSplinePlugSuffixes( const std::string &shaderName )
+lookupRampParameterSuffixes( const std::string &shaderName )
 {
 	// We seem to be able to identify shaders that should use the PRMan convention by whether they start
 	// with one of the PRMan prefixes.
@@ -836,65 +816,26 @@ lookupSplinePlugSuffixes( const std::string &shaderName )
 	}
 }
 
-template<typename Spline>
-void expandSpline( const InternedString &name, const Spline &spline, CompoundDataMap &newParameters, const std::string &shaderName )
+template<typename Ramp>
+int expandRamp( const InternedString &name, const Ramp &ramp, CompoundDataMap &newParameters, const std::string &shaderName )
 {
-	const char *basis = "catmull-rom";
-	if( spline.basis == Spline::Basis::bezier() )
-	{
-		basis = "bezier";
-	}
-	else if( spline.basis == Spline::Basis::bSpline() )
-	{
-		basis = "bspline";
-	}
-	else if( spline.basis == Spline::Basis::linear() )
-	{
-		basis = "linear";
-	}
-	else if( spline.basis == Spline::Basis::constant() )
-	{
-		// Also, "To maintain consistency", "constant splines ignore the first and the two last
-		// data values."
-		basis = "constant";
-	}
-	auto [ duplicateStartPoints, duplicateEndPoints ] = getEndPointDuplication( spline.basis );
+	StringDataPtr basisData = new StringData();
+	std::string &basis = basisData->writable();
 
-	typedef TypedData< vector<typename Spline::XType> > XTypedVectorData;
+	typedef TypedData< vector<typename Ramp::XType> > XTypedVectorData;
 	typename XTypedVectorData::Ptr positionsData = new XTypedVectorData();
 	auto &positions = positionsData->writable();
-	positions.reserve( spline.points.size() );
-	typedef TypedData< vector<typename Spline::YType> > YTypedVectorData;
+	positions.reserve( ramp.points.size() );
+	typedef TypedData< vector<typename Ramp::YType> > YTypedVectorData;
 	typename YTypedVectorData::Ptr valuesData = new YTypedVectorData();
 	auto &values = valuesData->writable();
-	values.reserve( spline.points.size() + duplicateStartPoints + duplicateEndPoints );
 
-	if( spline.points.size() )
-	{
-		for( size_t i = 0; i < duplicateStartPoints; i++ )
-		{
-			positions.push_back( spline.points.begin()->first );
-			values.push_back( spline.points.begin()->second );
-		}
-	}
-	for( typename Spline::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
-	{
-		positions.push_back( it->first );
-		values.push_back( it->second );
-	}
-	if( spline.points.size() )
-	{
-		for( size_t i = 0; i < duplicateEndPoints; i++ )
-		{
-			positions.push_back( spline.points.rbegin()->first );
-			values.push_back( spline.points.rbegin()->second );
-		}
-	}
+	ramp.toOSL( basis, positions, values );
 
-	auto [ positionsSuffix, floatValuesSuffix, colorValuesSuffix, basisSuffix, countSuffix ] = lookupSplinePlugSuffixes( shaderName );
+	auto [ positionsSuffix, floatValuesSuffix, colorValuesSuffix, basisSuffix, countSuffix ] = lookupRampParameterSuffixes( shaderName );
 
 	newParameters[ name.string() + *positionsSuffix ] = positionsData;
-	if constexpr( std::is_same_v< typename Spline::YType, float > )
+	if constexpr( std::is_same_v< typename Ramp::YType, float > )
 	{
 		newParameters[ name.string() + *floatValuesSuffix ] = valuesData;
 	}
@@ -902,70 +843,14 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 	{
 		newParameters[ name.string() + *colorValuesSuffix ] = valuesData;
 	}
-	newParameters[ name.string() + *basisSuffix ] = new StringData( basis );
+	newParameters[ name.string() + *basisSuffix ] = basisData;
 
 	if( countSuffix )
 	{
 		newParameters[ name.string() + *countSuffix ] = new IntData( positionsData->readable().size() );
 	}
-}
 
-template<typename SplineData>
-IECore::DataPtr loadSpline(
-	const StringData *basisData,
-	const IECore::TypedData< std::vector< typename SplineData::ValueType::XType > > *positionsData,
-	const IECore::TypedData< std::vector< typename SplineData::ValueType::YType > > *valuesData
-)
-{
-	typename SplineData::Ptr resultData = new SplineData();
-	auto &result = resultData->writable();
-
-	size_t unduplicateStartPoints = 0;
-	size_t unduplicateEndPoints = 0;
-
-	const std::string &basis = basisData->readable();
-	if( basis == "bezier" )
-	{
-		result.basis = SplineData::ValueType::Basis::bezier();
-	}
-	if( basis == "bspline" )
-	{
-		result.basis = SplineData::ValueType::Basis::bSpline();
-	}
-	else if( basis == "linear" )
-	{
-		// Reverse the duplication we do when expanding splines
-		unduplicateStartPoints = 1;
-		unduplicateEndPoints = 1;
-		result.basis = SplineData::ValueType::Basis::linear();
-	}
-	else if( basis == "constant" )
-	{
-		// Reverse the duplication we do when expanding splines
-		unduplicateStartPoints = 1;
-		unduplicateEndPoints = 2;
-		result.basis = SplineData::ValueType::Basis::constant();
-	}
-	else
-	{
-		result.basis = SplineData::ValueType::Basis::catmullRom();
-	}
-
-	const auto &positions = positionsData->readable();
-	const auto &values = valuesData->readable();
-
-	size_t n = std::min( positions.size(), values.size() );
-	for( size_t i = 0; i < n; ++i )
-	{
-		if( i < unduplicateStartPoints || i >= n - unduplicateEndPoints )
-		{
-			continue;
-		}
-
-		result.points.insert( typename SplineData::ValueType::Point( positions[i], values[i] ) );
-	}
-
-	return resultData;
+	return positionsData->readable().size();
 }
 
 void ensureParametersCopy(
@@ -981,10 +866,10 @@ void ensureParametersCopy(
 	}
 }
 
-IECore::ConstCompoundDataPtr collapseSplineParametersInternal( const IECore::ConstCompoundDataPtr &parametersData, const std::string &shaderName )
+IECore::ConstCompoundDataPtr collapseRampParametersInternal( const IECore::ConstCompoundDataPtr &parametersData, const std::string &shaderName )
 {
 
-	auto [ positionsSuffix, floatValuesSuffix, colorValuesSuffix, basisSuffix, countSuffix ] = lookupSplinePlugSuffixes( shaderName );
+	auto [ positionsSuffix, floatValuesSuffix, colorValuesSuffix, basisSuffix, countSuffix ] = lookupRampParameterSuffixes( shaderName );
 
 	const CompoundDataMap &parameters( parametersData->readable() );
 	CompoundDataPtr newParametersData;
@@ -1039,26 +924,38 @@ IECore::ConstCompoundDataPtr collapseSplineParametersInternal( const IECore::Con
 		}
 
 		IECore::InternedString valuesName = prefix + *floatValuesSuffix;
-		IECore::DataPtr foundSpline;
+		IECore::DataPtr foundRamp;
 		if( const FloatVectorData *floatValues = parametersData->member<const FloatVectorData>( valuesName ) )
 		{
-			foundSpline = loadSpline<SplineffData>( basis, floatPositions, floatValues );
+			RampffData::Ptr rampData = new RampffData();
+			rampData->writable().fromOSL(
+				basis->readable(), floatPositions->readable(), floatValues->readable(), prefix
+			);
+			foundRamp = rampData;
 		}
 		else
 		{
 			valuesName = prefix + *colorValuesSuffix;
 			if( const Color3fVectorData *color3Values = parametersData->member<const Color3fVectorData>( valuesName ) )
 			{
-				foundSpline = loadSpline<SplinefColor3fData>( basis, floatPositions, color3Values );
+				RampfColor3fData::Ptr rampData = new RampfColor3fData();
+				rampData->writable().fromOSL(
+					basis->readable(), floatPositions->readable(), color3Values->readable(), prefix
+				);
+				foundRamp = rampData;
 			}
 			else if( const Color4fVectorData *color4Values = parametersData->member<const Color4fVectorData>( valuesName ) )
 			{
-				foundSpline = loadSpline<SplinefColor4fData>( basis, floatPositions, color4Values );
+				RampfColor4fData::Ptr rampData = new RampfColor4fData();
+				rampData->writable().fromOSL(
+					basis->readable(), floatPositions->readable(), color4Values->readable(), prefix
+				);
+				foundRamp = rampData;
 			}
 
 		}
 
-		if( foundSpline )
+		if( foundRamp )
 		{
 			ensureParametersCopy( parameters, newParametersData, newParameters );
 			newParameters->erase( maybeBasis.first );
@@ -1069,7 +966,7 @@ IECore::ConstCompoundDataPtr collapseSplineParametersInternal( const IECore::Con
 				newParameters->erase( countName );
 			}
 
-			(*newParameters)[prefix] = foundSpline;
+			(*newParameters)[prefix] = foundRamp;
 
 		}
 	}
@@ -1103,27 +1000,35 @@ const InternedString g_arrayOutputNames[maxArrayInputAdapterSize + 1] = {
 	"out30", "out31", "out32"
 };
 
-const boost::regex g_splineElementRegex( "^(.*)\\[(.*)\\]\\.y(.*)$" );
+const boost::regex g_rampElementRegex( "^(.*)\\[(.*)\\]\\.y(.*)$" );
 const boost::regex g_splineAdapterInRegex( "^in([0-9]+)(\\..*)?$" );
 
-template< typename TypedSpline >
-std::pair< InternedString, int > createSplineInputAdapter(
-	ShaderNetwork *network, const TypedData<TypedSpline> *splineData,
-	const IECore::CompoundDataMap &newParameters, const IECore::InternedString &splineParameterName,
+struct RampInputAdapterParameters
+{
+	InternedString adapterHandle;
+	size_t origSize;
+	size_t expandedSize;
+	int knotOffset;
+};
+
+template< typename TypedRamp >
+RampInputAdapterParameters createRampInputAdapter(
+	ShaderNetwork *network, const TypedData<TypedRamp> *rampData,
+	const IECore::CompoundDataMap &newParameters, const IECore::InternedString &rampParameterName,
 	const ShaderNetwork::Parameter &destination
 )
 {
-	using ValueVectorData = TypedData< std::vector< typename TypedSpline::YType > >;
+	using ValueVectorData = TypedData< std::vector< typename TypedRamp::YType > >;
 
-	IECore::InternedString splineValuesName = splineParameterName.string() + "Values";
+	IECore::InternedString splineValuesName = rampParameterName.string() + "Values";
 	auto findValues = newParameters.find( splineValuesName );
 	const ValueVectorData *splineValuesData = findValues != newParameters.end() ? runTimeCast<const ValueVectorData>( findValues->second.get() ) : nullptr;
 	if( !splineValuesData )
 	{
-		throw IECore::Exception( "Internal failure in convertToOSLConventions - expandSpline did not create values." );
+		throw IECore::Exception( "Internal failure in convertToOSLConventions - expandRamp did not create values." );
 	}
 
-	const std::vector< typename TypedSpline::YType > &splineValues = splineValuesData->readable();
+	const std::vector< typename TypedRamp::YType > &splineValues = splineValuesData->readable();
 
 	if( splineValues.size() > maxArrayInputAdapterSize )
 	{
@@ -1137,30 +1042,30 @@ std::pair< InternedString, int > createSplineInputAdapter(
 
 	// Using this adapter depends on Gaffer being available, but I guess we don't really
 	// care about use cases outside Gaffer ( and in terms of using exported USD elsewhere,
-	// this spline representation is only used in Gaffer's spline shaders, so it's not very
+	// this ramp representation is only used in Gaffer's ramp shaders, so it's not very
 	// useful if you don't have access to Gaffer shaders anyway ).
 	ShaderPtr adapter = new Shader(
-		std::is_same< TypedSpline, SplinefColor3f >::value ? g_colorToArrayAdapter : g_floatToArrayAdapter,
+		std::is_same< TypedRamp, RampfColor3f >::value ? g_colorToArrayAdapter : g_floatToArrayAdapter,
 		g_oslShader
 	);
 
 	for( unsigned int i = 0; i < splineValues.size(); i++ )
 	{
-		adapter->parameters()[ g_arrayInputNames[i] ] = new TypedData< typename TypedSpline::YType >( splineValues[i] );
+		adapter->parameters()[ g_arrayInputNames[i] ] = new TypedData< typename TypedRamp::YType >( splineValues[i] );
 	}
 
-	InternedString adapterHandle = network->addShader( destination.shader.string() + "_" + splineParameterName.string() + "InputArrayAdapter", std::move( adapter ) );
+	InternedString adapterHandle = network->addShader( destination.shader.string() + "_" + rampParameterName.string() + "InputArrayAdapter", std::move( adapter ) );
 	network->addConnection( ShaderNetwork::Connection(
 		{ adapterHandle, g_arrayOutputNames[ splineValues.size() ] },
 		{ destination.shader, splineValuesName }
 	) );
 
-	return std::make_pair( adapterHandle, getEndPointDuplication( splineData->readable().basis ).first );
+	return { adapterHandle, rampData->readable().points.size(), splineValues.size(), rampData->readable().oslStartPointMultiplicity() - 1 };
 }
 
 } // namespace
 
-void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string targetPrefix )
+void ShaderNetworkAlgo::collapseRamps( ShaderNetwork *network, std::string targetPrefix )
 {
 	std::vector< IECore::InternedString > adapters;
 
@@ -1171,23 +1076,23 @@ void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string tar
 			continue;
 		}
 
-		bool isSplineAdapter = shader->getType() == g_oslShader && (
+		bool isRampAdapter = shader->getType() == g_oslShader && (
 			shader->getName() == g_colorToArrayAdapter || shader->getName() == g_floatToArrayAdapter
 		);
 
-		if( isSplineAdapter )
+		if( isRampAdapter )
 		{
 			adapters.push_back( name );
 			continue;
 		}
 
-		// For nodes which aren't spline adapters, we just need to deal with any parameters that are splines
-		ConstCompoundDataPtr collapsed = collapseSplineParametersInternal( shader->parametersData(), shader->getName() );
+		// For nodes which aren't spline adapters, we just need to deal with any parameters that can become ramps
+		ConstCompoundDataPtr collapsed = collapseRampParametersInternal( shader->parametersData(), shader->getName() );
 		if( collapsed != shader->parametersData() )
 		{
-			// \todo - this const_cast is ugly, although safe because if the return from collapseSplineParameterInternals
-			// doesn't match the input, it is freshly allocated. Once collapseSplineParameters is fully
-			// deprecated, and no longer visible publicly, collapseSplineParametersInternal could
+			// \todo - this const_cast is ugly, although safe because if the return from collapseRampParameterInternals
+			// doesn't match the input, it is freshly allocated. Now that collapseRampParameters is fully
+			// deprecated, and no longer visible publicly, collapseRampParametersInternal could
 			// just return a non-const new parameter data, or nullptr if no changes are needed.
 			network->setShader( name, std::move( new Shader( shader->getName(), shader->getType(), const_cast< CompoundData *>( collapsed.get() ) ) ) );
 		}
@@ -1203,12 +1108,12 @@ void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string tar
 			if( !boost::ends_with( splineValuesName, "Values" ) )
 			{
 				IECore::msg(
-					Msg::Error, "ShaderNetworkAlgo", "Invalid spline plug name \"" + splineValuesName + "\""
+					Msg::Error, "ShaderNetworkAlgo", "Invalid spline parameter name \"" + splineValuesName + "\""
 				);
 				continue;
 			}
 
-			InternedString splineName = string_view( splineValuesName ).substr( 0, splineValuesName.size() - 6 );
+			InternedString rampName = string_view( splineValuesName ).substr( 0, splineValuesName.size() - 6 );
 
 			const IECoreScene::Shader *targetShader = network->getShader( output.destination.shader );
 			if( !targetShader )
@@ -1219,25 +1124,29 @@ void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string tar
 			}
 			const IECore::CompoundDataMap &targetParameters = targetShader->parameters();
 
-			int targetSplineKnotOffset = -1;
-			auto targetParameterIt = targetParameters.find( splineName );
+			int targetRampKnotOffset = -1;
+			int targetRampSize = -1;
+			auto targetParameterIt = targetParameters.find( rampName );
 			if( targetParameterIt != targetParameters.end() )
 			{
-				if( const SplineffData *findSplineff = runTimeCast<const SplineffData>( targetParameterIt->second.get() ) )
+				if( const RampffData *findRampff = runTimeCast<const RampffData>( targetParameterIt->second.get() ) )
 				{
-					targetSplineKnotOffset = getEndPointDuplication( findSplineff->readable().basis ).first;
+					targetRampKnotOffset = findRampff->readable().oslStartPointMultiplicity() - 1;
+					targetRampSize = findRampff->readable().points.size();
 				}
-				else if( const SplinefColor3fData *findSplinefColor3f = runTimeCast<const SplinefColor3fData>( targetParameterIt->second.get() ) )
+				else if( const RampfColor3fData *findRampfColor3f = runTimeCast<const RampfColor3fData>( targetParameterIt->second.get() ) )
 				{
-					targetSplineKnotOffset = getEndPointDuplication( findSplinefColor3f->readable().basis ).first;
+					targetRampKnotOffset = findRampfColor3f->readable().oslStartPointMultiplicity() - 1;
+					targetRampSize = findRampfColor3f->readable().points.size();
 				}
-				else if( const SplinefColor4fData *findSplinefColor4f = runTimeCast<const SplinefColor4fData>( targetParameterIt->second.get() ) )
+				else if( const RampfColor4fData *findRampfColor4f = runTimeCast<const RampfColor4fData>( targetParameterIt->second.get() ) )
 				{
-					targetSplineKnotOffset = getEndPointDuplication( findSplinefColor4f->readable().basis ).first;
+					targetRampKnotOffset = findRampfColor4f->readable().oslStartPointMultiplicity() - 1;
+					targetRampSize = findRampfColor4f->readable().points.size();
 				}
 			}
 
-			if( targetSplineKnotOffset == -1 )
+			if( targetRampKnotOffset == -1 )
 			{
 				IECore::msg(
 					Msg::Error, "ShaderNetworkAlgo",
@@ -1262,20 +1171,27 @@ void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string tar
 
 				int elementId =
 					StringAlgo::toInt( stringViewFromMatch( adapterDestName, match, 1 ) )
-					- targetSplineKnotOffset;
+					- targetRampKnotOffset;
+
+				if( elementId < 0 || elementId >= targetRampSize )
+				{
+					// The likely cause of elements that don't map to the collapsed ramp is that this connection
+					// was created to handle endpoint duplication.
+					continue;
+				}
 
 				InternedString origDestName;
 				if( match[2].matched )
 				{
 					origDestName = StringAlgo::concat(
-						splineName.string(), "[", std::to_string( elementId ), "].y",
+						rampName.string(), "[", std::to_string( elementId ), "].y",
 						stringViewFromMatch( adapterDestName, match, 2 )
 					);
 				}
 				else
 				{
 					origDestName = StringAlgo::concat(
-						splineName.string(), "[", std::to_string( elementId ), "].y"
+						rampName.string(), "[", std::to_string( elementId ), "].y"
 					);
 				}
 
@@ -1289,7 +1205,7 @@ void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string tar
 	}
 }
 
-void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targetPrefix )
+void ShaderNetworkAlgo::expandRamps( ShaderNetwork *network, std::string targetPrefix )
 {
 	for( const auto &s : network->shaders() )
 	{
@@ -1305,32 +1221,32 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 
 		for( const auto &[name, value] : origParameters )
 		{
-			if( const SplinefColor3fData *colorSpline = runTimeCast<const SplinefColor3fData>( value.get() ) )
+			if( const RampfColor3fData *colorRamp = runTimeCast<const RampfColor3fData>( value.get() ) )
 			{
 				ensureParametersCopy( origParameters, newParametersData, newParameters );
 				newParameters->erase( name );
-				expandSpline( name, colorSpline->readable(), *newParameters, s.second->getName() );
+				expandRamp( name, colorRamp->readable(), *newParameters, s.second->getName() );
 			}
-			else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( value.get() ) )
+			else if( const RampffData *floatRamp = runTimeCast<const RampffData>( value.get() ) )
 			{
 				ensureParametersCopy( origParameters, newParametersData, newParameters );
 				newParameters->erase( name );
-				expandSpline( name, floatSpline->readable(), *newParameters, s.second->getName() );
+				expandRamp( name, floatRamp->readable(), *newParameters, s.second->getName() );
 			}
 		}
 
 		if( !newParameters )
 		{
-			// No splines to convert
+			// No ramps to convert
 			continue;
 		}
 
-		// currentSplineArrayAdapters holds array adapters that we need to use to hook up inputs to
-		// spline plugs. It is indexed by the name of a spline parameter for the shader, and holds
-		// the name of the adapter shader, and the offset we need to use when accessing the knot
-		// vector.
+		// currentRampArrayAdapters holds array adapters that we need to use to hook up inputs to
+		// spline parameters that were converted from ramp. It is indexed by the name of a ramp
+		// parameter for the shader, and holds the name of the adapter shader, and the offset we
+		// need to use when accessing the knot vector.
 
-		std::map< IECore::InternedString, std::pair< IECore::InternedString, size_t > > currentSplineArrayAdapters;
+		std::map< IECore::InternedString, RampInputAdapterParameters > currentRampArrayAdapters;
 
 		std::vector< ShaderNetwork::Connection > connectionsToAdd;
 		ShaderNetwork::ConnectionRange inputConnections = network->inputConnections( s.first );
@@ -1341,92 +1257,140 @@ void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targe
 			const ShaderNetwork::Connection connection = *it++;
 
 			const std::string &destName = connection.destination.name.string();
-			boost::smatch splineElementMatch;
-			if( !boost::regex_match( destName, splineElementMatch, g_splineElementRegex) )
+			boost::smatch rampElementMatch;
+			if( !boost::regex_match( destName, rampElementMatch, g_rampElementRegex) )
 			{
 				continue;
 			}
 
-			IECore::InternedString parameterName( stringViewFromMatch( destName, splineElementMatch, 1 ) );
+			IECore::InternedString parameterName( stringViewFromMatch( destName, rampElementMatch, 1 ) );
 			auto findParameter = origParameters.find( parameterName );
 			if( findParameter == origParameters.end() )
 			{
 				continue;
 			}
 
-			const SplinefColor3fData* colorSplineData = runTimeCast<const SplinefColor3fData>( findParameter->second.get() );
-			const SplineffData* floatSplineData = runTimeCast<const SplineffData>( findParameter->second.get() );
+			const RampfColor3fData* colorRampData = runTimeCast<const RampfColor3fData>( findParameter->second.get() );
+			const RampffData* floatRampData = runTimeCast<const RampffData>( findParameter->second.get() );
 
-			if( !( colorSplineData || floatSplineData ) )
+			if( !( colorRampData || floatRampData ) )
 			{
 				continue;
 			}
 
-			int numPoints = colorSplineData ? colorSplineData->readable().points.size() : floatSplineData->readable().points.size();
-
 			// Insert a conversion shader to handle connection to component
-			auto [ adapterIter, newlyInserted ] = currentSplineArrayAdapters.insert( { parameterName, std::make_pair( IECore::InternedString(), 0 ) } );
+			auto [ adapterIter, newlyInserted ] = currentRampArrayAdapters.insert( { parameterName, RampInputAdapterParameters() } );
 			if( newlyInserted )
 			{
-				if( colorSplineData )
+				if( colorRampData )
 				{
-					adapterIter->second = createSplineInputAdapter(
-						network, colorSplineData, *newParameters, parameterName, connection.destination
+					adapterIter->second = createRampInputAdapter(
+						network, colorRampData, *newParameters, parameterName, connection.destination
 					);
 				}
 				else
 				{
-					adapterIter->second = createSplineInputAdapter(
-						network, floatSplineData, *newParameters, parameterName, connection.destination
+					adapterIter->second = createRampInputAdapter(
+						network, floatRampData, *newParameters, parameterName, connection.destination
 					);
 				}
 			}
 
-			const auto [ adapterHandle, knotOffset ] = adapterIter->second;
+			const RampInputAdapterParameters &adapterParms = adapterIter->second;
 
 			int elementId;
-			std::string_view elementIdString( stringViewFromMatch( destName, splineElementMatch, 2 ) );
+			std::string_view elementIdString( stringViewFromMatch( destName, rampElementMatch, 2 ) );
 			try
 			{
 				elementId = StringAlgo::toInt( elementIdString );
 			}
 			catch( ... )
 			{
-				throw IECore::Exception( StringAlgo::concat( "Invalid spline point index ", elementIdString ) );
+				throw IECore::Exception( StringAlgo::concat( "Invalid ramp point index ", elementIdString ) );
 			}
 
-			if( elementId < 0 || elementId >= numPoints )
+			if( elementId < 0 || elementId >= (int)adapterParms.origSize )
 			{
-				throw IECore::Exception( "Spline index " + std::to_string( elementId ) + " is out of range in spline with " + std::to_string( numPoints ) + " points." );
+				throw IECore::Exception( "Connection to ramp index " + std::to_string( elementId ) + " is out of range in ramp with " + std::to_string( adapterParms.origSize ) + " points." );
 			}
 
-			// We form only a single connection, even if we are at an endpoint which is duplicated during
-			// expandSpline. This is OK because the end points that are duplicated by expandSpline are ignored
-			// by OSL.
-			//
-			// An aside : the X values of the ignored points do need to be non-decreasing sometimes. There are
-			// two contraditory claims in the OSL spec, that:
-			// "Results are undefined if the knots ... not ... monotonic"
-			// and
-			// "constant splines ignore the first and the two last data values."
-			// This statements combine to make it ambiguous whether the duplicated value is completely
-			// ignored, or whether it must be monotonic ... in practice, it seems to cause problems for
-			// constant, but not linear interpolation.
-			//
-			// In any case, we only make connections to the Y value, so there is no problem with ignoring
-			// the duplicated values
-
-			InternedString destinationName = g_arrayInputNames[elementId + knotOffset];
-			if( splineElementMatch.length( 3 ) )
-			{
-				destinationName = StringAlgo::concat( destinationName.string(), stringViewFromMatch( destName, splineElementMatch, 3 ) );
-			}
+			// Map connections to the corresponding parameters of the expanded ramp. When mapping the
+			// first or last point, the value may need to be connected multiple times to match the end
+			// point duplication. This is needed in order to actually reach the end point value when using
+			// BSpline or CatmullRom interpolation. It doesn't actually matter for Linear or Constant, which
+			// have duplicated end points that aren't used, just because OSL thought it would be good idea to
+			// specify unused duplicated end points for "consistency", but for simplicity, we always connect
+			// the first or last control point to the duplicated end points.
 
 			network->removeConnection( connection );
-			network->addConnection( { connection.source, { adapterHandle, destinationName } } );
+
+			int outIndexMin, outIndexMax;
+
+			if( elementId == 0 )
+			{
+				outIndexMin = 0;
+				outIndexMax = adapterParms.knotOffset;
+			}
+			else if( elementId == (int)( adapterParms.origSize - 1 ) )
+			{
+				outIndexMin = elementId + adapterParms.knotOffset;
+				outIndexMax = adapterParms.expandedSize - 1;
+			}
+			else
+			{
+				outIndexMin = outIndexMax = elementId + adapterParms.knotOffset;
+			}
+
+			for( int i = outIndexMin; i <= outIndexMax; i++ )
+			{
+				InternedString destinationName = g_arrayInputNames[i];
+				if( rampElementMatch.length( 3 ) )
+				{
+					destinationName = StringAlgo::concat( destinationName.string(), stringViewFromMatch( destName, rampElementMatch, 3 ) );
+				}
+
+				network->addConnection( { connection.source, { adapterParms.adapterHandle, destinationName } } );
+			}
 		}
 
 		network->setShader( s.first, std::move( new Shader( s.second->getName(), s.second->getType(), newParametersData.get() ) ) );
+
+	}
+}
+
+void ShaderNetworkAlgo::convertDeprecatedSplines( ShaderNetwork *network )
+{
+	for( const auto &s : network->shaders() )
+	{
+		const CompoundDataMap &origParameters = s.second->parameters();
+
+		CompoundDataPtr newParametersData;
+		CompoundDataMap *newParameters = nullptr;
+
+		for( const auto &[name, value] : origParameters )
+		{
+			if( const SplinefColor3fData *colorSpline = runTimeCast<const SplinefColor3fData>( value.get() ) )
+			{
+				ensureParametersCopy( origParameters, newParametersData, newParameters );
+				RampfColor3fDataPtr rampData = new RampfColor3fData;
+				rampData->writable().fromDeprecatedSpline( colorSpline->readable() );
+				(*newParameters)[ name ] = rampData;
+			}
+			else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( value.get() ) )
+			{
+				ensureParametersCopy( origParameters, newParametersData, newParameters );
+				RampffDataPtr rampData = new RampffData;
+				rampData->writable().fromDeprecatedSpline( floatSpline->readable() );
+				(*newParameters)[ name ] = rampData;
+			}
+		}
+
+		if( newParameters )
+		{
+			network->setShader( s.first, std::move(
+				new Shader( s.second->getName(), s.second->getType(), newParametersData.get() )
+			) );
+		}
 
 	}
 }

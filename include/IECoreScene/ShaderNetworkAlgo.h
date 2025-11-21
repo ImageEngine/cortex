@@ -103,37 +103,39 @@ IECORESCENE_API void deregisterJoinAdapter( const std::string &destinationShader
 ///     For OSL prior to 1.10, intermediate shaders are inserted to emulate connections between components.
 ///     For later versions, no new shaders are inserted, but components are renamed from our `.x, .y, .z`
 ///     suffixes to OSL's `[0], [1], [2]` suffixes.
-/// - Splines
-///     We support SplineData as a parameter type. For OSL, these must be converted to 3 parameters named
-///     `<splineName>Positions`, `<splineName>Values` and `<splineName>Basis`. We also support input
-///     connections to spline Y values, specified as `<splineName>[N].y`, which currently must be implemented
+/// - Ramps
+///     We support RampData as a parameter type. For OSL, these must be converted to 3 parameters named
+///     `<rampName>Positions`, `<rampName>Values` and `<rampName>Basis`. We also support input
+///     connections to ramp Y values, specified as `<rampName>[N].y`, which currently must be implemented
 ///     using an adapter shader.
 IECORESCENE_API void convertToOSLConventions( ShaderNetwork *network, int oslVersion );
 
 /// Converts from the legacy ObjectVector format previously used to represent shader networks.
 IECORESCENE_API ShaderNetworkPtr convertObjectVector( const IECore::ObjectVector *network );
 
-/// We use a convention where ramps are represented by a single SplineData in Cortex, but must be expanded
+/// We use a convention where ramps are represented by a single RampData in Cortex, but must be expanded
 /// out into basic types when being passed to a renderer. We need two functions to convert back and forth.
 
-
-/// Look throughout the network for parameters matching our spline convention, for any possible <prefix> :
+/// Look throughout the network for parameters matching our ramp convention, for any possible <prefix> :
 /// <prefix>Positions, a float vector parameter
 /// <prefix>Values, a vector of a value type, such as float or color
 /// <prefix>Basis, a string parameter
 /// For each set of parameters found matching this convention, the 3 parameters will be replaced with one
-/// spline parameter named <prefix>. If input connections are represented using an adapter shader, they
-/// will be converted to direct connections to the spline using our support for spline element
+/// ramp parameter named <prefix>. If input connections are represented using an adapter shader, they
+/// will be converted to direct connections to the ramp using our support for ramp element
 /// connections.
 /// If `targetPrefix` is given, only translates connections to shaders with a type starting with this string
-IECORESCENE_API void collapseSplines( ShaderNetwork *network, std::string targetPrefix = "" );
+IECORESCENE_API void collapseRamps( ShaderNetwork *network, std::string targetPrefix = "" );
 
-/// Look throughout the network for spline parameters. If any are found, they will be expanded out into
+/// Look throughout the network for ramp parameters. If any are found, they will be expanded out into
 /// 3 parameters named <name>Positions, <name>Values and <name>Basis.
-/// We also support input connections to spline Y values, specified as `<splineName>[N].y`, which currently
+/// We also support input connections to ramp Y values, specified as `<rampName>[N].y`, which currently
 /// must be implemented by inserting an adapter shader.
 /// If `targetPrefix` is given, only translates connections to shaders with a type starting with this string
-IECORESCENE_API void expandSplines( ShaderNetwork *network, std::string targetPrefix = "" );
+IECORESCENE_API void expandRamps( ShaderNetwork *network, std::string targetPrefix = "" );
+
+/// Used when dealing with SCC files written before Cortex 10.7, which used Spline*Data instead of Ramp*Data
+IECORESCENE_API void convertDeprecatedSplines( ShaderNetwork *network );
 
 } // namespace ShaderNetworkAlgo
 

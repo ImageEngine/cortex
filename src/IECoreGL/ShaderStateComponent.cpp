@@ -132,6 +132,9 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 				if( p->type == GL_SAMPLER_2D )
 				{
 					ConstTexturePtr texture = nullptr;
+					// NOTE : Shader parameters stored as SplineData are deprecated ( we now use Ramp ),
+					// however we're not updating this code, because we're not aware of anywhere it's currently
+					// used
 					if(
 						it->second->typeId() == (IECore::TypeId)IECoreImage::ImagePrimitiveTypeId ||
 						it->second->typeId() == IECore::CompoundDataTypeId ||
