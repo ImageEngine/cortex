@@ -6,6 +6,11 @@ Fixes
 
 - Boost : Fixed compatibility with Boost 1.85.
 
+Build
+-----
+
+- SConstruct : Added `INCLUDE_PATHS` option.
+
 10.6.2.0 (relative to 10.6.1.0)
 ========
 
