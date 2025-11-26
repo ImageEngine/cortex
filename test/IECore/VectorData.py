@@ -1369,6 +1369,18 @@ class TestSourceDataEquality( unittest.TestCase ) :
 
 class TestBufferProtocol( unittest.TestCase ) :
 
+	def __assertMemoryBufferProperties( self, pythonBuffer, cortexBuffer, elementFormat, ndim, shape, strides ) :
+
+		self.assertIs( pythonBuffer.obj, cortexBuffer )
+		self.assertTrue( pythonBuffer.readonly )
+		self.assertEqual( pythonBuffer.format, elementFormat )
+		self.assertEqual( pythonBuffer.ndim, ndim )
+		self.assertEqual( pythonBuffer.shape, shape )
+		self.assertEqual( pythonBuffer.itemsize, struct.calcsize( elementFormat ) )
+		self.assertEqual( pythonBuffer.strides, strides )
+		self.assertTrue( pythonBuffer.c_contiguous )
+		self.assertTrue( pythonBuffer.contiguous )
+
 	def testSimpleTypes( self ) :
 
 		for elementType, vectorType, elementFormat in [
@@ -1393,15 +1405,99 @@ class TestBufferProtocol( unittest.TestCase ) :
 
 				# `memoryview` returns `int` for C `char` / Python `chr` types. Cast to `chr`
 				self.assertEqual( list( m ) if elementType != chr else [ chr(i) for i in m ], list( v ) )
-				self.assertIs( m.obj, b )
-				self.assertTrue( m.readonly )
-				self.assertEqual( m.format, elementFormat )
-				self.assertEqual( m.ndim, 1 )
-				self.assertEqual( m.shape, ( len( v ), ) )
-				self.assertEqual( m.itemsize, struct.calcsize( elementFormat ) )
-				self.assertEqual( m.strides, ( m.itemsize, ) )
-				self.assertTrue( m.c_contiguous )
-				self.assertTrue( m.contiguous )
+				self.__assertMemoryBufferProperties( m, b, elementFormat, 1, ( len( v ), ), ( m.itemsize, ) )
+
+	def testMatrixTypes( self ) :
+
+		for elementType, vectorType, matrixSize, elementFormat in [
+			( imath.M44f, IECore.M44fVectorData, 4, "f" ),
+			( imath.M44d, IECore.M44dVectorData, 4, "d" ),
+			( imath.M33f, IECore.M33fVectorData, 3, "f" ),
+			( imath.M33d, IECore.M33dVectorData, 3, "d" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType( *list( range( 0, matrixSize * matrixSize ) ) ),
+						elementType( *list( range( 1, 1 + matrixSize * matrixSize ) ) ),
+						elementType( *list( range( 2, 2 + matrixSize * matrixSize ) ) ),
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					for j in range( 0, matrixSize ) :
+						for k in range( 0, matrixSize ) :
+							self.assertEqual( m.tolist()[i][j][k], v[i][j][k] )
+
+				self.__assertMemoryBufferProperties(
+					m,
+					b,
+					elementFormat,
+					3,
+					( len( v ), matrixSize, matrixSize ),
+					( matrixSize * matrixSize * m.itemsize, matrixSize * m.itemsize, m.itemsize )
+				)
+
+	def testQuat( self ) :
+
+		for elementType, vectorType, dimensions, elementFormat in [
+			( imath.Quatf, IECore.QuatfVectorData, 4, "f" ),
+			( imath.Quatd, IECore.QuatdVectorData, 4, "d" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType( *list( range( 0, dimensions ) ) ),
+						elementType( *list( range( 1, 1 + dimensions ) ) ),
+						elementType( *list( range( 2, 2 + dimensions ) ) ),
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					mList = m.tolist()
+					self.assertEqual( elementType( mList[i][0], mList[i][1], mList[i][2], mList[i][3] ), v[i] )
+
+				self.__assertMemoryBufferProperties( m, b, elementFormat, 2, ( len( v ), dimensions ), ( dimensions * m.itemsize, m.itemsize ) )
+
+	def testTwoDimensionalBuffers( self ) :
+
+		for elementType, vectorType, dimensions, elementFormat in [
+			( imath.Color3f, IECore.Color3fVectorData, 3, "f" ),
+			( imath.Color4f, IECore.Color4fVectorData, 4, "f" ),
+			( imath.V2f, IECore.V2fVectorData, 2, "f" ),
+			( imath.V2d, IECore.V2dVectorData, 2, "d" ),
+			( imath.V2i, IECore.V2iVectorData, 2, "i" ),
+			( imath.V3f, IECore.V3fVectorData, 3, "f" ),
+			( imath.V3d, IECore.V3dVectorData, 3, "d" ),
+			( imath.V3i, IECore.V3iVectorData, 3, "i" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType( *list( range( 0, dimensions ) ) ),
+						elementType( *list( range( 1, 1 + dimensions ) ) ),
+						elementType( *list( range( 2, 2 + dimensions ) ) ),
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					for j in range( 0, dimensions ) :
+						self.assertEqual( m.tolist()[i][j], v[i][j] )
+
+				self.__assertMemoryBufferProperties( m, b, elementFormat, 2, ( len( v ), dimensions ), ( dimensions * m.itemsize, m.itemsize ) )
+
 
 	def testReadOnlyBuffer( self ) :
 
