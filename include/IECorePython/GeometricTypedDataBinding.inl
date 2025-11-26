@@ -262,6 +262,7 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 					 "\nor any other python built-in type that is convertible to it. Alternatively accepts the size of the new vector.") \
 				.def("getInterpretation", &ThisClass::getInterpretation, "Returns the geometric interpretation of this data.") \
 				.def("setInterpretation", &ThisClass::setInterpretation, "Sets the geometric interpretation of this data.") \
+				BIND_BUFFER_PROTOCOL_METHODS	\
 			; \
 		} \
 

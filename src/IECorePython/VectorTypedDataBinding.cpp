@@ -91,6 +91,24 @@ template<> struct PythonType<unsigned short>{ static const char *value(){ return
 template<> struct PythonType<int64_t>{ static const char *value(){ return "q"; } };
 template<> struct PythonType<uint64_t>{ static const char *value(){ return "Q"; } };
 
+template<typename T>
+constexpr std::pair<const char *, Py_ssize_t> typeInfo()
+{
+	if constexpr(
+		IECore::TypeTraits::IsMatrix<T>::value ||
+		IECore::TypeTraits::IsColor<T>::value ||
+		IECore::TypeTraits::IsQuat<T>::value ||
+		IECore::TypeTraits::IsVec<T>::value
+	)
+	{
+		return { PythonType<typename T::BaseType>::value(), sizeof( typename T::BaseType ) };
+	}
+	else
+	{
+		return { PythonType<T>::value(), sizeof( T ) };
+	}
+}
+
 }  // namespace
 
 namespace IECorePython
@@ -209,20 +227,95 @@ int Buffer::getBuffer( PyObject *object, Py_buffer *view, int flags )
 				if constexpr( TypeTraits::HasBaseType<DataType>::value && TypeTraits::IsNumericBasedVectorTypedData<DataType>::value )
 				{
 					using ElementType = typename DataType::ValueType::value_type;
-					if constexpr( std::is_arithmetic_v<ElementType> )
+					const auto [format, itemSize] = typeInfo<ElementType>();
+
+					int ndim = 1;
+					Py_ssize_t *shape = NULL;
+					Py_ssize_t *strides = NULL;
+					if constexpr( IECore::TypeTraits::IsMatrix44<ElementType>::value )
 					{
-						view->obj = Py_XNewRef( object );
-						view->readonly = !self->isWritable();
-						view->buf = view->readonly ? (void*)bufferData->baseReadable() : (void*)bufferData->baseWritable();
-						view->len = bufferData->readable().size() * sizeof( ElementType );
-						view->itemsize = sizeof( ElementType );
-						view->format = ( ( flags & PyBUF_FORMAT ) == PyBUF_FORMAT ) ? const_cast<char *>( PythonType<ElementType>::value() ) : NULL;
-						view->ndim = 1;
-						view->internal = NULL;
-						view->shape = ( ( flags & PyBUF_ND ) == PyBUF_ND ) ? (Py_ssize_t*)( new Py_ssize_t( bufferData->readable().size() ) ) : NULL;
-						view->strides = ( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES ) ? &( view->itemsize ) : NULL;
-						view->suboffsets = NULL;
+						ndim = 3;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[3]{ (Py_ssize_t)bufferData->readable().size(), 4, 4 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[3]{ 16 * itemSize, 4 * itemSize, itemSize };
+						}
 					}
+					else if constexpr( IECore::TypeTraits::IsMatrix33<ElementType>::value )
+					{
+						ndim = 3;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[3]{ (Py_ssize_t)bufferData->readable().size(), 3, 3 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[3]{ 9 * itemSize, 3 * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsQuat<ElementType>::value )
+					{
+						ndim = 2;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[2]{ (Py_ssize_t)bufferData->readable().size(), 4 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[2]{ 4 * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsColor3<ElementType>::value )
+					{
+						// `Color3` doesn't have `dimensions()`
+						ndim = 2;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[2]{ (Py_ssize_t)bufferData->readable().size(), 3 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[2]{ 3 * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsColor4<ElementType>::value || IECore::TypeTraits::IsVec<ElementType>::value )
+					{
+						ndim = 2;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[2]{ (Py_ssize_t)bufferData->readable().size(), ElementType::dimensions() };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[2]{ ElementType::dimensions() * itemSize, itemSize };
+						}
+					}
+					else
+					{
+						shape = new Py_ssize_t{ (Py_ssize_t)bufferData->readable().size() };
+					}
+
+					Py_ssize_t shapeProduct = 1;
+					Py_ssize_t *idx = shape;
+					for( int i = 0; i < ndim; ++i, ++idx )
+					{
+						shapeProduct *= *idx;
+					}
+
+					view->obj = Py_XNewRef( object );
+					view->readonly = !self->isWritable();
+					view->buf = view->readonly ? (void*)bufferData->baseReadable() : (void*)bufferData->baseWritable();
+					view->len = view->itemsize * shapeProduct;
+					view->itemsize = itemSize;
+					view->format = ( ( flags & PyBUF_FORMAT ) == PyBUF_FORMAT ) ? const_cast<char *>( format ) : NULL;
+					view->ndim = ndim;
+					view->internal = NULL;
+					view->shape = shape;
+					view->strides = strides;
+					view->suboffsets = NULL;
 				}
 			}
 		);
@@ -242,6 +335,10 @@ void Buffer::releaseBuffer( PyObject *object, Py_buffer *view )
 	if( view->shape != NULL )
 	{
 		delete view->shape;
+	}
+	if( view->strides != NULL )
+	{
+		delete view->strides;
 	}
 	// Python takes care of decrementing `object`
 }
