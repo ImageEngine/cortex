@@ -1498,6 +1498,46 @@ class TestBufferProtocol( unittest.TestCase ) :
 
 				self.__assertMemoryBufferProperties( m, b, elementFormat, 2, ( len( v ), dimensions ), ( dimensions * m.itemsize, m.itemsize ) )
 
+	def testBoxTypes( self ) :
+
+		for elementType, vectorType, elementFormat, componentType in [
+			( imath.Box2i, IECore.Box2iVectorData, "i", imath.V2i ),
+			( imath.Box2f, IECore.Box2fVectorData, "f", imath.V2f ),
+			( imath.Box2d, IECore.Box2dVectorData, "d", imath.V2d ),
+			( imath.Box3i, IECore.Box3iVectorData, "i", imath.V3i ),
+			( imath.Box3f, IECore.Box3fVectorData, "f", imath.V3f ),
+			( imath.Box3d, IECore.Box3dVectorData, "d", imath.V3d )
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType(
+							componentType( *list( range( i, i + componentType.dimensions() ) ) ),
+							componentType( *list( range( i + 10, i + 10 + componentType.dimensions() ) ) )
+						) for i in range( 0, 3 )
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					for j in range( 0, 2 ) :
+						for k in range( 0, componentType.dimensions() ) :
+							if j == 0 :
+								self.assertEqual( m.tolist()[i][j][k], v[i].min()[k] )
+							else :
+								self.assertEqual( m.tolist()[i][j][k], v[i].max()[k] )
+
+				self.__assertMemoryBufferProperties(
+					m,
+					b,
+					elementFormat,
+					3,
+					( len( v ), 2, componentType.dimensions() ),
+					( 2 * componentType.dimensions() * m.itemsize, componentType.dimensions() * m.itemsize, m.itemsize )
+				)
 
 	def testReadOnlyBuffer( self ) :
 
