@@ -103,6 +103,11 @@ constexpr std::pair<const char *, Py_ssize_t> typeInfo()
 	{
 		return { PythonType<typename T::BaseType>::value(), sizeof( typename T::BaseType ) };
 	}
+	else if constexpr( IECore::TypeTraits::IsBox<T>::value )
+	{
+		using ElementType = decltype( T::min );
+		return { PythonType<typename ElementType::BaseType>::value(), sizeof( typename ElementType::BaseType ) };
+	}
 	else
 	{
 		return { PythonType<T>::value(), sizeof( T ) };
@@ -291,6 +296,19 @@ int Buffer::getBuffer( PyObject *object, Py_buffer *view, int flags )
 						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
 						{
 							strides = new Py_ssize_t[2]{ ElementType::dimensions() * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsBox<ElementType>::value )
+					{
+						ndim = 3;
+						using ElementType = decltype( ElementType::min );
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[3]{ (Py_ssize_t)bufferData->readable().size(), 2, ElementType::dimensions() };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[3]{ 2 * ElementType::dimensions() * itemSize, ElementType::dimensions() * itemSize, itemSize };
 						}
 					}
 					else
