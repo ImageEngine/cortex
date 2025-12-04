@@ -34,7 +34,11 @@
 
 #include "IECoreScene/CoordinateSystem.h"
 
+#include "IECore/SimpleTypedData.h"
 #include "IECore/MurmurHash.h"
+
+#include "Imath/ImathMatrix.h"
+#include "Imath/ImathMatrixAlgo.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -104,6 +108,46 @@ void CoordinateSystem::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
+
+	// CoordinateSystem used to derive from the deprecated and removed StateRenderable
+	// holding additional transform information for the renderer. A better approach that is also
+	// used in Gaffer, the transform information is better stored as separate transform information.
+	// Cortex 10.6 also removed all DCC integrations, i.e. IECoreMaya, which stored, for example
+	// Locator transformation on the CoordinateSystem. We provide a way to still retrieve this
+	// information from old SceneCaches, although not fully transparent and backwards compatible.
+	// Clients of CoordinateSystem will need to be adjusted if needed.
+
+	// We look for a matrix entry somewhere underneath the CoordinateSystem, directly read it from
+	// there instead of loading an object and stash it in the BlindData.
+	const IndexedIO::EntryID matrixEntry( "matrix" );
+	Imath::M44f matrix;
+
+	std::function<void(ConstIndexedIOPtr)> findMatrixEntry = [&]( ConstIndexedIOPtr directory )
+	{
+		if( directory->hasEntry( matrixEntry ) )
+		{
+			float *f = matrix.getValue();
+			directory->read( matrixEntry, f, 16 );
+		}
+
+		IndexedIO::EntryIDList levelDirectories;
+		directory->entryIds( levelDirectories, IndexedIO::EntryType::Directory );
+
+		for ( auto levelDirectory : levelDirectories )
+		{
+			ConstIndexedIOPtr subdirectory = directory->subdirectory( levelDirectory, IndexedIO::MissingBehaviour::NullIfMissing );
+			if( subdirectory )
+			{
+			    findMatrixEntry( subdirectory );
+			}
+		}
+	};
+
+	findMatrixEntry( container );
+	if( matrix != Imath::identity44f )
+	{
+	    blindData()->writable()["LegacyTransform"] = new IECore::M44fData( matrix );
+	}
 }
 
 void CoordinateSystem::hash( MurmurHash &h ) const
