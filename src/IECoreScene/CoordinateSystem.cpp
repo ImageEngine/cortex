@@ -34,7 +34,11 @@
 
 #include "IECoreScene/CoordinateSystem.h"
 
+#include "IECore/SimpleTypedData.h"
 #include "IECore/MurmurHash.h"
+
+#include "Imath/ImathMatrix.h"
+#include "Imath/ImathMatrixAlgo.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -104,6 +108,30 @@ void CoordinateSystem::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
+
+	// CoordinateSystem used to have a transform property, but that has
+	// been removed in favour of transforms being accessed independently
+	// of objects in SceneInterface (and Gaffer). If a legacy transform
+	// exists, load it and stash it as blind data for use by legacy tools.
+
+	ConstIndexedIOPtr matrixTransformContainer = container;
+	for( auto name : { "transform", "data", "MatrixTransform", "data" } )
+	{
+		matrixTransformContainer = matrixTransformContainer->subdirectory( name, IndexedIO::MissingBehaviour::NullIfMissing );
+		if( !matrixTransformContainer )
+		{
+			break;
+		}
+	}
+
+	const IndexedIO::EntryID matrixEntry( "matrix" );
+	if( matrixTransformContainer && matrixTransformContainer->hasEntry( matrixEntry ) )
+	{
+		M44fDataPtr matrix = new M44fData;
+		float *f = matrix->writable().getValue();
+		matrixTransformContainer->read( matrixEntry, f, 16 );
+		blindData()->writable()["LegacyTransform"] = matrix;
+	}
 }
 
 void CoordinateSystem::hash( MurmurHash &h ) const
