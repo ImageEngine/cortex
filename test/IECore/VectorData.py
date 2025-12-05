@@ -1341,6 +1341,31 @@ class TestInternedStringVectorData( unittest.TestCase ) :
 
 		self.assertEqual( d2, d )
 
+class TestSourceDataEquality( unittest.TestCase ) :
+
+	def test( self ) :
+
+		a = IECore.FloatVectorData( [ 1, 2, 3 ] )
+		b = IECore.FloatVectorData( [ 4, 5, 6 ] )
+
+		self.assertTrue( a._dataSourceEqual( a ) )
+		self.assertFalse( a._dataSourceEqual( b ) )
+
+		ca = a.copy()
+		self.assertTrue( a._dataSourceEqual( ca ) )
+
+		ca[0] = 42
+		self.assertFalse( a._dataSourceEqual( ca ) )
+
+		ca2 = a.copy()
+		ca3 = ca2.copy()
+		self.assertTrue( a._dataSourceEqual( ca2 ) )
+		self.assertTrue( a._dataSourceEqual( ca3 ) )
+		
+		a[0] = 99
+		self.assertFalse( a._dataSourceEqual( ca2 ) )
+		self.assertTrue( ca2._dataSourceEqual( ca3 ) )
+
 if __name__ == "__main__":
     unittest.main()
 

@@ -541,6 +541,11 @@ class VectorTypedDataFunctions
 			);
 		}
 
+		static bool dataSourceEqual( ThisClass &x, ThisClass &y )
+		{
+			return &x.readable() == &y.readable();
+		}
+
 
 	protected:
 		/*
@@ -725,6 +730,7 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 			.def("resize", &ThisBinder::resize, "s.resize( size )\nAdjusts the size of s.")	\
 			.def("resize", &ThisBinder::resizeWithValue, "s.resize( size, value )\nAdjusts the size of s, inserting elements of value as necessary.")	\
 			.def("hasBase", &ThisClass::hasBase ).staticmethod( "hasBase" ) \
+			.def("_dataSourceEqual", &ThisBinder::dataSourceEqual, "Returns true if the given object points to the same source data as this object.")	\
 			.def("__str__", &str<ThisClass> )	\
 			.def("__repr__", &repr<ThisClass> )	\
 
