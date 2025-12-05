@@ -1013,12 +1013,22 @@ struct RampInputAdapterParameters
 
 template< typename TypedRamp >
 RampInputAdapterParameters createRampInputAdapter(
-	ShaderNetwork *network, const TypedData<TypedRamp> *rampData,
+	ShaderNetwork *network, const TypedRamp &ramp,
 	const IECore::CompoundDataMap &newParameters, const IECore::InternedString &rampParameterName,
 	const ShaderNetwork::Parameter &destination
 )
 {
 	using ValueVectorData = TypedData< std::vector< typename TypedRamp::YType > >;
+
+	if( ramp.interpolation == RampInterpolation::MonotoneCubic )
+	{
+		IECore::msg(
+			Msg::Error, "ShaderNetworkAlgo",
+			"Cannot connect adaptors to ramp when using monotoneCubic interpolation: " +
+			destination.shader.string() + "." + destination.name.string()
+		);
+		return { "", 0, 0, 0 };
+	}
 
 	IECore::InternedString splineValuesName = rampParameterName.string() + "Values";
 	auto findValues = newParameters.find( splineValuesName );
@@ -1032,12 +1042,13 @@ RampInputAdapterParameters createRampInputAdapter(
 
 	if( splineValues.size() > maxArrayInputAdapterSize )
 	{
-		throw IECore::Exception(
-			"Cannot handle input to " +
-			destination.shader.string() + "." + destination.name.string() +
+		IECore::msg(
+			Msg::Error, "ShaderNetworkAlgo",
+			"Cannot handle input to " + destination.shader.string() + "." + destination.name.string() +
 			" : expanded spline has " + std::to_string( splineValues.size() ) +
 			" control points, but max input adapter size is " + std::to_string( maxArrayInputAdapterSize )
 		);
+		return { "", 0, 0, 0 };
 	}
 
 	// Using this adapter depends on Gaffer being available, but I guess we don't really
@@ -1060,7 +1071,7 @@ RampInputAdapterParameters createRampInputAdapter(
 		{ destination.shader, splineValuesName }
 	) );
 
-	return { adapterHandle, rampData->readable().points.size(), splineValues.size(), rampData->readable().oslStartPointMultiplicity() - 1 };
+	return { adapterHandle, ramp.points.size(), splineValues.size(), ramp.oslStartPointMultiplicity() - 1 };
 }
 
 } // namespace
@@ -1129,20 +1140,32 @@ void ShaderNetworkAlgo::collapseRamps( ShaderNetwork *network, std::string targe
 			auto targetParameterIt = targetParameters.find( rampName );
 			if( targetParameterIt != targetParameters.end() )
 			{
-				if( const RampffData *findRampff = runTimeCast<const RampffData>( targetParameterIt->second.get() ) )
+				if( const RampffData *findRampffData = runTimeCast<const RampffData>( targetParameterIt->second.get() ) )
 				{
-					targetRampKnotOffset = findRampff->readable().oslStartPointMultiplicity() - 1;
-					targetRampSize = findRampff->readable().points.size();
+					const Rampff &ramp = findRampffData->readable();
+					if( ramp.interpolation != RampInterpolation::MonotoneCubic )
+					{
+						targetRampKnotOffset = ramp.oslStartPointMultiplicity() - 1;
+						targetRampSize = ramp.points.size();
+					}
 				}
-				else if( const RampfColor3fData *findRampfColor3f = runTimeCast<const RampfColor3fData>( targetParameterIt->second.get() ) )
+				else if( const RampfColor3fData *findRampfColor3fData = runTimeCast<const RampfColor3fData>( targetParameterIt->second.get() ) )
 				{
-					targetRampKnotOffset = findRampfColor3f->readable().oslStartPointMultiplicity() - 1;
-					targetRampSize = findRampfColor3f->readable().points.size();
+					const RampfColor3f &ramp = findRampfColor3fData->readable();
+					if( ramp.interpolation != RampInterpolation::MonotoneCubic )
+					{
+						targetRampKnotOffset = ramp.oslStartPointMultiplicity() - 1;
+						targetRampSize = ramp.points.size();
+					}
 				}
-				else if( const RampfColor4fData *findRampfColor4f = runTimeCast<const RampfColor4fData>( targetParameterIt->second.get() ) )
+				else if( const RampfColor4fData *findRampfColor4fData = runTimeCast<const RampfColor4fData>( targetParameterIt->second.get() ) )
 				{
-					targetRampKnotOffset = findRampfColor4f->readable().oslStartPointMultiplicity() - 1;
-					targetRampSize = findRampfColor4f->readable().points.size();
+					const RampfColor4f &ramp = findRampfColor4fData->readable();
+					if( ramp.interpolation != RampInterpolation::MonotoneCubic )
+					{
+						targetRampKnotOffset = ramp.oslStartPointMultiplicity() - 1;
+						targetRampSize = ramp.points.size();
+					}
 				}
 			}
 
@@ -1150,7 +1173,7 @@ void ShaderNetworkAlgo::collapseRamps( ShaderNetwork *network, std::string targe
 			{
 				IECore::msg(
 					Msg::Error, "ShaderNetworkAlgo",
-					"Invalid connection to spline parameter that doesn't exist \"" +
+					"Invalid connection to spline parameter that doesn't exist or can't accept connections \"" +
 					output.destination.shader.string() + "." + output.destination.name.string() + "\""
 				);
 				continue;
@@ -1256,7 +1279,7 @@ void ShaderNetworkAlgo::expandRamps( ShaderNetwork *network, std::string targetP
 			// if we remove the connection.
 			const ShaderNetwork::Connection connection = *it++;
 
-			const std::string &destName = connection.destination.name.string();
+			const std::string destName = connection.destination.name.string();
 			boost::smatch rampElementMatch;
 			if( !boost::regex_match( destName, rampElementMatch, g_rampElementRegex) )
 			{
@@ -1285,18 +1308,26 @@ void ShaderNetworkAlgo::expandRamps( ShaderNetwork *network, std::string targetP
 				if( colorRampData )
 				{
 					adapterIter->second = createRampInputAdapter(
-						network, colorRampData, *newParameters, parameterName, connection.destination
+						network, colorRampData->readable(), *newParameters, parameterName, connection.destination
 					);
 				}
 				else
 				{
 					adapterIter->second = createRampInputAdapter(
-						network, floatRampData, *newParameters, parameterName, connection.destination
+						network, floatRampData->readable(), *newParameters, parameterName, connection.destination
 					);
 				}
 			}
 
+			network->removeConnection( connection );
+
 			const RampInputAdapterParameters &adapterParms = adapterIter->second;
+
+			if( adapterParms.adapterHandle.string().size() == 0 )
+			{
+				// Can't form new connection, createRampInputAdapter should have already printed an error
+				continue;
+			}
 
 			int elementId;
 			std::string_view elementIdString( stringViewFromMatch( destName, rampElementMatch, 2 ) );
@@ -1321,8 +1352,6 @@ void ShaderNetworkAlgo::expandRamps( ShaderNetwork *network, std::string targetP
 			// have duplicated end points that aren't used, just because OSL thought it would be good idea to
 			// specify unused duplicated end points for "consistency", but for simplicity, we always connect
 			// the first or last control point to the duplicated end points.
-
-			network->removeConnection( connection );
 
 			int outIndexMin, outIndexMax;
 

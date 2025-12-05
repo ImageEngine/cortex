@@ -407,7 +407,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			IECoreScene.ShaderNetworkAlgo.collapseRamps( shaderNetworkBadRampConnection )
 		self.assertEqual( len( mh.messages ), 1 )
 		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
-		self.assertEqual( mh.messages[0].message, 'Invalid connection to spline parameter that doesn\'t exist "test.notARampValues"' )
+		self.assertEqual( mh.messages[0].message, 'Invalid connection to spline parameter that doesn\'t exist or can\'t accept connections "test.notARampValues"' )
 
 		shaderNetworkBadRampConnection = shaderNetworkExpandedGood.copy()
 		shaderNetworkBadRampConnection.addConnection( ( ( "adapt", "out4" ), ( "test", "testffbSplineValues" ) ) )
@@ -593,8 +593,12 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "testRamps"
 		)
 
-		with self.assertRaisesRegex( Exception, r".*Cannot handle input to testRamps.fC3fcatmullRom\[0\].y.b : expanded spline has 35 control points, but max input adapter size is 32.*" ):
+		with IECore.CapturingMessageHandler() as mh :
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[0].message, "Cannot handle input to testRamps.fC3fcatmullRom[0].y.b : expanded spline has 35 control points, but max input adapter size is 32" )
 
 		n = IECoreScene.ShaderNetwork(
 			shaders = {

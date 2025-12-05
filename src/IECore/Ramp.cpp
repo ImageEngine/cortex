@@ -458,19 +458,6 @@ void Ramp<X,Y>::toOSL( std::string &basis, std::vector<X> &positions, std::vecto
 template<typename X, typename Y>
 int Ramp<X,Y>::oslStartPointMultiplicity() const
 {
-	if( interpolation == RampInterpolation::MonotoneCubic )
-	{
-		// I guess the only way to handle this properly would be to do the end point duplication
-		// and conversion from monotone to bezier in our OSL shaders ( like the PRMan and 3delight
-		// shader libraries do ). Except that the PRMan approach has a potentially significant
-		// downside that if the inputs are varying, the array conversion code can't be constant
-		// folded, and you would end up doing the array processing per-shading point. 3delight
-		// appears to have implemented their own spline handling, which may not have this problem,
-		// but we don't want to do this ourselves. For now, not handling inputs to monotoneCubic
-		// ramps seems pretty reasonable.
-		throw IECore::Exception( "Cannot connect adaptors to ramp when using monotoneCubic interpolation" );
-	}
-
 	// The "multiplicity" is one greater than the number of duplicates: by default, without duplication,
 	// every control point has a multiplicity of 1, and after 1 duplicate, there is a multiplicity of 2.
 	return getOSLEndPointDuplication( interpolation ).first + 1;
