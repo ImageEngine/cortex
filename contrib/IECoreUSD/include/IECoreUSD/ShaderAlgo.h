@@ -58,16 +58,19 @@ IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderN
 
 /// Reads a ShaderNetwork from a material output, typically obtained from `UsdShadeMaterial::GetOutput()`.
 /// Returns `nullptr` if `canReadShaderNetwork() == false`, usually because the output has no connected source.
-IECOREUSD_API IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output );
+IECOREUSD_API IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output, pxr::UsdTimeCode timeCode = pxr::UsdTimeCode::Default() );
 /// Returns true if `readShaderNetwork()` will return `nullptr`, usually because the output has no
 /// connected source.
 bool canReadShaderNetwork( const pxr::UsdShadeOutput &output );
+IECOREUSD_API bool shaderNetworkMightBeTimeVarying( const pxr::UsdShadeOutput &output );
 
 #if PXR_VERSION >= 2111
 /// Writes a UsdLuxLight from a shader network.
 IECOREUSD_API void writeLight( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim prim );
 /// Reads a ShaderNetwork from a light.
-IECOREUSD_API IECoreScene::ShaderNetworkPtr readLight( const pxr::UsdLuxLightAPI &light );
+IECOREUSD_API IECoreScene::ShaderNetworkPtr readLight( const pxr::UsdLuxLightAPI &light, pxr::UsdTimeCode timeCode = pxr::UsdTimeCode::Default() );
+IECOREUSD_API bool lightMightBeTimeVarying( const pxr::UsdLuxLightAPI &light );
+
 #endif
 
 } // namespace ShaderAlgo
