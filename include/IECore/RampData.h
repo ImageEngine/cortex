@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2025, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,61 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_SPLINETOIMAGE_H
-#define IECOREIMAGE_SPLINETOIMAGE_H
+#ifndef IECORE_RAMPDATA_H
+#define IECORE_RAMPDATA_H
 
-#include "IECoreImage/Export.h"
-#include "IECoreImage/TypeIds.h"
-
-#include "IECore/ObjectParameter.h"
-#include "IECore/Op.h"
-#include "IECore/SimpleTypedParameter.h"
+#include "IECore/Ramp.h"
+#include "IECore/TypedData.h"
 
 namespace IECore
 {
 
-IE_CORE_FORWARDDECLARE( ObjectParameter )
+// Ramp data types.
+
+IECORE_DECLARE_TYPEDDATA( RampffData, Rampff, void, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( RampfColor3fData, RampfColor3f, void, SharedDataHolder )
+IECORE_DECLARE_TYPEDDATA( RampfColor4fData, RampfColor4f, void, SharedDataHolder )
 
 }
 
-namespace IECoreImage
-{
-
-/// This Op creates ImagePrimitives from SplineData.
-/// \todo Different projections would be nice.
-/// \todo If we wanted to keep this up to date, it should probably take RampData instead
-/// of SplineData, but ImagePrimitive is on the path to deprecation anyway.
-/// \ingroup imageProcessingGroup
-class IECOREIMAGE_API SplineToImage : public IECore::Op
-{
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SplineToImage, SplineToImageTypeId, IECore::Op );
-
-		SplineToImage();
-		~SplineToImage() override;
-
-		IECore::ObjectParameter *splineParameter();
-		const IECore::ObjectParameter *splineParameter() const;
-
-		IECore::V2iParameter *resolutionParameter();
-		const IECore::V2iParameter *resolutionParameter() const;
-
-	protected :
-
-		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
-
-	private :
-
-		struct CreateImage;
-
-		IECore::ObjectParameterPtr m_splineParameter;
-		IECore::V2iParameterPtr m_resolutionParameter;
-
-};
-
-IE_CORE_DECLAREPTR( SplineToImage );
-
-} // namespace IECoreImage
-
-#endif // IECOREIMAGE_SPLINETOIMAGE_H
+#endif // IECORE_RAMPDATA_H

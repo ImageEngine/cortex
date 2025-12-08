@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,61 +32,79 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_SPLINETOIMAGE_H
-#define IECOREIMAGE_SPLINETOIMAGE_H
+#include "boost/python.hpp"
 
-#include "IECoreImage/Export.h"
-#include "IECoreImage/TypeIds.h"
+#include "IECorePython/RampDataBinding.h"
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/Op.h"
-#include "IECore/SimpleTypedParameter.h"
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/SimpleTypedDataBinding.h"
 
-namespace IECore
+#include "IECore/RampData.h"
+
+#include "boost/python/make_constructor.hpp"
+
+#include <sstream>
+
+using namespace std;
+using std::string;
+using namespace boost;
+using namespace boost::python;
+using namespace Imath;
+using namespace IECore;
+
+namespace IECorePython
 {
 
-IE_CORE_FORWARDDECLARE( ObjectParameter )
+template<class T>
+std::string repr( T &x )
+{
+	std::stringstream s;
 
+	s << "IECore." << x.typeName() << "( ";
+
+	object item( x.readable() );
+
+	assert( item.attr( "__repr__" ) != object() );
+
+	s << call_method< std::string >( item.ptr(), "__repr__" );
+
+	s << " )";
+
+	return s.str();
 }
 
-namespace IECoreImage
+template<class T>
+static void setValue( T &that, const typename T::ValueType &v )
 {
+	that.writable() = v;
+}
 
-/// This Op creates ImagePrimitives from SplineData.
-/// \todo Different projections would be nice.
-/// \todo If we wanted to keep this up to date, it should probably take RampData instead
-/// of SplineData, but ImagePrimitive is on the path to deprecation anyway.
-/// \ingroup imageProcessingGroup
-class IECOREIMAGE_API SplineToImage : public IECore::Op
+template<class T>
+static typename T::ValueType &getValue( T &that )
 {
-	public :
+	return that.writable();
+}
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SplineToImage, SplineToImageTypeId, IECore::Op );
+template< typename T >
+void bindRampData()
+{
+	TypedDataFromType<T>();
 
-		SplineToImage();
-		~SplineToImage() override;
+	RunTimeTypedClass<T>()
+		.def( init<>() )
+		.def( init<const typename T::ValueType &>() )
+		.add_property( "value", make_function( &getValue<T>, return_internal_reference<>() ), &setValue<T> )
+		.def( "__repr__", &repr<T> )
+		.def( "hasBase", &T::hasBase ).staticmethod( "hasBase" )
+	;
+}
 
-		IECore::ObjectParameter *splineParameter();
-		const IECore::ObjectParameter *splineParameter() const;
+void bindRampData()
+{
+	bindRampData<RampffData>();
+	bindRampData<RampfColor3fData>();
+	bindRampData<RampfColor4fData>();
+}
 
-		IECore::V2iParameter *resolutionParameter();
-		const IECore::V2iParameter *resolutionParameter() const;
-
-	protected :
-
-		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
-
-	private :
-
-		struct CreateImage;
-
-		IECore::ObjectParameterPtr m_splineParameter;
-		IECore::V2iParameterPtr m_resolutionParameter;
-
-};
-
-IE_CORE_DECLAREPTR( SplineToImage );
-
-} // namespace IECoreImage
-
-#endif // IECOREIMAGE_SPLINETOIMAGE_H
+} // namespace IECorePython

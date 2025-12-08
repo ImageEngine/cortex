@@ -65,26 +65,6 @@ void registerJoinAdapterWrapper( const std::string &destinationShaderType, IECor
 	ShaderNetworkAlgo::registerJoinAdapter( destinationShaderType, destinationParameterType, adapter, inParameters, outParameter );
 }
 
-void convertOSLComponentConnectionsWrapper( ShaderNetwork *network, int oslVersion )
-{
-	ShaderNetworkAlgo::convertOSLComponentConnections( network, oslVersion );
-}
-
-CompoundDataPtr collapseSplineParametersWrapper( CompoundDataPtr parameters )
-{
-	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::collapseSplineParameters( parameters ) );
-}
-
-CompoundDataPtr expandSplineParametersWrapper( CompoundDataPtr parameters )
-{
-	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::expandSplineParameters( parameters ) );
-}
-
-std::string componentConnectionAdapterLabelWrapper()
-{
-	return ShaderNetworkAlgo::componentConnectionAdapterLabel().string();
-}
-
 } // namespace
 
 void IECoreSceneModule::bindShaderNetworkAlgo()
@@ -101,13 +81,9 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 	def( "deregisterSplitAdapter", &ShaderNetworkAlgo::deregisterSplitAdapter, ( arg( "destinationShaderType" ), arg( "component" ) ) );
 	def( "registerJoinAdapter", &registerJoinAdapterWrapper, ( arg( "destinationShaderType" ), arg( "destinationParameterType" ), arg( "adapter" ), arg( "inParameters" ), arg( "outParameter" ) ) );
 	def( "deregisterJoinAdapter", &ShaderNetworkAlgo::deregisterJoinAdapter, ( arg( "destinationShaderType" ), arg( "destinationParameterType" ) ) );
-	def( "componentConnectionAdapterLabel", &componentConnectionAdapterLabelWrapper );
 	def( "convertToOSLConventions", &ShaderNetworkAlgo::convertToOSLConventions );
-	def( "convertOSLComponentConnections", &convertOSLComponentConnectionsWrapper, ( arg( "network" ), arg( "oslVersion" ) = 10900 ) );
 	def( "convertObjectVector", &ShaderNetworkAlgo::convertObjectVector );
-	def( "collapseSplines", &ShaderNetworkAlgo::collapseSplines, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
-	def( "expandSplines", &ShaderNetworkAlgo::expandSplines, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
-	def( "collapseSplineParameters", &collapseSplineParametersWrapper );
-	def( "expandSplineParameters", &expandSplineParametersWrapper );
+	def( "collapseRamps", &ShaderNetworkAlgo::collapseRamps, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
+	def( "expandRamps", &ShaderNetworkAlgo::expandRamps, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
 
 }

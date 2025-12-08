@@ -1,7 +1,17 @@
 10.x.x.x (relative to 10.6.x.x)
 ========
 
+Features
+--------
 
+- IECore : Added Rampff, RampfColor3f, RampfColor4f and corresponding Ramp*Data classes, for representing user facing shader ramp parameters.
+
+Breaking Changes
+----------------
+
+- IECoreScene::ShaderNetworkAlgo :
+  - Removed deprecated functions componentConnectionAdapterLabel, convertOSLComponentConnections, collapseSplineParameters, expandSplineParameters.
+  - Switch support for Spline parameters to support for Ramp parameters.
 
 10.6.x.x (relative to 10.6.1.0)
 ========

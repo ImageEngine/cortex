@@ -39,6 +39,7 @@
 #include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SplineData.h"
+#include "IECore/RampData.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/VectorTypedData.h"
 
@@ -132,6 +133,12 @@ typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&fu
 			return functor( static_cast<SplinefColor3fData *>( data ), std::forward<Args>( args )... );
 		case SplinefColor4fDataTypeId :
 			return functor( static_cast<SplinefColor4fData *>( data ), std::forward<Args>( args )... );
+		case RampffDataTypeId :
+			return functor( static_cast<RampffData *>( data ), std::forward<Args>( args )... );
+		case RampfColor3fDataTypeId :
+			return functor( static_cast<RampfColor3fData *>( data ), std::forward<Args>( args )... );
+		case RampfColor4fDataTypeId :
+			return functor( static_cast<RampfColor4fData *>( data ), std::forward<Args>( args )... );
 		case DateTimeDataTypeId :
 			return functor( static_cast<DateTimeData *>( data ), std::forward<Args>( args )... );
 		case BoolVectorDataTypeId :
@@ -286,6 +293,12 @@ typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *
 			return functor( static_cast<const SplinefColor3fData *>( data ), std::forward<Args>( args )... );
 		case SplinefColor4fDataTypeId :
 			return functor( static_cast<const SplinefColor4fData *>( data ), std::forward<Args>( args )... );
+		case RampffDataTypeId :
+			return functor( static_cast<const RampffData *>( data ), std::forward<Args>( args )... );
+		case RampfColor3fDataTypeId :
+			return functor( static_cast<const RampfColor3fData *>( data ), std::forward<Args>( args )... );
+		case RampfColor4fDataTypeId :
+			return functor( static_cast<const RampfColor4fData *>( data ), std::forward<Args>( args )... );
 		case DateTimeDataTypeId :
 			return functor( static_cast<const DateTimeData *>( data ), std::forward<Args>( args )... );
 		case BoolVectorDataTypeId :

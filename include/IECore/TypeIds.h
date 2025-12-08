@@ -203,9 +203,9 @@ enum TypeId
 	YUVImageWriterTypeId = 265,
 	DateTimeDataTypeId = 269,
 	DateTimeParameterTypeId = 270,
-	TimeDurationDataTypeId = 272, // Obsolete
-	TimeDurationParameterTypeId = 273, // Obsolete
-	TimePeriodDataTypeId = 274, // Obsolete
+	RampffDataTypeId = 272,
+	RampfColor3fDataTypeId = 273,
+	RampfColor4fDataTypeId = 274,
 	TimePeriodParameterTypeId = 275, // Obsolete
 	FrameListTypeId = 279,
 	EmptyFrameListTypeId = 280,

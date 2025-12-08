@@ -41,6 +41,12 @@
 namespace IECore
 {
 
+// NOTE : Using Spline*Data has basically been deprecated in favour of Ramp*Data.
+// Setting up shader data this way will no longer work with renderer backends.
+//
+// We do not plan to update this because Parameter itself is on the way to
+// deprecation ( in favour of using Gaffer to build UIs ).
+
 typedef TypedParameter<Splineff> SplineffParameter;
 typedef TypedParameter<Splinedd> SplineddParameter;
 typedef TypedParameter<SplinefColor3f> SplinefColor3fParameter;
