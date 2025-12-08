@@ -1,0 +1,80 @@
+#usda 1.0
+(
+	timeCodesPerSecond = 1.0
+)
+
+def "model"
+{
+
+	def Sphere "staticSphere" (
+		prepend apiSchemas = ["MaterialBindingAPI"]
+	)
+	{
+		rel material:binding = </model/materials/staticMaterial>
+	}
+
+	def Sphere "animatedSphere" (
+		prepend apiSchemas = ["MaterialBindingAPI"]
+	)
+	{
+		rel material:binding = </model/materials/animatedMaterial>
+	}
+
+	def Scope "materials"
+	{
+
+		def Material "staticMaterial"
+		{
+			token outputs:surface.connect = </model/materials/staticMaterial/previewSurface.outputs:surface>
+
+			def Shader "previewSurface"
+			{
+				uniform token info:id = "UsdPreviewSurface"
+				color3f inputs:diffuseColor.connect = </model/materials/staticMaterial/texture.outputs:rgb>
+				token outputs:surface
+			}
+
+			def Shader "texture"
+			{
+				uniform token info:id = "UsdUVTexture"
+				asset inputs:file = @myTexture.tx@
+				vector3f outputs:rgb
+			}
+
+		}
+
+		def Material "animatedMaterial"
+		{
+			token outputs:surface.connect = </model/materials/animatedMaterial/previewSurface.outputs:surface>
+
+			def Shader "previewSurface"
+			{
+				uniform token info:id = "UsdPreviewSurface"
+				color3f inputs:diffuseColor.connect = </model/materials/animatedMaterial/texture.outputs:rgb>
+				token outputs:surface
+			}
+
+			def Shader "texture"
+			{
+				uniform token info:id = "UsdUVTexture"
+				asset inputs:file.timeSamples = {
+					0 : @myTexture.0000.tx@,
+					1 : @myTexture.0001.tx@,
+					2 : @myTexture.0002.tx@,
+					3 : @myTexture.0003.tx@,
+					4 : @myTexture.0004.tx@,
+					5 : @myTexture.0005.tx@,
+					6 : @myTexture.0006.tx@,
+					7 : @myTexture.0007.tx@,
+					8 : @myTexture.0008.tx@,
+					9 : @myTexture.0009.tx@,
+				}
+				vector3f outputs:rgb
+			}
+
+		}
+
+	}
+}
+
+

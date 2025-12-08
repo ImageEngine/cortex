@@ -1,0 +1,20 @@
+#usda 1.0
+(
+	timeCodesPerSecond = 1
+)
+
+def SphereLight "staticLight"
+{
+	float inputs:exposure = 1.0
+}
+
+def SphereLight "animatedLight"
+{
+	float inputs:exposure.timeSamples = {
+		0 : 0,
+		1 : 0.5,
+		2 : 1.0,
+		3 : 1.5,
+		4 : 2.0,
+	}
+}

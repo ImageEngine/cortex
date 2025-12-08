@@ -647,6 +647,11 @@ o.Add(
 	BoolVariable( "INSTALL_CREATE_SYMLINKS", "Whether to create symlinks post install", True )
 )
 
+o.Add(
+	"INCLUDE_PATHS",
+	"Additional locations on which to search for include files for the dependencies.",
+	[],
+)
 
 # Test options
 
@@ -802,6 +807,9 @@ dependencyIncludes = [
 	systemIncludeArgument, os.path.join( "$ILMBASE_INCLUDE_PATH","Imath" ),
 	systemIncludeArgument, "$FREETYPE_INCLUDE_PATH",
 ]
+
+for path in env.get( "INCLUDE_PATHS" ) :
+	dependencyIncludes.extend( [ systemIncludeArgument, path ] )
 
 env.Prepend(
 	LIBPATH = [

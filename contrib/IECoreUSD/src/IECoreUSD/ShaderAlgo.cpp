@@ -167,6 +167,45 @@ void readNonStandardLightParameters( const pxr::UsdPrim &prim, IECore::CompoundD
 #endif
 }
 
+bool nonStandardLightParametersMightBeTimeVarying( const pxr::UsdPrim &prim )
+{
+#if PXR_VERSION >= 2111
+	if( auto sphereLight = pxr::UsdLuxSphereLight( prim ) )
+	{
+		if( sphereLight.GetTreatAsPointAttr().ValueMightBeTimeVarying() )
+		{
+			return true;
+		}
+	}
+	else if( auto cylinderLight = pxr::UsdLuxCylinderLight( prim ) )
+	{
+		if( cylinderLight.GetTreatAsLineAttr().ValueMightBeTimeVarying() )
+		{
+			return true;
+		}
+	}
+
+	if( auto light = pxr::UsdLuxLightAPI( prim ) )
+	{
+		pxr::UsdGeomPrimvarsAPI primVarsAPI( prim );
+		for( const auto &primVar : primVarsAPI.GetPrimvarsWithAuthoredValues() )
+		{
+			pxr::TfToken name = primVar.GetPrimvarName();
+			if( !boost::starts_with( name.GetString(), "arnold:" ) )
+			{
+				continue;
+			}
+
+			if( primVar.ValueMightBeTimeVarying() )
+			{
+				return true;
+			}
+		}
+	}
+#endif
+	return false;
+}
+
 const std::regex g_arrayIndexFromUSDRegex( ":i([0-9]+)$" );
 const std::string g_arrayIndexFromUSDFormat( "[$1]" );
 IECore::InternedString fromUSDParameterName( const pxr::TfToken &usdName )
@@ -186,9 +225,9 @@ pxr::TfToken toUSDParameterName( IECore::InternedString cortexName )
 	);
 }
 
-IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, IECoreScene::ShaderNetwork &shaderNetwork );
+IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, pxr::UsdTimeCode timeCode, IECoreScene::ShaderNetwork &shaderNetwork );
 
-IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeConnectableAPI &usdShader, IECoreScene::ShaderNetwork &shaderNetwork )
+IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeConnectableAPI &usdShader, pxr::UsdTimeCode timeCode, IECoreScene::ShaderNetwork &shaderNetwork )
 {
 	IECore::InternedString handle( usdShader.GetPath().MakeRelativePath( anchorPath ).GetString() );
 
@@ -231,7 +270,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 			if( usdSourceType == pxr::UsdShadeAttributeType::Output )
 			{
 				const IECoreScene::ShaderNetwork::Parameter sourceHandle = readShaderNetworkWalk(
-					anchorPath, usdSource.GetOutput( usdSourceName ), shaderNetwork
+					anchorPath, usdSource.GetOutput( usdSourceName ), timeCode, shaderNetwork
 				);
 				connections.push_back( {
 					sourceHandle, { handle, fromUSDParameterName( i.GetBaseName() ) }
@@ -246,7 +285,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 			}
 		}
 
-		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( valueAttribute ) ) )
+		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( valueAttribute ), timeCode ) )
 		{
 			parameters[fromUSDParameterName( i.GetBaseName() )] = d;
 		}
@@ -286,9 +325,9 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 	return handle;
 }
 
-IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, IECoreScene::ShaderNetwork &shaderNetwork )
+IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, pxr::UsdTimeCode timeCode, IECoreScene::ShaderNetwork &shaderNetwork )
 {
-	IECore::InternedString shaderHandle = readShaderNetworkWalk( anchorPath, pxr::UsdShadeConnectableAPI( output.GetPrim() ), shaderNetwork );
+	IECore::InternedString shaderHandle = readShaderNetworkWalk( anchorPath, pxr::UsdShadeConnectableAPI( output.GetPrim() ), timeCode, shaderNetwork );
 	if( output.GetBaseName() != "DEFAULT_OUTPUT" )
 	{
 		return IECoreScene::ShaderNetwork::Parameter( shaderHandle, output.GetBaseName().GetString() );
@@ -297,6 +336,45 @@ IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath 
 	{
 		return IECoreScene::ShaderNetwork::Parameter( shaderHandle );
 	}
+}
+
+bool shaderNetworkMightBeTimeVaryingWalk( const pxr::UsdShadeConnectableAPI &usdShader, std::unordered_set<pxr::UsdPrim, pxr::TfHash> &visited )
+{
+	if( !visited.insert( usdShader.GetPrim() ).second )
+	{
+		return false;
+	}
+
+	std::vector<IECoreScene::ShaderNetwork::Connection> connections;
+	for( pxr::UsdShadeInput &i : usdShader.GetInputs() )
+	{
+		pxr::UsdShadeConnectableAPI usdSource;
+		pxr::TfToken usdSourceName;
+		pxr::UsdShadeAttributeType usdSourceType;
+
+		pxr::UsdAttribute valueAttribute = i;
+		if( i.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) )
+		{
+			if( usdSourceType == pxr::UsdShadeAttributeType::Output )
+			{
+				if( shaderNetworkMightBeTimeVaryingWalk( usdSource, visited ) )
+				{
+					return true;
+				}
+			}
+			else
+			{
+				valueAttribute = usdSource.GetInput( usdSourceName );
+			}
+		}
+
+		if( valueAttribute.ValueMightBeTimeVarying() )
+		{
+			return true;
+		}
+	}
+
+	return nonStandardLightParametersMightBeTimeVarying( usdShader.GetPrim() );
 }
 
 IECoreScene::ConstShaderNetworkPtr adaptShaderNetworkForWriting( const IECoreScene::ShaderNetwork *shaderNetwork )
@@ -485,7 +563,7 @@ bool IECoreUSD::ShaderAlgo::canReadShaderNetwork( const pxr::UsdShadeOutput &out
 	return true;
 }
 
-IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const pxr::UsdShadeOutput &output  )
+IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const pxr::UsdShadeOutput &output, pxr::UsdTimeCode timeCode )
 {
 	pxr::UsdShadeConnectableAPI usdSource;
 	pxr::TfToken usdSourceName;
@@ -499,7 +577,7 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 	}
 
 	IECoreScene::ShaderNetworkPtr result = new IECoreScene::ShaderNetwork();
-	IECoreScene::ShaderNetwork::Parameter outputHandle = readShaderNetworkWalk( usdSource.GetPrim().GetParent().GetPath(), usdSource.GetOutput( usdSourceName ), *result );
+	IECoreScene::ShaderNetwork::Parameter outputHandle = readShaderNetworkWalk( usdSource.GetPrim().GetParent().GetPath(), usdSource.GetOutput( usdSourceName ), timeCode, *result );
 
 	// If the output shader has type "ai:shader" then set its type to
 	// "ai:surface" or "ai:light" as appropriate. This is just a heuristic,
@@ -532,6 +610,23 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 	IECoreScene::ShaderNetworkAlgo::collapseRamps( result.get() );
 
 	return result;
+}
+
+bool IECoreUSD::ShaderAlgo::shaderNetworkMightBeTimeVarying( const pxr::UsdShadeOutput &output )
+{
+	pxr::UsdShadeConnectableAPI usdSource;
+	pxr::TfToken usdSourceName;
+	pxr::UsdShadeAttributeType usdSourceType;
+	if(
+		!output.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) ||
+		usdSourceType != pxr::UsdShadeAttributeType::Output
+	)
+	{
+		return false;
+	}
+
+	std::unordered_set<pxr::UsdPrim, pxr::TfHash> visited;
+	return shaderNetworkMightBeTimeVaryingWalk( usdSource, visited );
 }
 
 #if PXR_VERSION >= 2111
@@ -592,13 +687,19 @@ void IECoreUSD::ShaderAlgo::writeLight( const IECoreScene::ShaderNetwork *shader
 	writeShaderConnections( shaderNetwork, usdShaders );
 }
 
-IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readLight( const pxr::UsdLuxLightAPI &light )
+IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readLight( const pxr::UsdLuxLightAPI &light, pxr::UsdTimeCode timeCode )
 {
 	IECoreScene::ShaderNetworkPtr result = new IECoreScene::ShaderNetwork();
-	IECoreScene::ShaderNetwork::Parameter lightHandle = readShaderNetworkWalk( light.GetPath().GetParentPath(), pxr::UsdShadeConnectableAPI( light ), *result );
+	IECoreScene::ShaderNetwork::Parameter lightHandle = readShaderNetworkWalk( light.GetPath().GetParentPath(), pxr::UsdShadeConnectableAPI( light ), timeCode, *result );
 	result->setOutput( lightHandle );
 	IECoreScene::ShaderNetworkAlgo::removeComponentConnectionAdapters( result.get() );
 	return result;
+}
+
+bool IECoreUSD::ShaderAlgo::lightMightBeTimeVarying( const pxr::UsdLuxLightAPI &light )
+{
+	std::unordered_set<pxr::UsdPrim, pxr::TfHash> visited;
+	return shaderNetworkMightBeTimeVaryingWalk( pxr::UsdShadeConnectableAPI( light ), visited );
 }
 
 #endif

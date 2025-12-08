@@ -52,9 +52,6 @@
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
 
-#include "boost/format.hpp"
-#include "boost/timer.hpp"
-
 using namespace IECoreGL;
 
 //////////////////////////////////////////////////////////////////////////

@@ -13,7 +13,26 @@ Breaking Changes
   - Removed deprecated functions componentConnectionAdapterLabel, convertOSLComponentConnections, collapseSplineParameters, expandSplineParameters.
   - Switch support for Spline parameters to support for Ramp parameters.
 
-10.6.x.x (relative to 10.6.1.0)
+10.6.x.x (relative to 10.6.2.1)
+========
+
+
+
+10.6.2.1 (relative to 10.6.2.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed reading of animated parameters on materials and lights.
+- Boost : Fixed compatibility with Boost 1.85.
+
+Build
+-----
+
+- SConstruct : Added `INCLUDE_PATHS` option.
+
+10.6.2.0 (relative to 10.6.1.0)
 ========
 
 Improvements
