@@ -4676,5 +4676,62 @@ class USDSceneTest( unittest.TestCase ) :
 			timeInSeconds = frame / framesPerSecond
 			self.assertEqual( child.readAttribute( "render:test", timeInSeconds ), IECore.BoolData( frame % 2 ) )
 
+	def testAnimatedMaterial( self ) :
+
+		scene = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedMaterial.usda", IECore.IndexedIO.OpenMode.Read )
+
+		staticSphere = scene.child( "model" ).child( "staticSphere" )
+		hashes = []
+		shaderNetworks = []
+		for frame in range( 0, 10 ) :
+			hashes.append( staticSphere.hash( scene.HashType.AttributesHash, frame ) )
+			shaderNetworks.append( staticSphere.readAttribute( "surface", frame, _copy = False ) )
+
+		for frame in range( 1, 10 ) :
+			self.assertEqual( hashes[frame], hashes[0] )
+			self.assertEqual( shaderNetworks[frame], shaderNetworks[0] )
+			self.assertTrue( shaderNetworks[frame].isSame( shaderNetworks[0] ) )
+			self.assertEqual( shaderNetworks[frame].getShader( "texture" ).parameters["file"].value, "myTexture.tx" )
+
+		animatedSphere = scene.child( "model" ).child( "animatedSphere" )
+		hashes = []
+		shaderNetworks = []
+		for frame in range( 0, 10 ) :
+			hashes.append( animatedSphere.hash( scene.HashType.AttributesHash, frame ) )
+			shaderNetworks.append( animatedSphere.readAttribute( "surface", frame, _copy = False ) )
+
+		for frame in range( 1, 10 ) :
+			self.assertNotEqual( hashes[frame], hashes[0] )
+			self.assertNotEqual( shaderNetworks[frame], shaderNetworks[0] )
+			self.assertEqual( shaderNetworks[frame].getShader( "texture" ).parameters["file"].value, f"myTexture.{frame:04}.tx" )
+
+	def testAnimatedLight( self ) :
+
+		scene = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedLight.usda", IECore.IndexedIO.OpenMode.Read )
+
+		staticLight = scene.child( "staticLight" )
+		hashes = []
+		shaderNetworks = []
+		for frame in range( 0, 5 ) :
+			hashes.append( staticLight.hash( scene.HashType.AttributesHash, frame ) )
+			shaderNetworks.append( staticLight.readAttribute( "light", frame ) )
+
+		for frame in range( 1, 5 ) :
+			self.assertEqual( hashes[frame], hashes[0] )
+			self.assertEqual( shaderNetworks[frame], shaderNetworks[0] )
+			self.assertEqual( shaderNetworks[frame].outputShader().parameters["exposure"].value, 1.0 )
+
+		animatedSphere = scene.child( "animatedLight" )
+		hashes = []
+		shaderNetworks = []
+		for frame in range( 0, 5 ) :
+			hashes.append( animatedSphere.hash( scene.HashType.AttributesHash, frame ) )
+			shaderNetworks.append( animatedSphere.readAttribute( "light", frame ) )
+
+		for frame in range( 1, 5 ) :
+			self.assertNotEqual( hashes[frame], hashes[0] )
+			self.assertNotEqual( shaderNetworks[frame], shaderNetworks[0] )
+			self.assertEqual( shaderNetworks[frame].outputShader().parameters["exposure"].value, frame / 2.0 )
+
 if __name__ == "__main__":
 	unittest.main()

@@ -531,29 +531,25 @@ std::tuple<pxr::TfToken, pxr::TfToken> materialOutputAndPurpose( const std::stri
 	return { AttributeAlgo::nameToUSD( attributeName ).name, pxr::UsdShadeTokens->allPurpose };
 }
 
-/// SdfPath is the appropriate cache key for _storage_, but we need a
-/// `UsdShadeOutput` for computation. This struct provides the implicit
-/// conversion that LRUCache needs to make that possible.
-struct ShaderNetworkCacheGetterKey : public pxr::UsdShadeOutput
+using ShaderNetworkCacheKey = std::pair<pxr::SdfPath, pxr::UsdTimeCode>;
+
+struct ShaderNetworkCacheGetterKey : public ShaderNetworkCacheKey
 {
-	ShaderNetworkCacheGetterKey( const pxr::UsdShadeOutput &output )
-		:	pxr::UsdShadeOutput( output )
+	ShaderNetworkCacheGetterKey( const pxr::UsdShadeOutput &output, pxr::UsdTimeCode time = pxr::UsdTimeCode::Default() )
+		:	ShaderNetworkCacheKey( output.GetAttr().GetPath(), time ), output( output )
 	{
 	}
 
-	operator pxr::SdfPath () const
-	{
-		return GetAttr().GetPath();
-	}
+	const pxr::UsdShadeOutput output;
 };
 
-class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShaderNetworkPtr, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>
+class ShaderNetworkCache : public LRUCache<ShaderNetworkCacheKey, IECoreScene::ConstShaderNetworkPtr, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>
 {
 
 	public :
 
 		ShaderNetworkCache( size_t maxBytes )
-			:	LRUCache<pxr::SdfPath, IECoreScene::ConstShaderNetworkPtr, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>( getter, maxBytes )
+			:	LRUCache<ShaderNetworkCacheKey, IECoreScene::ConstShaderNetworkPtr, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>( getter, maxBytes )
 		{
 		}
 
@@ -561,8 +557,29 @@ class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShade
 
 		static IECoreScene::ConstShaderNetworkPtr getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
 		{
-			IECoreScene::ConstShaderNetworkPtr result = ShaderAlgo::readShaderNetwork( key );
+			IECoreScene::ConstShaderNetworkPtr result = ShaderAlgo::readShaderNetwork( key.output, key.second );
 			cost = result ? result ->Object::memoryUsage() : 0;
+			return result;
+		}
+
+};
+
+class ShaderNetworkMightBeTimeVaryingCache : public LRUCache<ShaderNetworkCacheKey, bool, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>
+{
+
+	public :
+
+		ShaderNetworkMightBeTimeVaryingCache( size_t maxBytes )
+			:	LRUCache<ShaderNetworkCacheKey, bool, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>( getter, maxBytes )
+		{
+		}
+
+	private :
+
+		static bool getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
+		{
+			bool result = ShaderAlgo::shaderNetworkMightBeTimeVarying( key.output );
+			cost = 1;
 			return result;
 		}
 
@@ -669,6 +686,7 @@ class USDScene::IO : public RefCounted
 				m_rootPrim( m_stage->GetPseudoRoot() ),
 				m_timeCodesPerSecond( m_stage->GetTimeCodesPerSecond() ),
 				m_shaderNetworkCache( 10 * 1024 * 1024 ), // 10Mb
+				m_shaderNetworkMightBeTimeVaryingCache( 1000 ),
 				m_uniqueId( g_usdFileCounter.fetch_add( 1, std::memory_order_relaxed ) )
 		{
 			// Although the USD API implies otherwise, we need a different
@@ -802,9 +820,23 @@ class USDScene::IO : public RefCounted
 			return material;
 		}
 
-		IECoreScene::ConstShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output )
+		bool shaderNetworkMightBeTimeVarying( const pxr::UsdShadeOutput &output )
 		{
-			return m_shaderNetworkCache.get( output );
+			return m_shaderNetworkMightBeTimeVaryingCache.get( output );
+		}
+
+		IECoreScene::ConstShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output, pxr::UsdTimeCode timeCode )
+		{
+			if( shaderNetworkMightBeTimeVarying( output ) )
+			{
+				return m_shaderNetworkCache.get( ShaderNetworkCacheGetterKey( output, timeCode ) );
+			}
+			else
+			{
+				// Omit time, so we don't produce duplicate cache entries
+				// for non-time-varying shaders.
+				return m_shaderNetworkCache.get( output );
+			}
 		}
 
 		inline int uniqueId()
@@ -863,6 +895,7 @@ class USDScene::IO : public RefCounted
 		pxr::UsdShadeMaterialBindingAPI::CollectionQueryCache m_usdCollectionQueryCache;
 
 		ShaderNetworkCache m_shaderNetworkCache;
+		ShaderNetworkMightBeTimeVaryingCache m_shaderNetworkMightBeTimeVaryingCache;
 
 		// Used to identify a file uniquely ( including between different openings of the same filename,
 		// since closing and reopening a file may cause USD to shuffle the contents ).
@@ -1234,7 +1267,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 #if PXR_VERSION >= 2111
 	else if( name == g_lightAttributeName )
 	{
-		return ShaderAlgo::readLight( pxr::UsdLuxLightAPI( m_location->prim ) );
+		return ShaderAlgo::readLight( pxr::UsdLuxLightAPI( m_location->prim ), m_root->timeCode( time ) );
 	}
 #endif
 	else if( name == g_kindAttributeName )
@@ -1267,7 +1300,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
-				return m_root->readShaderNetwork( o );
+				return m_root->readShaderNetwork( o, m_root->timeCode( time ) );
 			}
 		}
 		return nullptr;
@@ -1719,8 +1752,7 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 #if PXR_VERSION >= 2111
 	if( m_location->prim.HasAPI<pxr::UsdLuxLightAPI>() )
 	{
-		/// \todo Consider time-varying lights - see comment below
-		/// for materials.
+		mightBeTimeVarying = mightBeTimeVarying || ShaderAlgo::lightMightBeTimeVarying( pxr::UsdLuxLightAPI( m_location->prim ) );
 		haveAttributes = true;
 	}
 #endif
@@ -1751,9 +1783,11 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 	{
 		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
-			// \todo - This does not consider the possibility that the material could contain time-varying
-			// attributes
 			append( mat.GetPrim().GetPath(), h );
+			for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
+			{
+				mightBeTimeVarying = mightBeTimeVarying || m_root->shaderNetworkMightBeTimeVarying( o );
+			}
 			haveMaterials = true;
 		}
 	}

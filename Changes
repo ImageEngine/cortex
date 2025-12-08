@@ -4,6 +4,7 @@
 Fixes
 -----
 
+- USDScene : Fixed reading of animated parameters on materials and lights.
 - Boost : Fixed compatibility with Boost 1.85.
 
 Build
