@@ -105,7 +105,7 @@ constexpr std::pair<const char *, Py_ssize_t> typeInfo()
 	else if constexpr( IECore::TypeTraits::IsBox<T>::value )
 	{
 		using ElementType = decltype( T::min );
-		return { PythonType<typename ElementType::BaseType>::value(), sizeof( ElementType::BaseType ) };
+		return { PythonType<typename ElementType::BaseType>::value(), sizeof( typename ElementType::BaseType ) };
 	}
 	else
 	{
