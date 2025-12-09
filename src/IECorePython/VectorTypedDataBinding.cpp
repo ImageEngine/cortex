@@ -100,7 +100,7 @@ constexpr std::pair<const char *, Py_ssize_t> typeInfo()
 		IECore::TypeTraits::IsVec<T>::value
 	)
 	{
-		return { PythonType<typename T::BaseType>::value(), sizeof( T::BaseType ) };
+		return { PythonType<typename T::BaseType>::value(), sizeof( typename T::BaseType ) };
 	}
 	else if constexpr( IECore::TypeTraits::IsBox<T>::value )
 	{
