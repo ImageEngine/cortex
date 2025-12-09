@@ -36,21 +36,15 @@
 #define IECOREPYTHON_VECTORTYPEDDATABINDING_INL
 
 #include "boost/python.hpp"
-#include "Python.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/VectorTypedDataBinding.h"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/TypeTraits.h"
-
 #include "boost/numeric/conversion/cast.hpp"
-
 #include "boost/python/suite/indexing/container_utils.hpp"
 
 #include <sstream>
-#include <typeindex>
 
 namespace IECorePython
 {

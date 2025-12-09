@@ -49,6 +49,7 @@
 
 #include "IECore/DataAlgo.h"
 #include "IECore/Export.h"
+#include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
