@@ -97,7 +97,7 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 				typedef void (Result::*InitFunction)( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator );
 
-				template<bool linear, bool periodic>
+				template<bool Linear, bool Periodic>
 				void init( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator );
 
 				template<typename T>
