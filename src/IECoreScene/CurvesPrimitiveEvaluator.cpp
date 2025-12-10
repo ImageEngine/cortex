@@ -241,7 +241,7 @@ half CurvesPrimitiveEvaluator::Result::halfPrimVar( const PrimitiveVariable &pv 
 	return primVar<half>( pv, m_coefficients.data() );
 }
 
-template<bool linear, bool periodic>
+template<bool Linear, bool Periodic>
 void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator )
 {
 	m_curveIndex = curveIndex;
@@ -251,9 +251,9 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 	const CubicBasisf &basis = evaluator->m_curvesPrimitive->basis();
 
 	unsigned numSegments = 0;
-	if( linear )
+	if( Linear )
 	{
-		if( periodic )
+		if( Periodic )
 		{
 			numSegments = numVertices;
 		}
@@ -264,7 +264,7 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 	}
 	else
 	{
-		if( periodic )
+		if( Periodic )
 		{
 			numSegments = numVertices / basis.step;
 		}
@@ -281,14 +281,14 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 	unsigned o = evaluator->m_vertexDataOffsets[m_curveIndex];
 	unsigned i = segment * basis.step;
 
-	if( linear )
+	if( Linear )
 	{
 		m_coefficients[0] = 1.0f - m_segmentV;
 		m_coefficients[1] = m_segmentV;
 		m_derivativeCoefficients[0] = -1.0f;
 		m_derivativeCoefficients[1] = 1.0f;
 		m_vertexDataIndices[0] = m_varyingDataIndices[0] = o + i;
-		if( periodic )
+		if( Periodic )
 		{
 			m_vertexDataIndices[1] = m_varyingDataIndices[1] = o + ( ( i + 1 ) % numVertices );
 		}
@@ -302,7 +302,7 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 		basis.coefficients( m_segmentV, m_coefficients.data() );
 		basis.derivativeCoefficients( m_segmentV, m_derivativeCoefficients.data() );
 
-		if( periodic )
+		if( Periodic )
 		{
 			m_vertexDataIndices[0] = o + i;
 			m_vertexDataIndices[1] = o + ( ( i + 1 ) % numVertices );
