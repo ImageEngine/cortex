@@ -49,47 +49,16 @@ namespace IECorePython
 
 struct half_to_float
 {
-	static PyObject* convert( const half &x )
-	{
-		return PyFloat_FromDouble( x );
-	}
-};
-
-struct HalfFromPython
-{
-	HalfFromPython()
-	{
-		converter::registry::push_back(
-			&convertible,
-			&construct,
-			type_id<half> ()
-		);
-	}
-
-	static void *convertible( PyObject *obj_ptr )
-	{
-		if ( !PyFloat_Check( obj_ptr ) )
-		{
-			return nullptr;
-		}
-		return obj_ptr;
-	}
-
-	static void construct( PyObject *obj_ptr, converter::rvalue_from_python_stage1_data *data )
-	{
-		assert( obj_ptr );
-
-		void* storage = (( converter::rvalue_from_python_storage<half>* ) data )->storage.bytes;
-		new( storage ) half( extract<float>( obj_ptr ) );
-		data->convertible = storage;
-	}
+    static PyObject* convert( const half &x )
+    {
+        return PyFloat_FromDouble( x );
+    }
 };
 
 void bindHalf()
 {
-	to_python_converter<half, half_to_float>();
-	HalfFromPython();
-	// implicitly_convertible<float, half>();
+    to_python_converter<half, half_to_float>();
+	implicitly_convertible<float, half>();
 }
 
 }
