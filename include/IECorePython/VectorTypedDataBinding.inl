@@ -46,6 +46,24 @@
 
 #include <sstream>
 
+#if !defined( NDEBUG ) && defined( __GNUC__ )
+
+namespace boost{
+
+template <>
+struct call_traits<half>
+{
+public:
+   typedef half value_type;
+   typedef half& reference;
+   typedef const half& const_reference;
+   typedef const half& param_type;
+};
+
+}
+
+#endif
+
 namespace IECorePython
 {
 
