@@ -42,7 +42,6 @@
 #include "IECore/ReversedFrameList.h"
 
 #include "boost/algorithm/string.hpp"
-#include "boost/filesystem/convenience.hpp"
 #include "boost/filesystem/directory.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
