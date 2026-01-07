@@ -139,7 +139,7 @@ class SceneAlgoTest( unittest.TestCase ) :
 		src = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Read )
 		dst = IECoreScene.SceneCache( self.__testFile2, IECore.IndexedIO.OpenMode.Write )
 
-		with IECore.tbb_task_scheduler_init(max_threads = 15) as taskScheduler:
+		with IECore.tbb_global_control( IECore.tbb_global_control.parameter.max_allowed_parallelism, 15 ) :
 			IECoreScene.SceneAlgo.copy( src, dst, 1, 1, 1.0, IECoreScene.SceneAlgo.ProcessFlags.All )
 
 		del dst, src
@@ -157,7 +157,7 @@ class SceneAlgoTest( unittest.TestCase ) :
 
 		for t in range(1, 16):
 			# set thread
-			with IECore.tbb_task_scheduler_init(max_threads = t) as taskScheduler:
+			with IECore.tbb_global_control( IECore.tbb_global_control.parameter.max_allowed_parallelism, t ) :
 				stats = IECoreScene.SceneAlgo.parallelReadAll( src, 1, 1, 1.0, IECoreScene.SceneAlgo.ProcessFlags.All )
 
 				self.assertEqual(stats["locations"], 4096 + 2)
