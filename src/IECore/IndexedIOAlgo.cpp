@@ -34,7 +34,8 @@
 
 #include "IECore/IndexedIOAlgo.h"
 
-#include "tbb/task.h"
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_for.h"
 
 #include <atomic>
 
@@ -227,59 +228,52 @@ void recursiveCopy( const IndexedIO *src, IndexedIO *dst )
 	}
 }
 
-//! Task for traversing all files in parallel. New tasks are spawned for each directory
+//! Traverse all files in parallel.
 template<template<typename, typename> class FileHandler, typename FileCallback>
-class FileTask : public tbb::task
+void parallelFileWalk( const IndexedIO *src, FileCallback &fileCallback, tbb::task_group_context &taskGroupContext )
 {
+	IndexedIO::EntryIDList fileNames;
+	src->entryIds( fileNames, IndexedIO::EntryType::File );
 
-	public :
+	for( const auto &fileName : fileNames )
+	{
+		handleFile<FileHandler, FileCallback>( src, nullptr, fileName, fileCallback );
+	}
 
-		FileTask( const IndexedIO *src, FileCallback &fileCallback )
-		: m_src( src ), m_fileCallback( fileCallback )
-		{
-		}
+	IndexedIO::EntryIDList directoryNames;
+	src->entryIds( directoryNames, IndexedIO::EntryType::Directory );
+	if( directoryNames.empty() )
+	{
+		return;
+	}
 
-		~FileTask() override
-		{
-		}
+	std::vector<ConstIndexedIOPtr> childDirectories;
+	childDirectories.reserve(directoryNames.size());
+	for( const auto &directoryName : directoryNames )
+	{
+		childDirectories.push_back( src->subdirectory( directoryName, IndexedIO::ThrowIfMissing ) );
+	}
 
-		task *execute() override
-		{
-			IndexedIO::EntryIDList fileNames;
-			m_src->entryIds( fileNames, IndexedIO::EntryType::File );
-
-			for( const auto &fileName : fileNames )
+	if( childDirectories.size() == 1 )
+	{
+		// Serial execution
+		parallelFileWalk<FileHandler, FileCallback>( childDirectories[0].get(), fileCallback, taskGroupContext );
+	}
+	else
+	{
+		tbb::parallel_for(
+			tbb::blocked_range<size_t>( 0, childDirectories.size() ),
+			[&]( const tbb::blocked_range<size_t> &r )
 			{
-				handleFile<FileHandler, FileCallback>( m_src, nullptr, fileName, m_fileCallback );
-			}
-
-			IndexedIO::EntryIDList directoryNames;
-			m_src->entryIds( directoryNames, IndexedIO::EntryType::Directory );
-
-			set_ref_count( 1 + directoryNames.size() );
-
-			std::vector<ConstIndexedIOPtr> childDirectories;
-			childDirectories.reserve(directoryNames.size());
-			for( const auto &directoryName : directoryNames )
-			{
-				childDirectories.push_back( m_src->subdirectory( directoryName, IndexedIO::ThrowIfMissing ) );
-			}
-
-			for( const auto &childDirectory : childDirectories )
-			{
-				FileTask *t = new( allocate_child() ) FileTask( childDirectory.get() , m_fileCallback );
-				spawn( *t );
-			}
-
-			wait_for_all();
-
-			return nullptr;
-		}
-
-	private :
-		const IndexedIO *m_src;
-		FileCallback &m_fileCallback;
-};
+				for( size_t i = r.begin(); i != r.end(); ++i )
+				{
+					parallelFileWalk<FileHandler, FileCallback>( childDirectories[i].get(), fileCallback, taskGroupContext );
+				}
+			},
+			taskGroupContext
+		);
+	}
+}
 
 } // namespace
 
@@ -303,8 +297,7 @@ FileStats<size_t> parallelReadAll( const IndexedIO *src )
 	};
 
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	FileTask<Reader, decltype( fileCallback )> *task = new( tbb::task::allocate_root( taskGroupContext ) ) FileTask<Reader, decltype( fileCallback )>( src, fileCallback );
-	tbb::task::spawn_root_and_wait( *task );
+	parallelFileWalk<Reader, decltype( fileCallback )>( src, fileCallback, taskGroupContext );
 	return fileStats;
 }
 
