@@ -1,7 +1,15 @@
 10.7.x.x (relative to 10.7.0.0a1)
 ========
 
+Improvements
+------------
 
+- TBB : Improved compatibility with oneTBB 2021.
+
+Breaking Changes
+----------------
+
+- IECore : Removed `tbb_task_scheduler_init()` Python Context Manager. Use `tbb_global_control()` instead.
 
 10.7.0.0a1 (relative to 10.6.2.1)
 ==========

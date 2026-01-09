@@ -39,7 +39,8 @@
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/SceneInterface.h"
 
-#include "tbb/task.h"
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_for.h"
 
 #include <atomic>
 
@@ -50,64 +51,52 @@ namespace
 {
 
 template<typename LocationFn>
-class Task : public tbb::task
+void parallelLocationWalk( const SceneInterface *src, SceneInterface *dst, LocationFn &locationFn, double time, unsigned int flags, tbb::task_group_context &taskGroupContext )
 {
+	locationFn( src, dst, time, flags );
 
-	public :
+	SceneInterface::NameList childNames;
+	src->childNames( childNames );
+	if( childNames.empty() )
+	{
+		return;
+	}
 
-		Task(
-			const SceneInterface *src, SceneInterface *dst, LocationFn &locationFn, double time, unsigned int flags
-		) : m_src( src ), m_dst( dst ), m_locationFn( locationFn ), m_time( time ), m_flags( flags )
-		{
-		}
+	std::vector<SceneInterfacePtr> childSceneInterfaces;
+	childSceneInterfaces.reserve( childNames.size() );
 
-		~Task() override
-		{
-		}
+	std::vector<ConstSceneInterfacePtr> srcChildSceneInterfaces;
+	srcChildSceneInterfaces.reserve( childNames.size() );
 
-		task *execute() override
-		{
-			m_locationFn( m_src, m_dst, m_time, m_flags );
+	for( const auto &childName : childNames )
+	{
+		SceneInterfacePtr dstChild = dst ? dst->child( childName, SceneInterface::CreateIfMissing ) : nullptr;
+		childSceneInterfaces.push_back( dstChild );
 
-			SceneInterface::NameList childNames;
-			m_src->childNames( childNames );
+		ConstSceneInterfacePtr srcChild = src->child( childName );
+		srcChildSceneInterfaces.push_back( srcChild );
+	}
 
-			set_ref_count( 1 + childNames.size() );
-
-			std::vector<SceneInterfacePtr> childSceneInterfaces;
-			childSceneInterfaces.reserve( childNames.size() );
-
-			std::vector<ConstSceneInterfacePtr> srcChildSceneInterfaces;
-			srcChildSceneInterfaces.reserve( childNames.size() );
-
-			for( const auto &childName : childNames )
+	if( childNames.size() == 1 )
+	{
+		// Serial execution
+		parallelLocationWalk<LocationFn>( srcChildSceneInterfaces[0].get(), childSceneInterfaces[0].get(), locationFn, time, flags, taskGroupContext );
+	}
+	else
+	{
+		tbb::parallel_for(
+			tbb::blocked_range<size_t>( 0, childNames.size() ),
+			[&]( const tbb::blocked_range<size_t> &r )
 			{
-				SceneInterfacePtr dstChild = m_dst ? m_dst->child( childName, SceneInterface::CreateIfMissing ) : nullptr;
-				if( dstChild )
+				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
-					childSceneInterfaces.push_back( dstChild );
+					parallelLocationWalk<LocationFn>( srcChildSceneInterfaces[i].get(), childSceneInterfaces[i].get(), locationFn, time, flags, taskGroupContext );
 				}
-
-				ConstSceneInterfacePtr srcChild = m_src->child( childName );
-				srcChildSceneInterfaces.push_back( srcChild );
-
-				Task *t = new( allocate_child() ) Task( srcChild.get(), dstChild.get(), m_locationFn, m_time, m_flags );
-				spawn( *t );
-			}
-			wait_for_all();
-
-			return nullptr;
-		}
-
-	private :
-
-		const SceneInterface *m_src;
-		SceneInterface *m_dst;
-		LocationFn &m_locationFn;
-		double m_time;
-		unsigned int m_flags;
-
-};
+			},
+			taskGroupContext
+		);
+	}
+}
 
 template<typename T>
 struct CopyInfo
@@ -261,8 +250,7 @@ SceneStats parallelReadAll( const SceneInterface *src, int startFrame, int endFr
 	{
 		double time = f / frameRate;
 		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-		Task<decltype( locationFn )> *task = new( tbb::task::allocate_root( taskGroupContext ) ) Task<decltype( locationFn )>( src, nullptr, locationFn, time, flags );
-		tbb::task::spawn_root_and_wait( *task );
+		parallelLocationWalk<decltype( locationFn )>( src, nullptr, locationFn, time, flags, taskGroupContext );
 	}
 
 	SceneStats stats;

@@ -121,11 +121,11 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 		src2 = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read )
 
 		# set thread count to 1
-		with IECore.tbb_task_scheduler_init( 1 ) as taskScheduler:
+		with IECore.tbb_global_control( IECore.tbb_global_control.parameter.max_allowed_parallelism, 1 ) :
 			copyStats1thread = IECore.IndexedIOAlgo.parallelReadAll( src2 )
 
 		# set thread count to 8
-		with IECore.tbb_task_scheduler_init( 8 ) as taskScheduler:
+		with IECore.tbb_global_control( IECore.tbb_global_control.parameter.max_allowed_parallelism, 8 ) :
 			copyStats8threads = IECore.IndexedIOAlgo.parallelReadAll( src2 )
 
 		self.assertEqual( copyStats1thread, copyStats8threads )

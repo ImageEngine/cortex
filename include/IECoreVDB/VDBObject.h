@@ -53,8 +53,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "Imath/ImathBox.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "tbb/recursive_mutex.h"
-
 #include <unordered_map>
 
 namespace IECoreVDB
