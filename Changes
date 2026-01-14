@@ -1,7 +1,13 @@
-10.6.x.x (relative to 10.6.2.1)
+10.6.x.x (relative to 10.6.2.2)
 ========
 
+10.6.2.2
+========
 
+Fixes
+-----
+
+- CoordinateSystem : Added backwards compatibility for legacy transform.
 
 10.6.2.1 (relative to 10.6.2.0)
 ========
