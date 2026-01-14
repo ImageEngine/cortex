@@ -87,6 +87,14 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		self.assertNotEqual( c2, c1 )
 		c1.setName( "test" )
 
+	def testLegacyTransform( self ) :
+
+		c = IECore.ObjectReader( os.path.join( "test", "IECoreScene", "data", "coordinateSystemLegacyTransform.cob" ) ).read()
+		self.assertTrue( c.blindData().has_key( "LegacyTransform" ) )
+
+		expected = imath.M44f().translate( imath.V3f( 0, 2, 0 ) )
+		self.assertEqual( c.blindData()["LegacyTransform"].value, expected )
+
 	def tearDown( self ) :
 
 		if os.path.exists( os.path.join( "test", "IECore", "data", "coordSys.cob" ) ) :
