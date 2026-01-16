@@ -1423,3 +1423,92 @@ void ShaderNetworkAlgo::convertDeprecatedSplines( ShaderNetwork *network )
 
 	}
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+// Render Adaptors
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+struct RenderAdaptor
+{
+	std::string name;
+	IECoreScene::ShaderNetworkAlgo::RenderAdaptorHashFunction hash;
+	IECoreScene::ShaderNetworkAlgo::RenderAdaptorFunction apply;
+};
+
+using RenderAdaptors = std::vector<RenderAdaptor>;
+RenderAdaptors &renderAdaptors()
+{
+	static RenderAdaptors g_renderAdaptors;
+	return g_renderAdaptors;
+}
+
+bool g_stringSubstitutionsRegistration = [] () {
+
+	IECoreScene::ShaderNetworkAlgo::registerRenderAdaptor(
+		"stringSubstitution",
+		// Hash
+		[] ( const IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash ) {
+			shaderNetwork->hashSubstitutions( attributes, hash );
+		},
+		// Apply
+		[] ( IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName, const IECore::CompoundObject *attributes ) {
+			shaderNetwork->applySubstitutions( attributes );
+		}
+	);
+
+	return true;
+} ();
+
+} // namespace
+
+void ShaderNetworkAlgo::registerRenderAdaptor( const std::string &name, RenderAdaptorHashFunction hashFunction, RenderAdaptorFunction adaptorFunction )
+{
+	// Replace existing adaptor if it exists.
+	RenderAdaptors &a = renderAdaptors();
+	for( auto &x : a )
+	{
+		if( x.name == name )
+		{
+			x.hash = hashFunction;
+			x.apply = adaptorFunction;
+			return;
+		}
+	}
+	// Otherwise add new adaptor.
+	a.push_back( { name, hashFunction, adaptorFunction } );
+}
+
+void ShaderNetworkAlgo::deregisterRenderAdaptor( const std::string &name )
+{
+	RenderAdaptors &a = renderAdaptors();
+	a.erase(
+		std::remove_if(
+			a.begin(),
+			a.end(),
+			[&] ( const RenderAdaptor &x ) {
+				return x.name == name;
+			}
+		),
+		a.end()
+	);
+}
+
+void ShaderNetworkAlgo::hashRenderAdaptors( const IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash )
+{
+	for( const auto &x : renderAdaptors() )
+	{
+		x.hash( shaderNetwork, attributeName, attributes, hash );
+	}
+}
+
+void ShaderNetworkAlgo::applyRenderAdaptors( IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName, const IECore::CompoundObject *attributes )
+{
+	for( const auto &x : renderAdaptors() )
+	{
+		x.apply( shaderNetwork, attributeName, attributes );
+	}
+}

@@ -1,7 +1,18 @@
 10.7.x.x (relative to 10.7.0.0a2)
 ========
 
+Improvements
+------------
 
+- ShaderNetworkAlgo : Added render adaptor API, allowing just-in-time modifications to
+  ShaderNetworks during translation for rendering [^1].
+
+Fixes
+-----
+
+- CoordinateSystem : Added backwards compatibility for legacy transform [^1].
+
+[^1]: To be omitted from the notes for the final 10.7.0.0 release.
 
 10.7.0.0a2 (relative to 10.7.0.0a1)
 ==========
@@ -31,10 +42,27 @@ Breaking Changes
   - Removed deprecated functions componentConnectionAdapterLabel, convertOSLComponentConnections, collapseSplineParameters, expandSplineParameters.
   - Switch support for Spline parameters to support for Ramp parameters.
 
-10.6.x.x (relative to 10.6.2.1)
+10.6.x.x (relative to 10.6.3.0)
 ========
 
 
+
+10.6.3.0 (relative to 10.6.2.2)
+========
+
+Improvements
+------------
+
+- ShaderNetworkAlgo : Added render adaptor API, allowing just-in-time modifications to
+  ShaderNetworks during translation for rendering.
+
+10.6.2.2
+========
+
+Fixes
+-----
+
+- CoordinateSystem : Added backwards compatibility for legacy transform.
 
 10.6.2.1 (relative to 10.6.2.0)
 ========
