@@ -1,6 +1,12 @@
 10.6.x.x (relative to 10.6.2.2)
 ========
 
+Improvements
+------------
+
+- ShaderNetworkAlgo : Added render adaptor API, allowing just-in-time modifications to
+  ShaderNetworks during translation for rendering.
+
 10.6.2.2
 ========
 
