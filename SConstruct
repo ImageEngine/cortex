@@ -41,15 +41,12 @@
 #
 ##########################################################################
 
-import SCons
-import shutil
 import glob
 import sys
 import os
 import re
 import subprocess
 import platform
-import distutils
 
 EnsureSConsVersion( 3, 0, 2 )  # Substfile is a default builder as of 3.0.2
 SConsignFile()

@@ -154,6 +154,38 @@ IECORESCENE_API IECore::ConstCompoundDataPtr collapseSplineParameters( const IEC
 /// \deprecated: Use expandSplines on the whole network, which can handle input connections
 IECORESCENE_API IECore::ConstCompoundDataPtr expandSplineParameters( const IECore::ConstCompoundDataPtr& parametersData );
 
+/// Render Adaptors
+/// ===============
+///
+/// Render adaptors are functions called to make "just in time" modifications to
+/// shader networks prior to rendering. They have access to a fully resolved
+/// attribute state, which can be used to drive the modifications. There is currently
+/// a single built-in adaptor, which uses `ShaderNetworkAlgo::applySubstitutions()`
+/// to allow strings such as texture paths to be substituted in from attributes that
+/// define them.
+///
+/// Adaptors are performance critical, so are deliberately not available via
+/// the Python API. They must be implemented in C++ only.
+
+/// A function that adapts the shader network for rendering, given the full
+/// inherited `attributes` for an object. Must be threadsafe.
+using RenderAdaptorFunction = void (*)( ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
+/// A function that appends to `hash` to uniquely identify the work that will be
+/// performed by an AdaptorFunction. Particular attention must be paid to
+/// the performance of any such function, as it will be called frequently. If an
+/// adaptor will be a no-op, then nothing should be appended to the hash.
+/// Must be threadsafe.
+using RenderAdaptorHashFunction = void (*)( const ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash );
+
+/// Registers an adaptor.
+IECORESCENE_API void registerRenderAdaptor( const std::string &name, RenderAdaptorHashFunction hashFunction, RenderAdaptorFunction adaptorFunction );
+/// Removes a previously registered adaptor with the specified name.
+IECORESCENE_API void deregisterRenderAdaptor( const std::string &name );
+
+/// Hashes all the currently registered adaptors for `shaderNetwork`.
+IECORESCENE_API void hashRenderAdaptors( const ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash );
+/// Applies all the currently registered adaptors to `shaderNetwork`.
+IECORESCENE_API void applyRenderAdaptors( ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
 
 } // namespace ShaderNetworkAlgo
 
