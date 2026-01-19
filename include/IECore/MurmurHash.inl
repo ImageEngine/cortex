@@ -347,7 +347,8 @@ inline void murmurHashAppend( MurmurHash &h, const Imath::Matrix44<T> &data )
 template<typename T>
 inline void murmurHashAppend( MurmurHash &h, const Imath::Box<T> &data )
 {
-	h.append( &data.min, 2 );
+	h.append( data.min );
+	h.append( data.max );
 }
 
 template<typename T>

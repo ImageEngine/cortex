@@ -69,6 +69,35 @@ struct MurmurHashTest
 		// many elements in it - currently, I'm seeing a max occupancy of 8.
 		BOOST_CHECK( maxBucketOccupancy < 16 );
 	}
+
+	void testAllElementsOfImathBoxes()
+	{
+		Imath::Box3i ref( Imath::V3i( 123, 456, 789 ), Imath::V3i( 10123, 10456, 10789 ) );
+		std::unordered_set< IECore::MurmurHash > set;
+
+		for( int i = 0; i < 6; i++ )
+		{
+			for( int j = 0; j < 32; j++ )
+			{
+				int bitToFlip = 1 << j;
+				Imath::Box3i q = ref;
+				if( i >= 3 )
+				{
+					q.max[i - 3] = bitToFlip ^ q.max[i - 3];
+				}
+				else
+				{
+					q.min[i] = bitToFlip ^ q.min[i];
+				}
+
+				IECore::MurmurHash h;
+				h.append( q );
+				set.insert( h );
+			}
+		}
+
+		BOOST_CHECK( set.size() == ( 6 * 32 ) );
+	}
 };
 
 
@@ -80,6 +109,7 @@ struct MurmurHashTestSuite : public boost::unit_test::test_suite
 		boost::shared_ptr<MurmurHashTest> instance( new MurmurHashTest() );
 
 		add( BOOST_CLASS_TEST_CASE( &MurmurHashTest::testUnorderedSet, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &MurmurHashTest::testAllElementsOfImathBoxes, instance ) );
 	}
 };
 
