@@ -567,6 +567,18 @@ o.Add(
 	"",
 )
 
+o.Add(
+	"NANOBIND_INCLUDE_PATH",
+	"The path to the nanobind include directory.",
+	"",
+)
+
+o.Add(
+	"NANOBIND_LIB_PATH",
+	"The path to the nanobind lib directory.",
+	"",
+)
+
 # Build options
 
 o.Add(
@@ -2071,11 +2083,22 @@ vdbEnvPrepends = {
 	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"],
 	"CXXFLAGS" : [
 		systemIncludeArgument, "$VDB_INCLUDE_PATH",
-		systemIncludeArgument, "$PYBIND11_INCLUDE_PATH",
 	]
 }
 
-vdbEnv.Prepend( **vdbEnvPrepends)
+if env[ "PYBIND11_INCLUDE_PATH" ] != "" :
+	vdbEnvPrepends["CXXFLAGS"].append( [ systemIncludeArgument, "$PYBIND11_INCLUDE_PATH" ] )
+
+if env[ "NANOBIND_INCLUDE_PATH" ] != "" :
+	vdbEnvPrepends["CXXFLAGS"].append( [ systemIncludeArgument, "$NANOBIND_INCLUDE_PATH" ] )
+
+vdbEnv.Prepend( **vdbEnvPrepends )
+
+if env[ "NANOBIND_LIB_PATH" ] != "" :
+	vdbEnvPrepends["LIBPATH"].append( "$NANOBIND_LIB_PATH" )
+
+if env[ "NANOBIND_INCLUDE_PATH" ] != "" :
+	vdbEnvPrepends["LIBS"].append( "nanobind-static" )
 
 vdbPythonModuleEnv = corePythonModuleEnv.Clone( **vdbEnvSets )
 vdbPythonModuleEnv.Prepend( **vdbEnvPrepends )
