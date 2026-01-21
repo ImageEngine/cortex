@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2026, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORE_HALF_H
+#define IECORE_HALF_H
 
-#include "IECorePython/HalfBinding.h"
+#include "IECore/HalfTypeTraits.h"
 
-#include "IECore/Export.h"
-#include "IECore/Half.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "Imath/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-using namespace boost::python;
-
-namespace IECorePython
-{
-
-struct half_to_float
-{
-    static PyObject* convert( const half &x )
-    {
-        return PyFloat_FromDouble( x );
-    }
-};
-
-void bindHalf()
-{
-    to_python_converter<half, half_to_float>();
-	implicitly_convertible<float, half>();
-}
-
-}
+#endif  // IECORE_HALF_H

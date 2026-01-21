@@ -35,8 +35,9 @@
 #ifndef IE_CORE_IMATHHASH_H
 #define IE_CORE_IMATHHASH_H
 
+#include "IECore/Half.h"
+
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "Imath/half.h"
 #include "Imath/ImathBox.h"
 #include "Imath/ImathColor.h"
 #include "Imath/ImathMatrix.h"
