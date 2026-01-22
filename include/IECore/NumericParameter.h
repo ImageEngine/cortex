@@ -35,10 +35,9 @@
 #ifndef IE_CORE_NUMERICPARAMETER_H
 #define IE_CORE_NUMERICPARAMETER_H
 
+#include "IECore/Half.h"
 #include "IECore/Parameter.h"
 #include "IECore/TypedData.h"
-
-#include "Imath/half.h"
 
 namespace IECore
 {

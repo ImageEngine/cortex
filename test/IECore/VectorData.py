@@ -37,6 +37,7 @@
 import math
 import os
 import unittest
+import struct
 import imath
 
 import IECore
@@ -1340,6 +1341,252 @@ class TestInternedStringVectorData( unittest.TestCase ) :
 		d2 = IECore.Object.load( m, "o" )
 
 		self.assertEqual( d2, d )
+
+class TestSourceDataEquality( unittest.TestCase ) :
+
+	def test( self ) :
+
+		a = IECore.FloatVectorData( [ 1, 2, 3 ] )
+		b = IECore.FloatVectorData( [ 4, 5, 6 ] )
+
+		self.assertTrue( a._dataSourceEqual( a ) )
+		self.assertFalse( a._dataSourceEqual( b ) )
+
+		ca = a.copy()
+		self.assertTrue( a._dataSourceEqual( ca ) )
+
+		ca[0] = 42
+		self.assertFalse( a._dataSourceEqual( ca ) )
+
+		ca2 = a.copy()
+		ca3 = ca2.copy()
+		self.assertTrue( a._dataSourceEqual( ca2 ) )
+		self.assertTrue( a._dataSourceEqual( ca3 ) )
+		
+		a[0] = 99
+		self.assertFalse( a._dataSourceEqual( ca2 ) )
+		self.assertTrue( ca2._dataSourceEqual( ca3 ) )
+
+class TestBufferProtocol( unittest.TestCase ) :
+
+	def __assertMemoryBufferProperties( self, pythonBuffer, cortexBuffer, elementFormat, ndim, shape, strides ) :
+
+		self.assertIs( pythonBuffer.obj, cortexBuffer )
+		self.assertTrue( pythonBuffer.readonly )
+		self.assertEqual( pythonBuffer.format, elementFormat )
+		self.assertEqual( pythonBuffer.ndim, ndim )
+		self.assertEqual( pythonBuffer.shape, shape )
+		self.assertEqual( pythonBuffer.itemsize, struct.calcsize( elementFormat ) )
+		self.assertEqual( pythonBuffer.strides, strides )
+		self.assertTrue( pythonBuffer.c_contiguous )
+		self.assertTrue( pythonBuffer.contiguous )
+
+	def testSimpleTypes( self ) :
+
+		for elementType, vectorType, elementFormat in [
+			# It would be nice to test for `IECore.HalfVectorData: "e"`
+			# but that is not supported in our Python.
+			( float, IECore.FloatVectorData, "f" ),
+			( float, IECore.DoubleVectorData, "d" ),
+			( int, IECore.IntVectorData, "i" ),
+			( int, IECore.UIntVectorData, "I" ),
+			( chr, IECore.CharVectorData, "b" ),
+			( int, IECore.UCharVectorData, "B" ),
+			( int, IECore.ShortVectorData, "h" ),
+			( int, IECore.UShortVectorData, "H" ),
+			( int, IECore.Int64VectorData, "q" ),
+			( int, IECore.UInt64VectorData, "Q" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType( [ elementType( 1 ), elementType( 2 ), elementType( 3 ) ] )
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				# `memoryview` returns `int` for C `char` / Python `chr` types. Cast to `chr`
+				self.assertEqual( list( m ) if elementType != chr else [ chr(i) for i in m ], list( v ) )
+				self.__assertMemoryBufferProperties( m, b, elementFormat, 1, ( len( v ), ), ( m.itemsize, ) )
+
+	def testMatrixTypes( self ) :
+
+		for elementType, vectorType, matrixSize, elementFormat in [
+			( imath.M44f, IECore.M44fVectorData, 4, "f" ),
+			( imath.M44d, IECore.M44dVectorData, 4, "d" ),
+			( imath.M33f, IECore.M33fVectorData, 3, "f" ),
+			( imath.M33d, IECore.M33dVectorData, 3, "d" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType( *list( range( 0, matrixSize * matrixSize ) ) ),
+						elementType( *list( range( 1, 1 + matrixSize * matrixSize ) ) ),
+						elementType( *list( range( 2, 2 + matrixSize * matrixSize ) ) ),
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					for j in range( 0, matrixSize ) :
+						for k in range( 0, matrixSize ) :
+							self.assertEqual( m.tolist()[i][j][k], v[i][j][k] )
+
+				self.__assertMemoryBufferProperties(
+					m,
+					b,
+					elementFormat,
+					3,
+					( len( v ), matrixSize, matrixSize ),
+					( matrixSize * matrixSize * m.itemsize, matrixSize * m.itemsize, m.itemsize )
+				)
+
+	def testQuat( self ) :
+
+		for elementType, vectorType, dimensions, elementFormat in [
+			( imath.Quatf, IECore.QuatfVectorData, 4, "f" ),
+			( imath.Quatd, IECore.QuatdVectorData, 4, "d" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType( *list( range( 0, dimensions ) ) ),
+						elementType( *list( range( 1, 1 + dimensions ) ) ),
+						elementType( *list( range( 2, 2 + dimensions ) ) ),
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					mList = m.tolist()
+					self.assertEqual( elementType( mList[i][0], mList[i][1], mList[i][2], mList[i][3] ), v[i] )
+
+				self.__assertMemoryBufferProperties( m, b, elementFormat, 2, ( len( v ), dimensions ), ( dimensions * m.itemsize, m.itemsize ) )
+
+	def testTwoDimensionalBuffers( self ) :
+
+		for elementType, vectorType, dimensions, elementFormat in [
+			( imath.Color3f, IECore.Color3fVectorData, 3, "f" ),
+			( imath.Color4f, IECore.Color4fVectorData, 4, "f" ),
+			( imath.V2f, IECore.V2fVectorData, 2, "f" ),
+			( imath.V2d, IECore.V2dVectorData, 2, "d" ),
+			( imath.V2i, IECore.V2iVectorData, 2, "i" ),
+			( imath.V3f, IECore.V3fVectorData, 3, "f" ),
+			( imath.V3d, IECore.V3dVectorData, 3, "d" ),
+			( imath.V3i, IECore.V3iVectorData, 3, "i" ),
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType( *list( range( 0, dimensions ) ) ),
+						elementType( *list( range( 1, 1 + dimensions ) ) ),
+						elementType( *list( range( 2, 2 + dimensions ) ) ),
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					for j in range( 0, dimensions ) :
+						self.assertEqual( m.tolist()[i][j], v[i][j] )
+
+				self.__assertMemoryBufferProperties( m, b, elementFormat, 2, ( len( v ), dimensions ), ( dimensions * m.itemsize, m.itemsize ) )
+
+	def testBoxTypes( self ) :
+
+		for elementType, vectorType, elementFormat, componentType in [
+			( imath.Box2i, IECore.Box2iVectorData, "i", imath.V2i ),
+			( imath.Box2f, IECore.Box2fVectorData, "f", imath.V2f ),
+			( imath.Box2d, IECore.Box2dVectorData, "d", imath.V2d ),
+			( imath.Box3i, IECore.Box3iVectorData, "i", imath.V3i ),
+			( imath.Box3f, IECore.Box3fVectorData, "f", imath.V3f ),
+			( imath.Box3d, IECore.Box3dVectorData, "d", imath.V3d )
+		] :
+			with self.subTest( elementType = elementType, vectorType = vectorType ) :
+				v = vectorType(
+					[
+						elementType(
+							componentType( *list( range( i, i + componentType.dimensions() ) ) ),
+							componentType( *list( range( i + 10, i + 10 + componentType.dimensions() ) ) )
+						) for i in range( 0, 3 )
+					]
+				)
+
+				b = v.asReadOnlyBuffer()
+				m = memoryview( b )
+
+				self.assertIsNotNone( m )
+				for i in range( 0, len( v ) ) :
+					for j in range( 0, 2 ) :
+						for k in range( 0, componentType.dimensions() ) :
+							if j == 0 :
+								self.assertEqual( m.tolist()[i][j][k], v[i].min()[k] )
+							else :
+								self.assertEqual( m.tolist()[i][j][k], v[i].max()[k] )
+
+				self.__assertMemoryBufferProperties(
+					m,
+					b,
+					elementFormat,
+					3,
+					( len( v ), 2, componentType.dimensions() ),
+					( 2 * componentType.dimensions() * m.itemsize, componentType.dimensions() * m.itemsize, m.itemsize )
+				)
+
+	def testReadOnlyBuffer( self ) :
+
+		v = IECore.FloatVectorData( [ 1, 2, 3 ] )
+		buffer = v.asReadOnlyBuffer()
+		bufferData = buffer.asData()
+		self.assertFalse( buffer.isWritable() )
+		self.assertTrue( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		m = memoryview( buffer )
+
+		self.assertTrue( m.readonly )
+		self.assertTrue( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# We can modify `v` without affecting our buffer.
+		v.append( 99 )
+		self.assertEqual( list( m ), [ 1, 2, 3 ] )
+		self.assertFalse( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# We can modify `bufferData`. It's a copy so writing to it results
+		# in a deep copy of the source data.
+		bufferData[0] = 42
+		self.assertEqual( list( bufferData ), [ 42, 2, 3 ] )
+		self.assertFalse( bufferData._dataSourceEqual( buffer.asData() ) )
+		self.assertEqual( list( buffer.asData() ), [ 1, 2, 3 ] )
+
+	def testReadWriteBuffer( self ) :
+
+		v = IECore.FloatVectorData( [ 1, 2, 3 ] )
+		buffer = v.asReadWriteBuffer()
+		bufferData = buffer.asData()
+		self.assertTrue( buffer.isWritable() )
+		self.assertTrue( v._dataSourceEqual( bufferData ) )
+		self.assertTrue( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# Creating a writable `memoryview` makes `bufferData` unique.
+		m = memoryview( buffer )
+		self.assertFalse( m.readonly )
+		self.assertFalse( v._dataSourceEqual( buffer.asData() ) )
+		self.assertFalse( bufferData._dataSourceEqual( buffer.asData() ) )
+
+		# Modify the memoryview, which is reflected in the buffer.
+		m[0] = 42
+		self.assertEqual( list( m ), [ 42, 2, 3 ] )
+		self.assertEqual( list( buffer.asData() ), list( m ) )
+
 
 if __name__ == "__main__":
     unittest.main()

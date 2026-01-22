@@ -36,6 +36,7 @@
 #define IECOREUSD_TYPETRAITS_H
 
 #include "IECore/GeometricTypedData.h"
+#include "IECore/Half.h"
 #include "IECore/InternedString.h"
 #include "IECore/TypedData.h"
 
@@ -44,7 +45,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/vt/value.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "Imath/half.h"
 #include "Imath/ImathColor.h"
 #include "Imath/ImathMatrix.h"
 #include "Imath/ImathQuat.h"
