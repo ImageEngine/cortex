@@ -4,7 +4,9 @@
 Build
 -----
 
-- CI : Updated to GafferHQ/dependencies 11.0.0a2.
+- CI :
+  - Updated to GafferHQ/dependencies 11.0.0a2.
+  - Build artifacts and releases now include a "-platform##" suffix denoting their target VFX Reference Platform year. This replaces the "gcc" suffix previously used on Linux builds.
 
 10.7.0.0a3 (relative to 10.7.0.0a2)
 ==========

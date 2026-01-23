@@ -30,16 +30,16 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux-gcc11,
-          linux-debug-gcc11,
-          windows,
-          windows-debug,
-          macos-arm64
+          linux-platform25,
+          linux-debug-platform25,
+          windows-platform25,
+          windows-debug-platform25,
+          macos-arm64-platform25
         ]
 
         include:
 
-          - name: linux-gcc11
+          - name: linux-platform25
             os: ubuntu-24.04
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:4.0.0a1
@@ -49,7 +49,7 @@ jobs:
             publish: true
             jobs: 4
 
-          - name: linux-debug-gcc11
+          - name: linux-debug-platform25
             os: ubuntu-24.04
             buildType: DEBUG
             containerImage: ghcr.io/gafferhq/build/build:4.0.0a1
@@ -59,7 +59,7 @@ jobs:
             publish: false
             jobs: 4
 
-          - name: windows
+          - name: windows-platform25
             os: windows-2022
             buildType: RELEASE
             options: .github/workflows/main/options.windows
@@ -68,7 +68,7 @@ jobs:
             publish: true
             jobs: 4
 
-          - name: windows-debug
+          - name: windows-debug-platform25
             os: windows-2022
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
@@ -77,7 +77,7 @@ jobs:
             publish: false
             jobs: 4
 
-          - name: macos-arm64
+          - name: macos-arm64-platform25
             os: macos-14
             buildType: RELEASE
             options: .github/workflows/main/options.posix
