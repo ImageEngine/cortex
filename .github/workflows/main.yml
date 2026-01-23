@@ -30,6 +30,7 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
+          linux-platform24,
           linux-platform25,
           linux-debug-platform25,
           windows-platform25,
@@ -38,6 +39,16 @@ jobs:
         ]
 
         include:
+
+          - name: linux-platform24
+            os: ubuntu-24.04
+            buildType: RELEASE
+            containerImage: ghcr.io/gafferhq/build/build:3.4.0
+            options: .github/workflows/main/options.posix
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/10.0.0/gafferDependencies-10.0.0-linux-gcc11.tar.gz
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: true
+            jobs: 4
 
           - name: linux-platform25
             os: ubuntu-24.04
