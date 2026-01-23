@@ -42,7 +42,7 @@ jobs:
           - name: linux-gcc11
             os: ubuntu-24.04
             buildType: RELEASE
-            containerImage: ghcr.io/gafferhq/build/build:3.0.0
+            containerImage: ghcr.io/gafferhq/build/build:4.0.0a1
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a2/gafferDependencies-11.0.0a2-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
@@ -52,7 +52,7 @@ jobs:
           - name: linux-debug-gcc11
             os: ubuntu-24.04
             buildType: DEBUG
-            containerImage: ghcr.io/gafferhq/build/build:3.0.0
+            containerImage: ghcr.io/gafferhq/build/build:4.0.0a1
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a2/gafferDependencies-11.0.0a2-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
