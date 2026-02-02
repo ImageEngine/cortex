@@ -50,6 +50,7 @@
 #endif
 
 #include "pxr/usd/usdGeom/primvarsAPI.h"
+#include "pxr/usd/usdShade/utils.h"
 
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
@@ -255,34 +256,40 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 	std::vector<IECoreScene::ShaderNetwork::Connection> connections;
 	for( pxr::UsdShadeInput &i : usdShader.GetInputs() )
 	{
-		pxr::UsdShadeConnectableAPI usdSource;
-		pxr::TfToken usdSourceName;
-		pxr::UsdShadeAttributeType usdSourceType;
-
-		pxr::UsdAttribute valueAttribute = i;
-		if( i.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) )
+		auto sourceAttributes = i.GetValueProducingAttributes();
+		if( sourceAttributes.size() == 0 )
 		{
-			if( usdSourceType == pxr::UsdShadeAttributeType::Output )
-			{
-				const IECoreScene::ShaderNetwork::Parameter sourceHandle = readShaderNetworkWalk(
-					anchorPath, usdSource.GetOutput( usdSourceName ), timeCode, shaderNetwork
-				);
-				connections.push_back( {
-					sourceHandle, { handle, fromUSDParameterName( i.GetBaseName() ) }
-				} );
-			}
-			else
-			{
-				// Connected to an exposed input on the material container. We don't
-				// have an equivalent in IECoreScene::ShaderNetwork yet, so just take
-				// the parameter value from the exposed input.
-				valueAttribute = usdSource.GetInput( usdSourceName );
-			}
+			continue;
+		}
+		else if( sourceAttributes.size() > 1 )
+		{
+			IECore::msg(
+				IECore::Msg::Warning, "ShaderAlgo",
+				boost::format( "Input `%1%` has multiple inputs" )
+					% i.GetAttr().GetPath()
+			);
 		}
 
-		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( valueAttribute ), timeCode ) )
+		const pxr::UsdShadeAttributeType type = pxr::UsdShadeUtils::GetType( sourceAttributes[0].GetName() );
+		if( type == pxr::UsdShadeAttributeType::Output )
 		{
-			parameters[fromUSDParameterName( i.GetBaseName() )] = d;
+			const IECoreScene::ShaderNetwork::Parameter sourceHandle = readShaderNetworkWalk(
+					anchorPath, pxr::UsdShadeOutput( sourceAttributes[0] ), timeCode, shaderNetwork
+			);
+			connections.push_back( {
+				sourceHandle, { handle, fromUSDParameterName( i.GetBaseName() ) }
+			} );
+			if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( i ), timeCode ) )
+			{
+				parameters[fromUSDParameterName( i.GetBaseName() )] = d;
+			}
+		}
+		else if( type == pxr::UsdShadeAttributeType::Input )
+		{
+			if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( sourceAttributes[0], timeCode ) )
+			{
+				parameters[fromUSDParameterName( i.GetBaseName() )] = d;
+			}
 		}
 	}
 
