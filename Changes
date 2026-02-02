@@ -1,12 +1,19 @@
 10.7.x.x (relative to 10.7.0.0a3)
 ========
 
+Fixes
+-----
+
+- USDScene : Fixed handling of connections involving UsdShadeNodeGraph interface parameters [^1].
+
 Build
 -----
 
 - CI :
   - Updated to GafferHQ/dependencies 11.0.0a2.
   - Build artifacts and releases now include a "-platform##" suffix denoting their target VFX Reference Platform year. This replaces the "gcc" suffix previously used on Linux builds.
+
+[^1]: To be omitted from the notes for the final 10.7.0.0 release.
 
 10.7.0.0a3 (relative to 10.7.0.0a2)
 ==========
@@ -52,10 +59,18 @@ Breaking Changes
   - Removed deprecated functions componentConnectionAdapterLabel, convertOSLComponentConnections, collapseSplineParameters, expandSplineParameters.
   - Switch support for Spline parameters to support for Ramp parameters.
 
-10.6.x.x (relative to 10.6.3.0)
+10.6.x.x (relative to 10.6.3.1)
 ========
 
 
+
+10.6.3.1 (relative to 10.6.3.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed handling of connections involving UsdShadeNodeGraph interface parameters.
 
 10.6.3.0 (relative to 10.6.2.2)
 ========

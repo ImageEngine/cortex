@@ -4736,5 +4736,39 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertNotEqual( shaderNetworks[frame], shaderNetworks[0] )
 			self.assertEqual( shaderNetworks[frame].outputShader().parameters["exposure"].value, frame / 2.0 )
 
+	def testMaterialSubgraph( self ) :
+
+		scene = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/materialSubgraph.usda", IECore.IndexedIO.OpenMode.Read )
+		sphere = scene.child( "sphere" )
+		shaderNetwork = sphere.readAttribute( "ri:surface", 0.0 )
+
+		# We don't currently have the concept of a subgraph in a ShaderNetwork,
+		# so we only load the leaf nodes, and we "flatten" the connections and
+		# values.
+
+		self.assertEqual( set( shaderNetwork.shaders().keys() ), { "lamaSurface", "pxrVary", "nodeGraph/lamaAdd", "nodeGraph/lamaDiffuse1", "nodeGraph/lamaDiffuse2" } )
+
+		self.assertEqual( shaderNetwork.getOutput(), ( "lamaSurface", "bxdf_out" ) )
+		self.assertEqual( shaderNetwork.shaders()["lamaSurface"].parameters, IECore.CompoundData() )
+		self.assertEqual( shaderNetwork.input( ( "lamaSurface", "materialFront" ) ), ( "nodeGraph/lamaAdd", "bxdf_out" ) )
+
+		self.assertEqual( shaderNetwork.shaders()["nodeGraph/lamaAdd"].parameters, IECore.CompoundData() )
+		self.assertEqual( shaderNetwork.input( ( "nodeGraph/lamaAdd", "material1" ) ), ( "nodeGraph/lamaDiffuse1", "bxdf_out" ) )
+		self.assertEqual( shaderNetwork.input( ( "nodeGraph/lamaAdd", "material2" ) ), ( "nodeGraph/lamaDiffuse2", "bxdf_out" ) )
+
+		self.assertEqual( shaderNetwork.shaders()["nodeGraph/lamaDiffuse1"].parameters, IECore.CompoundData( { "diffuseColor" : imath.Color3f( 2 ) } ) )
+		self.assertEqual( shaderNetwork.inputConnections( "nodeGraph/lamaDiffuse1" ), [] )
+
+		self.assertEqual( shaderNetwork.shaders()["nodeGraph/lamaDiffuse2"].parameters, IECore.CompoundData() )
+		self.assertEqual( shaderNetwork.input( ( "nodeGraph/lamaDiffuse2", "diffuseColor" ) ), ( "pxrVary", "resultRGB" ) )
+
+	def testMaterialTerminalFromSubgraph( self ) :
+
+		scene = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/materialSubgraph.usda", IECore.IndexedIO.OpenMode.Read )
+		sphere = scene.child( "sphere" )
+		shaderNetwork = sphere.readAttribute( "ri:surface", 0.0 )
+
+		self.assertEqual( shaderNetwork.outputShader().name, "LamaSurface" )
+
 if __name__ == "__main__":
 	unittest.main()
