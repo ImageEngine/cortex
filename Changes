@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.3.0)
 ========
 
+Fixes
+-----
 
+- USDScene : Fixed handling of connections involving UsdShadeNodeGraph interface parameters.
 
 10.6.3.0 (relative to 10.6.2.2)
 ========

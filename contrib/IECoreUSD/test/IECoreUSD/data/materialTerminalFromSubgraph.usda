@@ -1,0 +1,26 @@
+#usda 1.0
+
+def Sphere "sphere" (
+	prepend apiSchemas = ["MaterialBindingAPI"]
+)
+{
+	rel material:binding = </material>
+}
+
+def Material "material"
+{
+	token outputs:ri:surface.connect = </material/nodeGraph.outputs:bxdf_out>
+
+	def NodeGraph "nodeGraph"
+	{
+
+		token outputs:bxdf_out.connect = </material/nodeGraph/lamaSurface.outputs:bxdf_out>
+
+		def Shader "lamaSurface"
+		{
+			uniform token info:id = "LamaSurface"
+			token outputs:bxdf_out
+		}
+
+	}
+}

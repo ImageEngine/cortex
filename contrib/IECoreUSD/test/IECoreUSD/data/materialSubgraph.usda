@@ -1,0 +1,59 @@
+#usda 1.0
+
+def Sphere "sphere" (
+	prepend apiSchemas = ["MaterialBindingAPI"]
+)
+{
+	rel material:binding = </material>
+}
+
+def Material "material"
+{
+	token outputs:ri:surface.connect = </material/lamaSurface.outputs:bxdf_out>
+
+	def Shader "lamaSurface"
+	{
+		uniform token info:id = "LamaSurface"
+		token inputs:materialFront.connect = </material/nodeGraph.outputs:bxdf_out>
+		token outputs:bxdf_out
+	}
+
+	def NodeGraph "nodeGraph"
+	{
+		color3f inputs:diffuseColorA = ( 2, 2, 2 )
+
+		color3f inputs:diffuseColorB = (1, 1, 1)
+		color3f inputs:diffuseColorB.connect = </material/pxrVary.outputs:resultRGB>
+
+		token outputs:bxdf_out.connect = </material/nodeGraph/lamaAdd.outputs:bxdf_out>
+
+		def Shader "lamaAdd"
+		{
+			uniform token info:id = "LamaAdd"
+			token inputs:material1.connect = </material/nodeGraph/lamaDiffuse1.outputs:bxdf_out>
+			token inputs:material2.connect = </material/nodeGraph/lamaDiffuse2.outputs:bxdf_out>
+			token outputs:bxdf_out
+		}
+
+		def Shader "lamaDiffuse1"
+		{
+			uniform token info:id = "LamaDiffuse"
+			color3f inputs:diffuseColor.connect = </material/nodeGraph.inputs:diffuseColorA>
+			token outputs:bxdf_out
+		}
+
+		def Shader "lamaDiffuse2"
+		{
+			uniform token info:id = "LamaDiffuse"
+			color3f inputs:diffuseColor.connect = </material/nodeGraph.inputs:diffuseColorB>
+			token outputs:bxdf_out
+		}
+
+	}
+
+	def Shader "pxrVary"
+	{
+		uniform token info:id = "PxrVary"
+		color3f outputs:resultRGB
+	}
+}
