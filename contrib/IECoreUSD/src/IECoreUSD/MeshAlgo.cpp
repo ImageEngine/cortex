@@ -141,7 +141,10 @@ IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time, const
 			// within a single crease, rather than just a sharpness per crease. We don't know how
 			// we would author one of these in practice (certainly not in Maya), and we're not sure
 			// why we'd want to. For now we ignore them.
-			IECore::msg( IECore::Msg::Warning, "USDScene", "Ignoring creases with varying sharpness" );
+			IECore::msg(
+				IECore::Msg::Warning, "USDScene",
+				boost::format( "Ignoring creases with varying sharpness on \"%1%\"" ) % mesh.GetPath()
+			);
 		}
 	}
 
