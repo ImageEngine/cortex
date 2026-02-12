@@ -103,10 +103,10 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "PrimitiveReader::convertArbGeomParam",
-			boost::format( "GeomParam \"%s\" on object \"%s\" has unsupported array extent %d" )
-				% param.getHeader().getName()
-				% param.getParent().getObject().getFullName()
-				% param.getArrayExtent()
+			"GeomParam \"{}\" on object \"{}\" has unsupported array extent {}",
+			param.getHeader().getName(),
+			param.getParent().getObject().getFullName(),
+			param.getArrayExtent()
 		);
 		return;
 	}
@@ -151,13 +151,11 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "PrimitiveReader::readGeomParam",
-			boost::format(
-				"Ignoring invalid primitive variable \"%s\" on object \"%s\" (size %d, expected %d)"
-			)
-				% primitiveVariableName
-				% param.getParent().getObject().getFullName()
-				% (pv.indices ? pv.indices->readable().size() : data->readable().size())
-				% primitive->variableSize( pv.interpolation )
+			"Ignoring invalid primitive variable \"{}\" on object \"{}\" (size {}, expected {})",
+			primitiveVariableName,
+			param.getParent().getObject().getFullName(),
+			(pv.indices ? pv.indices->readable().size() : data->readable().size()),
+			primitive->variableSize( pv.interpolation )
 		);
 	}
 }
