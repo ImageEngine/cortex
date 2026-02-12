@@ -3,6 +3,16 @@
 
 
 
+API
+---
+
+- MessageHandler : Added `msg()` overload that accepts a `fmt::format_string` and arguments.
+
+Build
+-----
+
+- Requires `fmt` 9.1.0.
+
 10.7.0.0a4 (relative to 10.7.0.0a3)
 ==========
 

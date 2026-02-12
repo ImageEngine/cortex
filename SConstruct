@@ -1141,7 +1141,8 @@ env.Append( LIBS = [
 		"OpenEXR" + env["OPENEXR_LIB_SUFFIX"],
 		# Link Windows zlib against static library to avoid potential conflicts
 		# with system provided version.
-		"z" if env["PLATFORM"] != "win32" else "zlibstatic"
+		"z" if env["PLATFORM"] != "win32" else "zlibstatic",
+		"fmt"
 	]
 )
 
