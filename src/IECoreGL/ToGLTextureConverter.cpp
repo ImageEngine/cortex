@@ -47,8 +47,6 @@
 #include "IECore/TypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 
 using namespace IECoreGL;

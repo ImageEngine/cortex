@@ -41,8 +41,6 @@
 
 #include "IECore/MessageHandler.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 
 using namespace IECoreGL;

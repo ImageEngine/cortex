@@ -95,7 +95,7 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "ToGLPointsConverter::doConversion", boost::format( "Unknown type \"%s\" - reverting to particle type." ) % t->readable() );
+			IECore::msg( IECore::Msg::Warning, "ToGLPointsConverter::doConversion", "Unknown type \"{}\" - reverting to particle type.", t->readable() );
 		}
 	}
 
@@ -114,7 +114,7 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "ToGLPointsConverter", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
+			IECore::msg( IECore::Msg::Warning, "ToGLPointsConverter", "No data given for primvar \"{}\"", pIt->first );
 		}
 	}
 

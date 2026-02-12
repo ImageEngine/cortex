@@ -38,7 +38,7 @@
 
 #include "IECore/Exception.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 using namespace IECoreGL;
 
@@ -50,7 +50,7 @@ HitRecord::HitRecord( const GLuint *hitRecord )
 {
 	if( hitRecord[0] != 1 )
 	{
-		throw IECore::Exception( ( boost::format( "HitRecord supports only one name - found %s.") % hitRecord[0] ).str() );
+		throw IECore::Exception( fmt::format( "HitRecord supports only one name - found {}.", hitRecord[0] ) );
 	}
 }
 

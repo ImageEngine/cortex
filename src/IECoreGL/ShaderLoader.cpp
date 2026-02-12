@@ -38,13 +38,14 @@
 
 #include "IECore/MessageHandler.h"
 
-#include "boost/format.hpp"
 #include "boost/wave.hpp"
 #include "boost/wave/cpplexer/cpp_lex_iterator.hpp"
 #include "boost/wave/cpplexer/cpp_lex_token.hpp"
 
 #include <fstream>
 #include <iostream>
+
+#include "fmt/format.h"
 
 using namespace IECoreGL;
 using namespace IECore;
@@ -126,7 +127,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 				path fragmentPath = m_searchPaths.find( name + ".frag" );
 				if( vertexPath.empty() && geometryPath.empty() && fragmentPath.empty() )
 				{
-					IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderLoader::loadSource", boost::format( "Couldn't find \"%s\"." ) % name );
+					IECore::msg( IECore::Msg::Error, "IECoreGL::ShaderLoader::loadSource", "Couldn't find \"{}\".", name );
 				}
 
 				if( !vertexPath.empty() )
@@ -288,7 +289,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 				catch( boost::wave::cpp_exception &e )
 				{
 					// rethrow but in a nicely formatted form
-					throw IECore::Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % fileName % e.line_no() % e.description() ) );
+					throw IECore::Exception( fmt::format( "Error during preprocessing : {} line {} : {}", fileName, e.line_no(), e.description() ) );
 				}
 			}
 			return result;

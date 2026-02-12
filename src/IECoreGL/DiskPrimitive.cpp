@@ -96,7 +96,7 @@ void DiskPrimitive::addPrimitiveVariable( const std::string &name, const IECoreS
 			addUniformAttribute( name, primVar.data );
 			break;
 		default :
-			IECore::msg( IECore::Msg::Warning, "DiskPrimitive::addPrimitiveVariable", boost::format( "Primitive variable \"%s\" has unsupported interpolation." ) % name );
+			IECore::msg( IECore::Msg::Warning, "DiskPrimitive::addPrimitiveVariable", "Primitive variable \"{}\" has unsupported interpolation.", name );
 	}
 }
 

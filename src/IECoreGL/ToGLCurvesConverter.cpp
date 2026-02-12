@@ -131,7 +131,7 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 	{
 		if( !pIt->second.data )
 		{
-			IECore::msg( IECore::Msg::Warning, "ToGLCurvesConverter", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
+			IECore::msg( IECore::Msg::Warning, "ToGLCurvesConverter", "No data given for primvar \"{}\"", pIt->first );
 			continue;
 		}
 

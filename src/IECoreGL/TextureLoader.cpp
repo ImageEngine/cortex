@@ -84,7 +84,7 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	boost::filesystem::path path = m_searchPaths.find( name );
 	if( path.empty() )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't find \"%s\"." ) % name );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", "Couldn't find \"{}\".", name );
 		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
@@ -107,7 +107,7 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	OIIO::ImageSpec mipSpec;
 	if( !imageCache->get_imagespec( oiioPath, mipSpec, 0, 0 ) )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't load \"%s\"." ) % path.string() );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", "Couldn't load \"{}\".", path.string() );
 		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
@@ -139,7 +139,7 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	);
 	if( imageBuf.spec().full_x != 0 || imageBuf.spec().full_y != 0 )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Texture display window must start at origin for \"%s\"." ) % path.string() );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", "Texture display window must start at origin for \"{}\".", path.string() );
 		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
@@ -173,7 +173,7 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	if( !OIIO::ImageBufAlgo::colorconvert( imageBuf, imageBuf, currentColorSpace, linearColorSpace ) )
 	{
 		// This conversion is the first operation that will trigger a lazy read of the ImageBuf
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Error reading \"%s\" : %s." ) % path.string() % imageBuf.geterror() );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", "Error reading \"{}\" : {}.", path.string(), imageBuf.geterror() );
 	}
 
 
@@ -207,8 +207,8 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 		{
 			IECore::msg(
 				IECore::Msg::Error, "IECoreGL::TextureLoader::load",
-				boost::format( "Failed to read channel \"%s\" for \"%s\".%s" ) %
-				channelnames[chan] % path.string() % ( imageBuf.has_error() ? " " + imageBuf.geterror() : "" )
+				"Failed to read channel \"{}\" for \"{}\".{}",
+				channelnames[chan], path.string(), ( imageBuf.has_error() ? " " + imageBuf.geterror() : "" )
 			);
 		}
 	}
@@ -224,7 +224,7 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	}
 	else
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Texture conversion failed for \"%s\" ( Invalid image format, ToGLTextureConverter supports RGB[A] and Y[A]. )." ) % path.string() );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", "Texture conversion failed for \"{}\" ( Invalid image format, ToGLTextureConverter supports RGB[A] and Y[A]. ).", path.string() );
 	}
 	m_loadedTextures[key] = t;
 	return t;

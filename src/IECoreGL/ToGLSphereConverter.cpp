@@ -69,7 +69,7 @@ IECore::RunTimeTypedPtr ToGLSphereConverter::doConversion( IECore::ConstObjectPt
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "ToGLSphereConverter", boost::format( "No data given for primvar \"%s\"" ) % it->first );
+			IECore::msg( IECore::Msg::Warning, "ToGLSphereConverter", "No data given for primvar \"{}\"", it->first );
 		}
 	}
 

@@ -68,9 +68,7 @@ static int g_glslVersion = 0;
 		IECore::msg(													\
 			IECore::Msg::Error,											\
 			"IECoreGL::init",											\
-			boost::format(												\
-				"Failed to get \"%s\" procedure."						\
-			) % #funcName												\
+			"Failed to get \"{}\" procedure.", #funcName				\
 		);																\
 		return;															\
 	}																	\
@@ -267,9 +265,9 @@ void IECoreGL::init( bool glAlreadyInitialised )
 				return;
 			}
 
-			INIT_ENTRY_POINT( wglCreatePbufferARB, PFNWGLCREATEPBUFFERARBPROC ); 
+			INIT_ENTRY_POINT( wglCreatePbufferARB, PFNWGLCREATEPBUFFERARBPROC );
 			INIT_ENTRY_POINT( wglGetPbufferDCARB, PFNWGLGETPBUFFERDCARBPROC );
-			INIT_ENTRY_POINT( wglChoosePixelFormatARB, PFNWGLCHOOSEPIXELFORMATARBPROC ); 
+			INIT_ENTRY_POINT( wglChoosePixelFormatARB, PFNWGLCHOOSEPIXELFORMATARBPROC );
 
 			int pbufferIntAttribs[] = {
 				WGL_DRAW_TO_PBUFFER_ARB, true,
@@ -337,7 +335,7 @@ void IECoreGL::init( bool glAlreadyInitialised )
 		const GLenum initStatus = glewInit();
 		if( initStatus!=GLEW_OK )
 		{
-			IECore::msg( IECore::Msg::Error, "IECoreGL::init", boost::format( "GLEW initialisation failed (%s)." ) % glewGetErrorString( initStatus ) );
+			IECore::msg( IECore::Msg::Error, "IECoreGL::init", "GLEW initialisation failed ({}).", *glewGetErrorString( initStatus ) );
 		}
 		init = true;
 

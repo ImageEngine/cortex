@@ -45,8 +45,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 
 using namespace IECoreGL;
@@ -105,7 +103,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
+			IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "No data given for primvar \"{}\"", pIt->first );
 		}
 	}
 

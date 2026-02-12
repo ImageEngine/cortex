@@ -41,10 +41,11 @@
 
 #include "boost/bind/bind.hpp"
 #include "boost/bind/placeholders.hpp"
-#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "tbb/concurrent_queue.h"
+
+#include "fmt/format.h"
 
 using namespace boost::placeholders;
 using namespace IECoreGL;
@@ -101,11 +102,7 @@ struct CachedConverter::MemberData
 		if( !converter )
 		{
 			throw IECore::Exception(
-				boost::str(
-					boost::format(
-						"Unable to create converter for Object of type \"%s\""
-					) % key.object->typeName()
-				)
+				fmt::format( "Unable to create converter for Object of type \"{}\"", key.object->typeName()	)
 			);
 		}
 		return converter->convert();
