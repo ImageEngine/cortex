@@ -42,8 +42,9 @@
 #include "IECore/Math.h"
 #include "IECore/NullObject.h"
 
-#include "boost/format.hpp"
 #include "boost/multi_array.hpp"
+
+#include "fmt/format.h"
 
 using namespace std;
 using namespace boost;
@@ -226,7 +227,7 @@ ObjectPtr MedianCutSampler::doOperation( const CompoundObject * operands )
 	FloatVectorDataPtr luminance = image->getChannel<float>( channelName );
 	if( !luminance )
 	{
-		throw Exception( str( format( "No FloatVectorData channel named \"%s\"." ) % channelName ) );
+		throw Exception( fmt::format( "No FloatVectorData channel named \"{}\".", channelName ) );
 	}
 
 	// if the projection requires it, weight the luminances so they're less

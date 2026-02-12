@@ -50,8 +50,6 @@
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 #include <iostream>
 
@@ -318,7 +316,7 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 
 		catch ( Exception & )
 		{
-			msg( Msg::Warning, "ImageDiffOp", boost::format( "Could not convert data for image channel '%s' to floating point" ) % name );
+			msg( Msg::Warning, "ImageDiffOp", "Could not convert data for image channel '{}' to floating point", name );
 			return new BoolData( true );
 		}
 

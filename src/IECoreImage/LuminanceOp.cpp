@@ -42,7 +42,7 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 using namespace boost;
 using namespace Imath;
@@ -250,15 +250,15 @@ void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 		std::string reason;
 		if( !image->channelValid( rIt->first, &reason ) )
 		{
-			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % rIt->first ) + reason );
+			throw Exception( fmt::format( "Channel \"{}\" is invalid: {}", rIt->first, reason ) );
 		}
 		if( !image->channelValid( gIt->first, &reason ) )
 		{
-			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % gIt->first ) + reason );
+			throw Exception( fmt::format( "Channel \"{}\" is invalid: {}", gIt->first, reason ) );
 		}
 		if( !image->channelValid( bIt->first, &reason ) )
 		{
-			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % bIt->first ) + reason );
+			throw Exception( fmt::format( "Channel \"{}\" is invalid: {}", bIt->first, reason ) );
 		}
 
 		size_t channelSize = image->channelSize();

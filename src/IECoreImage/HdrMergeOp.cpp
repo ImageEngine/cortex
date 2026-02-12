@@ -41,8 +41,6 @@
 #include "IECore/ObjectVector.h"
 #include "IECore/TypedObjectParameter.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 
 using namespace std;
