@@ -187,7 +187,7 @@ size_t NParticleReader::numParticles()
 	std::map<int, IFFFile::Chunk::ChunkIterator>::const_iterator frameIt = frameToRootChildren.find( frame );
 	if( frameIt == frameToRootChildren.end() )
 	{
-		msg( Msg::Warning, "NParticleReader::attributeNames()", boost::format( "Frame '%d' (index '%d') does not exist in '%s'." ) % frame % frameIndex % m_iffFileName );
+		msg( Msg::Warning, "NParticleReader::attributeNames()", "Frame '{}' (index '{}') does not exist in '{}'.", frame, frameIndex, m_iffFileName );
 		return 0;
 	}
 
@@ -219,7 +219,7 @@ void NParticleReader::attributeNames( std::vector<std::string> &names )
 	std::map<int, IFFFile::Chunk::ChunkIterator>::const_iterator frameIt = frameToRootChildren.find( frame );
 	if( frameIt == frameToRootChildren.end() )
 	{
-		msg( Msg::Warning, "NParticleReader::attributeNames()", boost::format( "Frame '%d' (index '%d') does not exist in '%s'." ) % frame % frameIndex % m_iffFileName );
+		msg( Msg::Warning, "NParticleReader::attributeNames()", "Frame '{}' (index '{}') does not exist in '{}'.", frame, frameIndex, m_iffFileName );
 		return;
 	}
 
@@ -241,7 +241,7 @@ const IntVectorData * NParticleReader::frameTimes()
 {
 	if ( !open() )
 	{
-		msg( Msg::Error, "NParticleReader::attributeNames()", boost::format( "Failed to open '%s'." ) % m_iffFileName );
+		msg( Msg::Error, "NParticleReader::attributeNames()", "Failed to open '{}'.", m_iffFileName );
 		return nullptr;
 	}
 
@@ -298,7 +298,7 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 	std::map<int, IFFFile::Chunk::ChunkIterator>::const_iterator frameIt = frameToRootChildren.find( frame );
 	if( frameIt == frameToRootChildren.end() )
 	{
-		msg( Msg::Warning, "NParticleReader::readAttribute()", boost::format( "Frame '%d' (index '%d') does not exist in '%s'." ) % frame % frameIndex % m_iffFileName );
+		msg( Msg::Warning, "NParticleReader::readAttribute()", "Frame '{}' (index '{}') does not exist in '{}'.", frame, frameIndex, m_iffFileName );
 		return nullptr;
 	}
 
@@ -333,7 +333,7 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 		int id = it->type().id();
 		if ( id != kSIZE && id != kDBLA && id != kDVCA && id != kFVCA )
 		{
-			msg( Msg::Warning, "NParticleReader::readAttribute()", boost::format( "CHNM '%s' found, but was followed by invalid Tag '%s'." ) % name % it->type().name() );
+			msg( Msg::Warning, "NParticleReader::readAttribute()", "CHNM '{}' found, but was followed by invalid Tag '{}'.", name, it->type().name() );
 			return nullptr;
 		}
 	}
@@ -403,7 +403,7 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 			}
 			break;
 		default :
-			msg( Msg::Error, "NParticleReader::readAttribute()", boost::format( "CHNM '%s' found, but was followed by invalid Tag '%s'." ) % name % (attrIt+2)->type().name() );
+			msg( Msg::Error, "NParticleReader::readAttribute()", "CHNM '{}' found, but was followed by invalid Tag '{}'.", name, (attrIt+2)->type().name() );
 
 	}
 	return result;

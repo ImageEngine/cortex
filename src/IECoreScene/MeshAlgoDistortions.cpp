@@ -205,22 +205,19 @@ std::pair<PrimitiveVariable, PrimitiveVariable> MeshAlgo::calculateDistortion( c
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
 	{
-		string e = boost::str( boost::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"%s\" primitive variable." ) % position );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"{}\" primitive variable.", position ) );
 	}
 
 	const V3fVectorData *pRefData = mesh->variableData<V3fVectorData>( referencePosition, PrimitiveVariable::Vertex );
 	if( !pRefData )
 	{
-		string e = boost::str( boost::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"%s\" primitive variable." ) % referencePosition );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"{}\" primitive variable.", referencePosition ) );
 	}
 
 	PrimitiveVariableMap::const_iterator uvIt = mesh->variables.find( uvSet );
 	if( uvIt == mesh->variables.end() || uvIt->second.interpolation != PrimitiveVariable::FaceVarying || uvIt->second.data->typeId() != V2fVectorDataTypeId )
 	{
-		string e = boost::str( boost::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"%s\" primitive variable." ) % uvSet );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"{}\" primitive variable.", uvSet ) );
 	}
 
 	Canceller::check( canceller );

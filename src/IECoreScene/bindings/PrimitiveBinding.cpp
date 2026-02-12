@@ -41,6 +41,8 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "fmt/format.h"
+
 using namespace boost::python;
 using namespace IECore;
 using namespace IECorePython;
@@ -52,17 +54,17 @@ namespace
 #define IECORETEST_ASSERT( x ) \
     if( !( x ) ) \
     { \
-        throw IECore::Exception( boost::str( \
-            boost::format( "Failed assertion \"%s\" : %s line %d" ) % #x % __FILE__ % __LINE__ \
-        ) ); \
+        throw IECore::Exception( \
+            fmt::format( "Failed assertion \"{}\" : {} line {}", #x, __FILE__, __LINE__ ) \
+        ); \
     }
 
 #define IECORETEST_ASSERT_MSG( x, msg ) \
     if( !( x ) ) \
     { \
-        throw IECore::Exception( boost::str( \
-            boost::format( "Failed assertion \"%s\" msg: '%s': %s line %d" ) % #x % msg % __FILE__ % __LINE__ \
-        ) ); \
+        throw IECore::Exception( \
+            fmt::format( "Failed assertion \"{}\" msg: '{}': {} line {}", #x, msg, __FILE__, __LINE__ ) \
+        ); \
     }
 
 void testVariableIndexedView()

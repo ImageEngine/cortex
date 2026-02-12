@@ -42,8 +42,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/format.hpp"
-
 #include <fstream>
 
 using namespace IECore;
@@ -117,7 +115,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 	ofstream oStream( fileName().c_str(), std::ios_base::binary | std::ios_base::out );
 	if( !oStream.is_open() )
 	{
-		throw IOException( ( format( "Unable to open file \"%s\"." ) % fileName() ).str() );
+		throw IOException( fmt::format( "Unable to open file \"{}\".", fileName() ) );
 	}
 
 	char pdc[4] = { 'P', 'D', 'C', ' ' };

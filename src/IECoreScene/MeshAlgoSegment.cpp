@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-
 #include "IECore/DataAlgo.h"
 
 #include "IECoreScene/MeshAlgo.h"

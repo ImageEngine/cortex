@@ -38,8 +38,6 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
 
-#include "boost/format.hpp"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace std;

@@ -291,10 +291,9 @@ void processInputs(
 	}
 	if( !uvVar.data )
 	{
-		std::string e = boost::str( boost::format(
-			"MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named \"%s\" of type FaceVarying or Vertex." )
-		% uvSet );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named \"{}\" of type FaceVarying or Vertex.", uvSet )
+		);
 	}
 
 	faceAreaVar = MeshAlgo::calculateFaceArea( processedMesh.get(), refPosition, canceller );
@@ -365,10 +364,12 @@ void distributePointsInTriangle(
 	const float approxCandidatePoints = uvBounds.size().x * uvBounds.size().y * textureDensity;
 	if( ! ( approxCandidatePoints <= maxCandidatePoints ) )
 	{
-		std::string e = boost::str( boost::format(
-			"MeshAlgo::distributePoints : Cannot generate more than %i candidate points per polygon. Trying to generate %i. There are circumstances where the output would be reasonable, but this happens during processing due to a polygon with a large area in 3D space which is extremely thin in UV space, in which case you may need to clean your UVs. Alternatively, maybe you really want to put an extraordinary number of points on one polygon - please subdivide it before distributing points to help with performance." )
-		% size_t( maxCandidatePoints ) % size_t( approxCandidatePoints ) );
-		throw Exception( e );
+		throw Exception(
+			fmt::format(
+				"MeshAlgo::distributePoints : Cannot generate more than {} candidate points per polygon. Trying to generate {}. There are circumstances where the output would be reasonable, but this happens during processing due to a polygon with a large area in 3D space which is extremely thin in UV space, in which case you may need to clean your UVs. Alternatively, maybe you really want to put an extraordinary number of points on one polygon - please subdivide it before distributing points to help with performance.",
+				size_t( maxCandidatePoints ), size_t( approxCandidatePoints )
+			)
+		);
 	}
 
 	int cancelCounter = 0;

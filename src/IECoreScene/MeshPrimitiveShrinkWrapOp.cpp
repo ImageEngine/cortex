@@ -45,8 +45,6 @@
 #include "IECore/VectorOps.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/format.hpp"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
@@ -186,7 +184,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 		{
 			if ( !directionVerticesData )
 			{
-				throw InvalidArgumentException( (boost::format("MeshPrimitiveShrinkWrapOp: Direction mesh has no primitive variable \"P\" of type \"%s\" ") % T::staticTypeName() ).str() );
+				throw InvalidArgumentException( fmt::format( "MeshPrimitiveShrinkWrapOp: Direction mesh has no primitive variable \"P\" of type \"{}\"", T::staticTypeName() ) );
 			}
 			else if ( directionVerticesData->readable().size() != vertices.size() )
 			{
@@ -316,7 +314,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 		{
 			assert( data );
 
-			throw InvalidArgumentException( ( boost::format( "MeshPrimitiveShrinkWrapOp: Invalid data type \"%s\" for primitive variable \"P\"." ) % Object::typeNameFromTypeId( data->typeId() ) ).str() );
+			throw InvalidArgumentException( fmt::format( "MeshPrimitiveShrinkWrapOp: Invalid data type \"{}\" for primitive variable \"P\".", Object::typeNameFromTypeId( data->typeId() ) ) );
 		}
 	};
 };

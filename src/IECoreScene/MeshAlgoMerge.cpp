@@ -38,8 +38,6 @@
 #include "IECore/DataAlgo.h"
 #include "IECore/DespatchTypedData.h"
 
-#include "boost/format.hpp"
-
 #include <algorithm>
 
 using namespace Imath;
