@@ -270,8 +270,8 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 		{
 			IECore::msg(
 				IECore::Msg::Warning, "ShaderAlgo",
-				boost::format( "Input `%1%` has multiple inputs" )
-					% i.GetAttr().GetPath()
+				"Input `{}` has multiple inputs",
+				i.GetAttr().GetPath().GetAsString()
 			);
 		}
 
@@ -450,8 +450,8 @@ void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShad
 			if( !typeName )
 			{
 				IECore::msg( IECore::Msg::Warning, "ShaderAlgo",
-					boost::format( "Shader parameter `%1%.%2%` has unsupported type `%3%`" )
-						% shader->getName() % p.first % p.second->typeName()
+					"Shader parameter `{}.{}` has unsupported type `{}`",
+					shader->getName(), p.first, p.second->typeName()
 				);
 				continue;
 			}
@@ -663,7 +663,7 @@ void IECoreUSD::ShaderAlgo::writeLight( const IECoreScene::ShaderNetwork *shader
 		!type.IsA<pxr::UsdLuxNonboundableLightBase>()
 	)
 	{
-		IECore::msg( IECore::Msg::Warning, "ShaderAlgo::writeLight", boost::format( "Shader `%1%` is not a valid UsdLux light type" ) % outputShader->getName() );
+		IECore::msg( IECore::Msg::Warning, "ShaderAlgo::writeLight", "Shader `{}` is not a valid UsdLux light type", outputShader->getName() );
 		return;
 	}
 

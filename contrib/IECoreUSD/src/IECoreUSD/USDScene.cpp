@@ -82,10 +82,11 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/format.hpp"
 #include "boost/functional/hash.hpp"
 
 #include "tbb/concurrent_hash_map.h"
+
+#include "fmt/format.h"
 
 #include <filesystem>
 #include <iostream>
@@ -205,7 +206,7 @@ T *reportedCast( const IECore::RunTimeTyped *v, const char *context, const char 
 		return t;
 	}
 
-	IECore::msg( IECore::Msg::Warning, context, boost::format( "Expected %s but got %s for \"%s\"." ) % T::staticTypeName() % v->typeName() % name );
+	IECore::msg( IECore::Msg::Warning, context, "Expected {} but got {} for \"{}\".", T::staticTypeName(), v->typeName(), name );
 	return nullptr;
 }
 
@@ -347,8 +348,8 @@ IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name
 			{
 				IECore::msg(
 					IECore::Msg::Level::Warning, "USDScene",
-					boost::format( "Ignoring path \"%1%\" in collection \"%2%\" because it is not beneath the collection root \"%3%\"" ) %
-						path % collection.GetName() % prim.GetPath()
+					"Ignoring path \"{}\" in collection \"{}\" because it is not beneath the collection root \"{}\"",
+					path.GetAsString(), collection.GetName().GetString(), prim.GetPath().GetAsString()
 				);
 			}
 		}
@@ -877,7 +878,7 @@ class USDScene::IO : public RefCounted
 
 			if( !stage )
 			{
-				throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD stage : '%1%'" ) % fileName ) );
+				throw IECore::Exception( fmt::format( "USDScene : Failed to open USD stage : '{}'", fileName ) );
 			}
 			return stage;
 		}
@@ -973,7 +974,7 @@ USDScene::~USDScene()
 		{
 				IECore::msg(
 					IECore::Msg::Error, "USDScene::~USDScene",
-					boost::format( "Failed to write shaders with exception \"%1%\"" ) % e.what()
+					"Failed to write shaders with exception \"{}\"", e.what()
 				);
 		}
 	}
@@ -1337,7 +1338,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			{
 				IECore::msg(
 					IECore::Msg::Warning, "USDScene::writeAttribute",
-					boost::format( "Unable to write kind \"%1%\" to \"%2%\"" ) % data->readable() % m_location->prim.GetPath()
+					"Unable to write kind \"{}\" to \"{}\"", data->readable(), m_location->prim.GetPath().GetAsString()
 				);
 			}
 		}
@@ -1359,7 +1360,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				// `writeObject()` having been called first to get a suitable concrete type in place.
 				IECore::msg(
 					IECore::Msg::Warning, "USDScene::writeAttribute",
-					boost::format( "Unable to write attribute \"%1%\" to \"%2%\", because it is not a Gprim" ) % name % m_location->prim.GetPath()
+					"Unable to write attribute \"{}\" to \"{}\", because it is not a Gprim", name, m_location->prim.GetPath().GetAsString()
 				);
 			}
 		}
@@ -1548,7 +1549,7 @@ void USDScene::writeObject( const Object *object, double time )
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "USDScene::writeObject",
-			boost::format( "Unable to write %1% to \"%2%\" at time %3%" ) % object->typeName() % m_location->prim.GetPath() % time
+			"Unable to write {} to \"{}\" at time {}", object->typeName(), m_location->prim.GetPath().GetAsString(), time
 		);
 	}
 }

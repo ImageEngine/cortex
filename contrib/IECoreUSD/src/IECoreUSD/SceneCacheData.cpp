@@ -66,6 +66,8 @@
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/predicate.hpp"
 
+#include "fmt/format.h"
+
 #include <iostream>
 
 using namespace IECore;
@@ -89,7 +91,7 @@ const InternedString g_curvesType( "ObjectType:CurvesPrimitive" );
 static const TfToken g_curves( "BasisCurves" );
 static const TfToken g_xform( "Xform" );
 const InternedString g_pointPrimVar( "P" );
-static const TfToken g_NormalsIndicesPrimVar( boost::str( boost::format( "%s:indices" ) % UsdGeomTokens->normals ) );
+static const TfToken g_NormalsIndicesPrimVar( fmt::format( "{}:indices", UsdGeomTokens->normals.GetString() ) );
 const InternedString g_normalPrimVar( "N" );
 const InternedString g_uvPrimVar( "uv" );
 const InternedString g_csPrimVar( "Cs" );
@@ -620,7 +622,7 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 			auto timeSamplesIO = attributeIO->subdirectory( g_firstTimeSample, IndexedIO::MissingBehaviour::NullIfMissing );
 			if ( !timeSamplesIO )
 			{
-				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", boost::format( "Unable to find time samples for attribute \"%s\" at location \"%s\"." ) % attr % primPath );
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", "Unable to find time samples for attribute \"{}\" at location \"{}\".", attr, primPath.GetAsString() );
 				continue;
 			}
 
@@ -628,7 +630,7 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 			std::string dataTypeValue;
 			if( !timeSamplesIO->hasEntry( g_ioType ) )
 			{
-				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", boost::format( "Unable to find data type directory for attribute \"%s\" at location \"%s\"." ) % attr % primPath );
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", "Unable to find data type directory for attribute \"{}\" at location \"{}\".", attr, primPath.GetAsString() );
 				continue;
 			}
 			timeSamplesIO->read( g_ioType, dataTypeValue );
@@ -655,10 +657,10 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 			}
 			else
 			{
-				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", boost::format( "Unable to convert to USD data type for attribute \"%s\" at location \"%s\"." ) % attr % primPath );
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", "Unable to convert to USD data type for attribute \"{}\" at location \"{}\".", attr, primPath.GetAsString() );
 				continue;
 			}
-			
+
 			addProperty(
 				properties,
 				primPath,
@@ -715,7 +717,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			TfToken usdInterpolation;
 			if ( !variableIO || !variableIO->hasEntry( g_ioInterpolation ) )
 			{
-				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find interpolation for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", "Unable to find interpolation for Primitive Variable \"{}\" at location \"{}\".", var, primPath.GetAsString() );
 				continue;
 			}
 
@@ -725,7 +727,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			// data type
 			if( !variableIO->hasEntry( g_ioData ) )
 			{
-				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find data for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", "Unable to find data for Primitive Variable \"{}\" at location \"{}\".", var, primPath.GetAsString() );
 				continue;
 			}
 
@@ -735,7 +737,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			{
 				if( dataEntry.dataType() != IndexedIO::InternedStringArray )
 				{
-					IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find reference to data for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
+					IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", "Unable to find reference to data for Primitive Variable \"{}\" at location \"{}\".", var, primPath.GetAsString() );
 					continue;
 				}
 				// IECore::Object has saved a reference to the data, so we need to follow the link to the referenced
@@ -753,7 +755,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 
 			if( !dataIO || !dataIO->hasEntry( g_ioType ) )
 			{
-				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find data type for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", "Unable to find data type for Primitive Variable \"{}\" at location \"{}\".", var, primPath.GetAsString() );
 				continue;
 			}
 
@@ -805,7 +807,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			}
 			else
 			{
-				primVarName = TfToken( boost::str( boost::format( "primvars:%s" ) % var ) );
+				primVarName = TfToken( fmt::format( "primvars:{}", var ) );
 				auto object = Object::create( dataTypeValue );
 				if( auto data = runTimeCast<Data>( object.get() ) )
 				{
@@ -823,7 +825,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 				}
 				else
 				{
-					IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find USD data type for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
+					IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", "Unable to find USD data type for Primitive Variable \"{}\" at location \"{}\".", var, primPath.GetAsString() );
 					continue;
 				}
 			}
@@ -845,7 +847,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			// indices
 			if( variableIO && variableIO->hasEntry( g_ioIndices ) )
 			{
-				TfToken primVarIndicesName = TfToken( boost::str( boost::format( "%s:indices" ) % primVarName ) );
+				TfToken primVarIndicesName = TfToken( fmt::format( "{}:indices", primVarName.GetString() ) );
 
 				addProperty(
 					properties,
@@ -1159,10 +1161,10 @@ void SceneCacheData::addCollections( SpecData& spec, TfTokenVector& properties, 
 		auto safeCollectionName = SceneCacheDataAlgo::toInternalName( collection.first );
 
 		// apiSchemas
-		collectionList.push_back( TfToken( boost::str( boost::format( "CollectionAPI:%s" ) % safeCollectionName ) ) );
+		collectionList.push_back( TfToken( fmt::format( "CollectionAPI:{}", safeCollectionName ) ) );
 
 		// expansion rule
-		TfToken expansionRuleName( boost::str( boost::format( "collection:%s:%s" ) % safeCollectionName % g_expansionRule ) );
+		TfToken expansionRuleName( fmt::format( "collection:{}:{}", safeCollectionName, g_expansionRule ) );
 		addProperty(
 			properties,
 			primPath,
@@ -1173,9 +1175,9 @@ void SceneCacheData::addCollections( SpecData& spec, TfTokenVector& properties, 
 			&UsdTokens->explicitOnly,
 			false
 		);
-		
+
 		// include relationship
-		TfToken relationshipName( boost::str( boost::format( "collection:%s:includes" ) % safeCollectionName ) );
+		TfToken relationshipName( fmt::format( "collection:{}:includes", safeCollectionName ) );
 		SdfListOp<SdfPath> targetPaths;
 		std::vector<SdfPath> targetChildren;
 
@@ -1417,7 +1419,7 @@ VtValue* SceneCacheData::GetMutableFieldValue(const SdfPath &path, const TfToken
 
 VtValue SceneCacheData::Get(const SdfPath &path, const TfToken & field) const
 {
-	
+
 	return GetFieldValue(path, field);
 }
 
@@ -1478,7 +1480,7 @@ void SceneCacheData::Erase(const SdfPath &path, const TfToken & field)
 	{
 		return;
 	}
-	
+
 	SpecData &spec = i->second;
 	for (size_t j=0, jEnd = spec.fields.size(); j != jEnd; ++j)
 	{
@@ -2066,7 +2068,7 @@ void SceneCacheData::SetTimeSample(const SdfPath &path, double time, const VtVal
 	{
 		fieldValue->UncheckedSwap(newSamples);
 	}
-	
+
 	// Insert or overwrite into newSamples.
 	newSamples[time] = value;
 
@@ -2098,7 +2100,7 @@ void SceneCacheData::EraseTimeSample(const SdfPath &path, double time)
 	{
 		return;
 	}
-	
+
 	// Erase from newSamples.
 	newSamples.erase(time);
 

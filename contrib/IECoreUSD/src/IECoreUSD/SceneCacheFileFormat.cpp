@@ -177,7 +177,7 @@ bool UsdSceneCacheFileFormat::WriteToFile( const SdfLayer& layer, const std::str
 	outScene = SdfFileFormatSharedSceneWriters::get( filePath );
 	if ( !outScene )
 	{
-		IECore::msg( IECore::Msg::Error, "UsdSceneCacheFileFormat::WriteToFile", boost::format( "Invalid file path \"%s\" for layer \"%s\"." ) % filePath % layer.GetIdentifier() );
+		IECore::msg( IECore::Msg::Error, "UsdSceneCacheFileFormat::WriteToFile", "Invalid file path \"{}\" for layer \"{}\".", filePath, layer.GetIdentifier() );
 		return false;
 	}
 
@@ -262,8 +262,8 @@ void UsdSceneCacheFileFormat::writeLocation(
 					IECore::msg(
 						IECore::Msg::Warning,
 						"SceneCacheFileFormat::writeLocation",
-						boost::format( "Unsupported multiple reference at location \"%s\", writing only the first reference." ) % primPath
-						);
+						"Unsupported multiple reference at location \"{}\", writing only the first reference.", primPath.GetAsString()
+					);
 				}
 
 				if ( ! references.empty() )
@@ -288,7 +288,7 @@ void UsdSceneCacheFileFormat::writeLocation(
 						IECore::msg(
 							IECore::Msg::Warning,
 							"SceneCacheFileFormat::writeLocation",
-							boost::format( "Unsupported file extension \"%s\" for reference at location \"%s\"." ) % filePath % primPath
+							"Unsupported file extension \"{}\" for reference at location \"{}\".", filePath, primPath.GetAsString()
 						);
 						return;
 					}
