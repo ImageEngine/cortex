@@ -41,6 +41,8 @@
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 
+#include "fmt/format.h"
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -91,7 +93,7 @@ FileSequence::FileSequence( const std::string &fileSequenceStr )
 
 			spaceIndex = fileSequenceCopy.find_first_of( " " );
 		}
-		
+
 	}
 	setFileName( filename );
 	setFrameList( frameList );
@@ -206,14 +208,14 @@ FrameList::Frame FileSequence::frameForFileName( const std::string &fileName ) c
 
 	if ( fileName.substr( 0, prefix.size() ) != prefix || fileName.substr( fileName.size() - suffix.size(), suffix.size() ) != suffix )
 	{
-		throw InvalidArgumentException( ( boost::format( "Filename \"%s\" is not a part of sequence \"%s\"." ) % fileName % asString() ).str() );
+		throw InvalidArgumentException( fmt::format( "Filename \"{}\" is not a part of sequence \"{}\".", fileName, asString() ) );
 	}
 
 	std::string frameStr = fileName.substr( prefix.size(), fileName.size() - suffix.size() - prefix.size() );
 
 	if ( frameStr.size() == 0 )
 	{
-		throw InvalidArgumentException( ( boost::format( "Filename \"%s\" is not a part of sequence \"%s\"." ) % fileName % asString() ).str() );
+		throw InvalidArgumentException( fmt::format( "Filename \"{}\" is not a part of sequence \"{}\".", fileName, asString() ) );
 	}
 
 	return boost::lexical_cast< FrameList::Frame >( frameStr );

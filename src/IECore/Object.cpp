@@ -36,11 +36,12 @@
 
 #include "IECore/MurmurHash.h"
 
-#include "boost/format.hpp"
+#include "boost/shared_ptr.hpp"
 #include "boost/tokenizer.hpp"
 
-#include <iostream>
+#include "fmt/format.h"
 
+#include <iostream>
 
 using namespace IECore;
 using namespace std;
@@ -412,7 +413,7 @@ void Object::copyFrom( const Object *toCopy )
 {
 	if ( !toCopy->isInstanceOf( typeId() ) )
 	{
-		throw InvalidArgumentException( ( boost::format( "\"%s\" is not an instance of \"%s\"" ) % toCopy->typeName() % typeName() ).str() );
+		throw InvalidArgumentException( fmt::format( "\"{}\" is not an instance of \"{}\"", toCopy->typeName(), typeName() ) );
 	}
 
 	CopyContext context;
@@ -533,12 +534,12 @@ ObjectPtr Object::create( TypeId typeId )
 	TypeInformation::TypeIdsToCreatorsMap::const_iterator it = i->typeIdsToCreators.find( typeId );
 	if( it==i->typeIdsToCreators.end() )
 	{
-		throw Exception( ( boost::format( "Type %d is not a registered Object type." ) % typeId ).str() );
+		throw Exception( fmt::format( "Type \"{}\" is not a registered Object type.", typeId ) );
 	}
 
 	if( !it->second )
 	{
-		throw Exception( ( boost::format( "Type %d is an abstract type." ) % typeId ).str() );
+		throw Exception( fmt::format( "Type \"{}\" is an abstract type.", typeId ) );
 	}
 
 	return it->second();
@@ -550,12 +551,12 @@ ObjectPtr Object::create( const std::string &typeName )
 	TypeInformation::TypeNamesToCreatorsMap::const_iterator it = i->typeNamesToCreators.find( typeName );
 	if( it==i->typeNamesToCreators.end() )
 	{
-		throw Exception( ( boost::format( "Type \"%s\" is not a registered Object type." ) % typeName ).str() );
+		throw Exception( fmt::format( "Type \"{}\" is not a registered Object type.", typeName ) );
 	}
 
 	if( !it->second )
 	{
-		throw Exception( ( boost::format( "Type \"%s\" is an abstract type." ) % typeName ).str() );
+		throw Exception( fmt::format( "Type \"{}\" is an abstract type.", typeName ) );
 	}
 
 	return it->second();

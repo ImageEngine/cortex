@@ -142,7 +142,9 @@ LensModelPtr LensModel::create( const std::string &name )
 {
 	// Check to see whether the requested lens model is registered and if not, throw an exception.
 	if ( creators().find( name ) == creators().end() )
-		throw IECore::Exception( (boost::format("LensModel: Could not find registered lens model \"%s\".") % name).str() );
+	{
+		throw IECore::Exception( fmt::format( "LensModel: Could not find registered lens model \"{}\".", name ) );
+	}
 
 	LensModelPtr lensModel = (creators()[name])( new CompoundObject() );
 
@@ -163,7 +165,9 @@ LensModelPtr LensModel::create( IECore::ConstCompoundObjectPtr lensParams )
 
 	// Check to see whether the requested lens model is registered and if not, throw an exception.
 	if ( creators().find( name ) == creators().end() )
-		throw IECore::Exception( (boost::format("LensModel: Could not find registered lens model \"%s\".") % name).str() );
+	{
+		throw IECore::Exception( fmt::format( "LensModel: Could not find registered lens model \"{}\".", name ) );
+	}
 
 	LensModelPtr lensModel = (creators()[name])( lensParams );
 

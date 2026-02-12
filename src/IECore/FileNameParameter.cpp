@@ -40,7 +40,8 @@
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
 #include "boost/filesystem/operations.hpp"
-#include "boost/format.hpp"
+
+#include "fmt/format.h"
 
 #include <algorithm>
 
@@ -103,7 +104,7 @@ bool FileNameParameter::valueValid( const Object *value, std::string *reason ) c
 		{
 			if( reason )
 			{
-				*reason = ( boost::format( "Filename extension '%s' not valid" ) % ext ).str();
+				*reason = fmt::format( "Filename extension '{}' not valid", ext );
 			}
 			return false;
 		}

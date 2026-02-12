@@ -100,7 +100,7 @@ IFFFile::Chunk *IFFFile::root()
 {
 	if ( !open() )
 	{
-		throw Exception( ( boost::format( "Failed to load \"%s\"." ) % m_streamFileName ).str() );
+		throw Exception( fmt::format( "Failed to load \"{}\".", m_streamFileName ) );
 	}
 
 	return m_root;

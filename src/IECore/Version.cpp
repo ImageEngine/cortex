@@ -34,7 +34,7 @@
 
 #include "IECore/Version.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 int IECore::milestoneVersion()
 {
@@ -63,12 +63,12 @@ int IECore::compatibilityVersion()
 
 const std::string &IECore::compatibilityVersionString()
 {
-	static std::string v = boost::str( boost::format( "%d.%d" ) % milestoneVersion() % majorVersion() );
+	static std::string v = fmt::format( "{}.{}", milestoneVersion(), majorVersion() );
 	return v;
 }
 
 const std::string &IECore::versionString()
 {
-	static std::string v = boost::str( boost::format( "%d.%d.%d.%d" ) % milestoneVersion() % majorVersion() % minorVersion() % patchVersion() );
+	static std::string v = fmt::format( "{}.{}.{}.{}", milestoneVersion(), majorVersion(), minorVersion(), patchVersion() );
 	return v;
 }

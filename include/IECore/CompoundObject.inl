@@ -37,7 +37,7 @@
 
 #include "IECore/Exception.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 namespace IECore
 {
@@ -57,7 +57,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions )
 		{
 			if( throwExceptions )
 			{
-				throw Exception( boost::str( boost::format( "CompoundObject child \"%s\" is not of type \"%s\"." ) % name.value() % T::staticTypeName() ) );
+				throw Exception( fmt::format( "CompoundObject child \"{}\" is not of type \"{}\".", name.value(), T::staticTypeName() ) );
 			}
 			else
 			{
@@ -69,7 +69,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions )
 	{
 		if( throwExceptions )
 		{
-			throw Exception( boost::str( boost::format( "CompoundObject has no child named \"%s\"." ) % name.value() ) );
+			throw Exception( fmt::format( "CompoundObject has no child named \"{}\".", name.value() ) );
 		}
 		else
 		{
@@ -93,7 +93,7 @@ const T *CompoundObject::member( const InternedString &name, bool throwException
 		{
 			if( throwExceptions )
 			{
-				throw Exception( boost::str( boost::format( "CompoundObject child \"%s\" is not of type \"%s\"." ) % name.value() % T::staticTypeName() ) );
+				throw Exception( fmt::format( "CompoundObject child \"{}\" is not of type \"{}\".", name.value(), T::staticTypeName() ) );
 			}
 			else
 			{
@@ -105,7 +105,7 @@ const T *CompoundObject::member( const InternedString &name, bool throwException
 	{
 		if( throwExceptions )
 		{
-			throw Exception( boost::str( boost::format( "CompoundObject has no child named \"%s\"." ) % name.value() ) );
+			throw Exception( fmt::format( "CompoundObject has no child named \"{}\".", name.value() ) );
 		}
 		else
 		{
@@ -129,7 +129,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions, boo
 		{
 			if( throwExceptions )
 			{
-				throw Exception( boost::str( boost::format( "CompoundObject child \"%s\" is not of type \"%s\"." ) % name.value() % T::staticTypeName() ) );
+				throw Exception( fmt::format( "CompoundObject child \"{}\" is not of type \"{}\".", name.value(), T::staticTypeName() ) );
 			}
 			else
 			{
@@ -147,7 +147,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions, boo
 		}
 		else if( throwExceptions )
 		{
-			throw Exception( boost::str( boost::format( "CompoundObject has no child named \"%s\"." ) % name.value() ) );
+			throw Exception( fmt::format( "CompoundObject has no child named \"{}\".", name.value() ) );
 		}
 		else
 		{

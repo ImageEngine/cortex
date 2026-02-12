@@ -44,8 +44,6 @@
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/TypeIds.h"
 
-#include "boost/format.hpp"
-
 #include <map>
 
 namespace IECore

@@ -36,8 +36,9 @@
 
 #include "IECore/MurmurHash.h"
 
-#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
+
+#include "fmt/format.h"
 
 using namespace IECore;
 
@@ -98,7 +99,7 @@ void ObjectVector::save( SaveContext *context ) const
 	{
 		if( *it )
 		{
-			std::string name = str( boost::format( "%d" ) % i );
+			std::string name = fmt::format( "{}", i );
 			context->save( it->get(), ioMembers.get(), name );
 		}
 		i++;

@@ -43,8 +43,6 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 
 using namespace IECore;

@@ -43,8 +43,6 @@
 #include "IECore/Data.h"
 #include "IECore/Exception.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 
 namespace IECore

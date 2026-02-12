@@ -43,7 +43,7 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 #include <cassert>
 
@@ -724,7 +724,9 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 
 	string targetTypeName = Object::typeNameFromTypeId( targetType );
 	if ( targetTypeName == "" )
-		targetTypeName = ( format( "%d" ) % targetType ).str();
+	{
+		targetTypeName = fmt::format( "{}", fmt::underlying( targetType ) );
+	}
 
-	throw Exception( string("Don't know how to convert from type ") + data->typeName() + " to " + targetTypeName );
+	throw Exception( fmt::format( "Don't know how to convert from type {} to {}", data->typeName(), targetTypeName ) );
 }

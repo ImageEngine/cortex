@@ -39,10 +39,11 @@
 #include "IECore/Object.h"
 #include "IECore/Reader.h"
 
-#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "tbb/concurrent_hash_map.h"
+
+#include "fmt/format.h"
 
 #include <mutex>
 
@@ -111,7 +112,7 @@ struct CachedReader::MemberData
 				FileErrors::const_accessor cit;
 				if ( data->m_fileErrors.find( cit, filePath ) )
 				{
-					throw Exception( ( format( "Previous attempt to read %s failed: %s" ) % filePath % cit->second ).str() );
+					throw Exception( fmt::format( "Previous attempt to read {} failed: {}", filePath, cit->second ) );
 				}
 			}
 

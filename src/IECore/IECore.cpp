@@ -35,8 +35,6 @@
 
 #include "IECore/IECore.h"
 
-#include "boost/format.hpp"
-
 namespace IECore
 {
 

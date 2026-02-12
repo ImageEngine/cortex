@@ -40,7 +40,6 @@
 
 #include "boost/algorithm/string/trim.hpp"
 #include "boost/algorithm/string.hpp"
-#include "boost/format.hpp"
 
 #ifndef _MSC_VER
 #include <pwd.h>
@@ -125,7 +124,7 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 	}
 
 	// Getting the Windows OS version (and the build number in particular) from
-	// GetVersionEx, which is deprecated, is unreliable even when not running in 
+	// GetVersionEx, which is deprecated, is unreliable even when not running in
 	// Compatibility Mode. We match the Python method from
 	// https://github.com/python/cpython/blob/main/Python/sysmodule.c.
 	// This tries to get the version from kernel32.dll (a core Windows library)
@@ -144,8 +143,8 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 	char kernel32Path[MAX_PATH];
 	DWORD versionBlockSize;
 	LPVOID versionBlock;
-	if( 
-		kernel32Handle && 
+	if(
+		kernel32Handle &&
 		GetModuleFileNameA( kernel32Handle, kernel32Path, MAX_PATH )  &&
 		( versionBlockSize = GetFileVersionInfoSizeA( kernel32Path, NULL ) ) &&
 		( versionBlock = malloc( versionBlockSize ) )
@@ -163,7 +162,7 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 				std::to_string( HIWORD( fixedFileInfo->dwProductVersionMS ) )
 			);
 			compound->writable()["systemVersion"] = new StringData(
-				std::to_string( HIWORD( fixedFileInfo->dwProductVersionMS ) ) + "." + 
+				std::to_string( HIWORD( fixedFileInfo->dwProductVersionMS ) ) + "." +
 				std::to_string( LOWORD( fixedFileInfo->dwProductVersionMS ) ) + "." +
 				std::to_string( HIWORD( fixedFileInfo->dwProductVersionLS ) )
 			);
@@ -175,14 +174,14 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 	{
 		compound->writable()["systemRelease"] = new StringData( std::to_string( ovx.dwMajorVersion ) );
 		compound->writable()["systemVersion"] = new StringData(
-			std::to_string( ovx.dwMajorVersion ) + "." + 
+			std::to_string( ovx.dwMajorVersion ) + "." +
 			std::to_string( ovx.dwMinorVersion ) + "." +
 			std::to_string(ovx.dwBuildNumber )
 		);
 	}
 
 	header->members()["host"] = compound;
-	
+
 #endif
 }
 

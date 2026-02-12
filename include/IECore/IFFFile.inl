@@ -49,7 +49,7 @@ void IFFFile::Chunk::read( T &data )
 {
 	if ( sizeof(T) != m_dataSize )
 	{
-		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read data of size '%d' for a Chunk '%s' with dataSize '%d'." ) % sizeof(T) % m_type.name() % m_dataSize );
+		msg( Msg::Error, "IFFFile::Chunk::read()", "Attempting to read data of size '{}' for a Chunk '{}' with dataSize '{}'.", sizeof(T), m_type.name(), m_dataSize );
 	}
 
 	T dataBuffer[1];
@@ -65,7 +65,7 @@ size_t IFFFile::Chunk::read( std::vector<T> &data )
 
 	if ( sizeof(T) * length != m_dataSize )
 	{
-		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read '%d' pieces of data of size '%d' for a Chunk '%s' with dataSize '%d'." ) % length % sizeof(T) % m_type.name() % m_dataSize );
+		msg( Msg::Error, "IFFFile::Chunk::read()", "Attempting to read '{}' pieces of data of size '{}' for a Chunk '{}' with dataSize '{}'.", length, sizeof(T), m_type.name(), m_dataSize );
 	}
 
 	std::vector<T> dataBuffer( length );
@@ -86,7 +86,7 @@ size_t IFFFile::Chunk::read( std::vector<Imath::Vec3<T> > &data )
 
 	if ( sizeof(T) * length * 3 != m_dataSize )
 	{
-		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read %d pieces of IMath::Vec3 data of size %d for a Chunk '%s' with dataSize %d." ) % length % sizeof(T) % m_type.name() % m_dataSize );
+		msg( Msg::Error, "IFFFile::Chunk::read()", "Attempting to read {} pieces of IMath::Vec3 data of size {} for a Chunk '{}' with dataSize {}.", length, sizeof(T), m_type.name(), m_dataSize );
 	}
 
 	std::vector<T> dataBuffer( length * 3 );

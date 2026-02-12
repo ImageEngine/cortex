@@ -36,8 +36,6 @@
 
 #include "IECore/MessageHandler.h"
 
-#include "boost/format.hpp"
-
 #include <cassert>
 #include <mutex>
 
@@ -120,7 +118,7 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 		{
 			if ( baseTypeId != lb->second )
 			{
-				msg( Msg::Warning, "RunTimeTyped", boost::format( "Duplicate registration of base type id for '%s' - %d and %d") % derivedTypeName % lb->second % baseTypeId  );
+				msg( Msg::Warning, "RunTimeTyped", "Duplicate registration of base type id for '{}' - {} and {}", derivedTypeName, lb->second, baseTypeId );
 			}
 		}
 		else
@@ -142,7 +140,7 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 		{
 			if ( std::string( derivedTypeName ) != lb->second )
 			{
-				msg( Msg::Warning, "RunTimeTyped", boost::format( "Duplicate registration of type name for type id %d - '%s' and '%s'" ) % derivedTypeId % lb->second % derivedTypeName );
+				msg( Msg::Warning, "RunTimeTyped", "Duplicate registration of type name for type id {} - '{}' and '{}'", derivedTypeId, lb->second, derivedTypeName );
 			}
 		}
 		else
@@ -161,7 +159,7 @@ void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeNa
 		{
 			if ( derivedTypeId != lb->second )
 			{
-				msg( Msg::Warning, "RunTimeTyped", boost::format( "Duplicate registration of type id for type name '%s' - %d and %d") % derivedTypeName % lb->second % derivedTypeId );
+				msg( Msg::Warning, "RunTimeTyped", "Duplicate registration of type id for type name '{}' - {} and {}", derivedTypeName, lb->second, derivedTypeId );
 			}
 		}
 		else

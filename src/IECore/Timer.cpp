@@ -121,6 +121,6 @@ ScopedTimer::~ScopedTimer()
 	IECore::msg(
 		IECore::MessageHandler::Debug,
 		"ScopedTimer",
-		boost::str( boost::format( "[timed block] name: '%1%' time: %2% ms" ) % m_name % (m_timer.currentElapsed() * 1000.0) )
+		"[timed block] name: '{}' time: {} ms", m_name, (m_timer.currentElapsed() * 1000.0)
 	);
 }

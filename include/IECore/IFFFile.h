@@ -42,6 +42,8 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "Imath/ImathVec.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
+#include "fmt/format.h"
+
 #include <fstream>
 #include <vector>
 

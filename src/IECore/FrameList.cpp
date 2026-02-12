@@ -36,7 +36,7 @@
 
 #include "IECore/Exception.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 #include <algorithm>
 
@@ -108,7 +108,7 @@ FrameListPtr FrameList::parse( const std::string &frameList )
 		}
 	}
 
-	throw Exception( ( boost::format( "\"%s\" does not define a valid frame list." ) % ( frameList ) ).str() );
+	throw Exception( fmt::format( "\"{}\" does not define a valid frame list.", frameList ) );
 }
 
 bool FrameList::isEqualTo( ConstFrameListPtr other ) const
