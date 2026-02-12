@@ -1,12 +1,11 @@
 10.7.x.x (relative to 10.7.0.0a4)
 ========
 
-
-
 API
 ---
 
 - MessageHandler : Added `msg()` overload that accepts a `fmt::format_string` and arguments.
+- InternedString : Added specialisation for `fmt::formatter<InternedString>`.
 
 Build
 -----
