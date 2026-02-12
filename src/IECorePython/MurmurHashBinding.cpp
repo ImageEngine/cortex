@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
 #include "boost/python.hpp"
 
 #include "IECorePython/MurmurHashBinding.h"
@@ -40,6 +39,8 @@
 #include "IECore/DataAlgo.h"
 #include "IECore/MurmurHash.h"
 #include "IECore/VectorTypedData.h"
+
+#include "fmt/format.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -80,9 +81,9 @@ static long hash( MurmurHash *h )
 #define IECORETEST_ASSERT( x ) \
 	if( !( x ) ) \
 	{ \
-		throw IECore::Exception( boost::str( \
-			boost::format( "Failed assertion \"%s\" : %s line %d" ) % #x % __FILE__ % __LINE__ \
-		) ); \
+		throw IECore::Exception( \
+			fmt::format( "Failed assertion \"{}\" : {} line {}", #x, __FILE__, __LINE__ ) \
+		); \
 	}
 
 struct HashDispatchFunctor

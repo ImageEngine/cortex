@@ -43,7 +43,7 @@
 #include "IECore/Exception.h"
 #include "IECore/FrameRange.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -54,7 +54,7 @@ namespace IECorePython
 template<>
 std::string repr( FrameRange &x )
 {
-	return ( boost::format("IECore.FrameRange( %d, %d, %d )" ) % x.getStart() % x.getEnd() % x.getStep() ).str();
+	return fmt::format("IECore.FrameRange( {}, {}, {} )", x.getStart(), x.getEnd(), x.getStep() );
 }
 
 void bindFrameRange()

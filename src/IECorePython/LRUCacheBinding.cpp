@@ -43,9 +43,9 @@
 
 #include "IECore/LRUCache.h"
 
-#include "boost/format.hpp"
-
 #include "tbb/parallel_for.h"
+
+#include "fmt/format.h"
 
 #include <mutex>
 
@@ -178,9 +178,7 @@ struct GetFromTestCache
 				if( k != v )
 				{
 					throw Exception(
-						boost::str(
-							boost::format( "Incorrect LRUCache value found (expected %d but got %d)" ) % k %v
-						)
+						fmt::format( "Incorrect LRUCache value found (expected {} but got {})", k, v )
 					);
 				}
 

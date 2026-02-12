@@ -44,7 +44,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImfTimeCode.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 #include <sstream>
 #include <string>
@@ -85,7 +85,7 @@ template<>
 std::string str<Imf::TimeCode>( Imf::TimeCode &x )
 {
 
-	return ( boost::format( "%02d:%02d:%02d:%02d" ) % x.hours() % x.minutes() % x.seconds() % x.frame() ).str();
+	return fmt::format( "{:02}:{:02}:{:02}:{:02}", x.hours(), x.minutes(), x.seconds(), x.frame() );
 }
 
 bool equal( Imf::TimeCode &x, Imf::TimeCode &y )

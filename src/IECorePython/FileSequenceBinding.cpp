@@ -42,8 +42,6 @@
 #include "IECore/Exception.h"
 #include "IECore/FileSequence.h"
 
-#include "boost/format.hpp"
-
 using namespace boost::python;
 using namespace IECore;
 

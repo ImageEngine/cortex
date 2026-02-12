@@ -44,7 +44,6 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include "boost/format.hpp"
 
 using namespace boost::python;
 using namespace IECore;
