@@ -40,6 +40,8 @@
 
 #include "IECore/VectorTypedData.h"
 
+#include "fmt/format.h"
+
 #include <unordered_map>
 
 namespace IECoreScene
@@ -214,7 +216,7 @@ class DeleteFlaggedUniformFunctor : public DeleteFlagged<U>
 		IndexedData operator()( const IECore::Data *data )
 		{
 			throw IECore::Exception(
-				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+				fmt::format( "Unexpected Data: {}", ( data ? data->typeName() : std::string( "nullptr" ) ) )
 			);
 		}
 
@@ -259,7 +261,7 @@ class DeleteFlaggedFaceVaryingFunctor : public DeleteFlagged<U>
 		IndexedData operator()( const IECore::Data *data )
 		{
 			throw IECore::Exception(
-				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+				fmt::format( "Unexpected Data: {}", ( data ? data->typeName() : std::string( "nullptr" ) ) )
 			);
 		}
 
@@ -307,7 +309,7 @@ class DeleteFlaggedVaryingFunctor : public DeleteFlagged<U>
 		IndexedData operator()( const IECore::Data *data )
 		{
 			throw IECore::Exception(
-				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+				fmt::format( "Unexpected Data: {}", ( data ? data->typeName() : std::string( "nullptr" ) ) )
 			);
 		}
 
@@ -399,7 +401,7 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 		IndexedData operator()( const IECore::Data *data )
 		{
 			throw IECore::Exception(
-				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+				fmt::format( "Unexpected Data: {}", ( data ? data->typeName() : std::string( "nullptr" ) ) )
 			);
 		}
 

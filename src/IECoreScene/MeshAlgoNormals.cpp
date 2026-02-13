@@ -37,7 +37,6 @@
 
 #include "IECore/PolygonAlgo.h"
 
-#include "boost/format.hpp"
 #include "boost/iterator/transform_iterator.hpp"
 #include "boost/iterator/zip_iterator.hpp"
 #include "boost/tuple/tuple.hpp"
@@ -142,7 +141,7 @@ PrimitiveVariable calculateNormalsImpl( const MeshPrimitive *mesh, PrimitiveVari
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
 	{
-		throw InvalidArgumentException( boost::str( boost::format( "MeshAlgo::calculateNormals : MeshPrimitive has no \"%s\" primitive variable." ) % position ) );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::calculateNormals : MeshPrimitive has no \"{}\" primitive variable.", position ) );
 	}
 	const std::vector<V3f> &points = pData->readable();
 
@@ -329,7 +328,7 @@ PrimitiveVariable calculateNormalsImpl( const MeshPrimitive *mesh, PrimitiveVari
 					// test all pairs of face-verts for whether they match. The only reasonable cases for a
 					// vertex like this involve radial symmetry, so we'll just test one arbitrarily chosen
 					// vert against every other vert, and treat the vertex either as fully smooth
-					// ( appropriate for the pole of a sphere ) or fully hard edged ( appropriate for the tip of 
+					// ( appropriate for the pole of a sphere ) or fully hard edged ( appropriate for the tip of
 					// a cone )
 
 					bool allMatch = true;
@@ -479,7 +478,7 @@ PrimitiveVariable MeshAlgo::calculateNormals( const MeshPrimitive *mesh, Primiti
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
 	{
-		throw InvalidArgumentException( boost::str( boost::format( "MeshAlgo::calculateNormals : MeshPrimitive has no \"%s\" primitive variable." ) % position ) );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::calculateNormals : MeshPrimitive has no \"{}\" primitive variable.", position ) );
 	}
 	const std::vector<V3f> &points = pData->readable();
 

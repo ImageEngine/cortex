@@ -410,7 +410,8 @@ CurvesPrimitivePtr deleteCurves(
 		if( !curvesPrimitive->isPrimitiveVariableValid( it->second ) )
 		{
 			throw InvalidArgumentException(
-				boost::str ( boost::format( "CurvesAlgo::deleteCurves cannot process invalid primitive variable \"%s\"" ) % it->first ) );
+				fmt::format( "CurvesAlgo::deleteCurves cannot process invalid primitive variable \"{}\"", it->first )
+			);
 		}
 
 		switch( it->second.interpolation )

@@ -53,6 +53,8 @@
 
 #include "boost/tokenizer.hpp"
 
+#include "fmt/format.h"
+
 OIIO_NAMESPACE_USING
 
 using namespace std;
@@ -377,7 +379,7 @@ class ImageReader::Implementation
 					}
 					default :
 					{
-						throw IECore::IOException( ( boost::format( "ImageReader : Unsupported data type \"%d\"" ) % spec->format ).str() );
+						throw IECore::IOException( fmt::format( "ImageReader : Unsupported data type \"{}\"", spec->format ) );
 					}
 				}
 			}

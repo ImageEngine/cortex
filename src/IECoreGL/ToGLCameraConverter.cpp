@@ -43,8 +43,6 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/format.hpp"
-
 using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( ToGLCameraConverter );

@@ -36,9 +36,10 @@
 
 #include "IECore/Exception.h"
 
-#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
+
+#include "fmt/format.h"
 
 #include <algorithm>
 
@@ -126,15 +127,15 @@ std::string FrameRange::asString() const
 {
 	if ( m_step != 1 )
 	{
-		return ( boost::format( "%d-%dx%d") % m_start % m_end % m_step ).str();
+		return fmt::format( "{}-{}x{}", m_start, m_end, m_step );
 	}
 	else if ( m_start != m_end )
 	{
-		return ( boost::format( "%d-%d") % m_start % m_end ).str();
+		return fmt::format( "{}-{}", m_start, m_end );
 	}
 	else
 	{
-		return ( boost::format( "%d") % m_start ).str();
+		return fmt::format( "{}", m_start );
 	}
 }
 

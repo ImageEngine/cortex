@@ -43,8 +43,6 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
-#include "boost/format.hpp"
-
 #include <numeric>
 
 using namespace IECore;
@@ -126,7 +124,8 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreS
 				if( !pointsPrimitive->isPrimitiveVariableValid( it->second ) )
 				{
 					throw InvalidArgumentException(
-						boost::str ( boost::format( "PointsAlgo::deletePoints cannot process invalid primitive variable \"%s\"" ) % it->first ) );
+						fmt::format( "PointsAlgo::deletePoints cannot process invalid primitive variable \"{}\"", it->first )
+					);
 				}
 				const IECore::Data *inputData = it->second.data.get();
 				vertexFunctor.setIndices( it->second.indices.get() );
@@ -303,7 +302,7 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const P
 	if( pointsToDelete.interpolation != PrimitiveVariable::Vertex )
 	{
 		throw InvalidArgumentException(
-			boost::str ( boost::format( "PointsAlgo::deletePoints requires a Vertex [Int|Bool|Float]VectorData primitiveVariable. %1% interpolation found " ) % pointsToDelete.interpolation )
+			fmt::format( "PointsAlgo::deletePoints requires a Vertex [Int|Bool|Float]VectorData primitiveVariable. {} interpolation found", pointsToDelete.interpolation )
 		);
 	}
 
@@ -362,8 +361,7 @@ PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &poin
 			{
 				if( bExistingVertex )
 				{
-					std::string msg = boost::str( boost::format( "PointsAlgo::mergePoints mismatching primvar %s" ) % name );
-					throw InvalidArgumentException( msg );
+					throw InvalidArgumentException( fmt::format( "PointsAlgo::mergePoints mismatching primvar {}", name ) );
 				}
 
 				if( !bExistingConstant )
@@ -379,8 +377,7 @@ PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &poin
 				PrimitiveVariableMap::const_iterator constantPrimVarIt = constantPrimVars.find( name );
 				if( constantPrimVarIt != constantPrimVars.end() )
 				{
-					std::string msg = boost::str( boost::format( "PointsAlgo::mergePoints mismatching primvar %s" ) % name );
-					throw InvalidArgumentException( msg );
+					throw InvalidArgumentException( fmt::format( "PointsAlgo::mergePoints mismatching primvar {}", name ) );
 				}
 
 				if( !bExistingVertex )
@@ -403,8 +400,7 @@ PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &poin
 						}
 						catch( const IECore::Exception &e )
 						{
-							std::string msg = boost::str( boost::format( "PointsAlgo::mergePoints unable to cast primvar %s (%s) " ) % name % e.what() );
-							throw InvalidArgumentException( msg );
+							throw InvalidArgumentException( fmt::format( "PointsAlgo::mergePoints unable to cast primvar {} ({})", name, e.what() ) );
 						}
 					}
 				}

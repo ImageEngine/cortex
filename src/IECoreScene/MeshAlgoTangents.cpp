@@ -94,8 +94,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
 	if( !positionData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromUV : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromUV : MeshPrimitive has no Vertex \"{}\" primitive variable.", position )
+		);
 	}
 
 	const V3fVectorData::ValueType &points = positionData->readable();
@@ -109,7 +110,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const auto uvIt = mesh->variables.find( uvSet );
 	if( uvIt == mesh->variables.end() ||  uvIt->second.data->typeId() != V2fVectorDataTypeId )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangentsFromUV : MeshPrimitive has no V2fVectorData primitive variable named \"%s\"."  ) % ( uvSet ) ).str() );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromUV : MeshPrimitive has no V2fVectorData primitive variable named \"{}\".", uvSet )
+		);
 	}
 
 	const std::vector<Imath::V2f> *uvData = nullptr;
@@ -152,11 +155,10 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	else
 	{
 		throw InvalidArgumentException(
-			(
-				boost::format(
-					"MeshAlgo::calculateTangentsFromUV : MeshPrimitive primitive variable named \"%s\"  has incorrect interpolation, must be either Vertex or FaceVarying"
-				) % ( uvSet )
-			).str()
+			fmt::format(
+				"MeshAlgo::calculateTangentsFromUV : MeshPrimitive primitive variable named \"{}\"  has incorrect interpolation, must be either Vertex or FaceVarying",
+				uvSet
+			)
 		);
 	}
 
@@ -292,20 +294,23 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const V3fVectorData *normalData = mesh->variableData<V3fVectorData>( normal );
 	if( !positionData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : MeshPrimitive has no Vertex \"{}\" primitive variable.", position )
+		);
 	}
 	if( !normalData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % normal );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : MeshPrimitive has no Vertex \"{}\" primitive variable.", normal )
+		);
 	}
 
 	const auto normalIt = mesh->variables.find( normal );
 	if( normalIt == mesh->variables.end() ||  normalIt->second.interpolation != IECoreScene::PrimitiveVariable::Interpolation::Vertex )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"%s\" needs to be Vertex interpolated." ) % normal );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"{}\" needs to be Vertex interpolated.", normal )
+		);
 	}
 
 	const V3fVectorData::ValueType &points = positionData->readable();
@@ -399,8 +404,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
 	if( !positionData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromFirstEdge : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromFirstEdge : MeshPrimitive has no Vertex \"{}\" primitive variable.", position )
+		);
 	}
 	const V3fVectorData::ValueType &points = positionData->readable();
 
@@ -408,14 +414,16 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const V3fVectorData *normalData = mesh->variableData<V3fVectorData>( normal );
 	if( !normalData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromFirstEdge : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % normal );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromFirstEdge : MeshPrimitive has no Vertex \"{}\" primitive variable.", normal )
+		);
 	}
 	const auto normalIt = mesh->variables.find( normal );
 	if( normalIt == mesh->variables.end() ||  normalIt->second.interpolation != IECoreScene::PrimitiveVariable::Interpolation::Vertex )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"%s\" needs to be Vertex interpolated." ) % normal );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"{}\" needs to be Vertex interpolated.", normal )
+		);
 	}
 
 	const auto &normals = normalData->readable();
@@ -485,8 +493,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
 	if( !positionData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromTwoEdges : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromTwoEdges : MeshPrimitive has no Vertex \"{}\" primitive variable.", position )
+		);
 	}
 	const V3fVectorData::ValueType &points = positionData->readable();
 
@@ -494,14 +503,16 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const V3fVectorData *normalData = mesh->variableData<V3fVectorData>( normal );
 	if( !normalData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromTwoEdges : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % normal );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromTwoEdges : MeshPrimitive has no Vertex \"{}\" primitive variable.", normal )
+		);
 	}
 	const auto normalIt = mesh->variables.find( normal );
 	if( normalIt == mesh->variables.end() ||  normalIt->second.interpolation != IECoreScene::PrimitiveVariable::Interpolation::Vertex )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"%s\" needs to be Vertex interpolated." ) % normal );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException(
+			fmt::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"{}\" needs to be Vertex interpolated.", normal )
+		);
 	}
 
 	const auto &normals = normalData->readable();

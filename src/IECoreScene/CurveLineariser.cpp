@@ -40,8 +40,6 @@
 #include "IECore/FastFloat.h"
 #include "IECore/MessageHandler.h"
 
-#include "boost/format.hpp"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
@@ -145,7 +143,7 @@ void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const Comp
 				msg(
 					Msg::Warning,
 					"CurveLineariser::modifyTypedPrimitive",
-					boost::format( "Ignoring primitive variable \"%s\" with unsupported type \"%s\"" ) % it->first % it->second.data->typeName()
+					"Ignoring primitive variable \"{}\" with unsupported type \"{}\"", it->first, it->second.data->typeName()
 				);
 		}
 	}

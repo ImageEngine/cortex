@@ -41,8 +41,6 @@
 #include "IECore/DataCastOp.h"
 #include "IECore/DespatchTypedData.h"
 
-#include "boost/format.hpp"
-
 #include <algorithm>
 #include <cassert>
 
@@ -134,8 +132,7 @@ struct CurveTangentsOp::HandleErrors
 	template<typename T, typename F>
 	void operator()( const T *d, const F &f )
 	{
-		string e = boost::str( boost::format( "CurveTangentsOp : P primitive variable has unsupported data type \"%s\"." ) % d->typeName() );
-		throw InvalidArgumentException( e );
+		throw InvalidArgumentException( fmt::format( "CurveTangentsOp : P primitive variable has unsupported data type \"{}\".", d->typeName() ) );
 	}
 };
 

@@ -34,8 +34,6 @@
 
 #include "IECoreGL/Texture.h"
 
-#include "boost/format.hpp"
-
 using namespace IECoreGL;
 using namespace IECore;
 using namespace boost;

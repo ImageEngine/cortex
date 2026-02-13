@@ -38,7 +38,7 @@
 
 #include "IECore/MessageHandler.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 namespace IECoreGL
 {
@@ -62,7 +62,7 @@ void debugPrintErrors( const char *file, int line )
 	} while( error!=GL_NO_ERROR );
 	if( errors.size() )
 	{
-		std::string context = boost::str( boost::format( "%s line %d" ) % file % line );
+		std::string context = fmt::format( "{} line {}", file, line );
 		IECore::msg( IECore::Msg::Error, context, errors );
 	}
 

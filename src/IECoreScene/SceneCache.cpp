@@ -58,6 +58,8 @@
 
 #include "tbb/concurrent_hash_map.h"
 
+#include "fmt/format.h"
+
 using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
@@ -521,7 +523,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			if ( !it.first->second )
 			{
 				m_attributeSampleTimes.erase( it.first );
-				throw Exception( ( boost::format( "No samples for attribute %s available" ) % name.value() ).str() );
+				throw Exception( fmt::format( "No samples for attribute {} available", name.value() ) );
 			}
 			return *(it.first->second);
 		}
@@ -1009,7 +1011,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			{
 				if ( throwExceptions )
 				{
-					throw Exception( (boost::format("No %s samples available") % childName.value()).str() );
+					throw Exception( fmt::format( "No {} samples available", childName.value() ) );
 				}
 				return nullptr;
 			}
@@ -1221,7 +1223,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				}
 				catch ( std::exception &e )
 				{
-					msg( Msg::Error, "SceneCache::~SceneCache", ( boost::format( "Corrupted file resulted from exception while flushing data: %s." ) % e.what() ).str() );
+					msg( Msg::Error, "SceneCache::~SceneCache", "Corrupted file resulted from exception while flushing data: {}.", e.what() );
 				}
 				catch (...)
 				{
@@ -1262,10 +1264,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				if ( *(m_boundSampleTimes.rbegin()) >= time )
 				{
 					std::string prefix = "SceneCache::writeBound";
-					std::string details = boost::str(
-						boost::format(
-							"bound written at previous time: %1%,\nSample times must be written sequentially for each bound."
-						) % *(m_boundSampleTimes.rbegin())
+					std::string details = fmt::format(
+						"bound written at previous time: {},\nSample times must be written sequentially for each bound.",
+						*(m_boundSampleTimes.rbegin())
 					);
 					throwException( prefix, time, details );
 				}
@@ -1300,10 +1301,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				if ( *(m_transformSampleTimes.rbegin()) >= time )
 				{
 					std::string prefix = "SceneCache::writeTransform";
-					std::string details = boost::str(
-						boost::format(
-							"transform written at previous time: %1%,\nSample times must be written sequentially for each transform."
-						) % *(m_transformSampleTimes.rbegin())
+					std::string details = fmt::format(
+						"transform written at previous time: {},\nSample times must be written sequentially for each transform.",
+						*(m_transformSampleTimes.rbegin())
 					);
 					throwException( prefix, time, details );
 				}
@@ -1321,7 +1321,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 			if ( !attribute )
 			{
-				throw Exception( boost::str( boost::format( "SceneCache::writeAttribute ( name: '%1%' ): NULL attribute data!  ") % name.string() ) );
+				throw Exception( fmt::format( "SceneCache::writeAttribute (name: '{}'): NULL attribute data!", name ) );
 			}
 
 			std::pair< AttributeSamplesMap::iterator, bool > it = m_attributeSampleTimes.insert( std::pair< SceneCache::Name, SampleTimes >( name, SampleTimes() ) );
@@ -1331,10 +1331,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				if ( *(sampleTimes.rbegin()) >= time )
 				{
 					std::string prefix = "SceneCache::writeAttribute";
-					std::string details = boost::str(
-						boost::format(
-							"name: '%1%' written at previous time: %2%,\nSample times must be written sequentially for each attribute."
-						) % name.string() % *(sampleTimes.rbegin())
+					std::string details = fmt::format(
+						"name: '{}' written at previous time: {},\nSample times must be written sequentially for each attribute.",
+						name, *(sampleTimes.rbegin())
 					);
 					throwException( prefix, time, details );
 				}
@@ -1403,10 +1402,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				if ( *(m_objectSampleTimes.rbegin()) >= time )
 				{
 					std::string prefix = "SceneCache::writeObject";
-					std::string details = boost::str(
-						boost::format(
-							"object written at previous time: %1%,\nSample times must be written sequentially for each object."
-						) % *(m_objectSampleTimes.rbegin())
+					std::string details = fmt::format(
+						"object written at previous time: %1%,\nSample times must be written sequentially for each object.",
+						*(m_objectSampleTimes.rbegin())
 					);
 					throwException( prefix, time, details );
 				}
@@ -1582,7 +1580,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		{
 			if ( !m_sampleTimesMap )
 			{
-				throw Exception( boost::str( boost::format( " '%1%' has already been flushed to disk. You can't make further changes to it." ) % fileName() ) );
+				throw Exception( fmt::format( "'{}' has already been flushed to disk. You can't make further changes to it.", fileName() ) );
 			}
 		}
 
@@ -1763,7 +1761,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				path( p );
 				IECoreScene::SceneInterface::pathToString( p, stringPath );
 				std::string type = boost::core::demangle( typeid( e ).name() );
-				throw IECore::IOException( boost::str( boost::format( "%1% : %2% ( for location \"%3%\" )" ) % type % e.what() % stringPath ) );
+				throw IECore::IOException( fmt::format( "{} : {} (for location \"{}\")", type, e.what(), stringPath ) );
 			}
 			catch( ... )
 			{
@@ -1771,7 +1769,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				std::string stringPath;
 				path( p );
 				IECoreScene::SceneInterface::pathToString( p, stringPath );
-				throw IECore::IOException( boost::str( boost::format( "Unknown exception while flushing data ( for location %1% )" ) % stringPath ) );
+				throw IECore::IOException( fmt::format( "Unknown exception while flushing data (for location {})", stringPath ) );
 			}
 		}
 
@@ -2181,10 +2179,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			IECoreScene::SceneInterface::pathToString( p, stringPath );
 
 			throw Exception(
-				boost::str(
-					boost::format(
-						"%1% ( for location %2%, time: %3% ) : %4%"
-					) % prefix % stringPath % time % details
+				fmt::format(
+					"{} (for location {}, time: {}) : {}",
+					prefix, stringPath, time, details
 				)
 			);
 		}

@@ -58,7 +58,7 @@ FontPtr FontLoader::load( const std::string &name )
 	boost::filesystem::path path = m_searchPaths.find( name );
 	if( path.empty() )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::FontLoader::load", boost::format( "Couldn't find \"%s\"." ) % name );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::FontLoader::load", "Couldn't find \"{}\".", name );
 		m_fonts[name] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
@@ -70,7 +70,7 @@ FontPtr FontLoader::load( const std::string &name )
 	}
 	catch( const std::exception &e )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::Font::load", boost::format( "Failed to load \"%s\" ( %s )." ) % path.string() % e.what() );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::Font::load", "Failed to load \"{}\" ({}).", path.string(), e.what() );
 		m_fonts[name] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}

@@ -39,7 +39,7 @@
 
 #include "Imath/half.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 namespace IECore
 {
@@ -114,7 +114,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	size_t numPoints = points.size();
 	if( numPoints < coefficientsNeeded )
 	{
-		throw( Exception( boost::str( boost::format( "Spline has less than %i points." ) % coefficientsNeeded ) ) );
+		throw( Exception( fmt::format( "Spline has less than {} points.", coefficientsNeeded ) ) );
 	}
 	if( (numPoints - coefficientsNeeded) % basis.step )
 	{

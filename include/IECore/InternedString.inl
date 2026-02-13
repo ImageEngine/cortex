@@ -35,6 +35,8 @@
 #ifndef IECORE_INTERNEDSTRING_INL
 #define IECORE_INTERNEDSTRING_INL
 
+#include <fmt/ostream.h>
+
 namespace IECore
 {
 
@@ -136,5 +138,12 @@ struct hash<IECore::InternedString>
 };
 
 } // namespace std
+
+namespace fmt
+{
+
+template <> struct formatter<IECore::InternedString> : ostream_formatter { };
+
+} // namespace fmt
 
 #endif // IECORE_INTERNEDSTRING_INL

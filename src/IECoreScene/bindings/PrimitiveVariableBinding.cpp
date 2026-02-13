@@ -38,7 +38,7 @@
 
 #include "IECoreScene/PrimitiveVariable.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 using namespace std;
 using namespace boost::python;
@@ -51,9 +51,9 @@ namespace
 #define IECORETEST_ASSERT( x ) \
 	if( !( x ) ) \
 	{ \
-		throw IECore::Exception( boost::str( \
-			boost::format( "Failed assertion \"%s\" : %s line %d" ) % #x % __FILE__ % __LINE__ \
-		) ); \
+		throw IECore::Exception( \
+			fmt::format( "Failed assertion \"{}\" : {} line {}", #x, __FILE__, __LINE__ ) \
+		); \
 	}
 
 void testIndexedView()

@@ -110,7 +110,7 @@ IECore::ObjectPtr readBasisCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTime
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "USDScene", boost::format( "Unsupported basis \"%1%\"" ) % usdBasis );
+			IECore::msg( IECore::Msg::Warning, "USDScene", "Unsupported basis \"{}\"", usdBasis.GetString() );
 		}
 	}
 
@@ -125,7 +125,7 @@ IECore::ObjectPtr readBasisCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTime
 	}
 	else if( wrap != pxr::UsdGeomTokens->nonperiodic )
 	{
-		IECore::msg( IECore::Msg::Warning, "USDScene", boost::format( "Unsupported wrap \"%1%\"" ) % wrap );
+		IECore::msg( IECore::Msg::Warning, "USDScene", "Unsupported wrap \"{}\"", wrap.GetString() );
 	}
 
 	return readCurves( curves, time, basis, periodic, canceller );

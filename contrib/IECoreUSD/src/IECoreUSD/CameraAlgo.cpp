@@ -91,10 +91,8 @@ IECore::ObjectPtr readCamera( pxr::UsdGeomCamera &camera, pxr::UsdTimeCode time,
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "IECoreUSD::CameraAlgo",
-			boost::format( "Unsupported projection \"%1%\" reading \"%2%\" at time %3%" )
-				% projection
-				% camera.GetPrim().GetPath()
-				% ( time.GetValue() / camera.GetPrim().GetStage()->GetTimeCodesPerSecond() )
+			"Unsupported projection \"{}\" reading \"{}\" at time {}",
+			projection.GetString(), camera.GetPrim().GetPath().GetAsString(), ( time.GetValue() / camera.GetPrim().GetStage()->GetTimeCodesPerSecond() )
 		);
 	}
 
@@ -182,10 +180,8 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "IECoreUSD::CameraAlgo",
-			boost::format( "Unsupported projection \"%1%\" writing \"%2%\" at time %3%" )
-				% camera->getProjection()
-				% path
-				% ( time.GetValue() / stage->GetTimeCodesPerSecond() )
+			"Unsupported projection \"{}\" writing \"{}\" at time {}",
+			camera->getProjection(), path.GetAsString(), ( time.GetValue() / stage->GetTimeCodesPerSecond() )
 		);
 	}
 

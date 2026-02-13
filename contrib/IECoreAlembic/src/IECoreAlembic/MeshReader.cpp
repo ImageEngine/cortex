@@ -159,12 +159,10 @@ class MeshReader : public PrimitiveReader
 			{
 				IECore::msg(
 					IECore::Msg::Warning, "PrimitiveReader::readGeomParam",
-					boost::format(
-						"Ignoring invalid \"uv\" property on object \"%1%\" (size %2%, expected %3%)"
-					)
-						% uvs.getParent().getObject().getFullName()
-						% ( indexData ? indexData->readable().size() : uvData->readable().size() )
-						% primitive->variableSize( primitiveVariable.interpolation )
+					"Ignoring invalid \"uv\" property on object \"{}\" (size {}, expected {})",
+					uvs.getParent().getObject().getFullName(),
+					( indexData ? indexData->readable().size() : uvData->readable().size() ),
+					primitive->variableSize( primitiveVariable.interpolation )
 				);
 			}
 		}

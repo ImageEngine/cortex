@@ -763,7 +763,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			{
 				std::string pathStr;
 				SceneInterface::pathToString( sceneRoot->readable(), pathStr );
-				msg( Msg::Debug, "LinkedScene::writeAttribute", ( boost::format( "Detected ancestor tags while creating link to file %s at location %s." ) % fileName->readable() % pathStr ).str() );
+				msg( Msg::Debug, "LinkedScene::writeAttribute", "Detected ancestor tags while creating link to file {} at location {}.", fileName->readable(), pathStr );
 			}
 			tags.clear();
 
@@ -938,7 +938,7 @@ void LinkedScene::writeSet( const SceneInterface::Name &name, const IECore::Path
 		path( p );
 		std::string strPath;
 		SceneInterface::pathToString( p, strPath );
-		throw IECore::Exception( boost::str( boost::format( "Unable to write set to linked scene location: '%1%'" ) % strPath ) );
+		throw IECore::Exception( fmt::format( "Unable to write set to linked scene location: '{}'", strPath ) );
 	}
 	else
 	{

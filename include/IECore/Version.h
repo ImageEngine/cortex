@@ -37,8 +37,6 @@
 
 #include "IECore/Export.h"
 
-#include "boost/format.hpp"
-
 #include <string>
 
 #define CORTEX_MILESTONE_VERSION IE_CORE_MILESTONEVERSION

@@ -199,7 +199,7 @@ void PrimitiveWriter::writeArbGeomParams( const IECoreScene::Primitive *primitiv
 				}
 				break;
 			default :
-				IECore::msg( IECore::Msg::Warning, "PrimitiveWriter::writeArbGeomParams", boost::format( "Variable \"%1%\" has unsupported type \"%2%" ) % p.first % p.second.data->typeName() );
+				IECore::msg( IECore::Msg::Warning, "PrimitiveWriter::writeArbGeomParams", "Variable \"{}\" has unsupported type \"{}\"", p.first, p.second.data->typeName() );
 				break;
 		}
  	}

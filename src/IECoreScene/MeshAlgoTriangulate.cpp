@@ -293,10 +293,10 @@ struct TriangulateFn
 			assert( data );
 
 			throw InvalidArgumentException(
-				(
-					boost::format( "MeshAlgo::triangulate: Invalid data type \"%s\" for primitive variable \"P\"." ) %
-						Object::typeNameFromTypeId( data->typeId() )
-				).str()
+				fmt::format(
+					"MeshAlgo::triangulate: Invalid data type \"{}\" for primitive variable \"P\".",
+					Object::typeNameFromTypeId( data->typeId() )
+				)
 			);
 		}
 	};

@@ -46,7 +46,7 @@ Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Inte
 	{
 		if( throwIfInvalid )
 		{
-			throw IECore::InvalidArgumentException( boost::str( boost::format( "Primitive::variableIndexedView - No primvar named '%1%' found" ) % name ) );
+			throw IECore::InvalidArgumentException( fmt::format( "Primitive::variableIndexedView - No primvar named '{}' found", name ) );
 		}
 		else
 		{
@@ -59,10 +59,9 @@ Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Inte
 		if( throwIfInvalid )
 		{
 			throw IECore::InvalidArgumentException(
-				boost::str(
-					boost::format(
-						"Primitive::variableIndexedView - PrimVar '%1%' interpolation (%2%) doesn't match requiredInterpolation (%3%)"
-					) % name % it->second.interpolation % requiredInterpolation
+				fmt::format(
+					"Primitive::variableIndexedView - PrimVar '{}' interpolation ({}) doesn't match requiredInterpolation ({})",
+					name, it->second.interpolation, requiredInterpolation
 				)
 			);
 		}
@@ -83,11 +82,9 @@ Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Inte
 	else if( throwIfInvalid )
 	{
 		throw IECore::InvalidArgumentException(
-			boost::str(
-				boost::format( "Primitive::variableIndexedView - Unable to created indexed view for '%1%' PrimVar, requested type: '%2%', actual type: '%3%'" ) %
-					name %
-					T::baseTypeName() %
-					it->second.data->typeName()
+			fmt::format(
+				"Primitive::variableIndexedView - Unable to created indexed view for '{}' PrimVar, requested type: '{}', actual type: '{}'",
+				name, T::baseTypeName(), it->second.data->typeName()
 			)
 		);
 	}
@@ -112,10 +109,9 @@ T *Primitive::variableData( const std::string &name, PrimitiveVariable::Interpol
 	if( it->second.indices )
 	{
 		throw IECore::Exception(
-			boost::str(
-				boost::format(
-					"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '%1%'"
-				) % name
+			fmt::format(
+				"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '{}'",
+				name
 			)
 		);
 	}
@@ -138,10 +134,9 @@ const T *Primitive::variableData( const std::string &name, PrimitiveVariable::In
 	if( it->second.indices )
 	{
 		throw IECore::Exception(
-			boost::str(
-				boost::format(
-					"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '%1%'"
-				) % name
+			fmt::format(
+				"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '{}'",
+				name
 			)
 		);
 	}
@@ -157,7 +152,7 @@ typename T::Ptr Primitive::expandedVariableData( const std::string &name, Primit
 	{
 		if ( throwIfInvalid )
 		{
-			throw IECore::Exception( boost::str( boost::format( "Primitive::expandedVariableData() - Primitive Variable '%1%' not found." ) % name ) );
+			throw IECore::Exception( fmt::format( "Primitive::expandedVariableData() - Primitive Variable '{}' not found.", name ) );
 		}
 
 		return nullptr;
@@ -167,11 +162,9 @@ typename T::Ptr Primitive::expandedVariableData( const std::string &name, Primit
 		if( throwIfInvalid )
 		{
 			throw IECore::Exception(
-				boost::str(
-					boost::format( "Primitive::expandedVariableData() - Primitive Variable '%1%' has interpolation: %2%, required :%3%." ) %
-						name %
-						it->second.interpolation %
-						requiredInterpolation
+				fmt::format(
+					"Primitive::expandedVariableData() - Primitive Variable '{}' has interpolation: {}, required: {}.",
+					name, it->second.interpolation, requiredInterpolation
 				)
 			);
 		}
@@ -184,11 +177,9 @@ typename T::Ptr Primitive::expandedVariableData( const std::string &name, Primit
 		if( throwIfInvalid )
 		{
 			throw IECore::Exception(
-				boost::str(
-					boost::format( "Primitive::expandedVariableData() - Primitive Variable '%1%' has invalid data type: %2%, required :%3%." ) %
-						name %
-						it->second.data->typeName() %
-						T::staticTypeName()
+				fmt::format(
+					"Primitive::expandedVariableData() - Primitive Variable '{}' has invalid data type: {}, required: {}.",
+					name, it->second.data->typeName(), T::staticTypeName()
 				)
 			);
 		}

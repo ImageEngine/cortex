@@ -51,8 +51,6 @@
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/format.hpp"
-
 using namespace IECoreGL;
 using namespace std;
 using namespace boost;

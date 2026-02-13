@@ -39,8 +39,6 @@
 #include "IECore/ClassData.h"
 #include "IECore/MurmurHash.h"
 
-#include "boost/format.hpp"
-
 #include "tbb/spin_rw_mutex.h"
 
 #include <algorithm>
@@ -284,20 +282,17 @@ void MeshPrimitive::setCorners( const IECore::IntVectorData *ids, const IECore::
 	{
 		if( id < 0 || (size_t)id >= m_numVertices )
 		{
-			throw Exception( boost::str(
-				boost::format(
-					"Bad corners : id (%1%) is out of expected range (0-%2%)"
-				) % id % (m_numVertices - 1)
+			throw Exception( fmt::format(
+				"Bad corners : id ({}) is out of expected range (0-{})", id, (m_numVertices - 1)
 			) );
 		}
 	}
 
 	if( sharpnesses->readable().size() != ids->readable().size() )
 	{
-		throw Exception( boost::str(
-			boost::format(
-				"Bad corners : number of sharpnesses (%1%) does not match number of ids (%2%)"
-			) % sharpnesses->readable().size() % ids->readable().size()
+		throw Exception( fmt::format(
+			"Bad corners : number of sharpnesses ({}) does not match number of ids ({})",
+			sharpnesses->readable().size(), ids->readable().size()
 		) );
 	}
 
@@ -328,10 +323,8 @@ void MeshPrimitive::setCreases( const IECore::IntVectorData *lengths, const IECo
 	{
 		if( length < 2 )
 		{
-			throw Exception( boost::str(
-				boost::format(
-					"Bad creases : length (%1%) is less than 2"
-				) % length
+			throw Exception( fmt::format(
+				"Bad creases : length ({}) is less than 2", length
 			) );
 		}
 		expectedIds += length;
@@ -339,10 +332,8 @@ void MeshPrimitive::setCreases( const IECore::IntVectorData *lengths, const IECo
 
 	if( ids->readable().size() != expectedIds )
 	{
-		throw Exception( boost::str(
-			boost::format(
-				"Bad creases : expected %1% ids but given %2%"
-			) % expectedIds % ids->readable().size()
+		throw Exception( fmt::format(
+			"Bad creases : expected {} ids but given {}", expectedIds, ids->readable().size()
 		) );
 	}
 
@@ -350,20 +341,17 @@ void MeshPrimitive::setCreases( const IECore::IntVectorData *lengths, const IECo
 	{
 		if( id < 0 || (size_t)id >= m_numVertices )
 		{
-			throw Exception( boost::str(
-				boost::format(
-					"Bad creases : id (%1%) is out of expected range (0-%2%)"
-				) % id % (m_numVertices - 1)
+			throw Exception( fmt::format(
+				"Bad creases : id ({}) is out of expected range (0-{})", id, (m_numVertices - 1)
 			) );
 		}
 	}
 
 	if( sharpnesses->readable().size() != lengths->readable().size() )
 	{
-		throw Exception( boost::str(
-			boost::format(
-				"Bad creases : number of sharpnesses (%1%) does not match number of lengths (%2%)"
-			) % sharpnesses->readable().size() % lengths->readable().size()
+		throw Exception( fmt::format(
+			"Bad creases : number of sharpnesses ({}) does not match number of lengths ({})",
+			sharpnesses->readable().size(), lengths->readable().size()
 		) );
 	}
 

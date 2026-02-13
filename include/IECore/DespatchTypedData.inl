@@ -85,7 +85,7 @@ struct DespatchTypedDataExceptionError
 	template<typename T, typename F>
 	void operator()( const T *data, const F& functor )
 	{
-		throw InvalidArgumentException( ( boost::format( "Unhandled data of type %s encountered by DespatchTypedData" ) % data->typeName() ).str() );
+		throw InvalidArgumentException( fmt::format( "Unhandled data of type {} encountered by DespatchTypedData", data->typeName() ) );
 	}
 };
 

@@ -423,9 +423,10 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 				if( !parameterValue )
 				{
 					throw IECore::Exception(
-						boost::str( boost::format(
-							"No value found for parameter `%1%.%2%`"
-						) % shader.first % parameterName )
+						fmt::format(
+							"No value found for parameter `{}.{}`",
+							shader.first, parameterName
+						)
 					);
 				}
 
@@ -510,11 +511,12 @@ void ShaderNetworkAlgo::removeComponentConnectionAdapters( ShaderNetwork *networ
 			ShaderNetwork::Parameter source = network->input( ShaderNetwork::Parameter( s.first, inParameter ) );
 			if( !source )
 			{
-				throw IECore::Exception( boost::str(
-					boost::format(
-						"removeComponentConnectionAdapters : \"%1%.%2%\" has no input"
-					) % s.first.string() % inParameter.string()
-				) );
+				throw IECore::Exception(
+					fmt::format(
+						"removeComponentConnectionAdapters : \"{}.{}\" has no input",
+						s.first, inParameter
+					)
+				);
 			}
 			source.name = source.name.string() + "." + component.string();
 

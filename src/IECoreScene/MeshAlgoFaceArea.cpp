@@ -37,7 +37,6 @@
 
 #include "IECore/PolygonAlgo.h"
 
-#include "boost/format.hpp"
 #include "boost/iterator/transform_iterator.hpp"
 #include "boost/iterator/zip_iterator.hpp"
 #include "boost/tuple/tuple.hpp"
@@ -70,7 +69,7 @@ PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const 
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
 	{
-		throw InvalidArgumentException( boost::str( boost::format( "MeshAlgo::calculateFaceArea : MeshPrimitive has no \"%s\" primitive variable." ) % position ) );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::calculateFaceArea : MeshPrimitive has no \"{}\" primitive variable.", position ) );
 	}
 	const std::vector<V3f> &p = pData->readable();
 
@@ -103,7 +102,7 @@ PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh,
 		uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, false );
 		if( !uvView )
 		{
-			throw InvalidArgumentException( boost::str( boost::format( "MeshAlgo::calculateFaceTextureArea : MeshPrimitive has no suitable \"%s\" primitive variable." ) % uvSet ) );
+			throw InvalidArgumentException( fmt::format( "MeshAlgo::calculateFaceTextureArea : MeshPrimitive has no suitable \"{}\" primitive variable.", uvSet ) );
 		}
 		uvInterpolation = PrimitiveVariable::FaceVarying;
 	}

@@ -35,7 +35,7 @@
 #include "IECore/MurmurHash.h"
 #include "IECore/Exception.h"
 
-#include <boost/format.hpp>
+#include "fmt/format.h"
 
 #include <iomanip>
 #include <sstream>
@@ -57,11 +57,8 @@ void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
 	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
 	{
 		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
+			fmt::format( "Invalid IECore::MurmurHash string representation \"{}\", must have 32 characters", repr )
+		);
 	}
 
 	std::stringstream s;

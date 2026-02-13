@@ -74,14 +74,14 @@ void Display::display( ConstFrameBufferPtr frameBuffer ) const
 	}
 	else
 	{
-		IECore::msg( IECore::Msg::Warning, "Display::display", boost::format( "Unsupported data format \"%s\"." ) % m_data );
+		IECore::msg( IECore::Msg::Warning, "Display::display", "Unsupported data format \"{}\".", m_data );
 		return;
 	}
 
 	IECore::WriterPtr writer = IECore::Writer::create( image, "tmp." + m_type );
 	if( !writer )
 	{
-		IECore::msg( IECore::Msg::Warning, "Display::display", boost::format( "Unsupported display type \"%s\"." ) % m_type );
+		IECore::msg( IECore::Msg::Warning, "Display::display", "Unsupported display type \"{}\".", m_type );
 		return;
 	}
 

@@ -56,6 +56,8 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdSkel/utils.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
+#include "fmt/ostream.h"
+
 using namespace std;
 using namespace pxr;
 using namespace IECore;
@@ -75,7 +77,7 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const IECoreScene::Primit
 	}
 	else
 	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Invalid Interpolation for %1%" ) % primVar.GetPrimvarName() );
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Invalid Interpolation for {}", primVar.GetPrimvarName().GetString() );
 	}
 
 	if ( usdInterpolation == pxr::UsdGeomTokens->constant )
@@ -215,7 +217,7 @@ void addPrimitiveVariableIfValid( IECoreScene::Primitive *primitive, const std::
 {
 	if( !primitive->isPrimitiveVariableValid( primitiveVariable ) )
 	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Ignoring invalid primitive variable \"%1%\"" ) % source.GetPath().GetAsString() );
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Ignoring invalid primitive variable \"{}\"", source.GetPath().GetAsString() );
 		return;
 	}
 
@@ -227,7 +229,7 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 	IECoreScene::PrimitiveVariable::Interpolation interpolation = IECoreUSD::PrimitiveAlgo::fromUSD( primVar.GetInterpolation() );
 	if( interpolation == IECoreScene::PrimitiveVariable::Invalid )
 	{
-		IECore::msg(IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Invalid Interpolation on %1%" ) % primVar.GetName().GetString() );
+		IECore::msg(IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Invalid Interpolation on {}", primVar.GetName().GetString() );
 		return;
 	}
 
@@ -243,7 +245,7 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 	);
 	if( !data )
 	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "PrimVar: %1% type: %2% not supported - skipping" ) % primVar.GetName().GetString() % primVar.GetTypeName() );
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "PrimVar: {} type: {} not supported - skipping", primVar.GetName().GetString(), fmt::streamed( primVar.GetTypeName() ) );
 		return;
 	}
 

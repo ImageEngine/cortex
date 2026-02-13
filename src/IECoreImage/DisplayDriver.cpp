@@ -34,6 +34,8 @@
 
 #include "IECoreImage/DisplayDriver.h"
 
+#include "fmt/format.h"
+
 using namespace std;
 using namespace Imath;
 using namespace IECore;
@@ -75,7 +77,7 @@ DisplayDriverPtr DisplayDriver::create( const std::string &typeName, const Imath
 		return it->second( displayWindow, dataWindow, channelNames, parameters );
 	}
 
-	throw Exception( boost::str( boost::format( "Display driver \"%s\" not registered" ) % typeName ) );
+	throw Exception( fmt::format( "Display driver \"{}\" not registered", typeName ) );
 }
 
 void DisplayDriver::registerType( const std::string &typeName, CreatorFn creator )

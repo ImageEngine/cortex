@@ -129,7 +129,7 @@ void SpherePrimitive::addPrimitiveVariable( const std::string &name, const IECor
 			addUniformAttribute( name, primVar.data );
 			break;
 		default :
-			IECore::msg( IECore::Msg::Warning, "SpherePrimitive::addPrimitiveVariable", boost::format( "Primitive variable \"%s\" has unsupported interpolation." ) % name );
+			IECore::msg( IECore::Msg::Warning, "SpherePrimitive::addPrimitiveVariable", "Primitive variable \"{}\" has unsupported interpolation.", name );
 	}
 }
 

@@ -285,7 +285,7 @@ IECore::CompoundObjectPtr VDBObject::metadata( const std::string &name )
 			IECore::msg(
 				IECore::MessageHandler::Warning,
 				"VDBObject::metadata",
-				boost::format( "'%1%' has unsupported metadata type: '%2%'" ) % metaIt->first % metaIt->second->typeName()
+				"'{}' has unsupported metadata type: '{}'", metaIt->first, metaIt->second->typeName()
 			);
 		}
 	}

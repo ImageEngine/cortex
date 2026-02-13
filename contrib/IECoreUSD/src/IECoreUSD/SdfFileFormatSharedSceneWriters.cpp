@@ -69,7 +69,7 @@ class Cache : public SceneLRUCache
 			}
 			catch ( ... )
 			{
-				IECore::msg( IECore::Msg::Error, "SdfFileFormatSharedSceneWriters::SceneLRUCache", boost::format( "Unable to open file path \"%s\" for writing IndexedIo data." ) % fileName );
+				IECore::msg( IECore::Msg::Error, "SdfFileFormatSharedSceneWriters::SceneLRUCache", "Unable to open file path \"{}\" for writing IndexedIo data.", fileName );
 			}
 			cost = 1;
 			return result;

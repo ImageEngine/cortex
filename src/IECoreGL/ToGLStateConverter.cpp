@@ -50,6 +50,8 @@
 #include "IECore/ObjectVector.h"
 #include "IECore/SimpleTypedData.h"
 
+#include "fmt/format.h"
+
 using namespace IECore;
 using namespace IECoreGL;
 
@@ -67,7 +69,7 @@ StateComponentPtr attributeToTypedState( const IECore::Object *attribute )
 	const DataType *d = runTimeCast<const DataType>( attribute );
 	if( !d )
 	{
-		throw IECore::Exception( boost::str( boost::format( "Expected data of type \"%s\"" ) % DataType::staticTypeName() ) );
+		throw IECore::Exception( fmt::format( "Expected data of type \"{}\"", DataType::staticTypeName() ) );
 	}
 
 	return new T( d->readable() );
@@ -97,7 +99,7 @@ StateComponentPtr attributeToUseGLPointsState( const IECore::Object *attribute )
 	}
 	else
 	{
-		throw IECore::Exception( boost::str( boost::format( "Unsupported value \"%s\"." ) % v ) );
+		throw IECore::Exception( fmt::format( "Unsupported value \"{}\".", v ) );
 	}
 
 	return new PointsPrimitive::UseGLPoints( u );

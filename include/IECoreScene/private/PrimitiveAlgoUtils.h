@@ -46,14 +46,13 @@
 
 #include <numeric>
 
-#include "boost/format.hpp"
-
 #include "tbb/blocked_range.h"
 #include "tbb/parallel_for.h"
 
+#include "fmt/format.h"
+
 #include <unordered_set>
 #include <type_traits>
-
 
 namespace IECoreScene
 {
@@ -129,7 +128,7 @@ struct AverageValueFromVector
 
 	IECore::DataPtr operator()( IECore::Data *data )
 	{
-		throw IECore::InvalidArgumentException( boost::str( boost::format( "PrimitiveAlgoUtils::AverageValueFromVector : Variable has unsupported data type \"%s\"." ) % data->typeName() ) );
+		throw IECore::InvalidArgumentException( fmt::format( "PrimitiveAlgoUtils::AverageValueFromVector : Variable has unsupported data type \"{}\".", data->typeName() ) );
 	}
 };
 
@@ -293,11 +292,7 @@ class TaskSegmenter
 			if ( !segments )
 			{
 				throw IECore::InvalidArgumentException(
-					(
-						boost::format( "Segment keys type '%s' doesn't match primitive variable type '%s'" ) %
-							m_data->typeName() %
-							array->typeName()
-					).str()
+					fmt::format( "Segment keys type '{}' doesn't match primitive variable type '{}'", m_data->typeName(), array->typeName() )
 				);
 			}
 
@@ -325,7 +320,7 @@ class TaskSegmenter
 		ReturnType operator()( const IECore::Data *data )
 		{
 			throw IECore::Exception(
-				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+				fmt::format( "Unexpected Data: {}", ( data ? data->typeName() : std::string( "nullptr" ) ) )
 			);
 		}
 

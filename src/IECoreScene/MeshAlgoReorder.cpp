@@ -90,8 +90,7 @@ struct ReorderFn
 
 		DataPtr operator()( Data *d, const std::string &name )
 		{
-			string e = boost::str( boost::format( "MeshAlgo::reorderVertices : \"%s\" has unsupported data type \"%s\"." ) % name % d->typeName() );
-			throw InvalidArgumentException( e );
+			throw InvalidArgumentException( fmt::format( "MeshAlgo::reorderVertices : \"{}\" has unsupported data type \"{}\".", name, d->typeName() ) );
 		}
 
 	private:
@@ -396,19 +395,19 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2, 
 	VertexToFacesMap::const_iterator vIt0 = vertexToFacesMap.find( id0 );
 	if( vIt0 == vertexToFacesMap.end() )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::reorderVertices : Cannot find vertex %d" ) % id0 ).str() );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::reorderVertices : Cannot find vertex {}", id0 ) );
 	}
 
 	VertexToFacesMap::const_iterator vIt1 = vertexToFacesMap.find( id1 );
 	if( vIt1 == vertexToFacesMap.end() )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::reorderVertices : Cannot find vertex %d" ) % id1 ).str() );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::reorderVertices : Cannot find vertex {}", id1 ) );
 	}
 
 	VertexToFacesMap::const_iterator vIt2 = vertexToFacesMap.find( id2 );
 	if( vIt2 == vertexToFacesMap.end() )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::reorderVertices : Cannot find vertex %d" ) % id2 ).str() );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::reorderVertices : Cannot find vertex {}", id2 ) );
 	}
 
 	FaceSet tmp;
@@ -432,7 +431,7 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2, 
 
 	if( tmp2.size() != 1 )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::reorderVertices : Vertices %d, %d, and %d do not uniquely define a single polygon" ) % id0 % id1 % id2 ).str() );
+		throw InvalidArgumentException( fmt::format( "MeshAlgo::reorderVertices : Vertices {}, {}, and {} do not uniquely define a single polygon", id0, id1, id2 ) );
 	}
 
 	int currentFace = *tmp2.begin();

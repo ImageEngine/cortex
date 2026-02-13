@@ -43,6 +43,8 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/VectorTypedData.h"
 
+#include "fmt/format.h"
+
 #include <type_traits>
 
 namespace IECore
@@ -204,7 +206,7 @@ typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&fu
 		case PathMatcherDataTypeId :
 			return functor( static_cast<PathMatcherData *>( data ), std::forward<Args>( args )... );
 		default :
-			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
+			throw InvalidArgumentException( fmt::format( "Data has unknown type '{}' / '{}'", typeId, data->typeName() ) );
 	}
 }
 
@@ -364,7 +366,7 @@ typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *
 		case PathMatcherDataTypeId :
 			return functor( static_cast<const PathMatcherData *>( data ), std::forward<Args>( args )... );
 		default :
-			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
+			throw InvalidArgumentException( fmt::format( "Data has unknown type '{}' / '{}'", typeId, data->typeName() ) );
 	}
 }
 

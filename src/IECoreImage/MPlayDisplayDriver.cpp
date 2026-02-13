@@ -38,7 +38,7 @@
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 #ifdef _MSC_VER
 #include <conio.h>
@@ -186,10 +186,10 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 	// Construct a command line calling imdisplay, and open it as a pipe
 	std::string commandLine = "imdisplay -f -p";
 
-	commandLine += boost::str( boost::format( " -o %d %d" ) % displayWindow.min.x % displayWindow.min.y );
+	commandLine += fmt::format( " -o {} {}", displayWindow.min.x, displayWindow.min.y );
 
 	V2i originalSize = displayWindow.size() + V2i( 1 );
-	commandLine += boost::str( boost::format( " -Z %d %d" ) % originalSize.x % originalSize.y );
+	commandLine += fmt::format( " -Z {} {}", originalSize.x, originalSize.y );
 
 	const StringData *extraArguments = parameters->member<StringData>( "imdisplayExtraArguments" );
 	if( extraArguments && extraArguments->readable().size() )

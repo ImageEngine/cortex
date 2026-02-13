@@ -67,6 +67,8 @@
 #include <Windows.h>
 #endif
 
+#include "fmt/format.h"
+
 OIIO_NAMESPACE_USING
 
 using namespace std;
@@ -603,7 +605,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	}
 	else
 	{
-		throw IECore::Exception( boost::str( boost::format( "IECoreImage::ImageWriter : Could not open \"%s\", error = %s" ) % fileName() % out->geterror() ) );
+		throw IECore::Exception( fmt::format( "IECoreImage::ImageWriter : Could not open \"{}\", error = {}", fileName(), out->geterror() ) );
 	}
 
 	ImagePrimitivePtr correctedImage = nullptr;
@@ -633,7 +635,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	const OpenImageIOAlgo::DataView dataView( buffer.get() );
 	if( dataView.type == TypeDesc::UNKNOWN )
 	{
-		throw IECore::Exception( boost::str( boost::format( "IECoreImage::ImageWriter : Failed to write \"%s\". Unsupported dataType %s." ) % fileName() % buffer->typeName() ) );
+		throw IECore::Exception( fmt::format( "IECoreImage::ImageWriter : Failed to write \"{}\". Unsupported dataType {}.", fileName(), buffer->typeName() ) );
 	}
 
 	const unsigned char *rawBuffer = (const unsigned char *)dataView.data;
@@ -694,7 +696,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 
 		if( !status )
 		{
-			throw IECore::Exception( boost::str( boost::format( "IECoreImage::ImageWriter : Failed to write \"%s\", error = %s" ) % fileName() % out->geterror() ) );
+			throw IECore::Exception( fmt::format( "IECoreImage::ImageWriter : Failed to write \"{}\", error = {}", fileName(), out->geterror() ) );
 		}
 	}
 

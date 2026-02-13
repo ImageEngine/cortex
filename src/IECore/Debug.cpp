@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 #include <chrono>
 #include <cstdlib>
@@ -67,7 +67,7 @@ void waitForDebugger()
 #else
 	const int pid = _getpid();
 #endif
-	std::cerr << ( boost::format( "Attach debugger here and set gDebuggerLock (%p) variable to false. pid: %i" ) % &gDebuggerLock % pid ).str() << std::endl;
+	std::cerr << fmt::format( "Attach debugger here and set gDebuggerLock ({}) variable to false. pid: {}", fmt::ptr( &gDebuggerLock ), pid ) << std::endl;
 	while( gDebuggerLock )
 	{
 		std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );

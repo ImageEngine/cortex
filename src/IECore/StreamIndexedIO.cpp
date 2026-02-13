@@ -47,13 +47,14 @@
 
 #include "tbb/spin_rw_mutex.h"
 
-#include "boost/format.hpp"
 #include "boost/iostreams/device/file.hpp"
 #include "boost/iostreams/filter/gzip.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
 #include "boost/iostreams/filtering_streambuf.hpp"
 #include "boost/iostreams/stream.hpp"
 #include "boost/tokenizer.hpp"
+
+#include "fmt/format.h"
 
 #include <algorithm>
 #include <cassert>
@@ -273,7 +274,7 @@ class StreamIndexedIO::StringCache
 			StringToIdMap::const_iterator it = m_stringToIdMap.find( s );
 			if ( it == m_stringToIdMap.end() )
 			{
-				throw IOException( (boost::format ( "StringCache: could not find string %s!" ) % s.value() ).str() );
+				throw IOException( fmt::format( "StringCache: could not find string {}!", s.value() ) );
 			}
 			return it->second;
 		}
@@ -286,7 +287,7 @@ class StreamIndexedIO::StringCache
 			{
 				if (errIfNotFound)
 				{
-					throw IOException( (boost::format ( "StringCache: could not find string %s!" ) % s.value() ).str() );
+					throw IOException( fmt::format( "StringCache: could not find string {}!", s.value() ) );
 				}
 
 				uint64_t id = ++m_prevId;
@@ -310,7 +311,7 @@ class StreamIndexedIO::StringCache
 		{
 			if ( id >= m_idToStringMap.size() )
 			{
-				throw IOException( (boost::format ( "StringCache: invalid string ID %d!" ) % id ).str() );
+				throw IOException( fmt::format( "StringCache: invalid string ID {}!", id ) );
 			}
 			return m_idToStringMap[id];
 		}
@@ -1467,9 +1468,9 @@ void StreamIndexedIO::Node::addDataChild(
 		if( numCompressedBlocks > std::numeric_limits<unsigned short>::max() )
 		{
 			throw IECore::Exception(
-				boost::str(
-					boost::format( "StreamIndexedIO::Node::addDataChild - Unable to store file with more than %1% compressed blocks " ) %
-						std::numeric_limits<unsigned short>::max()
+				fmt::format(
+					"StreamIndexedIO::Node::addDataChild - Unable to store file with more than {} compressed blocks ",
+					std::numeric_limits<unsigned short>::max()
 				)
 			);
 		}
@@ -1957,7 +1958,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV5( F &f )
 	}
 	else
 	{
-		throw IOException( boost::str( boost::format( "StreamIndexedIO::Index::readNodeV5 Invalid EntryType found '%1%'" ) % entryType ) );
+		throw IOException( fmt::format( "StreamIndexedIO::Index::readNodeV5 Invalid EntryType found '{}'", entryType ) );
 	}
 }
 
@@ -2028,7 +2029,7 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 	}
 	else
 	{
-		throw IOException( boost::str( boost::format( "StreamIndexedIO::Index::readNode - Invalid EntryType found '%1%'" ) % nodeType ) );
+		throw IOException( fmt::format( "StreamIndexedIO::Index::readNode - Invalid EntryType found '{}'", nodeType ) );
 	}
 }
 
@@ -3245,10 +3246,9 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, s
 	if ( arraySizeInBytes != nodeInfo.decompressedSize )
 	{
 		throw IECore::IOException(
-			boost::str(
-				boost::format( "StreamIndexedIO::rawRead - array size (%1%) does not match block size (%2%) " ) %
-					arraySizeInBytes %
-					nodeInfo.decompressedSize
+			fmt::format(
+				"StreamIndexedIO::rawRead - array size ({}) does not match block size ({}) ",
+				arraySizeInBytes, nodeInfo.decompressedSize
 			)
 		);
 	}
@@ -3366,10 +3366,9 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, size_t arra
 	if ( arraySizeInBytes != nodeInfo.decompressedSize )
 	{
 		throw IECore::IOException(
-			boost::str(
-				boost::format( "StreamIndexedIO::rawRead - array size (%1%) does not match block size (%2%) " ) %
-					arraySizeInBytes %
-					nodeInfo.decompressedSize
+			fmt::format(
+				"StreamIndexedIO::rawRead - array size ({}) does not match block size ({})",
+				arraySizeInBytes, nodeInfo.decompressedSize
 			)
 		);
 	}

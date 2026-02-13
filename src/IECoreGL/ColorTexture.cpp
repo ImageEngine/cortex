@@ -40,6 +40,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/VectorTypedData.h"
 
+#include "fmt/format.h"
+
 using namespace IECoreGL;
 using namespace IECore;
 using namespace Imath;
@@ -162,7 +164,7 @@ void ColorTexture::construct( unsigned int width, unsigned int height, const IEC
 		castConstruct<DoubleVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else {
-		throw IECore::Exception( boost::str( boost::format( "Unsupported channel type \"%s\"." ) % r->typeName() ) );
+		throw IECore::Exception( fmt::format( "Unsupported channel type \"{}\".", r->typeName() ) );
 	}
 }
 

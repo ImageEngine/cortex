@@ -38,7 +38,7 @@
 
 #include "IECore/Exception.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 using namespace IECoreGL;
 
@@ -82,9 +82,8 @@ const std::string &NameStateComponent::nameFromGLName( GLuint glName )
 	NameMap::nth_index<1>::type::const_iterator it = index.find( glName );
 	if( it==index.end() )
 	{
-		throw IECore::InvalidArgumentException( boost::str(
-				boost::format( "NameStateComponent::nameFromGLName : Invalid glName (%1%)" ) % glName
-			)
+		throw IECore::InvalidArgumentException(
+			fmt::format( "NameStateComponent::nameFromGLName : Invalid glName ({})", glName )
 		);
 	}
 	return it->first.value();
@@ -113,9 +112,8 @@ NameStateComponent::ConstNameIterator NameStateComponent::iteratorFromName( cons
 		}
 		else
 		{
-			throw IECore::InvalidArgumentException( boost::str(
-					boost::format( "NameStateComponent::iteratorFromName : Invalid name (%1%)" ) % name
-				)
+			throw IECore::InvalidArgumentException(
+				fmt::format( "NameStateComponent::iteratorFromName : Invalid name ({})", name )
 			);
 		}
 	}

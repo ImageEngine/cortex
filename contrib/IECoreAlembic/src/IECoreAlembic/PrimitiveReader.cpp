@@ -156,9 +156,8 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 		{
 			msg(
 				Msg::Warning, "PrimitiveReader::convertArbGeomParams",
-				boost::format( "GeomParam \"%s\" on object \"%s\" has unsupported type" )
-					% header.getName()
-					% params.getObject().getFullName()
+				"GeomParam \"{}\" on object \"{}\" has unsupported type",
+				header.getName(), params.getObject().getFullName()
 			);
 		}
 	}

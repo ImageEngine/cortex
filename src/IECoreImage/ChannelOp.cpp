@@ -41,7 +41,7 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
-#include "boost/format.hpp"
+#include "fmt/format.h"
 
 using namespace IECore;
 using namespace IECoreImage;
@@ -99,12 +99,12 @@ void ChannelOp::modify( Object * primitive, const CompoundObject * operands )
 		std::string reason;
 		if( !image->channelValid( name, &reason ) )
 		{
-			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % name ) + reason );
+			throw Exception( fmt::format( "Channel \"{}\" is invalid: {}", name, reason ) );
 		}
 
 		if( !image->channels[name]->isInstanceOf( FloatVectorData::staticTypeId() ) )
 		{
-			throw Exception( str( format( "Channel \"%s\" is invalid: not a float vector." ) % name ) );
+			throw Exception( fmt::format( "Channel \"{}\" is invalid: not a float vector.", name ) );
 		}
 
 		channels.push_back( boost::static_pointer_cast< FloatVectorData >( image->channels[name] ) );

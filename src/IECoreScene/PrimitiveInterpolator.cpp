@@ -84,13 +84,9 @@ PrimitivePtr interpolatePrimitive( const Primitive *y0, const Primitive *y1, dou
 			if( y0Size != y1Size )
 			{
 				msg(
-					MessageHandler::Level::Error, "interpolatePrimitive", boost::str(
-						boost::format( "primitive variable '%s' data array size changes between primitives. ( primitive0 size: %i, primitive1 size: %i, alpha: %f )" ) %
-							it->first %
-							y0Size %
-							y1Size %
-							x
-					)
+					MessageHandler::Level::Error, "interpolatePrimitive",
+					"primitive variable '{}' data array size changes between primitives. ( primitive0 size: {}, primitive1 size: {}, alpha: {:f} )",
+					it->first, y0Size, y1Size, x
 				);
 				continue;
 			}
@@ -108,7 +104,7 @@ PrimitivePtr interpolatePrimitive( const Primitive *y0, const Primitive *y1, dou
 					msg(
 						MessageHandler::Level::Error,
 						"interpolatePrimitive",
-						boost::str( boost::format( "primitive variable '%s' index ordering changes between primitives" ) % it->first )
+						"primitive variable '{}' index ordering changes between primitives", it->first
 					);
 					continue;
 				}
@@ -120,7 +116,7 @@ PrimitivePtr interpolatePrimitive( const Primitive *y0, const Primitive *y1, dou
 				msg(
 					MessageHandler::Level::Error,
 					"interpolatePrimitive",
-					boost::str( boost::format( "primitive variable '%s' indexing changes between primitives" ) % it->first )
+					"primitive variable '{}' indexing changes between primitives", it->first
 				);
 				continue;
 			}

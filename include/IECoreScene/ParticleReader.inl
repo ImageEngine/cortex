@@ -60,7 +60,7 @@ typename T::Ptr ParticleReader::filterAttr( const F *attr, float percentage, con
 			}
 			else
 			{
-				msg( IECore::Msg::Warning, "ParticleReader::filterAttr", boost::format( "Unrecognized id data type in file \"%s\"! Disabling filtering." ) % fileName() );
+				msg( IECore::Msg::Warning, "ParticleReader::filterAttr", "Unrecognized id data type in file \"{}\"! Disabling filtering.", fileName() );
 			}
 		}
 		else

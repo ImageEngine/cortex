@@ -40,7 +40,6 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
 
-#include "boost/format.hpp"
 #include "boost/regex.hpp"
 
 using namespace IECore;
@@ -255,7 +254,7 @@ void FaceVaryingPromotionOp::modifyTypedPrimitive( MeshPrimitive *mesh, const Co
 
 		if( !mesh->isPrimitiveVariableValid( it->second ) )
 		{
-			throw Exception( boost::str( boost::format( "Primitive variable \"%s\" is not valid." ) % it->first ) );
+			throw Exception( fmt::format( "Primitive variable \"{}\" is not valid.", it->first ) );
 		}
 
 		promoter.setInterpolation( it->second.interpolation );

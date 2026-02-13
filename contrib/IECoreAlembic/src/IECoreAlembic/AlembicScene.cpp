@@ -63,6 +63,8 @@
 
 #include "tbb/spin_mutex.h"
 
+#include "fmt/format.h"
+
 #include <memory>
 #include <unordered_map>
 
@@ -171,7 +173,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			{
 				// Even though the default policy for IFactory is kThrowPolicy, this appears not to
 				// be applied when it fails to load an archive - instead it returns an invalid archive.
-				throw IECore::Exception( boost::str( boost::format( "Unable to open file \"%s\"" ) % fileName ) );
+				throw IECore::Exception( fmt::format( "Unable to open file \"{}\"", fileName ) );
 			}
 		}
 
@@ -441,7 +443,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 				IECore::msg(
 					IECore::Msg::Warning,
 					"AlembicScene::readAttributeAtSample",
-					boost::format( "Unable to read attribute '%1%'" ) % name
+					"Unable to read attribute '{}'", name
 				);
 				return nullptr;
 			}
@@ -834,7 +836,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			IECore::msg(
 				IECore::Msg::Warning,
 				"AlembicScene::readAttributeAtSample",
-				boost::format( "Unsupported attribute type datatype: \"%1%\" extend:%2% interpretation:\"%3%\"" ) % pod % extent % getInterpretation()
+				"Unsupported attribute type datatype: \"{}\" extent:{} interpretation:\"{}\"", pod, extent, getInterpretation()
 			);
 
 			return nullptr;
@@ -1464,7 +1466,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			}
 			else
 			{
-				throw IECore::Exception( boost::str( boost::format( "Unsupported data type : '%1%'" ) % transform->typeName() ) );
+				throw IECore::Exception( fmt::format( "Unsupported data type : '{}'", transform->typeName() ) );
 			}
 
 			if( m_xformSampleTimes.size() && m_xformSampleTimes.back() >= time )
@@ -1536,13 +1538,10 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		{
 			if( !haveXform() )
 			{
-				IECore::msg(IECore::MessageHandler::Level::Warning, __func__,
-					boost::str(
-						boost::format( "Cannot write attribute ( attribute name: '%1%', attribute type: '%2%', time: %3% ) at root. " ) %
-							name.string() %
-							attribute->typeName() %
-							time
-					)
+				IECore::msg(
+					IECore::MessageHandler::Level::Warning, __func__,
+					"Cannot write attribute (attribute name: '{}', attribute type: '{}', time: {}) at root.",
+					name, attribute->typeName(), time
 				);
 				return;
 			}
@@ -1557,9 +1556,8 @@ class AlembicScene::AlembicWriter : public AlembicIO
 				{
 					IECore::msg(
 						IECore::MessageHandler::Level::Warning, "AlembicScene::writeAttribute",
-						boost::format(
-							"Expected BoolData for attribute \"%s\" but got \"%s\"."
-						) % name % attribute->typeName()
+						"Expected BoolData for attribute \"{}\" but got \"{}\".",
+						name, attribute->typeName()
 					);
 				}
 			}
@@ -1761,17 +1759,11 @@ class AlembicScene::AlembicWriter : public AlembicIO
 				this->path( path );
 				pathToString( path, pathStr );
 				IECore::msg(
-						IECore::Msg::Warning,
-						"AlembicScene::writeAttribute",
-						boost::str(
-							boost::format( "Cannot write attribute ( attribute name: '%1%', attribute type: '%2%', time: %3% ) at location '%4%'. " ) %
-								name.string() %
-								attribute->typeName() %
-								time %
-								pathStr
-						)
-					);
-
+					IECore::Msg::Warning,
+					"AlembicScene::writeAttribute",
+					"Cannot write attribute (attribute name: '{}', attribute type: '{}', time: {}) at location '{}'.",
+					name, attribute->typeName(), time, pathStr
+				);
 			}
 
 		}
@@ -1801,7 +1793,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 					IECore::msg(
 						IECore::Msg::Warning,
 						"AlembicScene::writeObject",
-						boost::format( "Unsupported object type \"%1%\"" ) % object->typeName()
+						"Unsupported object type \"{}\"", object->typeName()
 					);
 					return;
 				}
