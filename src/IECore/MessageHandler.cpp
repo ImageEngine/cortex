@@ -56,12 +56,6 @@ void MessageHandler::output( Level level, const std::string &context, const std:
 	currentHandler()->handle( level, context, message );
 }
 
-void MessageHandler::output( Level level, const std::string &context, const boost::format &message )
-{
-	string m = message.str();
-	output( level, context, m );
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////
 // default handler
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -170,11 +164,6 @@ MessageHandler::Level MessageHandler::stringAsLevel( const std::string &level )
 ///////////////////////////////////////////////////////////////////////////////////////
 
 void IECore::msg( MessageHandler::Level level, const std::string &context, const std::string &message )
-{
-	MessageHandler::output( level, context, message );
-}
-
-void IECore::msg( MessageHandler::Level level, const std::string &context, const boost::format &message )
 {
 	MessageHandler::output( level, context, message );
 }
