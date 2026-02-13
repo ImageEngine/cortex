@@ -476,9 +476,7 @@ class Font::Implementation : public IECore::RefCounted
 			V2f advance;
 		};
 
-		typedef boost::shared_ptr<Mesh> MeshPtr;
-		typedef boost::shared_ptr<const Mesh> ConstMeshPtr;
-		mutable std::vector<MeshPtr> m_meshes;
+		mutable std::vector<std::unique_ptr<Mesh>> m_meshes;
 
 		const Mesh *cachedMesh( char c ) const
 		{
@@ -511,11 +509,11 @@ class Font::Implementation : public IECore::RefCounted
 			transformOp->operate();
 
 			// put it in the cache
-			MeshPtr mesh( new Mesh );
+			auto &mesh = m_meshes[c];
+			mesh = std::make_unique<Mesh>();
 			mesh->primitive = primitive;
 			mesh->bound = primitive->bound();
 			mesh->advance = V2f( m_face->glyph->advance.x, m_face->glyph->advance.y ) / m_face->units_per_EM;
-			m_meshes[c] = mesh;
 
 			// return it
 			return mesh.get();
