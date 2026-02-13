@@ -124,7 +124,7 @@ bool PDCParticleReader::open()
 
 		if( m_header.version > 1 )
 		{
-			msg( Msg::Warning, "PDCParticleReader::open()", format( "File \"%s\" has unknown version %d." ) % fileName() % m_header.version );
+			msg( Msg::Warning, "PDCParticleReader::open()", "File \"{}\" has unknown version {}.", fileName(), m_header.version );
 		}
 
 		int unused = 0;
@@ -262,7 +262,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 	const Data *idAttr = idAttribute();
 	if ( !idAttr && particlePercentage() < 100.0f )
 	{
-		msg( Msg::Warning, "PDCParticleReader::filterAttr", format( "Percentage filtering requested but file \"%s\" contains no particle Id attribute." ) % fileName() );
+		msg( Msg::Warning, "PDCParticleReader::filterAttr", "Percentage filtering requested but file \"{}\" contains no particle Id attribute.", fileName() );
 	}
 
 	DataPtr result = nullptr;
