@@ -7,6 +7,11 @@ API
 - MessageHandler : Added `msg()` overload that accepts a `fmt::format_string` and arguments.
 - InternedString : Added specialisation for `fmt::formatter<InternedString>`.
 
+Breaking Changes
+----------------
+
+- MessageHandler : Removed support for passing `boost::format` objects to `msg()`. Use `fmt::format()` instead.
+
 Build
 -----
 

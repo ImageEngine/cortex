@@ -38,7 +38,6 @@
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
 
-#include "boost/format.hpp"
 #include "boost/noncopyable.hpp"
 
 #include "fmt/format.h"
@@ -82,8 +81,6 @@ class IECORE_API MessageHandler : public RefCounted
 		//@{
 		/// Output a message to the current handler.
 		static void output( Level level, const std::string &context, const std::string &message );
-		/// Output a message to the current handler.
-		static void output( Level level, const std::string &context, const boost::format &message );
 		//@}
 
 		//! @name Default handler
@@ -156,7 +153,6 @@ typedef MessageHandler Msg;
 /// Free functions which calls MessageHandler::output() with their arguments. These are provided
 /// for brevity.
 IECORE_API void msg( MessageHandler::Level level, const std::string &context, const std::string &message );
-IECORE_API void msg( MessageHandler::Level level, const std::string &context, const boost::format &message );
 /// Inline templated convenience function which formats the message using the provided arguments.
 template <typename... Args>
 inline void msg( MessageHandler::Level level, const std::string &context, fmt::format_string<Args...> message, Args&&... args )
