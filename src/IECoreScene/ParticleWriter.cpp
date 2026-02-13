@@ -95,7 +95,7 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 			}
 			else
 			{
-				msg( Msg::Warning, "ParticleWriter::particleAttributes", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % it->first % numParticles % s );
+				msg( Msg::Warning, "ParticleWriter::particleAttributes", "Ignoring attribute \"{}\" due to insufficient elements (expected {} but found {}).", it->first, numParticles, s );
 			}
 		}
 		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( it->second.data.get() ) )
@@ -124,7 +124,7 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 		}
 		else
 		{
-			msg( Msg::Warning, "ParticleWriter::particleAttributes", format( "Attribute \"%s\" requested via parameters but is not available." ) % *it );
+			msg( Msg::Warning, "ParticleWriter::particleAttributes", "Attribute \"{}\" requested via parameters but is not available.", *it );
 		}
 	}
 }
