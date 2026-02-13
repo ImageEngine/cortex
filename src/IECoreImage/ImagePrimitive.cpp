@@ -39,6 +39,8 @@
 #include "IECore/MurmurHash.h"
 #include "IECore/TypeTraits.h"
 
+#include "fmt/format.h"
+
 #include <cassert>
 
 using namespace std;
@@ -404,7 +406,7 @@ bool ImagePrimitive::channelValid( const IECore::Data *data, std::string *reason
 	{
 		if( reason )
 		{
-			*reason = str( format( "Channel has wrong size (%d but should be %d)." ) % size % numPixels );
+			*reason = fmt::format( "Channel has wrong size ({} but should be {}).", size, numPixels );
 		}
 		return false;
 	}
@@ -419,7 +421,7 @@ bool ImagePrimitive::channelValid( const std::string &name, std::string *reason 
 	{
 		if( reason )
 		{
-			*reason = str( format( "Channel \"%s\" does not exist." ) % name );
+			*reason = fmt::format( "Channel \"{}\" does not exist.", name );
 		}
 		return false;
 	}

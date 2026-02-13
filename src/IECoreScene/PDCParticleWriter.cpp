@@ -152,7 +152,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 		}
 		else
 		{
-			msg( Msg::Warning, "PDCParticleWriter::write", format( "Attribute \"%s\" is of unsupported type \"%s\"." ) % *it % attr->typeName() );
+			msg( Msg::Warning, "PDCParticleWriter::write", "Attribute \"{}\" is of unsupported type \"{}\".", *it, attr->typeName() );
 		}
 	}
 
