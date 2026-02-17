@@ -1,11 +1,17 @@
 10.7.x.x (relative to 10.7.0.0a4)
 ========
 
-API
----
+Improvements
+------------
 
+- Canceller : Derived from RefCounted, to allow Cancellers to be shared between multiple clients.
 - MessageHandler : Added `msg()` overload that accepts a `fmt::format_string` and arguments.
 - InternedString : Added specialisation for `fmt::formatter<InternedString>`.
+
+Breaking Changes
+----------------
+
+- Canceller : Changed base class.
 
 Build
 -----

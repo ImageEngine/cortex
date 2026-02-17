@@ -38,6 +38,7 @@
 
 #include "IECorePython/CancellerBinding.h"
 #include "IECorePython/ExceptionBinding.h"
+#include "IECorePython/RefCountedBinding.h"
 
 #include "IECore/Canceller.h"
 
@@ -60,15 +61,14 @@ namespace IECorePython
 void bindCanceller()
 {
 
-	class_<Canceller, boost::noncopyable>( "Canceller" )
+	RefCountedClass<Canceller, RefCounted>( "Canceller" )
+		.def( init<>() )
 		.def( "cancel", &Canceller::cancel )
 		.def( "cancelled", &Canceller::cancelled )
 		.def( "check", &Canceller::check )
 		.staticmethod( "check" )
 		.def( "elapsedTime", &elapsedTimeWrapper )
 	;
-
-	register_ptr_to_python<std::shared_ptr<Canceller>>();
 
 	ExceptionClass<Cancelled>( "Cancelled", PyExc_RuntimeError )
 		.def( init<>() )

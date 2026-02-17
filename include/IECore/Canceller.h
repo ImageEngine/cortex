@@ -35,9 +35,7 @@
 #ifndef IECORE_CANCELLER_H
 #define IECORE_CANCELLER_H
 
-#include "IECore/Export.h"
-
-#include "boost/noncopyable.hpp"
+#include "IECore/RefCounted.h"
 
 #include <atomic>
 #include <chrono>
@@ -61,18 +59,18 @@ struct IECORE_API Cancelled
 /// Example :
 ///
 /// ```
-/// Canceller c;
+/// CancellerPtr c = new Canceller;
 /// thread t(
 ///     [&c] {
 ///         while( 1 ) {
-///             Canceller::check( &c );
+///             Canceller::check( c.get() );
 ///         }
 ///     }
 /// );
 /// c.cancel();
 /// t.join();
 /// ```
-class Canceller : public boost::noncopyable
+class IECORE_API Canceller : public IECore::RefCounted
 {
 
 	public :
@@ -81,6 +79,8 @@ class Canceller : public boost::noncopyable
 			:	m_cancelled( false ), m_cancellationTime( 0 )
 		{
 		}
+
+		IE_CORE_DECLAREMEMBERPTR( Canceller )
 
 		void cancel()
 		{
