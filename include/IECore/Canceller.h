@@ -39,6 +39,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <mutex>
 
 namespace IECore
 {
@@ -93,7 +94,14 @@ class IECORE_API Canceller : public IECore::RefCounted
 			);
 			// Set cancellation flag _after_ storing time, so that
 			// `elapsedTime()` always sees a valid time.
-			m_cancelled = true;
+			if( !m_cancelled.exchange( true ) )
+			{
+				std::lock_guard lock( m_childrenMutex );
+				for( const auto &[child, count] : m_children )
+				{
+					child->cancel();
+				}
+			};
 		}
 
 		bool cancelled() const
@@ -125,12 +133,74 @@ class IECORE_API Canceller : public IECore::RefCounted
 			}
 		}
 
+		/// Adds a child canceller that will be cancelled automatically
+		/// when this is cancelled. If this is already cancels, then the
+		/// child is cancelled immediately.
+		void addChild( const Ptr &child )
+		{
+			std::lock_guard lock( m_childrenMutex );
+			m_children[child]++;
+			if( m_cancelled )
+			{
+				child->cancel();
+			}
+		}
+
+		/// Removes a child canceller. Additions are counted, and actual
+		/// removal only occurs when the number of removals equals the number
+		/// of additions.
+		void removeChild( const Ptr &child )
+		{
+			std::lock_guard lock( m_childrenMutex );
+			auto it = m_children.find( child );
+			if( it != m_children.end() )
+			{
+				if( --it->second == 0 )
+				{
+					m_children.erase( it );
+				}
+			}
+		}
+
+		/// Convenience class to manage removal of children in an
+		/// exception-safe way.
+		class IECORE_API ScopedChild : boost::noncopyable
+		{
+
+			public :
+
+				/// Adds `child` to `parent`.
+				ScopedChild( Canceller *parent, const Ptr &child )
+					:	m_parent( parent ), m_child( child )
+				{
+					m_parent->addChild( m_child );
+				}
+
+				/// Removes `child` from `parent`.
+				~ScopedChild()
+				{
+					m_parent->removeChild( m_child );
+				}
+
+			private :
+
+				Canceller *m_parent;
+				Ptr m_child;
+
+		};
+
+
 	private :
 
 		std::atomic_bool m_cancelled;
 		std::atomic<std::chrono::steady_clock::time_point::rep> m_cancellationTime;
 
+		std::mutex m_childrenMutex;
+		std::unordered_map<Ptr, size_t> m_children;
+
 };
+
+IE_CORE_DECLAREPTR( Canceller )
 
 }; // namespace IECore
 

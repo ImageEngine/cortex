@@ -42,6 +42,8 @@
 
 #include "IECore/Canceller.h"
 
+#include <optional>
+
 using namespace boost::python;
 using namespace IECore;
 
@@ -53,6 +55,35 @@ double elapsedTimeWrapper( const Canceller &canceller )
 	return std::chrono::duration<double>( canceller.elapsedTime() ).count();
 }
 
+class ScopedChildWrapper : public boost::noncopyable
+{
+
+	public :
+
+		ScopedChildWrapper( Canceller &parent, Canceller &child )
+			:	m_parent( &parent ), m_child( &child )
+		{
+		}
+
+		void enter()
+		{
+			m_scope.emplace( m_parent.get(), m_child );
+		}
+
+		bool exit( boost::python::object excType, boost::python::object excValue, boost::python::object excTraceBack )
+		{
+			m_scope.reset();
+			return false; // Don't suppress exceptions
+		}
+
+	private :
+
+		CancellerPtr m_parent;
+		CancellerPtr m_child;
+		std::optional<Canceller::ScopedChild> m_scope;
+
+};
+
 } // namespace
 
 namespace IECorePython
@@ -61,14 +92,24 @@ namespace IECorePython
 void bindCanceller()
 {
 
-	RefCountedClass<Canceller, RefCounted>( "Canceller" )
-		.def( init<>() )
-		.def( "cancel", &Canceller::cancel )
-		.def( "cancelled", &Canceller::cancelled )
-		.def( "check", &Canceller::check )
-		.staticmethod( "check" )
-		.def( "elapsedTime", &elapsedTimeWrapper )
-	;
+	{
+		scope s = RefCountedClass<Canceller, RefCounted>( "Canceller" )
+			.def( init<>() )
+			.def( "cancel", &Canceller::cancel )
+			.def( "cancelled", &Canceller::cancelled )
+			.def( "check", &Canceller::check )
+			.staticmethod( "check" )
+			.def( "elapsedTime", &elapsedTimeWrapper )
+			.def( "addChild", &Canceller::addChild )
+			.def( "removeChild", &Canceller::removeChild )
+		;
+
+		class_<ScopedChildWrapper, boost::noncopyable>( "ScopedChild", no_init )
+			.def( init<Canceller &, Canceller &>() )
+			.def( "__enter__", &ScopedChildWrapper::enter, return_self<>() )
+			.def( "__exit__", &ScopedChildWrapper::exit )
+		;
+	}
 
 	ExceptionClass<Cancelled>( "Cancelled", PyExc_RuntimeError )
 		.def( init<>() )

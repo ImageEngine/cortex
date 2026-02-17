@@ -4,7 +4,9 @@
 Improvements
 ------------
 
-- Canceller : Derived from RefCounted, to allow Cancellers to be shared between multiple clients.
+- Canceller :
+  - Derived from RefCounted, to allow Cancellers to be shared between multiple clients.
+  - Enabled chaining of Cancellers, via `addChild()` and `removeChild()` methods and a `ScopedChild` utility class.
 - MessageHandler : Added `msg()` overload that accepts a `fmt::format_string` and arguments.
 - InternedString : Added specialisation for `fmt::formatter<InternedString>`.
 
