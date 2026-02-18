@@ -76,91 +76,30 @@ class IECORE_API Canceller : public IECore::RefCounted
 
 	public :
 
-		Canceller()
-			:	m_cancelled( false ), m_cancellationTime( 0 )
-		{
-		}
+		Canceller();
 
 		IE_CORE_DECLAREMEMBERPTR( Canceller )
 
-		void cancel()
-		{
-			// Store time of first cancellation. We use `compare_exchange_weak()`
-			// to avoid unwanted updates on subsequent calls.
-			std::chrono::steady_clock::rep epoch( 0 );
-			m_cancellationTime.compare_exchange_weak(
-				epoch,
-				std::chrono::steady_clock::now().time_since_epoch().count()
-			);
-			// Set cancellation flag _after_ storing time, so that
-			// `elapsedTime()` always sees a valid time.
-			if( !m_cancelled.exchange( true ) )
-			{
-				std::lock_guard lock( m_childrenMutex );
-				for( const auto &[child, count] : m_children )
-				{
-					child->cancel();
-				}
-			};
-		}
+		void cancel();
+		bool cancelled() const;
 
-		bool cancelled() const
-		{
-			/// \todo Can we reduce overhead by reading
-			/// with a more relaxed memory ordering here?
-			return m_cancelled;
-		}
-
-		static void check( const Canceller *canceller )
-		{
-			if( canceller && canceller->cancelled() )
-			{
-				throw Cancelled();
-			}
-		}
+		/// Throws `IECore::Cancelled` if `canceller` is non-null and has
+		/// been cancelled, otherwise does nothing.
+		static void check( const Canceller *canceller );
 
 		/// Returns the time passed since `cancel()` was first called, or `0` if
 		/// it has not been called yet.
-		std::chrono::steady_clock::duration elapsedTime() const
-		{
-			if( m_cancelled )
-			{
-				return std::chrono::steady_clock::now() - std::chrono::steady_clock::time_point( std::chrono::steady_clock::duration( m_cancellationTime ) );
-			}
-			else
-			{
-				return std::chrono::steady_clock::duration( 0 );
-			}
-		}
+		std::chrono::steady_clock::duration elapsedTime() const;
 
 		/// Adds a child canceller that will be cancelled automatically
 		/// when this is cancelled. If this is already cancels, then the
 		/// child is cancelled immediately.
-		void addChild( const Ptr &child )
-		{
-			std::lock_guard lock( m_childrenMutex );
-			m_children[child]++;
-			if( m_cancelled )
-			{
-				child->cancel();
-			}
-		}
+		void addChild( const Ptr &child );
 
 		/// Removes a child canceller. Additions are counted, and actual
 		/// removal only occurs when the number of removals equals the number
 		/// of additions.
-		void removeChild( const Ptr &child )
-		{
-			std::lock_guard lock( m_childrenMutex );
-			auto it = m_children.find( child );
-			if( it != m_children.end() )
-			{
-				if( --it->second == 0 )
-				{
-					m_children.erase( it );
-				}
-			}
-		}
+		void removeChild( const Ptr &child );
 
 		/// Convenience class to manage removal of children in an
 		/// exception-safe way.
@@ -170,17 +109,9 @@ class IECORE_API Canceller : public IECore::RefCounted
 			public :
 
 				/// Adds `child` to `parent`.
-				ScopedChild( Canceller *parent, const Ptr &child )
-					:	m_parent( parent ), m_child( child )
-				{
-					m_parent->addChild( m_child );
-				}
-
+				ScopedChild( Canceller *parent, const Ptr &child );
 				/// Removes `child` from `parent`.
-				~ScopedChild()
-				{
-					m_parent->removeChild( m_child );
-				}
+				~ScopedChild();
 
 			private :
 
@@ -203,5 +134,7 @@ class IECORE_API Canceller : public IECore::RefCounted
 IE_CORE_DECLAREPTR( Canceller )
 
 }; // namespace IECore
+
+#include "IECore/Canceller.inl"
 
 #endif // IECORE_CANCELLER_H
