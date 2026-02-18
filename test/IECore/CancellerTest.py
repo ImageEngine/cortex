@@ -168,5 +168,111 @@ class CancellerTest( unittest.TestCase ) :
 		del exception
 		self.assertIsNone( w() )
 
+	def testAddChild( self ) :
+
+		parent = IECore.Canceller()
+		child = IECore.Canceller()
+
+		parent.addChild( child )
+		self.assertFalse( parent.cancelled() )
+		self.assertFalse( child.cancelled() )
+
+		parent.cancel()
+		self.assertTrue( parent.cancelled() )
+		self.assertTrue( child.cancelled() )
+
+	def testChildCancelledIfParentAlreadyCancelled( self ) :
+
+		parent = IECore.Canceller()
+		parent.cancel()
+
+		child = IECore.Canceller()
+		parent.addChild( child )
+		self.assertTrue( child.cancelled() )
+
+	def testRemoveChild( self ) :
+
+		parent = IECore.Canceller()
+		child = IECore.Canceller()
+
+		parent.addChild( child )
+		parent.removeChild( child )
+
+		parent.cancel()
+		self.assertTrue( parent.cancelled() )
+		self.assertFalse( child.cancelled() )
+
+	def testChildCount( self ) :
+
+		parent = IECore.Canceller()
+		child = IECore.Canceller()
+
+		parent.addChild( child )
+		parent.addChild( child )
+		parent.removeChild( child )
+
+		parent.cancel()
+		self.assertTrue( parent.cancelled() )
+		self.assertTrue( child.cancelled() )
+
+		parent = IECore.Canceller()
+		child = IECore.Canceller()
+
+		parent.addChild( child )
+		parent.addChild( child )
+		parent.removeChild( child )
+		parent.removeChild( child )
+
+		parent.cancel()
+		self.assertTrue( parent.cancelled() )
+		self.assertFalse( child.cancelled() )
+
+	def testChildCycles( self ) :
+
+		canceller1 = IECore.Canceller()
+		canceller2 = IECore.Canceller()
+		canceller1.addChild( canceller2 )
+		canceller2.addChild( canceller1 )
+
+		# This should return quickly despite the infinite parent->child->parent
+		# loop, because it can stop as soon as everything is cancelled.
+		canceller1.cancel()
+		self.assertTrue( canceller1.cancelled() )
+		self.assertTrue( canceller2.cancelled() )
+
+		# In this case, the client is responsible for removing reference
+		# cycles to allow destruction.
+		canceller1.removeChild( canceller2 )
+		self.assertEqual( canceller2.refCount(), 1 )
+		self.assertEqual( canceller1.refCount(), 2 )
+
+	def testScopedChild( self ) :
+
+		parent = IECore.Canceller()
+		child = IECore.Canceller()
+
+		with IECore.Canceller.ScopedChild( parent, child ) :
+			parent.cancel()
+			self.assertTrue( parent.cancelled() )
+			self.assertTrue( child.cancelled() )
+
+		parent = IECore.Canceller()
+		child = IECore.Canceller()
+		with IECore.Canceller.ScopedChild( parent, child ) :
+			pass
+		parent.cancel()
+
+		self.assertTrue( parent.cancelled() )
+		self.assertFalse( child.cancelled() )
+
+		parent = IECore.Canceller()
+		child = IECore.Canceller()
+		with IECore.Canceller.ScopedChild( parent, child ) :
+			with IECore.Canceller.ScopedChild( parent, child ) :
+				pass
+			parent.cancel()
+			self.assertTrue( parent.cancelled() )
+			self.assertTrue( child.cancelled() )
+
 if __name__ == "__main__":
 	unittest.main()

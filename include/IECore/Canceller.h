@@ -35,12 +35,11 @@
 #ifndef IECORE_CANCELLER_H
 #define IECORE_CANCELLER_H
 
-#include "IECore/Export.h"
-
-#include "boost/noncopyable.hpp"
+#include "IECore/RefCounted.h"
 
 #include <atomic>
 #include <chrono>
+#include <mutex>
 
 namespace IECore
 {
@@ -61,77 +60,81 @@ struct IECORE_API Cancelled
 /// Example :
 ///
 /// ```
-/// Canceller c;
+/// CancellerPtr c = new Canceller;
 /// thread t(
 ///     [&c] {
 ///         while( 1 ) {
-///             Canceller::check( &c );
+///             Canceller::check( c.get() );
 ///         }
 ///     }
 /// );
 /// c.cancel();
 /// t.join();
 /// ```
-class Canceller : public boost::noncopyable
+class IECORE_API Canceller : public IECore::RefCounted
 {
 
 	public :
 
-		Canceller()
-			:	m_cancelled( false ), m_cancellationTime( 0 )
-		{
-		}
+		Canceller();
 
-		void cancel()
-		{
-			// Store time of first cancellation. We use `compare_exchange_weak()`
-			// to avoid unwanted updates on subsequent calls.
-			std::chrono::steady_clock::rep epoch( 0 );
-			m_cancellationTime.compare_exchange_weak(
-				epoch,
-				std::chrono::steady_clock::now().time_since_epoch().count()
-			);
-			// Set cancellation flag _after_ storing time, so that
-			// `elapsedTime()` always sees a valid time.
-			m_cancelled = true;
-		}
+		IE_CORE_DECLAREMEMBERPTR( Canceller )
 
-		bool cancelled() const
-		{
-			/// \todo Can we reduce overhead by reading
-			/// with a more relaxed memory ordering here?
-			return m_cancelled;
-		}
+		void cancel();
+		bool cancelled() const;
 
-		static void check( const Canceller *canceller )
-		{
-			if( canceller && canceller->cancelled() )
-			{
-				throw Cancelled();
-			}
-		}
+		/// Throws `IECore::Cancelled` if `canceller` is non-null and has
+		/// been cancelled, otherwise does nothing.
+		static void check( const Canceller *canceller );
 
 		/// Returns the time passed since `cancel()` was first called, or `0` if
 		/// it has not been called yet.
-		std::chrono::steady_clock::duration elapsedTime() const
+		std::chrono::steady_clock::duration elapsedTime() const;
+
+		/// Adds a child canceller that will be cancelled automatically
+		/// when this is cancelled. If this is already cancels, then the
+		/// child is cancelled immediately.
+		void addChild( const Ptr &child );
+
+		/// Removes a child canceller. Additions are counted, and actual
+		/// removal only occurs when the number of removals equals the number
+		/// of additions.
+		void removeChild( const Ptr &child );
+
+		/// Convenience class to manage removal of children in an
+		/// exception-safe way.
+		class IECORE_API ScopedChild : boost::noncopyable
 		{
-			if( m_cancelled )
-			{
-				return std::chrono::steady_clock::now() - std::chrono::steady_clock::time_point( std::chrono::steady_clock::duration( m_cancellationTime ) );
-			}
-			else
-			{
-				return std::chrono::steady_clock::duration( 0 );
-			}
-		}
+
+			public :
+
+				/// Adds `child` to `parent`.
+				ScopedChild( Canceller *parent, const Ptr &child );
+				/// Removes `child` from `parent`.
+				~ScopedChild();
+
+			private :
+
+				Canceller *m_parent;
+				Ptr m_child;
+
+		};
+
 
 	private :
 
 		std::atomic_bool m_cancelled;
 		std::atomic<std::chrono::steady_clock::time_point::rep> m_cancellationTime;
 
+		std::mutex m_childrenMutex;
+		std::unordered_map<Ptr, size_t> m_children;
+
 };
 
+IE_CORE_DECLAREPTR( Canceller )
+
 }; // namespace IECore
+
+#include "IECore/Canceller.inl"
 
 #endif // IECORE_CANCELLER_H
