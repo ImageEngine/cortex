@@ -54,8 +54,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/sdf/path.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "boost/shared_ptr.hpp"
-
 #include <vector>
 
 // plugins to USD are required to use the internal pxr namespace
@@ -93,7 +91,7 @@ public:
 	std::vector<TfToken> List(const SdfPath& path) const override;
 
 	std::set<double> ListAllTimeSamples() const override;
-	
+
 	std::set<double> ListTimeSamplesForPath(const SdfPath& path) const override;
 
 	bool GetBracketingTimeSamples(double time, double* tLower, double* tUpper) const override;
@@ -158,7 +156,7 @@ private:
 	typedef std::pair<TfToken, VtValue> FieldValuePair;
 	struct SpecData {
 		SpecData() : specType(SdfSpecTypeUnknown) {}
-		
+
 		SdfSpecType specType;
 		std::vector<FieldValuePair> fields;
 	};
