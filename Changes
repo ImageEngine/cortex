@@ -19,6 +19,7 @@ Build
 -----
 
 - Requires `fmt` 9.1.0.
+- Removed unnecessary linking of `boost_chrono`.
 
 10.7.0.0a4 (relative to 10.7.0.0a3)
 ==========
