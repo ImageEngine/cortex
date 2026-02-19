@@ -40,7 +40,7 @@
 #include "IECore/ObjectPool.h"
 #include "IECore/SearchPath.h"
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace IECore
 {
@@ -80,6 +80,8 @@ class IECORE_API CachedReader : public RefCounted
 		/// As above, but also takes an Op which will be applied to
 		/// objects following loading. Will use the given ObjectPool to store the loaded objects.
 		CachedReader( const SearchPath &paths, ConstModifyOpPtr postProcessor, ObjectPoolPtr objectPool = ObjectPool::defaultObjectPool() );
+
+		~CachedReader() override;
 
 		/// Searches for the given file and loads it if found.
 		/// Throws an exception in case it cannot be found or no suitable Reader
@@ -122,7 +124,7 @@ class IECORE_API CachedReader : public RefCounted
 	private :
 
 		struct MemberData;
-		boost::shared_ptr<MemberData> m_data;
+		std::unique_ptr<MemberData> m_data;
 
 };
 
