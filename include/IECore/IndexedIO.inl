@@ -34,8 +34,6 @@
 
 #include "OpenEXR/ImfXdr.h"
 
-#include "boost/static_assert.hpp"
-
 #include <stdint.h>
 #include <string.h>
 

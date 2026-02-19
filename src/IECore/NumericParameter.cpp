@@ -39,8 +39,6 @@
 #include "IECore/Export.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/static_assert.hpp"
-
 using namespace std;
 using namespace IECore;
 using namespace boost;

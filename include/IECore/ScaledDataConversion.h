@@ -37,8 +37,6 @@
 
 #include "IECore/DataConversion.h"
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 
@@ -56,7 +54,7 @@ struct ScaledDataConversion : public DataConversion< F, T >
 {
 	T operator()( F f ) const
 	{
-		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+		static_assert( sizeof(T) == 0 );
 	}
 };
 

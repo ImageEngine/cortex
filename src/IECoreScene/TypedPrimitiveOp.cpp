@@ -43,8 +43,6 @@
 #include "IECore/NullObject.h"
 #include "IECore/TypedObjectParameter.h"
 
-#include "boost/static_assert.hpp"
-
 using namespace IECore;
 using namespace IECoreScene;
 

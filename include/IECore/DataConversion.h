@@ -35,7 +35,6 @@
 #ifndef IE_CORE_DATACONVERSION_H
 #define IE_CORE_DATACONVERSION_H
 
-#include "boost/static_assert.hpp"
 #include "boost/type_traits/integral_constant.hpp"
 
 namespace IECore
@@ -61,13 +60,13 @@ struct DataConversion
 
 	T operator()( F f ) const
 	{
-		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+		static_assert( sizeof( T ) == 0 );
 	}
 
 	InverseType inverse() const
 	{
 		/// Function is not invertible
-		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+		static_assert( sizeof( T ) == 0 );
 	}
 
 };

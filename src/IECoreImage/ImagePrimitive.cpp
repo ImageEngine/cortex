@@ -39,8 +39,6 @@
 #include "IECore/MurmurHash.h"
 #include "IECore/TypeTraits.h"
 
-#include "boost/static_assert.hpp"
-
 #include <cassert>
 
 using namespace std;

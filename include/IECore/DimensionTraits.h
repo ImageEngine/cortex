@@ -48,7 +48,7 @@ namespace IECore
 template< int N, typename T = void >
 struct DimensionTraits
 {
-	BOOST_STATIC_ASSERT( sizeof( T ) == 0 );
+	static_assert( sizeof( T ) == 0 );
 
 	typedef void VectorType;
 	typedef void BoxType;

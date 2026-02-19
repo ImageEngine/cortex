@@ -39,8 +39,6 @@
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 
@@ -54,7 +52,7 @@ struct DefaultLevenbergMarquardtTraits;
 /// template<typename T>
 /// class DefaultErrorFn
 /// {
-///	BOOST_STATIC_ASSERT( boost::is_floating_point<T>::value );
+///	static_assert( boost::is_floating_point<T>::value );
 ///
 ///	public :
 ///
@@ -87,7 +85,7 @@ struct DefaultLevenbergMarquardtTraits;
 template<typename T, typename ErrorFn, template<typename> class Traits = DefaultLevenbergMarquardtTraits >
 class LevenbergMarquardt : public boost::noncopyable
 {
-		BOOST_STATIC_ASSERT( boost::is_floating_point<T>::value );
+		static_assert( boost::is_floating_point<T>::value );
 
 	public:
 

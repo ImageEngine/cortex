@@ -38,8 +38,6 @@
 #include "IECore/BoxTraits.h"
 #include "IECore/VectorOps.h"
 
-#include "boost/static_assert.hpp"
-
 #include <algorithm>
 #include <cassert>
 #include <set>

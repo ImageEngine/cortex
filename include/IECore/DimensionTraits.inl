@@ -45,8 +45,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "Imath/ImathVec.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 
@@ -54,7 +52,7 @@ namespace IECore
 template<typename T>
 struct DimensionTraits<1, T>
 {
-	BOOST_STATIC_ASSERT( boost::is_arithmetic<T>::value );
+	static_assert( boost::is_arithmetic<T>::value );
 	typedef T ValueType;
 	typedef T VectorType;
 	typedef void BoxType;
@@ -66,7 +64,7 @@ struct DimensionTraits<1, T>
 template<typename T>
 struct DimensionTraits<2, T>
 {
-	BOOST_STATIC_ASSERT( boost::is_arithmetic<T>::value );
+	static_assert( boost::is_arithmetic<T>::value );
 	typedef T ValueType;
 	typedef Imath::Vec2<T> VectorType;
 	typedef Imath::Box< VectorType > BoxType;
@@ -78,7 +76,7 @@ struct DimensionTraits<2, T>
 template<typename T>
 struct DimensionTraits<3, T>
 {
-	BOOST_STATIC_ASSERT( boost::is_arithmetic<T>::value );
+	static_assert( boost::is_arithmetic<T>::value );
 	typedef T ValueType;
 	typedef Imath::Vec3<T> VectorType;
 	typedef Imath::Box< VectorType > BoxType;

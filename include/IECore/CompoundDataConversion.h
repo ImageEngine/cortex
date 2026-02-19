@@ -37,7 +37,6 @@
 
 #include "IECore/DataConversion.h"
 
-#include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
 
 namespace IECore
@@ -50,7 +49,7 @@ class CompoundDataConversion : public DataConversion< typename C1::FromType, typ
 {
 	public:
 		/// These two types must be the same, so that the function composition works
-		BOOST_STATIC_ASSERT( (boost::is_same< typename C1::ToType, typename C2::FromType >::value) );
+		static_assert( std::is_same_v<typename C1::ToType, typename C2::FromType> );
 
 		/// Inverse defined by the equality: (f o g)'(x) = ( g' o f' )(x)
 		typedef CompoundDataConversion< typename C2::InverseType, typename C1::InverseType > InverseType;

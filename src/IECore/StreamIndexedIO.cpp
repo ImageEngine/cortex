@@ -2226,7 +2226,7 @@ void StreamIndexedIO::Index::writeNodeChildren( DirectoryNode *n, F &f )
 template < typename F >
 void StreamIndexedIO::Index::writeNode( DirectoryNode *node, F &f )
 {
-	BOOST_STATIC_ASSERT( sizeof( NodeBase::NodeType ) == 1 );
+	static_assert( sizeof( NodeBase::NodeType ) == 1 );
 
 	NodeBase::NodeType nodeType = node->subindex() ? NodeBase::NodeType::SubIndex : node->nodeType();
 	f.write( (char *) &nodeType, sizeof( nodeType ) );

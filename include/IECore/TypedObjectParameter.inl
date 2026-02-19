@@ -44,8 +44,6 @@
 #include "IECore/Object.h"
 #include "IECore/TypedObjectParameter.h"
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 

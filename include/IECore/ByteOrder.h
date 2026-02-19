@@ -35,8 +35,6 @@
 #ifndef IE_CORE_BYTEORDER_H
 #define IE_CORE_BYTEORDER_H
 
-#include "boost/static_assert.hpp"
-
 #include <stdint.h>
 
 namespace IECore
@@ -74,8 +72,7 @@ inline bool bigEndian()
 template<typename T>
 inline T reverseBytes( const T &x )
 {
-	// needs specialising for each type
-	BOOST_STATIC_ASSERT(sizeof(T)==0);
+	static_assert( sizeof( T ) == 0, "reverseBytes requires specialisation" );
 }
 
 template<>
@@ -125,7 +122,7 @@ inline uint32_t reverseBytes<uint32_t>( const uint32_t &x )
 template<>
 inline float reverseBytes<float>( const float &x )
 {
-	BOOST_STATIC_ASSERT( sizeof(uint32_t) == sizeof(float) );
+	static_assert( sizeof( uint32_t ) == sizeof( float) );
 	union {
 		uint32_t i;
 		float f;
@@ -151,7 +148,7 @@ inline uint64_t reverseBytes<uint64_t>( const uint64_t &x )
 template<>
 inline double reverseBytes<double>( const double &x )
 {
-	BOOST_STATIC_ASSERT( sizeof(uint64_t) == sizeof(double) );
+	static_assert( sizeof( uint64_t ) == sizeof( double ) );
 	union {
 		uint64_t i;
 		double d;
