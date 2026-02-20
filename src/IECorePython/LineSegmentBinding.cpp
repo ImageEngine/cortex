@@ -40,8 +40,6 @@
 
 #include "IECore/LineSegment.h"
 
-#include "boost/static_assert.hpp"
-
 #include <cassert>
 
 using namespace boost::python;
@@ -53,7 +51,7 @@ namespace IECorePython
 template<class L>
 static const char *typeName()
 {
-	BOOST_STATIC_ASSERT( sizeof(L) == 0 );
+	static_assert( sizeof(L) == 0 );
 	return "";
 }
 

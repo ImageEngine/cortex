@@ -38,7 +38,6 @@
 #ifndef IE_CORE_HEXCONVERSION_H
 #define IE_CORE_HEXCONVERSION_H
 
-#include "boost/static_assert.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_same.hpp"
 
@@ -52,9 +51,9 @@ namespace IECore
 template<typename T, typename OutputIterator>
 inline void decToHex( T value, OutputIterator result )
 {
-	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
+	static_assert( boost::is_integral<T>::value );
 	typedef typename std::iterator_traits<OutputIterator>::value_type CharType;
-	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
+	static_assert( ( boost::is_same<CharType, char>::value ) );
 
 	for( int i = sizeof( T ) * 2 - 1; i >= 0 ; --i )
 	{
@@ -86,7 +85,7 @@ inline std::string decToHex( RandomAccessIterator first, RandomAccessIterator la
 template<typename T>
 inline std::string decToHex( T n )
 {
-	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
+	static_assert( boost::is_integral<T>::value );
 
 	std::string r; r.resize( sizeof( T ) * 2 );
 	decToHex( n, r.begin() );
@@ -97,9 +96,9 @@ inline std::string decToHex( T n )
 template<typename T, typename InputIterator>
 inline T hexToDec( InputIterator first, InputIterator last )
 {
-	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
+	static_assert( boost::is_integral<T>::value );
 	typedef typename std::iterator_traits<InputIterator>::value_type CharType;
-	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
+	static_assert( ( boost::is_same<CharType, char>::value ) );
 
 	T n = 0;
 
@@ -182,7 +181,7 @@ template<typename T, typename InputIterator, typename OutputIterator>
 inline void hexToDec( InputIterator first, InputIterator last, OutputIterator result )
 {
 	typedef typename std::iterator_traits<InputIterator>::value_type CharType;
-	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
+	static_assert( ( boost::is_same<CharType, char>::value ) );
 
 	for( ; first != last; first += sizeof( T ) * 2 )
 	{

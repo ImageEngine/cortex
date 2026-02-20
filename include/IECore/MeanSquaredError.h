@@ -35,8 +35,6 @@
 #ifndef IE_CORE_MEANSQUAREDERROR_H
 #define IE_CORE_MEANSQUAREDERROR_H
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 
@@ -47,7 +45,7 @@ struct MeanSquaredError
 {
 	ReturnType operator()( const T &a, const T &b ) const
 	{
-		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+		static_assert( sizeof(T) == 0 );
 		return ReturnType(0);
 	}
 };

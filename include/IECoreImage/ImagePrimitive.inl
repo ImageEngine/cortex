@@ -43,8 +43,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "Imath/half.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "boost/static_assert.hpp"
-
 namespace IECoreImage
 {
 

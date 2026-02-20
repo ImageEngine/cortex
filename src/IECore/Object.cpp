@@ -36,7 +36,6 @@
 
 #include "IECore/MurmurHash.h"
 
-#include "boost/shared_ptr.hpp"
 #include "boost/tokenizer.hpp"
 
 #include "fmt/format.h"
@@ -405,8 +404,8 @@ ObjectPtr Object::copy() const
 
 void Object::save( IndexedIOPtr ioInterface, const IndexedIO::EntryID &name ) const
 {
-	boost::shared_ptr<SaveContext> context( new SaveContext( ioInterface ) );
-	context->save( this, ioInterface.get(), name );
+	SaveContext context( ioInterface );
+	context.save( this, ioInterface.get(), name );
 }
 
 void Object::copyFrom( const Object *toCopy )

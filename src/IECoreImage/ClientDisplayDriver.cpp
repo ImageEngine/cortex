@@ -49,7 +49,6 @@
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/array.hpp"
 #include "boost/bind/bind.hpp"
 
 using namespace std;
@@ -213,7 +212,7 @@ void ClientDisplayDriver::imageData( const Box2i &box, const float *data, size_t
 {
 	sendHeader( DisplayDriverServerHeader::imageData, sizeof( box ) + dataSize * sizeof( float ) );
 
-	boost::array<boost::asio::const_buffer, 2> buffers = { {
+	std::array<boost::asio::const_buffer, 2> buffers = { {
 		boost::asio::buffer( &box, sizeof( box ) ),
 		boost::asio::buffer( data, dataSize * sizeof( float ) )
 	} };

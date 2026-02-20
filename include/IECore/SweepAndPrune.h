@@ -37,8 +37,6 @@
 
 #include "IECore/RadixSort.h"
 
-#include "boost/static_assert.hpp"
-
 #include <vector>
 
 namespace IECore

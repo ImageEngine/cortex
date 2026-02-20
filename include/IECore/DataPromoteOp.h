@@ -40,8 +40,6 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/Op.h"
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 
@@ -73,7 +71,7 @@ class IECORE_API DataPromoteOp : public Op
 		template<typename T, typename E=void >
 		struct Promote2Fn
 		{
-			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+			static_assert( sizeof( T ) == 0 );
 		};
 
 		ObjectParameterPtr m_objectParameter;

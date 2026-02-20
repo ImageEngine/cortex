@@ -191,12 +191,16 @@ struct CachedReader::MemberData
 //////////////////////////////////////////////////////////////////////////
 
 CachedReader::CachedReader( const SearchPath &paths, ObjectPoolPtr objectPool  )
-	:	m_data( new MemberData( paths, nullptr, objectPool ) )
+	:	m_data( std::make_unique<MemberData>( paths, nullptr, objectPool ) )
 {
 }
 
 CachedReader::CachedReader( const SearchPath &paths, ConstModifyOpPtr postProcessor, ObjectPoolPtr objectPool )
-	:	m_data( new MemberData( paths, postProcessor, objectPool ) )
+	:	m_data( std::make_unique<MemberData>( paths, postProcessor, objectPool ) )
+{
+}
+
+CachedReader::~CachedReader()
 {
 }
 

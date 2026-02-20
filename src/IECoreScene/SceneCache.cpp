@@ -54,7 +54,6 @@
 #include "Imath/ImathBoxAlgo.h"
 
 #include "boost/core/demangle.hpp"
-#include "boost/tuple/tuple.hpp"
 
 #include "tbb/concurrent_hash_map.h"
 
@@ -865,7 +864,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		typedef tbb::spin_rw_mutex AttributeMapMutex;
 
 		typedef std::pair< const ReaderImplementation *, size_t > SimpleCacheKey;
-		typedef tuple< const ReaderImplementation *, const SceneCache::Name &, size_t > AttributeCacheKey;
+		using AttributeCacheKey = std::tuple< const ReaderImplementation *, const SceneCache::Name &, size_t >;
 
 		typedef IECore::ComputationCache< SimpleCacheKey > SimpleCache;
 		typedef IECore::ComputationCache< AttributeCacheKey > AttributeCache;

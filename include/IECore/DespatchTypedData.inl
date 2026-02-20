@@ -442,7 +442,7 @@ struct TypedDataSize
 	{
 		ReturnType operator()( const T *data ) const
 		{
-			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+			static_assert( sizeof( T ) == 0 );
 			return 0;
 		}
 	};
@@ -485,7 +485,7 @@ struct TypedDataAddress
 	{
 		ReturnType operator()( const T *data ) const
 		{
-			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+			static_assert( sizeof( T ) == 0 );
 			return nullptr;
 		}
 	};

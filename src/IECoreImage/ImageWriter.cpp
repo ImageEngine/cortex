@@ -57,7 +57,6 @@
 #include "boost/mpl/if.hpp"
 #include "boost/mpl/not.hpp"
 #include "boost/mpl/or.hpp"
-#include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
 
 #ifndef _MSC_VER

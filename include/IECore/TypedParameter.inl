@@ -39,8 +39,6 @@
 #include "IECore/Export.h"
 #include "IECore/TypedParameter.h"
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 
@@ -100,7 +98,7 @@ TypeId TypedParameter<T>::typeId() const
 template <class T>
 TypeId TypedParameter<T>::staticTypeId()
 {
-	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
+	static_assert( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return InvalidTypeId;
 }
 
@@ -113,7 +111,7 @@ const char *TypedParameter<T>::typeName() const
 template <class T>
 const char *TypedParameter<T>::staticTypeName()
 {
-	BOOST_STATIC_ASSERT( sizeof(T) == 0 ); // this function must be specialised for each type!
+	static_assert( sizeof(T) == 0 ); // this function must be specialised for each type!
 	return "";
 }
 

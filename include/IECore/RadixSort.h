@@ -38,8 +38,6 @@
 #include "IECore/Export.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/static_assert.hpp"
-
 #include <vector>
 
 namespace IECore
@@ -53,9 +51,9 @@ class IECORE_API RadixSort
 {
 	public:
 
-		BOOST_STATIC_ASSERT( sizeof( int ) == 4 );
-		BOOST_STATIC_ASSERT( sizeof( unsigned int ) == 4 );
-		BOOST_STATIC_ASSERT( sizeof( float ) == 4 );
+		static_assert( sizeof( int ) == 4 );
+		static_assert( sizeof( unsigned int ) == 4 );
+		static_assert( sizeof( float ) == 4 );
 
 		RadixSort();
 		virtual ~RadixSort();

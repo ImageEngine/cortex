@@ -36,15 +36,13 @@
 
 #include "IECore/ByteOrder.h"
 
-#include "boost/static_assert.hpp"
-
 #include <string.h>
 
 using namespace IECore;
 
-BOOST_STATIC_ASSERT( sizeof(int) == 4 );
-BOOST_STATIC_ASSERT( sizeof(unsigned int) == 4 );
-BOOST_STATIC_ASSERT( sizeof(float) == 4 );
+static_assert( sizeof(int) == 4 );
+static_assert( sizeof(unsigned int) == 4 );
+static_assert( sizeof(float) == 4 );
 
 RadixSort::RadixSort() : m_currentSize( 0 ), m_ranks( nullptr ), m_ranks2( nullptr )
 {
@@ -412,7 +410,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<int> &
 template<typename T>
 bool RadixSort::createHistograms( const std::vector<T> &input )
 {
-	BOOST_STATIC_ASSERT( sizeof(T) == 4 );
+	static_assert( sizeof(T) == 4 );
 
 	memset( &m_histogram[0], 0, 256 * 4 * sizeof( unsigned int ) );
 

@@ -38,8 +38,6 @@
 #include "IECore/SpaceTransform.h"
 #include "IECore/TypeTraits.h"
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 
@@ -54,8 +52,8 @@ template<typename F, typename T>
 class EuclideanToSphericalTransform : public SpaceTransform< F, T >
 {
 	public:
-		BOOST_STATIC_ASSERT( ( TypeTraits::IsVec3<F>::value ) );
-		BOOST_STATIC_ASSERT( ( boost::mpl::or_< TypeTraits::IsVec3<T>, TypeTraits::IsVec2<T> >::value == true ) );
+		static_assert( ( TypeTraits::IsVec3<F>::value ) );
+		static_assert( ( boost::mpl::or_< TypeTraits::IsVec3<T>, TypeTraits::IsVec2<T> >::value == true ) );
 
 		typedef EuclideanToSphericalTransform< T, F > InverseType;
 

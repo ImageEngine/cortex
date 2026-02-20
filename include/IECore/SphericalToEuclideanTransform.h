@@ -38,8 +38,6 @@
 #include "IECore/SpaceTransform.h"
 #include "IECore/TypeTraits.h"
 
-#include "boost/static_assert.hpp"
-
 namespace IECore
 {
 

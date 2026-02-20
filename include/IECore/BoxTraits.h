@@ -44,8 +44,6 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include "Imath/ImathBoxAlgo.h"
 
-#include "boost/static_assert.hpp"
-
 #include <cassert>
 
 namespace IECore

@@ -66,7 +66,7 @@ struct ObjectPool::MemberData
 //////////////////////////////////////////////////////////////////////////
 
 ObjectPool::ObjectPool( size_t maxMemory )
-	:	m_data( new MemberData(maxMemory) )
+	:	m_data( std::make_unique<MemberData>( maxMemory ) )
 {
 }
 

@@ -39,7 +39,7 @@
 #include "IECore/MurmurHash.h"
 #include "IECore/Object.h"
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace IECore
 {
@@ -113,7 +113,7 @@ class IECORE_API ObjectPool : public RefCounted
 	private:
 
 		struct MemberData;
-		boost::shared_ptr<MemberData> m_data;
+		std::unique_ptr<MemberData> m_data;
 };
 
 } // namespace IECore
