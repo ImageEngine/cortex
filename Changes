@@ -82,10 +82,18 @@ Breaking Changes
   - Removed deprecated functions componentConnectionAdapterLabel, convertOSLComponentConnections, collapseSplineParameters, expandSplineParameters.
   - Switch support for Spline parameters to support for Ramp parameters.
 
-10.6.x.x (relative to 10.6.3.1)
+10.6.x.x (relative to 10.6.4.0)
 ========
 
 
+
+10.6.4.0 (relative to 10.6.3.1)
+========
+
+Improvements
+------------
+
+- USDScene : Added prim path to warnings when reading curves and meshes.
 
 10.6.3.1 (relative to 10.6.3.0)
 ========
