@@ -200,15 +200,7 @@ void CurvesPrimitive::setTopology( ConstIntVectorDataPtr verticesPerCurve, const
 	const std::vector<int> &v = m_vertsPerCurve->readable();
 	for( size_t i=0; i<v.size(); i++ )
 	{
-		if( m_periodic )
-		{
-			m_numFaceVarying += numSegments( i );
-		}
-		else
-		{
-			m_numFaceVarying += numSegments( i ) + 1;
-		}
-
+		m_numFaceVarying += variableSize( PrimitiveVariable::FaceVarying, i );
 		m_numVerts += v[i];
 	}
 }
