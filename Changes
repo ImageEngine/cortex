@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.4.0)
 ========
 
+API
+---
 
+- IECorePython : Added `Buffer` object and associated `asReadOnlyBuffer()` and `asReadWriteBuffer()` methods for numeric-based `*VectorData` types. This adds support for Python's buffer protocol which allows direct access to the vector.
 
 10.6.4.0 (relative to 10.6.3.1)
 ========

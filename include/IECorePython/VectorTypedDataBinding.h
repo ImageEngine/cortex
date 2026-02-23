@@ -37,8 +37,35 @@
 
 #include "IECorePython/Export.h"
 
+#include "IECore/Data.h"
+#include "IECore/RefCounted.h"
+
+
 namespace IECorePython
 {
+
+class Buffer : public IECore::RefCounted
+{
+	public :
+		IE_CORE_DECLAREMEMBERPTR( Buffer );
+
+		Buffer( IECore::Data *data, const bool writable );
+		~Buffer() override;
+
+		IECore::DataPtr asData() const;
+
+		bool isWritable() const;
+
+		static int getBuffer( PyObject *object, Py_buffer *view, int flags );
+		static void releaseBuffer( PyObject *object, Py_buffer *view );
+
+	private :
+		IECore::DataPtr m_data;
+		const bool m_writable;
+};
+
+IE_CORE_DECLAREPTR( Buffer )
+
 extern IECOREPYTHON_API void bindAllVectorTypedData();
 }
 
