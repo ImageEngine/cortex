@@ -37,7 +37,6 @@
 #include "IECore/Exception.h"
 
 #include "boost/algorithm/string.hpp"
-#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 
@@ -198,7 +197,9 @@ void FileSequence::setSuffix( const std::string &suffix )
 
 std::string FileSequence::fileNameForFrame( FrameList::Frame frameNumber ) const
 {
-	return ( fileNameTemplate( frameNumber < 0 ) % frameNumber ).str();
+	return fmt::format(
+		"{0}{1:0{2}}{3}", getPrefix(), frameNumber, getPadding() + ( frameNumber < 0 ? 1 : 0 ), getSuffix()
+	);
 }
 
 FrameList::Frame FileSequence::frameForFileName( const std::string &fileName ) const
@@ -225,17 +226,12 @@ void FileSequence::fileNames( std::vector< std::string > &f ) const
 {
 	f.clear();
 
-	boost::format posFmt = fileNameTemplate( false );
-	boost::format negFmt = fileNameTemplate( true );
-
 	std::vector< FrameList::Frame > frames;
-
 	m_frameList->asList( frames );
 
-	for ( std::vector< FrameList::Frame >::const_iterator it = frames.begin(); it != frames.end(); ++it )
+	for( auto frame : frames )
 	{
-		boost::format &fmt = *it < 0 ? negFmt : posFmt ;
-		f.push_back( ( fmt % *it ).str() );
+		f.push_back( fileNameForFrame( frame ) );
 	}
 }
 
@@ -243,23 +239,16 @@ void FileSequence::clumpedFileNames( unsigned clumpSize, std::vector< std::vecto
 {
 	f.clear();
 
-	boost::format posFmt = fileNameTemplate( false );
-	boost::format negFmt = fileNameTemplate( true );
-
 	std::vector< std::vector< FrameList::Frame > > clumpedFrames;
 
 	m_frameList->asClumpedList( clumpedFrames, clumpSize );
 
-	for ( std::vector< std::vector< FrameList::Frame > >::const_iterator it = clumpedFrames.begin(); it != clumpedFrames.end(); ++it )
+	for( const auto &clump : clumpedFrames )
 	{
-		const std::vector< FrameList::Frame > &clump = *it;
-
 		f.push_back( std::vector< std::string >() );
-
-		for ( std::vector< FrameList::Frame > ::const_iterator cit = clump.begin(); cit != clump.end(); ++cit )
+		for( auto frame : clump )
 		{
-			boost::format &fmt = *cit < 0 ? negFmt : posFmt ;
-			f.back().push_back( ( fmt % *cit ).str() );
+			f.back().push_back( fileNameForFrame( frame ) );
 		}
 	}
 }
@@ -324,20 +313,4 @@ boost::regex FileSequence::fileNameValidator()
 bool FileSequence::operator ==( const FileSequence &other ) const
 {
 	return m_fileName == other.m_fileName && m_frameList->isEqualTo( other.m_frameList );
-}
-
-boost::format FileSequence::fileNameTemplate( bool negativeFrame ) const
-{
-	unsigned padding = getPadding();
-	std::string paddingStr = "";
-	for ( unsigned i = 0; i < padding; i++)
-	{
-		paddingStr += "#";
-	}
-
-	std::string f = m_fileName;
-	boost::replace_all( f, "%", "%%" );
-	boost::replace_all( f, paddingStr, ( boost::format( "%%0%dd" ) % ( negativeFrame ? padding + 1 : padding ) ).str() );
-
-	return boost::format( f );
 }

@@ -39,7 +39,6 @@
 #include "IECore/FrameList.h"
 #include "IECore/RunTimeTyped.h"
 
-#include "boost/format.hpp"
 #include "boost/regex.hpp"
 
 #include <string>
@@ -131,11 +130,6 @@ class IECORE_API FileSequence : public RunTimeTyped
 
 		std::string m_fileName;
 		FrameListPtr m_frameList;
-
-		/// Returns a boost::format for expanding out the filename with a frame number. Due to limitations in boost::format
-		/// we need use a different template depending on the sign of the frame number.
-		boost::format fileNameTemplate( bool negativeFrame ) const;
-
 
 };
 

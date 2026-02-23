@@ -190,7 +190,7 @@ ObjectPtr ParticleReader::doOperation( const CompoundObject * operands )
 			}
 			else
 			{
-				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % result->getNumPoints() % s );
+				msg( Msg::Warning, "ParticleReader::doOperation", "Ignoring attribute \"{}\" due to insufficient elements (expected {} but found {}).", *it, result->getNumPoints(), s );
 			}
 		}
 		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( d.get() ) )

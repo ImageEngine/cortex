@@ -19,6 +19,8 @@ Breaking Changes
 ----------------
 
 - Canceller : Changed base class.
+- MessageHandler : Removed support for passing `boost::format` objects to `msg()`. Use `fmt::format()` instead.
+- FileSequence : Removed `fileNameTemplate()` protected method. Use `fileNameForFrame()` instead.
 
 Build
 -----

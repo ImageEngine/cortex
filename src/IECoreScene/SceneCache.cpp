@@ -1402,7 +1402,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				{
 					std::string prefix = "SceneCache::writeObject";
 					std::string details = fmt::format(
-						"object written at previous time: %1%,\nSample times must be written sequentially for each object.",
+						"object written at previous time: {},\nSample times must be written sequentially for each object.",
 						*(m_objectSampleTimes.rbegin())
 					);
 					throwException( prefix, time, details );

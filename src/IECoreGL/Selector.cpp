@@ -306,7 +306,7 @@ class Selector::Implementation : public IECore::RefCounted
 		//////////////////////////////////////////////////////////////////////////
 
 		FrameBufferPtr m_frameBuffer;
-		boost::shared_ptr<FrameBuffer::ScopedBinding> m_frameBufferBinding;
+		std::unique_ptr<FrameBuffer::ScopedBinding> m_frameBufferBinding;
 		GLint m_prevProgram;
 		ConstShaderPtr m_currentIDShader;
 		std::stack<ConstShaderPtr> m_IDShaderStack;
@@ -325,7 +325,7 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 			m_frameBuffer->setDepth( new DepthTexture( 128, 128 ) );
 			m_frameBuffer->validate();
-			m_frameBufferBinding = boost::shared_ptr<FrameBuffer::ScopedBinding>( new FrameBuffer::ScopedBinding( *m_frameBuffer ) );
+			m_frameBufferBinding = std::make_unique<FrameBuffer::ScopedBinding>( *m_frameBuffer );
 
 			glGetIntegerv( GL_VIEWPORT, m_prevViewport );
 			glViewport( 0, 0, 128, 128 );
