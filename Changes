@@ -6,6 +6,12 @@ Fixes
 
 - CompoundData : Fixed bad formatting of exception messages [^1].
 
+Breaking Changes
+----------------
+
+- MessageHandler : Removed support for passing `boost::format` objects to `msg()`. Use `fmt::format()` instead.
+- FileSequence : Removed `fileNameTemplate()` protected method. Use `fileNameForFrame()` instead.
+
 [^1]: To be omitted from the notes for the final 10.7.0.0 release.
 
 10.7.0.0a5 (relative to 10.7.0.0a4)
@@ -24,8 +30,6 @@ Breaking Changes
 ----------------
 
 - Canceller : Changed base class.
-- MessageHandler : Removed support for passing `boost::format` objects to `msg()`. Use `fmt::format()` instead.
-- FileSequence : Removed `fileNameTemplate()` protected method. Use `fileNameForFrame()` instead.
 
 Build
 -----
