@@ -1,7 +1,12 @@
 10.7.x.x (relative to 10.7.0.0a5)
 ========
 
+Fixes
+-----
 
+- CompoundData : Fixed bad formatting of exception messages [^1].
+
+[^1]: To be omitted from the notes for the final 10.7.0.0 release.
 
 10.7.0.0a5 (relative to 10.7.0.0a4)
 ==========

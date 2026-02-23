@@ -102,7 +102,7 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 		{
 			if( throwExceptions )
 			{
-				throw Exception( fmt::format( "CompoundData child \"%s\" is not of type \"%s\".", name.value(), T::staticTypeName() ) );
+				throw Exception( fmt::format( "CompoundData child \"{}\" is not of type \"{}\".", name.value(), T::staticTypeName() ) );
 			}
 			else
 			{
@@ -120,7 +120,7 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 		}
 		else if( throwExceptions )
 		{
-			throw Exception( fmt::format( "CompoundData has no child named \"%s\".", name.value() ) );
+			throw Exception( fmt::format( "CompoundData has no child named \"{}\".", name.value() ) );
 		}
 		else
 		{
