@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.0.0a6)
 ========
 
+Breaking Changes
+----------------
 
+- HenyeyGreenstein.h : Removed.
 
 10.7.0.0a6 (relative to 10.7.0.0a5)
 ==========

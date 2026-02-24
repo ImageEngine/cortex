@@ -117,7 +117,6 @@
 #include "IECorePython/RampBinding.h"
 #include "IECorePython/RampDataBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
-#include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
 #include "IECorePython/DateTimeDataBinding.h"
 #include "IECorePython/FrameListBinding.h"
@@ -268,7 +267,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindRamp();
 	bindRampData();
 	bindObjectVector();
-	bindHenyeyGreenstein();
 	bindDateTimeData();
 	bindFrameList();
 	bindEmptyFrameList();
