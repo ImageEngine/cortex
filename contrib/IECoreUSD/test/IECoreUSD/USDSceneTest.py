@@ -2025,7 +2025,8 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( root.childNames(), [ "scope" ] )
 		scope = root.child( "scope" )
-		self.assertEqual( scope.attributeNames(), [] )
+		self.assertEqual( scope.attributeNames(), [ "usd:schemaType" ] )
+		self.assertEqual( scope.readAttribute( "usd:schemaType", 0.0 ), IECore.StringData( "Scope" ) )
 		self.assertEqual( scope.readTransformAsMatrix( 0 ), imath.M44d() )
 		self.assertFalse( scope.hasObject() )
 
@@ -2217,7 +2218,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertSetNamesEqual( root.readTags( root.AncestorTag ), [] )
 		self.assertSetNamesEqual( root.readTags( root.LocalTag ), [] )
-		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), allTags + [ "__cameras", "usd:pointInstancers" ] + self.__expectedLightSets() )
+		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), allTags + [ "__cameras", "usd:pointInstancers", "__materials" ] + self.__expectedLightSets() )
 		checkHasTag( root )
 
 		a = root.child( "a" )
@@ -2265,7 +2266,7 @@ class USDSceneTest( unittest.TestCase ) :
 		instancerGroup = group.child( "instancerGroup" )
 		instancer = instancerGroup.child( "instancer" )
 
-		self.assertSetNamesEqual( root.setNames(), [ "__cameras", "usd:pointInstancers" ] + self.__expectedLightSets() )
+		self.assertSetNamesEqual( root.setNames(), [ "__cameras", "usd:pointInstancers", "__materials" ] + self.__expectedLightSets() )
 		self.assertSetNamesEqual( group.setNames(), [] )
 		self.assertSetNamesEqual( camera.setNames(), [] )
 		self.assertSetNamesEqual( instancerGroup.setNames(), [] )
@@ -2287,7 +2288,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertSetNamesEqual( root.readTags( root.AncestorTag ), [] )
 		self.assertSetNamesEqual( root.readTags( root.LocalTag ), [] )
-		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers" ] + self.__expectedLightSets() )
+		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers", "__materials" ] + self.__expectedLightSets() )
 
 		self.assertSetNamesEqual( group.readTags( root.AncestorTag ), [] )
 		self.assertSetNamesEqual( group.readTags( root.LocalTag ), [] )
@@ -4555,7 +4556,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual(
 			set( root.setNames() ),
-			set( expectedSetNames.values() ) | { "__lights", "usd:pointInstancers", "__cameras" }
+			set( expectedSetNames.values() ) | { "__lights", "usd:pointInstancers", "__cameras", "__materials" }
 		)
 
 		for setIndex, setName in enumerate( expectedSetNames.values() ) :
@@ -4769,6 +4770,187 @@ class USDSceneTest( unittest.TestCase ) :
 		shaderNetwork = sphere.readAttribute( "ri:surface", 0.0 )
 
 		self.assertEqual( shaderNetwork.outputShader().name, "LamaSurface" )
+
+	def testWriteSchemaType( self ) :
+
+		# Write via SceneInterface
+
+		fileName = os.path.join( self.temporaryDirectory(), "schemaType.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		# We are only interested in Scope and Material, and "None" would be the default XForm.
+		schemaTypes = ( None, "Scope", "Material" )
+
+		# Use SceneInterface to write values for Schema Type.
+
+		for schemaType in schemaTypes :
+			child = root.createChild( schemaType or "none" )
+			if schemaType is not None :
+				child.writeAttribute( "usd:schemaType", IECore.StringData( schemaType ), 0 )
+			del child
+		del root
+
+		# Verify by reading via USD API.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		for schemaType in schemaTypes :
+			child = stage.GetPrimAtPath( "/{}".format( schemaType or "none" ) )
+			schemaTypeName = child.GetPrimTypeInfo().GetSchemaTypeName()
+			if schemaType is None :
+				self.assertEqual( schemaTypeName, "Xform" )
+			else :
+				self.assertEqual( schemaTypeName, schemaType )
+
+		# Verify by reading via SceneInterface.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		for schemaType in schemaTypes :
+			child = root.child( schemaType or "none" )
+			if schemaType is not None :
+				self.assertTrue( child.hasAttribute( "usd:schemaType" ) )
+				self.assertIn( "usd:schemaType", child.attributeNames() )
+				self.assertIsInstance( child.readAttribute( "usd:schemaType", 0 ), IECore.StringData )
+				self.assertEqual( child.readAttribute( "usd:schemaType", 0 ).value, schemaType )
+			else :
+				self.assertFalse( child.hasAttribute( "usd:schemaType" ) )
+				self.assertNotIn( "usd:schemaType", child.attributeNames() )
+				self.assertEqual( child.readAttribute( "usd:schemaType", 0 ), None )
+
+	def testWriteMaterialBind( self ) :
+
+		# Write via SceneInterface
+
+		fileName = os.path.join( self.temporaryDirectory(), "materialBind.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		# Use SceneInterface to write values for Schema Type.
+
+		materials = root.createChild( "materials" )
+		materials.writeAttribute( "usd:schemaType", IECore.StringData( "Scope" ), 0 )
+		material = materials.createChild( "material" )
+		material.writeAttribute( "usd:schemaType", IECore.StringData( "Material" ), 0 )
+
+		# Create a ShaderNetwork onto the Material.
+
+		network1 = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader(
+					"mySurface", "surface",
+					{
+						"color3fParameter" : imath.Color3f( 1, 2, 3 ),
+					}
+				),
+			},
+			output = "output"
+		)
+		material.writeAttribute( "surface", network1, 0 )
+
+		# Now create a prim with a bind to the Material prim.
+
+		sphere1 = root.createChild( "sphere1" )
+		sphere1.writeObject( IECoreScene.SpherePrimitive( 3.0 ), 0 )
+		sphere1.writeAttribute( "usd:material:binding", IECore.StringData( "/materials/material" ), 0 )
+
+		# A bind and the shader directly assigned, matching hashes should collapse
+		# into a single bind to the original material prim.
+
+		sphere2 = root.createChild( "sphere2" )
+		sphere2.writeObject( IECoreScene.SpherePrimitive( 3.0 ), 0 )
+		sphere2.writeAttribute( "usd:material:binding", IECore.StringData( "/materials/material" ), 0 )
+		sphere2.writeAttribute( "surface", network1, 0 )
+
+		# The shader network doesn't match, so it should reject the assignment
+		# and store a unique material inside a Scope with cortex_autoMaterials set to true.
+
+		network2 = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader(
+					"mySurface", "surface",
+					{
+						"color3fParameter" : imath.Color3f( 9, 9, 9 ),
+					}
+				),
+			},
+			output = "output"
+		)
+
+		sphere3 = root.createChild( "sphere3" )
+		sphere3.writeObject( IECoreScene.SpherePrimitive( 3.0 ), 0 )
+		sphere3.writeAttribute( "usd:material:binding", IECore.StringData( "/materials/material" ), 0 )
+		sphere3.writeAttribute( "surface", network2, 0 )
+
+		del material, materials, sphere1, sphere2, sphere3, root
+
+		# Verify by reading via USD API.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+
+		binding = pxr.UsdShade.MaterialBindingAPI( stage.GetPrimAtPath( "/sphere1" ) )
+		self.assertEqual( binding.GetDirectBinding( "" ).GetMaterialPath(), "/materials/material" )
+		self.assertFalse( stage.GetPrimAtPath( "/sphere1/materials" ).IsValid() )
+
+		self.assertEqual( binding.GetDirectBinding( "" ).GetMaterial().GetPrim().GetPrimTypeInfo().GetSchemaTypeName(), "Material" )
+		self.assertEqual( stage.GetPrimAtPath( "/materials" ).GetPrimTypeInfo().GetSchemaTypeName(), "Scope" )
+		self.assertEqual( stage.GetPrimAtPath( "/materials/material" ).GetPrimTypeInfo().GetSchemaTypeName(), "Material" )
+
+		mat1 = pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ stage.GetPrimAtPath( "/sphere1" ) ] )[0][0]
+		oneShaderSource = mat1.GetOutput( "surface" ).GetConnectedSource()
+		self.assertEqual( oneShaderSource[1], "DEFAULT_OUTPUT" )
+
+		binding = pxr.UsdShade.MaterialBindingAPI( stage.GetPrimAtPath( "/sphere2" ) )
+		self.assertEqual( binding.GetDirectBinding( "" ).GetMaterialPath(), "/materials/material" )
+		self.assertFalse( stage.GetPrimAtPath( "/sphere2/materials" ).IsValid() )
+
+		mat2 = pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ stage.GetPrimAtPath( "/sphere2" ) ] )[0][0]
+		oneShaderSource = mat2.GetOutput( "surface" ).GetConnectedSource()
+		self.assertEqual( oneShaderSource[1], "DEFAULT_OUTPUT" )
+
+		binding = pxr.UsdShade.MaterialBindingAPI( stage.GetPrimAtPath( "/sphere3" ) )
+		self.assertIn( "/sphere3/materials/material_", str( binding.GetDirectBinding( "" ).GetMaterialPath() ) )
+		self.assertTrue( stage.GetPrimAtPath( "/sphere3/materials" ).IsValid() )
+
+		mat3 = pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ stage.GetPrimAtPath( "/sphere3" ) ] )[0][0]
+		oneShaderSource = mat3.GetOutput( "surface" ).GetConnectedSource()
+		self.assertEqual( oneShaderSource[1], "DEFAULT_OUTPUT" )
+
+		self.assertEqual( mat1.GetPrim().GetPath(), mat2.GetPrim().GetPath() )
+		self.assertNotEqual( mat1.GetPrim().GetPath(), mat3.GetPrim().GetPath() )
+		self.assertNotEqual( mat2.GetPrim().GetPath(), mat3.GetPrim().GetPath() )
+
+		# Verify by reading via SceneInterface.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		for sphereName in ( "sphere1", "sphere2" ) :
+
+			sphere = root.child( sphereName )
+			self.assertTrue( sphere.hasAttribute( "usd:material:binding" ) )
+			self.assertTrue( sphere.hasAttribute( "surface" ) )
+			self.assertIn( "usd:material:binding", sphere.attributeNames() )
+			self.assertIsInstance( sphere.readAttribute( "usd:material:binding", 0 ), IECore.StringData )
+			self.assertEqual( sphere.readAttribute( "usd:material:binding", 0 ).value, "/materials/material" )
+		
+		# Sphere3 should be using its own unique shader without binding attributes
+
+		sphere = root.child( "sphere3" )
+		self.assertFalse( sphere.hasAttribute( "usd:material:binding" ) )
+		self.assertTrue( sphere.hasAttribute( "surface" ) )
+		self.assertNotIn( "usd:material:binding", sphere.attributeNames() )
+
+		materials = root.child( "materials" )
+		self.assertTrue( materials.hasAttribute( "usd:schemaType" ) )
+		self.assertIn( "usd:schemaType", materials.attributeNames() )
+		self.assertIsInstance( materials.readAttribute( "usd:schemaType", 0 ), IECore.StringData )
+		self.assertEqual( materials.readAttribute( "usd:schemaType", 0 ).value, "Scope" )
+
+		material = materials.child( "material" )
+		self.assertTrue( material.hasAttribute( "usd:schemaType" ) )
+		self.assertIn( "usd:schemaType", material.attributeNames() )
+		self.assertIsInstance( material.readAttribute( "usd:schemaType", 0 ), IECore.StringData )
+		self.assertEqual( material.readAttribute( "usd:schemaType", 0 ).value, "Material" )
+		self.assertFalse( material.hasAttribute( "usd:material:binding" ) )
+		self.assertTrue( material.hasAttribute( "surface" ) )
+
 
 if __name__ == "__main__":
 	unittest.main()

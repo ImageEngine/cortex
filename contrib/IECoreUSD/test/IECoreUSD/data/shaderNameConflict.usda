@@ -10,7 +10,9 @@ def Xform "shaderLocation" (
     custom float arnold:surface = 7
     rel material:binding = </shaderLocation/materials/testMat>
 
-    def Scope "materials"
+    def Scope "materials" (
+        cortex_autoMaterials = true
+    )
     {
         def Material "testMat"
         {

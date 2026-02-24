@@ -10,7 +10,9 @@ def "model"
 		rel material:binding = </model/materials/textureParameterTest>
 	}
 
-	def Scope "materials"
+	def Scope "materials" (
+		cortex_autoMaterials = true
+	)
 	{
 
 		def Material "textureParameterTest"

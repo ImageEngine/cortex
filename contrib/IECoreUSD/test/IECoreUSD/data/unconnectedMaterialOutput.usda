@@ -4,10 +4,15 @@ def Sphere "sphere" (
     prepend apiSchemas = ["MaterialBindingAPI"]
 )
 {
-    rel material:binding = </myMaterial>
+    rel material:binding = </materials/myMaterial>
 }
 
-def Material "myMaterial"
+def Scope "materials" (
+    cortex_autoMaterials = true
+)
 {
-    token outputs:cycles:surface
+    def Material "myMaterial"
+    {
+        token outputs:cycles:surface
+    }
 }

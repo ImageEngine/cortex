@@ -6,7 +6,9 @@ def Xform "shaderLocation" (
 {
     rel material:binding = </shaderLocation/materials/testMat>
 
-    def Scope "materials"
+    def Scope "materials" (
+        cortex_autoMaterials = true
+    )
     {
         def Material "testMat"
         {
