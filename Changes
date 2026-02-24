@@ -6,6 +6,7 @@ Breaking Changes
 
 - HenyeyGreenstein.h : Removed.
 - SweepAndPrune.h : Removed.
+- RadixSort.h : Removed.
 
 10.7.0.0a6 (relative to 10.7.0.0a5)
 ==========

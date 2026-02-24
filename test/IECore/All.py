@@ -102,7 +102,6 @@ from LineSegmentTest import *
 from CubicBasisTest import *
 from BezierAlgoTest import *
 from UnicodeToStringTest import *
-from RadixSortTest import *
 from AngleConversionTest import *
 from SplineTest import *
 from SplineDataTest import *
