@@ -1,7 +1,14 @@
 10.7.x.x (relative to 10.7.0.0a6)
 ========
 
+Features
+--------
 
+- IECoreUSD :
+  - Added the ability to round-trip Scope and Material schema types via `usd:schemaType` attribute.
+  - Create `__materials` set for locations acting as materials.
+  - Added `usd:material:binding` as well as `usd:material:binding:full` and `usd:material:binding:preview` attributes to round-trip material bindings.
+  - If the shader networks assigned to the material location matches the shader networks assigned to the location with the binding attribute, a `cortex_autoMaterials` scope won't be created on the location and instead will bind to the material location only to improve round-tripping consistency with other DCCs.
 
 10.7.0.0a6 (relative to 10.7.0.0a5)
 ==========

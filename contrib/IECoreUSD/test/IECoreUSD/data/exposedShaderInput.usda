@@ -10,7 +10,9 @@ def "model"
 		rel material:binding = </model/materials/material1>
 	}
 
-	def Scope "materials"
+	def Scope "materials" (
+		cortex_autoMaterials = true
+	)
 	{
 
 		def Material "material1"

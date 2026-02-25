@@ -126,6 +126,9 @@ class USDScene : public IECoreScene::SceneInterface
 		// Contains the materials to be bound for this location, indexed by purpose.
 		using Materials = boost::container::flat_map<pxr::TfToken, MaterialNetworks>;
 		Materials m_materials;
+		// Use a material bind if the attribute usd:material:binding was found.
+		using MaterialBinds = boost::container::flat_map<pxr::TfToken, pxr::SdfPath>;
+		MaterialBinds m_materialBinds;
 
 };
 

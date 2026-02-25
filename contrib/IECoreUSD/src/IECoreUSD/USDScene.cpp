@@ -220,6 +220,11 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 		return false;
 	}
 
+	if( prim.GetParent().IsA<pxr::UsdShadeMaterial>() )
+	{
+		return false;
+	}
+
 #ifdef IECOREUSD_WITH_OPENVDB
 	if( prim.IsA<pxr::UsdVolFieldBase>() )
 	{
@@ -233,7 +238,8 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 
 	return (!autoMaterials) && (
 		prim.GetTypeName().IsEmpty() ||
-		pxr::UsdGeomImageable( prim )
+		pxr::UsdGeomImageable( prim ) ||
+		prim.IsA<pxr::UsdShadeMaterial>()
 	);
 }
 
@@ -282,7 +288,8 @@ boost::container::flat_map<pxr::TfToken, PrimPredicate> g_schemaTypeSetPredicate
 #if PXR_VERSION >= 2111
 	{  pxr::TfToken( "__lights" ), &pxr::UsdPrim::HasAPI<pxr::UsdLuxLightAPI> },
 #endif
-	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> }
+	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> },
+	{ pxr::TfToken( "__materials" ), &pxr::UsdPrim::IsA<pxr::UsdShadeMaterial> },
 };
 
 bool collectionIsSet( const pxr::UsdCollectionAPI &collection )
@@ -840,6 +847,44 @@ class USDScene::IO : public RefCounted
 			}
 		}
 
+		// Get SdfPath's hash impl for tbb::concurrent_hash_map
+		struct SdfPathHashCompare
+		{
+			static size_t hash( const pxr::SdfPath &path )
+			{
+				return path.GetHash();
+			}
+
+			static bool equal( const pxr::SdfPath &first, const pxr::SdfPath &second )
+			{
+				return first == second;
+			}
+		};
+
+		using MaterialHash = boost::container::flat_map<pxr::TfToken, IECore::MurmurHash>;
+		using MaterialHashes = tbb::concurrent_hash_map<pxr::SdfPath, MaterialHash, SdfPathHashCompare>;
+
+		void setMaterialHash( const pxr::SdfPath &path, const pxr::TfToken &purpose, const IECore::MurmurHash &hash )
+		{
+			MaterialHashes::accessor writeAccessor;
+			m_materialHashes.insert( writeAccessor, path );
+			writeAccessor->second[purpose] = hash;
+			writeAccessor.release();
+		}
+
+		const IECore::MurmurHash getMaterialHash( const pxr::SdfPath &path, const pxr::TfToken &purpose )
+		{
+			MaterialHashes::const_accessor readAccessor;
+			if( m_materialHashes.find( readAccessor, path ) )
+			{
+				if( readAccessor->second.contains( purpose ) )
+				{
+					return readAccessor->second.at( purpose );
+				}
+			}
+			return IECore::MurmurHash();
+		}
+
 		inline int uniqueId()
 		{
 			return m_uniqueId;
@@ -898,6 +943,9 @@ class USDScene::IO : public RefCounted
 		ShaderNetworkCache m_shaderNetworkCache;
 		ShaderNetworkMightBeTimeVaryingCache m_shaderNetworkMightBeTimeVaryingCache;
 
+		// Store the material hash to compare and potentially reference.
+		MaterialHashes m_materialHashes;
+
 		// Used to identify a file uniquely ( including between different openings of the same filename,
 		// since closing and reopening a file may cause USD to shuffle the contents ).
 		const int m_uniqueId;
@@ -923,7 +971,7 @@ USDScene::USDScene( IOPtr io, LocationPtr location )
 
 USDScene::~USDScene()
 {
-	if( m_materials.size() )
+	if( m_materials.size() || m_materialBinds.size() )
 	{
 		try
 		{
@@ -932,6 +980,106 @@ USDScene::~USDScene()
 			while( topAncestor.GetPathElementCount() > 1 )
 			{
 				topAncestor = topAncestor.GetParentPath();
+			}
+
+			// Already converted global materials
+			if( m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+			{
+				return;
+			}
+
+			if( m_materialBinds.size() )
+			{
+				bool isUnique = false;
+
+				for( const auto &[purpose, material] : m_materials )
+				{
+					// Use a hash to identify the combination of shaders in this material.
+					IECore::MurmurHash materialHash;
+					for( const auto &[output, shaderNetwork] : material )
+					{
+						materialHash.append( output );
+						materialHash.append( shaderNetwork->Object::hash() );
+					}
+
+					if( m_materialBinds.contains( purpose ) )
+					{
+						pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( m_root->getStage(), m_materialBinds[purpose] );
+						if( !mat )
+						{
+							IECore::msg(
+								IECore::Msg::Warning, "USDScene::~USDScene",
+								fmt::format( "Unable to find material \"{}\" to bind to \"{}\"",
+									m_materialBinds[purpose].GetString(), m_location->prim.GetPath().GetString() )
+							);
+							isUnique = true;
+							break;
+						}
+						if( m_root->getMaterialHash( m_materialBinds[purpose], purpose ) != materialHash )
+						{
+							IECore::msg(
+								IECore::Msg::Warning, "USDScene::~USDScene",
+								fmt::format( "Unable to bind material \"{}\" to \"{}\" as they do not match.",
+									m_materialBinds[purpose].GetString(), m_location->prim.GetPath().GetString() )
+							);
+							isUnique = true;
+							break;
+						}
+						// Bind the material to this location
+						pxr::UsdShadeMaterialBindingAPI::Apply( m_location->prim ).Bind(
+							mat, pxr::UsdShadeTokens->fallbackStrength, purpose
+						);
+					}
+					else
+					{
+						IECore::msg(
+							IECore::Msg::Warning, "USDScene::~USDScene",
+							fmt::format( "Unable to find the correct purpose \"{}\" on material \"{}\" to bind to \"{}\".",
+								purpose.GetString(), m_materialBinds[purpose].GetString(), m_location->prim.GetPath().GetString() )
+						);
+						isUnique = true;
+						break;
+					}
+				}
+
+				if( !m_materials.size() )
+				{
+					// If there is a material bind but no materials assigned directly, ensure we apply the bind anyways.
+					for( const auto &purpose : { pxr::UsdShadeTokens->allPurpose, pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
+					{
+						if( m_materialBinds.contains( purpose ) )
+						{
+							pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( m_root->getStage(), m_materialBinds[purpose] );
+							if ( mat )
+							{
+								pxr::UsdShadeMaterialBindingAPI::Apply( m_location->prim ).Bind(
+									mat, pxr::UsdShadeTokens->fallbackStrength, purpose
+								);
+							}
+							else
+							{
+								IECore::msg(
+									IECore::Msg::Warning, "USDScene::~USDScene",
+									fmt::format( "Unable to find material \"{}\" to bind to \"{}\"",
+										m_materialBinds[purpose].GetString(), m_location->prim.GetPath().GetString() )
+								);
+							}
+						}
+					}
+					return;
+				}
+				else if( !isUnique )
+				{
+					// Return early if the shaders are bound to material prims.
+					return;
+				}
+				else
+				{
+					IECore::msg(
+						IECore::Msg::Warning, "USDScene::~USDScene",
+						fmt::format( "Generating unique materials for \"{}\" (see warnings above).", m_location->prim.GetPath().GetString() )
+					);
+				}
 			}
 
 			pxr::UsdGeomScope materialContainer = pxr::UsdGeomScope::Get( m_root->getStage(), topAncestor.AppendChild( pxr::TfToken( "materials" ) ) );
@@ -1090,6 +1238,8 @@ namespace
 
 const IECore::InternedString g_purposeAttributeName( "usd:purpose" );
 const IECore::InternedString g_kindAttributeName( "usd:kind" );
+const IECore::InternedString g_schemaTypeAttributeName( "usd:schemaType" );
+const IECore::InternedString g_materialBindingAttributeName( "usd:material:binding" );
 const IECore::InternedString g_lightAttributeName( "light" );
 const IECore::InternedString g_doubleSidedAttributeName( "doubleSided" );
 
@@ -1127,6 +1277,44 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 	{
 		return pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr().HasAuthoredValue();
 	}
+	else if( name == g_schemaTypeAttributeName )
+	{
+		if( m_location->prim.IsA<pxr::UsdGeomScope>() )
+		{
+			return true;
+		}
+		else if( m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+		{
+			return true;
+		}
+		return false;
+	}
+	else if( boost::starts_with( name.string(), g_materialBindingAttributeName.string() ) )
+	{
+		if( !m_location->prim.HasAPI<pxr::UsdShadeMaterialBindingAPI>() )
+		{
+			return false;
+		}
+
+		pxr::UsdShadeMaterialBindingAPI binding = pxr::UsdShadeMaterialBindingAPI( m_location->prim );
+		for( const auto &purpose : { pxr::UsdShadeTokens->allPurpose, pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
+		{
+			if( binding.GetDirectBinding( purpose ).IsBound() &&
+				isSceneChild( binding.GetDirectBinding( purpose ).GetMaterial().GetPrim().GetParent() ) )
+			{
+				InternedString attrName = g_materialBindingAttributeName;
+				if( !purpose.IsEmpty() )
+				{
+					attrName = attrName.string() + ":" + purpose.GetString();
+				}
+				if( name == attrName )
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	else if( auto attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
 		return attribute.HasAuthoredValue();
@@ -1134,6 +1322,16 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 	else
 	{
 		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+
+		if( m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+		{
+			pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( m_root->getStage(), m_location->prim.GetPath() );
+			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
+			{
+				return ShaderAlgo::canReadShaderNetwork( o );
+			}
+		}
+
 		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
@@ -1182,6 +1380,29 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		attrs.push_back( g_doubleSidedAttributeName );
 	}
 
+	if( m_location->prim.IsA<pxr::UsdGeomScope>() || m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+	{
+		attrs.push_back( g_schemaTypeAttributeName );
+	}
+
+	if( m_location->prim.HasAPI<pxr::UsdShadeMaterialBindingAPI>() )
+	{
+		pxr::UsdShadeMaterialBindingAPI binding = pxr::UsdShadeMaterialBindingAPI( m_location->prim );
+		for( const auto &purpose : { pxr::UsdShadeTokens->allPurpose, pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
+		{
+			if( binding.GetDirectBinding( purpose ).IsBound() &&
+				isSceneChild( binding.GetDirectBinding( purpose ).GetMaterial().GetPrim().GetParent() ) )
+			{
+				InternedString attrName = g_materialBindingAttributeName;
+				if( !purpose.IsEmpty() )
+				{
+					attrName = attrName.string() + ":" + purpose.GetString();
+				}
+				attrs.push_back( attrName );
+			}
+		}
+	}
+
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
 	{
@@ -1193,6 +1414,20 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		if( name.string().size() )
 		{
 			attrs.push_back( name );
+		}
+	}
+
+	if ( m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+	{
+		pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( m_root->getStage(), m_location->prim.GetPath() );
+		for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
+		{
+			if( !ShaderAlgo::canReadShaderNetwork( o ) )
+			{
+				continue;
+			}
+			InternedString attrName = AttributeAlgo::nameFromUSD( { o.GetBaseName() , false } );
+			attrs.push_back( attrName );
 		}
 	}
 
@@ -1290,6 +1525,38 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		}
 		return nullptr;
 	}
+	else if( name == g_schemaTypeAttributeName )
+	{
+		if( m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+		{
+			return new StringData( "Material" );
+		}
+		else if( m_location->prim.IsA<pxr::UsdGeomScope>() )
+		{
+			return new StringData( "Scope" );
+		}
+		return nullptr;
+	}
+	else if( boost::starts_with( name.string(), g_materialBindingAttributeName.string() ) )
+	{
+		for( const auto &purpose : { pxr::UsdShadeTokens->allPurpose, pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
+		{
+			InternedString attrName = g_materialBindingAttributeName;
+			if( !purpose.IsEmpty() )
+			{
+				attrName = attrName.string() + ":" + purpose.GetString();
+			}
+			if( name == attrName )
+			{
+				pxr::UsdShadeMaterialBindingAPI binding = pxr::UsdShadeMaterialBindingAPI( m_location->prim );
+				if( isSceneChild( binding.GetDirectBinding( purpose ).GetMaterial().GetPrim().GetParent() ) )
+				{
+					return new StringData( binding.GetDirectBinding( purpose ).GetMaterialPath().GetString() );
+				}
+			}
+		}
+		return nullptr;
+	}
 	else if( pxr::UsdAttribute attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
 		return DataAlgo::fromUSD( attribute, m_root->timeCode( time ) );
@@ -1297,6 +1564,16 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	else
 	{
 		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+
+		if( m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+		{
+			pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( m_root->getStage(), m_location->prim.GetPath() );
+			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
+			{
+				return m_root->readShaderNetwork( o, m_root->timeCode( time ) );
+			}
+		}
+
 		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
@@ -1365,22 +1642,72 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			}
 		}
 	}
+	else if( name == g_schemaTypeAttributeName )
+	{
+		if( auto *data = reportedCast<const StringData>( attribute, "USDScene::writeAttribute", name.c_str() ) )
+		{
+			pxr::TfType schemaType = pxr::UsdSchemaRegistry::GetInstance().GetTypeFromName( pxr::TfToken( data->readable() ) );
+			if( schemaType.IsA<pxr::UsdGeomScope>() )
+			{
+				pxr::UsdGeomScope scope = pxr::UsdGeomScope::Define( m_root->getStage(), m_location->prim.GetPath() );
+				pxr::UsdGeomXformable( scope.GetPrim() ).ClearXformOpOrder();
+			}
+			else if( schemaType.IsA<pxr::UsdShadeMaterial>() )
+			{
+				pxr::UsdShadeMaterial material = pxr::UsdShadeMaterial::Define( m_root->getStage(), m_location->prim.GetPath() );
+				pxr::UsdGeomXformable( material.GetPrim() ).ClearXformOpOrder();
+			}
+		}
+	}
 	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
 	{
-#if PXR_VERSION >= 2111
-		if( name == g_lightAttributeName )
-		{
-			ShaderAlgo::writeLight( shaderNetwork, m_location->prim );
-		}
-		else
+		// TODO : Just check if the parent is a Scope to determine if this is a material container?
+		if( m_location->prim.GetParent().IsA<pxr::UsdGeomScope>() )
 		{
 			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
 			m_materials[purpose][output] = shaderNetwork;
+
+			pxr::SdfPath matPath = m_location->prim.GetPath();
+
+			// Re-calculate each time we come across a new ShaderNetwork
+			for( const auto &[purpose, material] : m_materials )
+			{
+				pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( m_root->getStage(), matPath );
+				if( !mat )
+				{
+					mat = pxr::UsdShadeMaterial::Define( m_root->getStage(), matPath );
+				}
+				populateMaterial( mat, material );
+
+				// Use a hash to identify the combination of shaders in this material.
+				IECore::MurmurHash materialHash;
+				for( const auto &[output, shaderNetwork] : material )
+				{
+					materialHash.append( output );
+					materialHash.append( shaderNetwork->Object::hash() );
+				}
+				// Store the material hash to compare with other materials
+				// eg. allow referencing if they match.
+				m_root->setMaterialHash( matPath, purpose, materialHash );
+			}
 		}
+		else
+		{
+#if PXR_VERSION >= 2111
+			if( name == g_lightAttributeName )
+			{
+				ShaderAlgo::writeLight( shaderNetwork, m_location->prim );
+			}
+			else
+			{
+				const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+				m_materials[purpose][output] = shaderNetwork;
+			}
 #else
-		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
-		m_materials[purpose][output] = shaderNetwork;
+			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+			m_materials[purpose][output] = shaderNetwork;
 #endif
+		}
 	}
 	else if( name.string() == "gaffer:globals" )
 	{
@@ -1401,6 +1728,14 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 					globalAttribute.Set( DataAlgo::toUSD( d ), m_root->timeCode( time ) );
 				}
 			}
+		}
+	}
+	else if( boost::starts_with( name.string(), g_materialBindingAttributeName.string() ) )
+	{
+		if( const IECore::StringData *stringData = runTimeCast<const StringData>( attribute ) )
+		{
+			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+			m_materialBinds[purpose] = pxr::SdfPath( stringData->readable() );
 		}
 	}
 	else if( name.string().find( ':' ) != std::string::npos )
@@ -1765,6 +2100,25 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 		mightBeTimeVarying |= doubleSidedAttr.ValueMightBeTimeVarying();
 	}
 
+	if( m_location->prim.IsA<pxr::UsdGeomScope>() || m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+	{
+		haveAttributes = true;
+	}
+
+	if( m_location->prim.HasAPI<pxr::UsdShadeMaterialBindingAPI>() )
+	{
+		pxr::UsdShadeMaterialBindingAPI binding = pxr::UsdShadeMaterialBindingAPI( m_location->prim );
+		for( const auto &purpose : { pxr::UsdShadeTokens->allPurpose, pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
+		{
+			if( binding.GetDirectBinding( purpose ).IsBound() &&
+				isSceneChild( binding.GetDirectBinding( purpose ).GetMaterial().GetPrim().GetParent() ) )
+			{
+				haveAttributes = true;
+				break;
+			}
+		}
+	}
+
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
 	{
@@ -1791,6 +2145,16 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 			}
 			haveMaterials = true;
 		}
+	}
+
+	if( m_location->prim.IsA<pxr::UsdShadeMaterial>() )
+	{
+		pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( m_root->getStage(), m_location->prim.GetPath() );
+		for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
+		{
+			mightBeTimeVarying = mightBeTimeVarying || m_root->shaderNetworkMightBeTimeVarying( o );
+		}
+		haveMaterials = true;
 	}
 
 	if( haveAttributes || haveMaterials )

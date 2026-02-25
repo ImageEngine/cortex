@@ -12,7 +12,9 @@ def "model"
 		rel material:binding:preview = </model/materials/previewMaterial>
 	}
 
-	def Scope "materials"
+	def Scope "materials" (
+		cortex_autoMaterials = true
+	)
 	{
 
 		def Material "material"
