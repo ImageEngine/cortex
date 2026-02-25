@@ -110,14 +110,12 @@
 #include "IECorePython/BezierAlgoBinding.h"
 #include "IECorePython/ToCoreConverterBinding.h"
 #include "IECorePython/PolygonAlgoBinding.h"
-#include "IECorePython/RadixSortBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
 #include "IECorePython/SplineBinding.h"
 #include "IECorePython/SplineDataBinding.h"
 #include "IECorePython/RampBinding.h"
 #include "IECorePython/RampDataBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
-#include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
 #include "IECorePython/DateTimeDataBinding.h"
 #include "IECorePython/FrameListBinding.h"
@@ -261,14 +259,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBezierAlgo();
 	bindToCoreConverter();
 	bindPolygonAlgo();
-	bindRadixSort();
 	bindAngleConversion();
 	bindSpline();
 	bindSplineData();
 	bindRamp();
 	bindRampData();
 	bindObjectVector();
-	bindHenyeyGreenstein();
 	bindDateTimeData();
 	bindFrameList();
 	bindEmptyFrameList();

@@ -51,8 +51,6 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "DataConvertTest.h"
 #include "DespatchTypedDataTest.h"
 #include "CompilerTest.h"
-#include "RadixSortTest.h"
-#include "SweepAndPruneTest.h"
 #include "InternedStringTest.h"
 #include "LevenbergMarquardtTest.h"
 #include "SpaceTransformTest.h"
@@ -86,8 +84,6 @@ bool init()
 		addDataConvertTest(test);
 		addDespatchTypedDataTest(test);
 		addCompilerTest(test);
-		addRadixSortTest(test);
-		addSweepAndPruneTest(test);
 		addLevenbergMarquardtTest(test);
 		addSpaceTransformTest(test);
 		addLookupTest(test);
