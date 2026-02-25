@@ -57,7 +57,11 @@ ARCH_PRAGMA_MACRO_TOO_FEW_ARGUMENTS
 #include "pxr/usd/sdf/layer.h"
 #include "pxr/usd/usd/clipsAPI.h"
 #include "pxr/usd/usd/prim.h"
+#if PXR_VERSION >= 2511
+#include "pxr/usd/sdf/usdaFileFormat.h"
+#else
 #include "pxr/usd/usd/usdaFileFormat.h"
+#endif
 #include "pxr/usd/usdGeom/tokens.h"
 
 ARCH_PRAGMA_POP
@@ -92,7 +96,11 @@ TF_REGISTRY_FUNCTION(TfType)
 
 UsdSceneCacheFileFormat::UsdSceneCacheFileFormat()
 	: SdfFileFormat( UsdSceneCacheFileFormatTokens->Id, UsdSceneCacheFileFormatTokens->Version, UsdSceneCacheFileFormatTokens->Target, UsdSceneCacheFileFormatTokens->Id),
+#if PXR_VERSION >= 2511
+	m_usda(SdfFileFormat::FindById(SdfUsdaFileFormatTokens->Id))
+#else
 	m_usda(SdfFileFormat::FindById(UsdUsdaFileFormatTokens->Id))
+#endif
 {
 }
 
