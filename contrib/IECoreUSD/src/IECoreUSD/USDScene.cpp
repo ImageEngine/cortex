@@ -65,9 +65,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/scope.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
-#if PXR_VERSION >= 2111
 #include "pxr/usd/usdLux/lightAPI.h"
-#endif
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
@@ -95,10 +93,6 @@ IECORE_POP_DEFAULT_VISIBILITY
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreUSD;
-
-#if PXR_VERSION < 2011
-#define GetPrimInPrototype GetPrimInMaster
-#endif
 
 namespace
 {
@@ -262,26 +256,15 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 		targets.push_back( USDScene::toUSD( *it, /* relative = */ true ) );
 	}
 
-#if PXR_VERSION < 2009
-
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validNamespacedName( name ), pxr::UsdTokens->explicitOnly );
-
-#else
-
 	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, validNamespacedName( name ) );
 	collection.CreateExpansionRuleAttr( pxr::VtValue( pxr::UsdTokens->explicitOnly ) );
-
-#endif
-
 	collection.CreateIncludesRel().SetTargets( targets );
 }
 
 using PrimPredicate = bool (pxr::UsdPrim::*)() const;
 boost::container::flat_map<pxr::TfToken, PrimPredicate> g_schemaTypeSetPredicates = {
 	{ pxr::TfToken( "__cameras" ), &pxr::UsdPrim::IsA<pxr::UsdGeomCamera> },
-#if PXR_VERSION >= 2111
 	{  pxr::TfToken( "__lights" ), &pxr::UsdPrim::HasAPI<pxr::UsdLuxLightAPI> },
-#endif
 	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> }
 };
 
@@ -1117,12 +1100,10 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		pxr::TfToken kind;
 		return model.GetKind( &kind );
 	}
-#if PXR_VERSION >= 2111
 	else if( name == g_lightAttributeName )
 	{
 		return m_location->prim.HasAPI<pxr::UsdLuxLightAPI>();
 	}
-#endif
 	else if( name == g_doubleSidedAttributeName )
 	{
 		return pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr().HasAuthoredValue();
@@ -1170,12 +1151,10 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		attrs.push_back( g_kindAttributeName );
 	}
 
-#if PXR_VERSION >= 2111
 	if( m_location->prim.HasAPI<pxr::UsdLuxLightAPI>() )
 	{
 		attrs.push_back( g_lightAttributeName );
 	}
-#endif
 
 	if( pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr().HasAuthoredValue() )
 	{
@@ -1265,12 +1244,10 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		pxr::TfToken value; attr.Get( &value );
 		return new StringData( value.GetString() );
 	}
-#if PXR_VERSION >= 2111
 	else if( name == g_lightAttributeName )
 	{
 		return ShaderAlgo::readLight( pxr::UsdLuxLightAPI( m_location->prim ), m_root->timeCode( time ) );
 	}
-#endif
 	else if( name == g_kindAttributeName )
 	{
 		pxr::TfToken kind;
@@ -1367,7 +1344,6 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 	}
 	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
 	{
-#if PXR_VERSION >= 2111
 		if( name == g_lightAttributeName )
 		{
 			ShaderAlgo::writeLight( shaderNetwork, m_location->prim );
@@ -1377,10 +1353,6 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
 			m_materials[purpose][output] = shaderNetwork;
 		}
-#else
-		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
-		m_materials[purpose][output] = shaderNetwork;
-#endif
 	}
 	else if( name.string() == "gaffer:globals" )
 	{
@@ -1750,13 +1722,11 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 		// Kind can not be animated so no need to update `mightBeTimeVarying`.
 	}
 
-#if PXR_VERSION >= 2111
 	if( m_location->prim.HasAPI<pxr::UsdLuxLightAPI>() )
 	{
 		mightBeTimeVarying = mightBeTimeVarying || ShaderAlgo::lightMightBeTimeVarying( pxr::UsdLuxLightAPI( m_location->prim ) );
 		haveAttributes = true;
 	}
-#endif
 
 	auto doubleSidedAttr = pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr();
 	if( doubleSidedAttr && doubleSidedAttr.HasAuthoredValue() )

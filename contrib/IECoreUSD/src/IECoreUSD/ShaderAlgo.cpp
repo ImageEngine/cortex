@@ -41,13 +41,11 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#if PXR_VERSION >= 2111
 #include "pxr/usd/usdLux/cylinderLight.h"
 #include "pxr/usd/usdLux/nonboundableLightBase.h"
 #include "pxr/usd/usdLux/sphereLight.h"
 
 #include "pxr/usd/usd/schemaRegistry.h"
-#endif
 
 #include "pxr/usd/usdGeom/primvarsAPI.h"
 #include "pxr/usd/usdShade/utils.h"
@@ -57,10 +55,6 @@
 #include "boost/pointer_cast.hpp"
 
 #include <regex>
-
-#if PXR_VERSION < 2102
-#define IsContainer IsNodeGraph
-#endif
 
 namespace
 {
@@ -82,20 +76,17 @@ std::pair<pxr::TfToken, std::string> shaderIdAndType( const pxr::UsdShadeConnect
 		shader.GetShaderId( &id );
 		type = "surface";
 	}
-#if PXR_VERSION >= 2111
 	else if( auto light = pxr::UsdLuxLightAPI( connectable ) )
 	{
 		light.GetShaderIdAttr().Get( &id );
 		type = "light";
 	}
-#endif
 
 	return std::make_pair( id, type );
 }
 
 bool writeNonStandardLightParameter( const std::string &name, const IECore::Data *value, pxr::UsdShadeConnectableAPI usdShader )
 {
-#if PXR_VERSION >= 2111
 
 	if( auto sphereLight = pxr::UsdLuxSphereLight( usdShader.GetPrim() ) )
 	{
@@ -125,7 +116,6 @@ bool writeNonStandardLightParameter( const std::string &name, const IECore::Data
 		}
 	}
 
-#endif
 	return false;
 }
 
@@ -133,7 +123,6 @@ void readNonStandardLightParameters( const pxr::UsdPrim &prim, IECore::CompoundD
 {
 	// Just to keep us on our toes, not all light parameters are stored as UsdShade inputs,
 	// so we have special-case code for loading those here.
-#if PXR_VERSION >= 2111
 	if( auto sphereLight = pxr::UsdLuxSphereLight( prim ) )
 	{
 		bool treatAsPoint = false;
@@ -165,12 +154,10 @@ void readNonStandardLightParameters( const pxr::UsdPrim &prim, IECore::CompoundD
 			}
 		}
 	}
-#endif
 }
 
 bool nonStandardLightParametersMightBeTimeVarying( const pxr::UsdPrim &prim )
 {
-#if PXR_VERSION >= 2111
 	if( auto sphereLight = pxr::UsdLuxSphereLight( prim ) )
 	{
 		if( sphereLight.GetTreatAsPointAttr().ValueMightBeTimeVarying() )
@@ -203,7 +190,7 @@ bool nonStandardLightParametersMightBeTimeVarying( const pxr::UsdPrim &prim )
 			}
 		}
 	}
-#endif
+
 	return false;
 }
 
@@ -636,8 +623,6 @@ bool IECoreUSD::ShaderAlgo::shaderNetworkMightBeTimeVarying( const pxr::UsdShade
 	return shaderNetworkMightBeTimeVaryingWalk( usdSource, visited );
 }
 
-#if PXR_VERSION >= 2111
-
 // This is very similar to `writeShaderNetwork` but with these key differences :
 //
 // - The output shader is written as a UsdLight-derived prim rather than a UsdShadeShader.
@@ -708,5 +693,3 @@ bool IECoreUSD::ShaderAlgo::lightMightBeTimeVarying( const pxr::UsdLuxLightAPI &
 	std::unordered_set<pxr::UsdPrim, pxr::TfHash> visited;
 	return shaderNetworkMightBeTimeVaryingWalk( pxr::UsdShadeConnectableAPI( light ), visited );
 }
-
-#endif

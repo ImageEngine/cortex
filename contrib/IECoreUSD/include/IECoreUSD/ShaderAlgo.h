@@ -42,9 +42,7 @@
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/output.h"
-#if PXR_VERSION >= 2111
 #include "pxr/usd/usdLux/lightAPI.h"
-#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreUSD
@@ -64,14 +62,11 @@ IECOREUSD_API IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdSha
 bool canReadShaderNetwork( const pxr::UsdShadeOutput &output );
 IECOREUSD_API bool shaderNetworkMightBeTimeVarying( const pxr::UsdShadeOutput &output );
 
-#if PXR_VERSION >= 2111
 /// Writes a UsdLuxLight from a shader network.
 IECOREUSD_API void writeLight( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim prim );
 /// Reads a ShaderNetwork from a light.
 IECOREUSD_API IECoreScene::ShaderNetworkPtr readLight( const pxr::UsdLuxLightAPI &light, pxr::UsdTimeCode timeCode = pxr::UsdTimeCode::Default() );
 IECOREUSD_API bool lightMightBeTimeVarying( const pxr::UsdLuxLightAPI &light );
-
-#endif
 
 } // namespace ShaderAlgo
 

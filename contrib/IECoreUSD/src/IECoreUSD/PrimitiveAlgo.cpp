@@ -385,11 +385,7 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	}
 
 	Canceller::check( canceller );
-#if PXR_VERSION < 2011
-	::skelCache()->Populate( skelRoot );
-#else
 	::skelCache()->Populate( skelRoot, pxr::UsdTraverseInstanceProxies() );
-#endif
 
 	Canceller::check( canceller );
 	pxr::UsdSkelSkinningQuery skinningQuery = ::skelCache()->GetSkinningQuery( pointBased.GetPrim() );
