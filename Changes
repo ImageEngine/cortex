@@ -8,6 +8,11 @@ Breaking Changes
 - SweepAndPrune.h : Removed.
 - RadixSort.h : Removed.
 
+Build
+-----
+
+- Added compatibility with USD 25.11 and 26.03.
+
 10.7.0.0a6 (relative to 10.7.0.0a5)
 ==========
 
