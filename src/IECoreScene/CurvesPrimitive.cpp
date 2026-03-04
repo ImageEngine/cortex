@@ -40,12 +40,17 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
 
-static IndexedIO::EntryID g_basisMatrixEntry("basisMatrix");
-static IndexedIO::EntryID g_basisStepEntry("basisStep");
-static IndexedIO::EntryID g_periodicEntry("periodic");
-static IndexedIO::EntryID g_verticesPerCurveEntry("verticesPerCurve");
-static IndexedIO::EntryID g_numVertsEntry("numVerts");
-static IndexedIO::EntryID g_numFaceVaryingEntry("numFaceVarying");
+namespace
+{
+
+const IndexedIO::EntryID g_basisMatrixEntry( "basisMatrix" );
+const IndexedIO::EntryID g_basisStepEntry( "basisStep" );
+const IndexedIO::EntryID g_periodicEntry( "periodic" );
+const IndexedIO::EntryID g_verticesPerCurveEntry( "verticesPerCurve" );
+const IndexedIO::EntryID g_numVertsEntry( "numVerts" );
+const IndexedIO::EntryID g_numFaceVaryingEntry( "numFaceVarying" );
+
+} // namespace
 
 const unsigned int CurvesPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CurvesPrimitive );
