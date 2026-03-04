@@ -1,6 +1,11 @@
 10.7.x.x (relative to 10.7.0.0a7)
 ========
 
+Improvements
+------------
+
+- CurvesPrimitive : Added argument names to `variableSize()` and `numSegments()` Python bindings, so they can be passed as keywords.
+
 Breaking Changes
 ----------------
 

@@ -69,8 +69,8 @@ void bindCurvesPrimitive()
 		.def( "periodic", &CurvesPrimitive::periodic )
 		.def( "setTopology", &CurvesPrimitive::setTopology )
 		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation )const)&CurvesPrimitive::variableSize )
-		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize )
-		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments )
+		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize, arg( "curveIndex" ) )
+		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments, arg( "curveIndex" ) )
 		.def( "createBox", &CurvesPrimitive::createBox ).staticmethod( "createBox" )
 	;
 }
