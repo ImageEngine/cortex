@@ -50,6 +50,57 @@ const IndexedIO::EntryID g_verticesPerCurveEntry( "verticesPerCurve" );
 const IndexedIO::EntryID g_numVertsEntry( "numVerts" );
 const IndexedIO::EntryID g_numFaceVaryingEntry( "numFaceVarying" );
 
+/// Throws an exception if numVerts is an inappropriate number for the specified basis.
+unsigned int numSegmentsInternal( bool linear, int step, bool periodic, int numVerts )
+{
+	if( linear )
+	{
+		if( periodic )
+		{
+			if( numVerts < 3 )
+			{
+				throw Exception( "Linear periodic curve with less than 3 vertices." );
+			}
+			return numVerts;
+		}
+		else
+		{
+			if( numVerts < 2 )
+			{
+				throw Exception( "Linear non-periodic curve with less than 2 vertices." );
+			}
+			return numVerts - 1;
+		}
+	}
+	else
+	{
+		if( periodic )
+		{
+			if( numVerts < 3 )
+			{
+				throw Exception( "Cubic periodic curve with less than 3 vertices." );
+			}
+			if( (numVerts - 1) % step )
+			{
+				throw Exception( "Cubic curve with extra vertices." );
+			}
+			return numVerts / step;
+		}
+		else
+		{
+			if( numVerts < 4 )
+			{
+				throw Exception( "Cubic nonperiodic curve with less than 4 vertices." );
+			}
+			if( (numVerts - 4) % step )
+			{
+				throw Exception( "Cubic curve with extra vertices." );
+			}
+			return (numVerts - 4 )/ step + 1;
+		}
+	}
+}
+
 } // namespace
 
 const unsigned int CurvesPrimitive::m_ioVersion = 0;
@@ -264,62 +315,12 @@ unsigned CurvesPrimitive::numSegments( unsigned curveIndex ) const
 	{
 		throw Exception( "Curve index out of range." );
 	}
-	return numSegments( m_linear, m_basis.step, m_periodic, m_vertsPerCurve->readable()[curveIndex] );
+	return numSegmentsInternal( m_linear, m_basis.step, m_periodic, m_vertsPerCurve->readable()[curveIndex] );
 }
 
 unsigned CurvesPrimitive::numSegments( const CubicBasisf &basis, bool periodic, unsigned numVerts )
 {
-	return numSegments( basis==CubicBasisf::linear(), basis.step, periodic, numVerts );
-}
-
-unsigned int CurvesPrimitive::numSegments( bool linear, int step, bool periodic, int numVerts )
-{
-	if( linear )
-	{
-		if( periodic )
-		{
-			if( numVerts < 3 )
-			{
-				throw Exception( "Linear periodic curve with less than 3 vertices." );
-			}
-			return numVerts;
-		}
-		else
-		{
-			if( numVerts < 2 )
-			{
-				throw Exception( "Linear non-periodic curve with less than 2 vertices." );
-			}
-			return numVerts - 1;
-		}
-	}
-	else
-	{
-		if( periodic )
-		{
-			if( numVerts < 3 )
-			{
-				throw Exception( "Cubic periodic curve with less than 3 vertices." );
-			}
-			if( (numVerts - 1) % step )
-			{
-				throw Exception( "Cubic curve with extra vertices." );
-			}
-			return numVerts / step;
-		}
-		else
-		{
-			if( numVerts < 4 )
-			{
-				throw Exception( "Cubic nonperiodic curve with less than 4 vertices." );
-			}
-			if( (numVerts - 4) % step )
-			{
-				throw Exception( "Cubic curve with extra vertices." );
-			}
-			return (numVerts - 4 )/ step + 1;
-		}
-	}
+	return numSegmentsInternal( basis==CubicBasisf::linear(), basis.step, periodic, numVerts );
 }
 
 CurvesPrimitivePtr CurvesPrimitive::createBox( const Imath::Box3f &b )

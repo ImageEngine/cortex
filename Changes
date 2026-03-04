@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.0.0a7)
 ========
 
+Breaking Changes
+----------------
 
+- CurvesPrimitive : Made protected members private.
 
 10.7.0.0a7 (relative to 10.7.0.0a6)
 ==========

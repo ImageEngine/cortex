@@ -79,10 +79,7 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 
 		void topologyHash( IECore::MurmurHash &h ) const override;
 
-	protected :
-
-		/// Throws an exception if numVerts is an inappropriate number for the current basis.
-		static unsigned int numSegments( bool linear, int step, bool periodic, int numVerts );
+	private :
 
 		IECore::CubicBasisf m_basis;
 		bool m_linear;
@@ -90,8 +87,6 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 		IECore::IntVectorDataPtr m_vertsPerCurve;
 		unsigned m_numVerts;
 		unsigned m_numFaceVarying;
-
-	private :
 
 		static const unsigned int m_ioVersion;
 
