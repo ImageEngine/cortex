@@ -1827,6 +1827,99 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 			)
 		)
 
+class CurvesAlgoConvertPinnedToNonPeriodicTest( unittest.TestCase ):
+
+	def test( self ) :
+
+		sourceCurves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 3, 3 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Pinned,
+			IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 10 ), imath.V3f( 11 ), imath.V3f( 12 ) ] )
+		)
+		sourceCurves["varyingFloats"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Varying,
+			IECore.FloatVectorData( [ 0, 1, 2, 10, 11, 12 ] )
+		)
+		sourceCurves["vertexStrings"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.StringVectorData( [ "0", "1", "2", "10", "11", "12" ] )
+		)
+		sourceCurves["indexedFloats"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 10, 11 ] ),
+			IECore.IntVectorData( [ 0, 1, 0, 1, 0, 1 ] )
+		)
+		self.assertTrue( sourceCurves.arePrimitiveVariablesValid() )
+
+		convertedCurves = sourceCurves.copy()
+		IECoreScene.CurvesAlgo.convertPinnedToNonPeriodic( convertedCurves )
+		self.assertEqual( convertedCurves.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
+		self.assertEqual( convertedCurves.verticesPerCurve(), IECore.IntVectorData( [ 5, 5 ] ) )
+		self.assertTrue( convertedCurves.arePrimitiveVariablesValid() )
+		self.assertEqual(
+			convertedCurves["P"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData(
+					[
+						imath.V3f( -1 ), imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ),
+						imath.V3f( 9 ), imath.V3f( 10 ), imath.V3f( 11 ), imath.V3f( 12 ), imath.V3f( 13 ),
+					],
+					IECore.GeometricData.Interpretation.Point
+				)
+			)
+		)
+		self.assertEqual(
+			convertedCurves["varyingFloats"],
+			sourceCurves["varyingFloats"]
+		)
+		self.assertEqual(
+			convertedCurves["vertexStrings"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.StringVectorData( [ "0", "0", "1", "2", "2", "10", "10", "11", "12", "12" ] ),
+			)
+		)
+		self.assertEqual(
+			convertedCurves["indexedFloats"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.FloatVectorData( [ 10, 11 ] ),
+				IECore.IntVectorData( [ 0, 0, 1, 0, 0, 1, 1, 0, 1, 1 ] )
+			)
+		)
+
+	def testSharedData( self ) :
+
+		sourceCurves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 2 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Pinned,
+			IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ) ] )
+		)
+		sourceCurves["PRef"] = sourceCurves["P"]
+		self.assertTrue( sourceCurves.arePrimitiveVariablesValid() )
+
+		convertedCurves = sourceCurves.copy()
+		IECoreScene.CurvesAlgo.convertPinnedToNonPeriodic( convertedCurves )
+		self.assertTrue( convertedCurves.arePrimitiveVariablesValid() )
+
+	def testNonPinnableCurves( self ) :
+
+		# Pinning shouldn't have any effect on linear or bezier curves
+		for basis in ( IECore.CubicBasisf.linear(), IECore.CubicBasisf.bezier() ) :
+
+			with self.subTest( basis = basis.standardBasis() ) :
+
+				sourceCurves = IECoreScene.CurvesPrimitive(
+					IECore.IntVectorData( [ 4 ] ), basis, IECoreScene.CurvesPrimitive.Wrap.Pinned,
+					IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ) ] )
+				)
+
+				convertedCurves = sourceCurves.copy()
+				IECoreScene.CurvesAlgo.convertPinnedToNonPeriodic( convertedCurves )
+				self.assertEqual( convertedCurves.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
+				# Nothing except the wrap should have changed.
+				convertedCurves.setTopology( convertedCurves.verticesPerCurve(), convertedCurves.basis(), IECoreScene.CurvesPrimitive.Wrap.Pinned )
+				self.assertEqual( convertedCurves, sourceCurves )
+
 class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 
 	def createLinearCurves(self):

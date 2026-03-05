@@ -77,6 +77,12 @@ boost::python::list segmentWrapper(const CurvesPrimitive *curves, const Primitiv
 	return returnList;
 }
 
+void convertPinnedToNonPeriodicWrapper( CurvesPrimitive &curves, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return CurvesAlgo::convertPinnedToNonPeriodic( &curves, canceller );
+}
+
 CurvesPrimitivePtr updateEndpointMultiplicityWrapper( const CurvesPrimitive *curves, const IECore::CubicBasisf& cubicBasis, const IECore::Canceller *canceller )
 {
 	IECorePython::ScopedGILRelease gilRelease;
@@ -100,6 +106,8 @@ void bindCurvesAlgo()
 	def( "resamplePrimitiveVariable", &resamplePrimitiveVariableWrapper, ( arg_( "curvesPrimitive" ), arg_( "primitiveVariable" ), arg_( "interpolation" ), arg_( "canceller" ) = object() ) );
 	def( "deleteCurves", &deleteCurvesWrapper, ( arg_( "curvesPrimitive" ), arg_( "curvesToDelete" ), arg_( "invert" ) = false, arg_( "canceller" ) = object() ) );
 	def( "segment", ::segmentWrapper, segmentOverLoads());
+	def( "isPinned", &CurvesAlgo::isPinned );
+	def( "convertPinnedToNonPeriodic", &convertPinnedToNonPeriodicWrapper, ( arg_( "curves" ), arg_( "canceller" ) = object() ) );
 	def( "updateEndpointMultiplicity", &updateEndpointMultiplicityWrapper, ( arg_( "curves" ), arg_( "cubicBasis" ), arg_( "canceller" ) = object() ) );
 }
 

@@ -64,7 +64,15 @@ IECORESCENE_API CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPr
 /// completely segmententing the curves based on the unique values in a primitive variable.
 IECORESCENE_API std::vector<CurvesPrimitivePtr> segment( const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr  );
 
+/// Returns true if wrap is pinned and basis is BSpline or CatmullRom.
+IECORESCENE_API bool isPinned( const CurvesPrimitive *curves );
+
+/// If `Curves::wrap()` is `pinned`, converts it to `NonPeriodic`, adding "phantom" endpoints as required.
+/// If wrap is not pinned, does nothing.
+IECORESCENE_API void convertPinnedToNonPeriodic( CurvesPrimitive *curves, const IECore::Canceller *canceller = nullptr );
+
 /// Update the number of replicated end points based on the basis.
+/// \deprecated Use pinned curves instead.
 IECORESCENE_API CurvesPrimitivePtr updateEndpointMultiplicity( const CurvesPrimitive *curves, const IECore::CubicBasisf& cubicBasis, const IECore::Canceller *canceller = nullptr  );
 
 } // namespace CurveAlgo
