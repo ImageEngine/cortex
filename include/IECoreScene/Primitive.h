@@ -86,9 +86,9 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		/// would not be sufficient for manipulating the PrimitiveVariable. To access indexed
 		/// variables, either call expandedVariableData and take ownership of the copied data,
 		/// or get them directly from the PrimitiveVariableMap to manipulate them in-place.
-		template<typename T>
+		template<typename T = IECore::Data>
 		T *variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid );
-		template<typename T>
+		template<typename T = IECore::Data>
 		const T *variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid ) const;
 		/// Use expandedVariableData() to find a named variable, expand indices if they exist,
 		/// and cast to the requested data type. If the variable is not indexed, a direct copy
