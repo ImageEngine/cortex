@@ -13,6 +13,11 @@ Build
 
 - Added compatibility with USD 25.11 and 26.03.
 
+API
+---
+
+- Primitive : Added default type to templated function variableData.
+
 10.7.0.0a6 (relative to 10.7.0.0a5)
 ==========
 
