@@ -55,7 +55,7 @@ jobs:
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:4.0.0a1
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a2/gafferDependencies-11.0.0a2-linux-gcc11.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a3/gafferDependencies-11.0.0a3-linux-platform25.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 4
@@ -65,7 +65,7 @@ jobs:
             buildType: DEBUG
             containerImage: ghcr.io/gafferhq/build/build:4.0.0a1
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a2/gafferDependencies-11.0.0a2-linux-gcc11.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a3/gafferDependencies-11.0.0a3-linux-platform25.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
             jobs: 4
@@ -74,7 +74,7 @@ jobs:
             os: windows-2022
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a2/gafferDependencies-11.0.0a2-windows.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a3/gafferDependencies-11.0.0a3-windows-platform25.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 4
@@ -83,7 +83,7 @@ jobs:
             os: windows-2022
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a2/gafferDependencies-11.0.0a2-windows.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a3/gafferDependencies-11.0.0a3-windows-platform25.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
             jobs: 4
@@ -92,7 +92,7 @@ jobs:
             os: macos-14
             buildType: RELEASE
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a2/gafferDependencies-11.0.0a2-macos-arm64.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a3/gafferDependencies-11.0.0a3-macos-platform25.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 3
