@@ -125,7 +125,7 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 		width = widthData->readable();
 	}
 
-	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->periodic(), curves->verticesPerCurve(), width );
+	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->wrap(), curves->verticesPerCurve(), width );
 
 	for ( IECoreScene::PrimitiveVariableMap::const_iterator pIt = curves->variables.begin(); pIt != curves->variables.end(); ++pIt )
 	{

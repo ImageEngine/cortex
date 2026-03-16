@@ -985,12 +985,14 @@ const std::string &Shader::defaultVertexSource()
 		in vec3 vertexN;
 		in vec2 vertexuv;
 		in vec3 vertexCs;
+		in int vertexIsCurveEndPoint;
 
 		out vec3 geometryI;
 		out vec3 geometryP;
 		out vec3 geometryN;
 		out vec2 geometryuv;
 		out vec3 geometryCs;
+		out int geometryIsCurveEndPoint;
 
 		out vec3 fragmentI;
 		out vec3 fragmentP;
@@ -1024,6 +1026,7 @@ const std::string &Shader::defaultVertexSource()
 
 			geometryuv = vertexuv;
 			geometryCs = mix( Cs, vertexCs, float( vertexCsActive ) );
+			geometryIsCurveEndPoint = vertexIsCurveEndPoint;
 
 			fragmentI = geometryI;
 			fragmentP = geometryP;

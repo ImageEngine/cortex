@@ -38,6 +38,8 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
+#include "IECoreScene/CurvesPrimitive.h"
+
 #include "IECore/CubicBasis.h"
 #include "IECore/VectorTypedData.h"
 
@@ -52,6 +54,8 @@ class IECOREGL_API CurvesPrimitive : public Primitive
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
 
+		CurvesPrimitive( const IECore::CubicBasisf &basis, IECoreScene::CurvesPrimitive::Wrap wrap, IECore::ConstIntVectorDataPtr vertsPerCurve, float width=1.0f );
+		/// \deprecated Use the version taking `wrap` argument instead.
 		CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, float width=1.0f );
 		~CurvesPrimitive() override;
 
