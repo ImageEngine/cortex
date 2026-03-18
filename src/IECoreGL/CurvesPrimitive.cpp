@@ -54,6 +54,116 @@ using namespace Imath;
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
+// GLSL source
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+const string g_cubicLinesGeometrySource = R"(
+
+#version 150 compatibility
+#include "IECoreGL/CurvesPrimitive.h"
+
+IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS
+
+void main()
+{
+
+	for( int i = 0; i < 10; i++ )
+	{
+		float t = float( i ) / 9.0;
+		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs );
+		gl_Position = IECOREGL_CURVESPRIMITIVE_POSITION( coeffs );
+		EmitVertex();
+	}
+}
+
+)";
+
+const string g_cubicRibbonsGeometrySource = R"(
+
+#version 150 compatibility
+#include "IECoreGL/CurvesPrimitive.h"
+
+IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_RIBBONS_PARAMETERS
+
+out vec3 fragmentI;
+out vec3 fragmentN;
+out vec2 fragmentuv;
+
+void main()
+{
+
+	for( int i = 0; i < 10; i++ )
+	{
+
+		float t = float( i ) / 9.0;
+		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );
+		vec4 derivCoeffs = IECOREGL_CURVESPRIMITIVE_DERIVATIVE_COEFFICIENTS( t );
+		vec4 p, n, uTangent, vTangent;
+		IECOREGL_CURVESPRIMITIVE_CUBICFRAME( coeffs, derivCoeffs, p, n, uTangent, vTangent );
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		fragmentuv = vec2( 0, t );
+		gl_Position = p + width * uTangent;
+		EmitVertex();
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		fragmentuv = vec2( 1, t );
+		gl_Position = p - width * uTangent;
+		EmitVertex();
+
+	}
+}
+
+)";
+
+const string g_linearRibbonsGeometrySource = R"(
+
+#version 150 compatibility
+
+#include "IECoreGL/CurvesPrimitive.h"
+
+IECOREGL_CURVESPRIMITIVE_DECLARE_LINEAR_RIBBONS_PARAMETERS
+
+out vec3 fragmentI;
+out vec3 fragmentN;
+
+void main()
+{
+
+	for( int i = 0; i < 2; i++ )
+	{
+
+		vec4 p, n, uTangent, vTangent;
+		IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, n, uTangent, vTangent );
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		gl_Position = p + width * uTangent;
+		EmitVertex();
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		gl_Position = p - width * uTangent;
+		EmitVertex();
+
+	}
+}
+
+)";
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
 // StateComponents
 //////////////////////////////////////////////////////////////////////////
 
@@ -184,11 +294,11 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 		{
 			if( linear )
 			{
-				geometryShader = shaderLoader->create( geometryShader->vertexSource(), linearRibbonsGeometrySource(), geometryShader->fragmentSource() );
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), g_linearRibbonsGeometrySource, geometryShader->fragmentSource() );
 			}
 			else
 			{
-				geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicRibbonsGeometrySource(), geometryShader->fragmentSource() );
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), g_cubicRibbonsGeometrySource, geometryShader->fragmentSource() );
 			}
 		}
 		else
@@ -196,7 +306,7 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 			// When drawing as lines, default to the constant fragment source, because using a facing ratio
 			// shader doesn't work
 			geometryShader = shaderLoader->create(
-				geometryShader->vertexSource(), cubicLinesGeometrySource(),
+				geometryShader->vertexSource(), g_cubicLinesGeometrySource,
 				geometryShader->fragmentSource() != "" ? geometryShader->fragmentSource() : Shader::constantFragmentSource()
 			);
 		}
@@ -298,119 +408,6 @@ bool CurvesPrimitive::renderUsesGLLines( const State *state ) const
 		}
 	}
 	return glslVersion() < 150;
-}
-
-const std::string &CurvesPrimitive::cubicLinesGeometrySource()
-{
-	static std::string s =
-
-		"#version 150 compatibility\n"
-		""
-		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
-		""
-		"IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS\n"
-		""
-		"void main()"
-		"{"
-		""
-		"	for( int i = 0; i < 10; i++ )"
-		"	{"
-		"		float t = float( i ) / 9.0;"
-		"		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );"
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs );"
-		"		gl_Position = IECOREGL_CURVESPRIMITIVE_POSITION( coeffs );"
-		"		EmitVertex();"
-		""
-		"	}"
-		"}";
-
-	return s;
-}
-
-const std::string &CurvesPrimitive::cubicRibbonsGeometrySource()
-{
-	static std::string s =
-
-		"#version 150 compatibility\n"
-		""
-		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
-		""
-		"IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_RIBBONS_PARAMETERS\n"
-		""
-		"out vec3 fragmentI;"
-		"out vec3 fragmentN;"
-		"out vec2 fragmentuv;"
-		""
-		"void main()"
-		"{"
-		""
-		"	for( int i = 0; i < 10; i++ )"
-		"	{"
-		""
-		"		float t = float( i ) / 9.0;"
-		"		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );"
-		"		vec4 derivCoeffs = IECOREGL_CURVESPRIMITIVE_DERIVATIVE_COEFFICIENTS( t );"
-		"		vec4 p, n, uTangent, vTangent;"
-		"		IECOREGL_CURVESPRIMITIVE_CUBICFRAME( coeffs, derivCoeffs, p, n, uTangent, vTangent );"
-		""
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		fragmentuv = vec2( 0, t );"
-		"		gl_Position = p + width * uTangent;"
-		"		EmitVertex();"
-		""
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		fragmentuv = vec2( 1, t );"
-		"		gl_Position = p - width * uTangent;"
-		"		EmitVertex();"
-		""
-		"	}"
-		"}";
-
-	return s;
-}
-
-const std::string &CurvesPrimitive::linearRibbonsGeometrySource()
-{
-	static std::string s =
-
-		"#version 150 compatibility\n"
-		""
-		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
-		""
-		"IECOREGL_CURVESPRIMITIVE_DECLARE_LINEAR_RIBBONS_PARAMETERS\n"
-		""
-		"out vec3 fragmentI;"
-		"out vec3 fragmentN;"
-		""
-		"void main()"
-		"{"
-
-		"	for( int i = 0; i < 2; i++ )"
-		"	{"
-
-		"		vec4 p, n, uTangent, vTangent;"
-		"		IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, n, uTangent, vTangent );"
-
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		gl_Position = p + width * uTangent;"
-		"		EmitVertex();"
-
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		gl_Position = p - width * uTangent;"
-		"		EmitVertex();"
-		""
-		"	}"
-		"}";
-
-	return s;
 }
 
 void CurvesPrimitive::ensureVertIds() const

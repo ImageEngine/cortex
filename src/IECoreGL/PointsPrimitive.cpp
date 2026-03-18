@@ -70,6 +70,63 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitive::GLPointW
 } // namespace IECoreGL
 
 //////////////////////////////////////////////////////////////////////////
+// GLSL Source
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+const std::string g_instancingVertexSource = R"(
+
+#version 120
+
+#include "IECoreGL/PointsPrimitive.h"
+#include "IECoreGL/VertexShader.h"
+
+IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS
+
+IECOREGL_VERTEXSHADER_IN vec3 vertexCs;
+uniform bool vertexCsActive = false;
+
+uniform vec3 Cs = vec3( 1, 1, 1 );
+
+IECOREGL_VERTEXSHADER_IN vec3 instanceP;
+IECOREGL_VERTEXSHADER_IN vec3 instanceN;
+IECOREGL_VERTEXSHADER_IN vec2 instanceuv;
+
+IECOREGL_VERTEXSHADER_OUT vec3 fragmentI;
+IECOREGL_VERTEXSHADER_OUT vec3 fragmentN;
+IECOREGL_VERTEXSHADER_OUT vec2 fragmentuv;
+IECOREGL_VERTEXSHADER_OUT vec3 fragmentCs;
+
+void main()
+{
+	mat4 instanceMatrix = IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX;
+
+	vec4 pCam = instanceMatrix * vec4( instanceP, 1 );
+	gl_Position = gl_ProjectionMatrix * pCam;
+
+	fragmentN = normalize( instanceMatrix * vec4( instanceN, 0.0 ) ).xyz;
+
+	if( gl_ProjectionMatrix[2][3] != 0.0 )
+	{
+		fragmentI = normalize( -pCam.xyz );
+	}
+	else
+	{
+		fragmentI = vec3( 0.0, 0.0, -1.0 );
+	}
+
+	fragmentCs = mix( Cs, vertexCs, float( vertexCsActive ) );
+	fragmentuv = instanceuv;
+
+};
+
+)";
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
 // MemberData
 //////////////////////////////////////////////////////////////////////////
 
@@ -223,7 +280,7 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 			// a shader capable of performing the instancing, but if not then we substitute in our own
 			// instancing vertex shader.
 			ShaderLoader *shaderLoader = shaderStateComponent->shaderLoader();
-			instancingShader = shaderLoader->create( instancingVertexSource(), "", shader->fragmentSource() );
+			instancingShader = shaderLoader->create( g_instancingVertexSource, "", shader->fragmentSource() );
 		}
 
 		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
@@ -361,55 +418,4 @@ PointsPrimitive::Type PointsPrimitive::effectiveType( const State *state ) const
 			break;
 	}
 	return result;
-}
-
-std::string &PointsPrimitive::instancingVertexSource()
-{
-	static std::string s =
-
-		"#version 120\n"
-		""
-		"#include \"IECoreGL/PointsPrimitive.h\"\n"
-		"#include \"IECoreGL/VertexShader.h\"\n"
-		""
-		"IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS\n"
-		""
-		"IECOREGL_VERTEXSHADER_IN vec3 vertexCs;"
-		"uniform bool vertexCsActive = false;"
-		""
-		"uniform vec3 Cs = vec3( 1, 1, 1 );"
-		""
-		"IECOREGL_VERTEXSHADER_IN vec3 instanceP;"
-		"IECOREGL_VERTEXSHADER_IN vec3 instanceN;"
-		"IECOREGL_VERTEXSHADER_IN vec2 instanceuv;"
-		""
-		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentI;"
-		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentN;"
-		"IECOREGL_VERTEXSHADER_OUT vec2 fragmentuv;"
-		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-		"	mat4 instanceMatrix = IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX;"
-		""
-		"	vec4 pCam = instanceMatrix * vec4( instanceP, 1 );"
-		"	gl_Position = gl_ProjectionMatrix * pCam;"
-		""
-		"	fragmentN = normalize( instanceMatrix * vec4( instanceN, 0.0 ) ).xyz;"
-		""
-		"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
-		"	{"
-		"		fragmentI = normalize( -pCam.xyz );"
-		"	}"
-		"	else"
-		"	{"
-		"		fragmentI = vec3( 0.0, 0.0, -1.0 );"
-		"	}"
-		""
-		"	fragmentCs = mix( Cs, vertexCs, float( vertexCsActive ) );"
-		"	fragmentuv = instanceuv;"
-		""
-		"}";
-
-	return s;
 }

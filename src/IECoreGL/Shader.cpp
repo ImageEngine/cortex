@@ -968,150 +968,158 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 
 const std::string &Shader::defaultVertexSource()
 {
-	static string s =
+	static const string g_s = R"(
 
-		"#version 120\n"
-		""
-		"#if __VERSION__ <= 120\n"
-		"#define in attribute\n"
-		"#define out varying\n"
-		"#endif\n"
-		""
-		"uniform vec3 Cs = vec3( 1, 1, 1 );"
-		"uniform bool vertexCsActive = false;"
-		"uniform bool vertexNActive = false;"
-		""
-		"in vec3 vertexP;"
-		"in vec3 vertexN;"
-		"in vec2 vertexuv;"
-		"in vec3 vertexCs;"
-		""
-		"out vec3 geometryI;"
-		"out vec3 geometryP;"
-		"out vec3 geometryN;"
-		"out vec2 geometryuv;"
-		"out vec3 geometryCs;"
-		""
-		"out vec3 fragmentI;"
-		"out vec3 fragmentP;"
-		"out vec3 fragmentN;"
-		"out vec2 fragmentuv;"
-		"out vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-		"	vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );"
-		"	gl_Position = gl_ProjectionMatrix * pCam;"
-		"	geometryP = pCam.xyz;"
-		""
-		"	if( vertexNActive )"
-		"	{"
-		"		geometryN = normalize( gl_NormalMatrix * vertexN );"
-		"	}"
-		"	else"
-		"	{"
-		"		geometryN = vec3( 0.0, 0.0, 1.0 );"
-		"	}"
-		""
-		"	if( gl_ProjectionMatrix[2][3] != 0.0 )"
-		"	{"
-		"		geometryI = normalize( -pCam.xyz );"
-		"	}"
-		"	else"
-		"	{"
-		"		geometryI = vec3( 0, 0, -1 );"
-		"	}"
-		""
-		"	geometryuv = vertexuv;"
-		"	geometryCs = mix( Cs, vertexCs, float( vertexCsActive ) );"
-		""
-		"	fragmentI = geometryI;"
-		"	fragmentP = geometryP;"
-		"	fragmentN = geometryN;"
-		"	fragmentuv = geometryuv;"
-		"	fragmentCs = geometryCs;"
-		"}";
+		#version 150 compatibility
 
-	return s;
+		#if __VERSION__ <= 120
+		#define in attribute
+		#define out varying
+		#endif
+
+		uniform vec3 Cs = vec3( 1, 1, 1 );
+		uniform bool vertexCsActive = false;
+		uniform bool vertexNActive = false;
+
+		in vec3 vertexP;
+		in vec3 vertexN;
+		in vec2 vertexuv;
+		in vec3 vertexCs;
+
+		out vec3 geometryI;
+		out vec3 geometryP;
+		out vec3 geometryN;
+		out vec2 geometryuv;
+		out vec3 geometryCs;
+
+		out vec3 fragmentI;
+		out vec3 fragmentP;
+		out vec3 fragmentN;
+		out vec2 fragmentuv;
+		out vec3 fragmentCs;
+
+		void main()
+		{
+			vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );
+			gl_Position = gl_ProjectionMatrix * pCam;
+			geometryP = pCam.xyz;
+
+			if( vertexNActive )
+			{
+				geometryN = normalize( gl_NormalMatrix * vertexN );
+			}
+			else
+			{
+				geometryN = vec3( 0.0, 0.0, 1.0 );
+			}
+
+			if( gl_ProjectionMatrix[2][3] != 0.0 )
+			{
+				geometryI = normalize( -pCam.xyz );
+			}
+			else
+			{
+				geometryI = vec3( 0, 0, -1 );
+			}
+
+			geometryuv = vertexuv;
+			geometryCs = mix( Cs, vertexCs, float( vertexCsActive ) );
+
+			fragmentI = geometryI;
+			fragmentP = geometryP;
+			fragmentN = geometryN;
+			fragmentuv = geometryuv;
+			fragmentCs = geometryCs;
+		}
+
+	)";
+
+	return g_s;
 }
 
 const std::string &Shader::defaultGeometrySource()
 {
-	static string s = "";
-	return s;
+	static const string g_s = "";
+	return g_s;
 }
 
 const std::string &Shader::defaultFragmentSource()
 {
-	static string s =
+	static const string g_s = R"(
 
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"in vec3 fragmentI;"
-		"in vec3 fragmentN;"
-		"in vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-		"	vec3 Nf = faceforward( fragmentN, -fragmentI, fragmentN );"
-		"	float f = dot( normalize( fragmentI ), normalize(Nf) );"
-		"	gl_FragColor = vec4( f * fragmentCs, 1 );"
-		"}";
+		#if __VERSION__ <= 120
+		#define in varying
+		#endif
 
-	return s;
+		in vec3 fragmentI;
+		in vec3 fragmentN;
+		in vec3 fragmentCs;
+
+		void main()
+		{
+			vec3 Nf = faceforward( fragmentN, -fragmentI, fragmentN );
+			float f = dot( normalize( fragmentI ), normalize(Nf) );
+			gl_FragColor = vec4( f * fragmentCs, 1 );
+		};
+
+	)";
+
+	return g_s;
 }
 
 const std::string &Shader::constantFragmentSource()
 {
-	static string s =
+	static const string g_s = R"(
 
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"in vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-		"	gl_FragColor = vec4( fragmentCs, 1 );"
-		"}";
+		#if __VERSION__ <= 120
+		#define in varying
+		#endif
 
-	return s;
+		in vec3 fragmentCs;
+
+		void main()
+		{
+			gl_FragColor = vec4( fragmentCs, 1 );
+		};
+
+	)";
+
+	return g_s;
 }
 
 const std::string &Shader::lambertFragmentSource()
 {
-	static string s =
+	static const string g_s = R"(
 
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"#include \"IECoreGL/Lights.h\"\n"
-		"#include \"IECoreGL/ColorAlgo.h\"\n"
-		"#include \"IECoreGL/Diffuse.h\"\n"
+		#if __VERSION__ <= 120
+		#define in varying
+		#endif
 
-		"in vec3 fragmentP;"
-		"in vec3 fragmentN;"
-		"in vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-		"	vec3 n = normalize( fragmentN );"
-		""
-		"	vec3 L[ gl_MaxLights ];"
-		"	vec3 Cl[ gl_MaxLights ];"
-		""
-		"	lights( fragmentP, Cl, L, gl_MaxLights );"
-		""
-		"	vec3 Cdiffuse = ieDiffuse( fragmentP, n, Cl, L, gl_MaxLights );"
-		""
-		"	gl_FragColor = vec4( Cdiffuse, 1.0 );"
-		"}";
+		#include "IECoreGL/Lights.h"
+		#include "IECoreGL/ColorAlgo.h"
+		#include "IECoreGL/Diffuse.h"
 
-	return s;
+		in vec3 fragmentP;
+		in vec3 fragmentN;
+		in vec3 fragmentCs;
+
+		void main()
+		{
+			vec3 n = normalize( fragmentN );
+
+			vec3 L[ gl_MaxLights ];
+			vec3 Cl[ gl_MaxLights ];
+
+			lights( fragmentP, Cl, L, gl_MaxLights );
+
+			vec3 Cdiffuse = ieDiffuse( fragmentP, n, Cl, L, gl_MaxLights );
+
+			gl_FragColor = vec4( Cdiffuse, 1.0 );
+		};
+
+	)";
+
+	return g_s;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
