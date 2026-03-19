@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OVERSAMPLESCALCULATOR_H
-#define IE_CORE_OVERSAMPLESCALCULATOR_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -82,4 +81,3 @@ class IECORE_API OversamplesCalculator
 }; // namespace IECore
 
 
-#endif // IE_CORE_OVERSAMPLESCALCULATOR_H

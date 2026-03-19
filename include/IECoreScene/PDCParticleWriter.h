@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PDCPARTICLEWRITER_H
-#define IECORESCENE_PDCPARTICLEWRITER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/ParticleWriter.h"
@@ -65,4 +64,3 @@ IE_CORE_DECLAREPTR( PDCParticleWriter );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PDCPARTICLEWRITER_H

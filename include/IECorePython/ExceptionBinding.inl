@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_EXCEPTIONBINDING_INL
-#define IECOREPYTHON_EXCEPTIONBINDING_INL
+#pragma once
 
 #include "boost/python/raw_function.hpp"
 
@@ -170,5 +169,3 @@ ExceptionClass<T> &ExceptionClass<T>::def( Args&&... args )
 }
 
 } // namespace IECorePython
-
-#endif // IECOREPYTHON_EXCEPTIONBINDING_INL

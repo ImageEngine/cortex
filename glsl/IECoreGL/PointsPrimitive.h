@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_POINTSPRIMITIVE_H
-#define IECOREGL_POINTSPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/MatrixAlgo.h"
 #include "IECoreGL/VertexShader.h"
@@ -84,4 +83,3 @@ mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float width, in float aspect
 	return placementMatrix;
 }
 
-#endif // IECOREGL_POINTSPRIMITIVE_H

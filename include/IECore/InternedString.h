@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_INTERNEDSTRING_H
-#define IECORE_INTERNEDSTRING_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -121,4 +120,3 @@ IECORE_API std::ostream &operator << ( std::ostream &o, const InternedString &st
 
 #include "IECore/InternedString.inl"
 
-#endif // IECORE_INTERNEDSTRING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_BUFFER_H
-#define IECOREGL_BUFFER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
@@ -102,4 +101,3 @@ IE_CORE_DECLAREPTR( Buffer );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_BUFFER_H

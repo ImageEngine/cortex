@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_TRIANGULATORBINDING_H
-#define IECORESCENEMODULE_TRIANGULATORBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindTriangulator();
 }
 
-#endif // IECORESCENEMODULE_TRIANGULATORBINDING_H

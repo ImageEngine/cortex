@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDPARAMETER_INL
-#define IE_CORE_COMPOUNDPARAMETER_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -80,5 +79,3 @@ const T *CompoundParameter::parameter( const std::string &name ) const
 }
 
 }; // namespace IECore
-
-#endif // IE_CORE_COMPOUNDPARAMETER_INL

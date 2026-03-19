@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_RAMPBINDING_H
-#define IECOREPYTHON_RAMPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindRamp();
 
 }
 
-#endif // IECOREPYTHON_RAMPBINDING_H

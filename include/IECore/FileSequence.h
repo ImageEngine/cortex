@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FILESEQUENCE_H
-#define IE_CORE_FILESEQUENCE_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FrameList.h"
@@ -135,4 +134,3 @@ class IECORE_API FileSequence : public RunTimeTyped
 
 } // namespace IECore
 
-#endif // IE_CORE_FILESEQUENCE_H

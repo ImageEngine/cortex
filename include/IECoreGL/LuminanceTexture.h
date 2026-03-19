@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_LUMINANCETEXTURE_H
-#define IECOREGL_LUMINANCETEXTURE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
@@ -77,4 +76,3 @@ IE_CORE_DECLAREPTR( LuminanceTexture );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_LUMINANCETEXTURE_H

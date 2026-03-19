@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DIMENSIONTRAITS_H
-#define IE_CORE_DIMENSIONTRAITS_H
+#pragma once
 
 namespace IECore
 {
@@ -59,5 +58,3 @@ struct DimensionTraits
 } // namespace IECore
 
 #include "IECore/DimensionTraits.inl"
-
-#endif // IE_CORE_DIMENSIONTRAITS_INL

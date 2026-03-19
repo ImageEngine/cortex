@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MEANSQUAREDERROR_INL
-#define IE_CORE_MEANSQUAREDERROR_INL
+#pragma once
 
 #include "IECore/TypeTraits.h"
 
@@ -111,5 +110,3 @@ struct MeanSquaredError< T, R, typename boost::enable_if< TypeTraits::IsNumericS
 };
 
 } // namespace IECore
-
-#endif // IE_CORE_MEANSQUAREDERROR_INL

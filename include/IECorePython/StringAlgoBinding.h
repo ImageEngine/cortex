@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_STRINGALGOBINDING_H
-#define IECOREPYTHON_STRINGALGOBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -46,4 +45,3 @@ IECOREPYTHON_API void bindStringAlgo();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_STRINGALGOBINDING_H

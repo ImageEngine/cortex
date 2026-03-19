@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CURVESALGOBINDING_H
-#define IECORESCENEMODULE_CURVESALGOBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindCurvesAlgo();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_CURVESALGOBINDING_H

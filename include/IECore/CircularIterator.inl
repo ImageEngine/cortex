@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CIRCULARITERATOR_INL
-#define IECORE_CIRCULARITERATOR_INL
+#pragma once
 
 namespace IECore
 {
@@ -189,5 +188,3 @@ typename CircularIterator<Iterator, Container>::BaseIterator CircularIterator<It
 }
 
 } // namespace IECore
-
-#endif // IECORE_CIRCULARITERATOR_INL

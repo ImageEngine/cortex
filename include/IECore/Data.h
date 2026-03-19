@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATA_H
-#define IE_CORE_DATA_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Object.h"
@@ -63,4 +62,3 @@ IE_CORE_DECLAREPTR( Data );
 
 } // namespace IECore
 
-#endif // IE_CORE_DATA_H

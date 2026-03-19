@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_LUMINANCETEXTUREBINDING_H
-#define IE_COREGL_LUMINANCETEXTUREBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindLuminanceTexture();
 
 }
 
-#endif // IE_COREGL_LUMINANCETEXTUREBINDING_H

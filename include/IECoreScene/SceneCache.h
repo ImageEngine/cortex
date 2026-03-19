@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SCENECACHE_H
-#define IECORESCENE_SCENECACHE_H
+#pragma once
 
 #include "IECore/PathMatcherData.h"
 
@@ -167,4 +166,3 @@ class IECORESCENE_API SceneCache : public SampledSceneInterface
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_SCENECACHE_H

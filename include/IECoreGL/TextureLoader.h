@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TEXTURELOADER_H
-#define IECOREGL_TEXTURELOADER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
@@ -86,4 +85,3 @@ class IECOREGL_API TextureLoader : public IECore::RefCounted
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TEXTURELOADER_H

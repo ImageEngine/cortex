@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_VECTOROPS_INL
-#define IE_CORE_VECTOROPS_INL
+#pragma once
 
 #include <cassert>
 #include <cmath>
@@ -264,6 +263,4 @@ inline T vecCross( const T &v1, const T &v2 )
 
 } // namespace IECore
 
-
-#endif // IE_CORE_VECTOROPS_INL
 

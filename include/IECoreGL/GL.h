@@ -36,8 +36,7 @@
 /// Include this file to include the system OpenGL headers. It's better this way as the
 /// right way of including OpenGL varies from system to system.
 
-#ifndef IECOREGL_GL_H
-#define IECOREGL_GL_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 
@@ -80,4 +79,3 @@ class IECOREGL_API PushAttrib
 
 #include "IECoreGL/GL.inl"
 
-#endif // IECOREGL_GL_H

@@ -36,8 +36,7 @@
 /// Defines additional functions for operating on Imath::Vec2 and Imath::Vec3 types.
 /// \ingroup mathGroup
 
-#ifndef IECORE_VECALGO_H
-#define IECORE_VECALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -66,4 +65,3 @@ bool operator < ( const Imath::Vec3<T> &left, const Imath::Vec3<T> &right );
 
 #include "IECore/VecAlgo.inl"
 
-#endif // IECORE_VECALGO_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_MEDIANCUTSAMPLER_H
-#define IECOREIMAGE_MEDIANCUTSAMPLER_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
@@ -99,4 +98,3 @@ IE_CORE_DECLAREPTR( MedianCutSampler );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_MEDIANCUTSAMPLER_H

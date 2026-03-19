@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_READER_INL
-#define IE_CORE_READER_INL
+#pragma once
 
 namespace IECore
 {
@@ -51,5 +50,3 @@ ReaderPtr Reader::ReaderDescription<T>::creator( const std::string &fileName )
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_READER_INL

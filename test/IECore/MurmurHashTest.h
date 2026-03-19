@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MURMURHASHTEST_H
-#define IECORE_MURMURHASHTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addMurmurHashTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_MURMURHASHTEST_H
 

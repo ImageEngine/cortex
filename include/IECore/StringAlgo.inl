@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_STRINGALGO_INL
-#define IECORE_STRINGALGO_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -363,5 +362,3 @@ std::string concat( StringsFoldType  const& ... strs )
 } // namespace StringAlgo
 
 } // namespace IECore
-
-#endif // IECORE_STRINGALGO_INL

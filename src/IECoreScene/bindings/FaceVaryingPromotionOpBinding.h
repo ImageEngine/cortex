@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_FACEVARYINGPROMOTIONOPBINDING_H
-#define IECORESCENEMODULE_FACEVARYINGPROMOTIONOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindFaceVaryingPromotionOp();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_FACEVARYINGPROMOTIONOPBINDING_H

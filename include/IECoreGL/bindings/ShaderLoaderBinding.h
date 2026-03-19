@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SHADERLOADERBINDING_H
-#define IECOREGL_SHADERLOADERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindShaderLoader();
 
 }
 
-#endif // IECOREGL_SHADERLOADERBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_RANDOMALGOBINDING_H
-#define IECOREPYTHON_RANDOMALGOBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindRandomAlgo();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_RANDOMALGOBINDING_H

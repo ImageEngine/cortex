@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SPHEREPRIMITIVEBINDING_H
-#define IECORESCENEMODULE_SPHEREPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindSpherePrimitive();
 }
 
-#endif // IECORESCENEMODULE_SPHEREPRIMITIVEBINDING_H

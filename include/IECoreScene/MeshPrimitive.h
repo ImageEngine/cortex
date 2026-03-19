@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHPRIMITIVE_H
-#define IECORESCENE_MESHPRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -185,5 +184,3 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 };
 
 }
-
-#endif // IECORE_MESHPRIMITIVE

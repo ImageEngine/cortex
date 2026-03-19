@@ -36,8 +36,7 @@
 /// Defines algorithms and operators which ideally would be already defined in ImathBox.h
 /// \ingroup mathGroup
 
-#ifndef IE_CORE_BOXALGO_H
-#define IE_CORE_BOXALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -79,4 +78,3 @@ void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high );
 
 #include "IECore/BoxAlgo.inl"
 
-#endif // IE_CORE_BOXALGO_H

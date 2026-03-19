@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SPHEREPRIMITIVE_H
-#define IECORESCENE_SPHEREPRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -101,5 +100,3 @@ class IECORESCENE_API SpherePrimitive : public Primitive
 IE_CORE_DECLAREPTR( SpherePrimitive );
 
 }
-
-#endif // IECORE_SPHEREPRIMITIVE

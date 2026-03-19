@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_COORDINATESYSTEM_H
-#define IECORESCENE_COORDINATESYSTEM_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderable.h"
@@ -66,4 +65,3 @@ IE_CORE_DECLAREPTR( CoordinateSystem );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_COORDINATESYSTEM_H

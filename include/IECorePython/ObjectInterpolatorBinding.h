@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_OBJECTINTERPOLATORBINDING_H
-#define IECOREPYTHON_OBJECTINTERPOLATORBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindObjectInterpolator();
 }
 
-#endif // IECOREPYTHON_OBJECTINTERPOLATORBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MATRIXTRAITS_H
-#define IE_CORE_MATRIXTRAITS_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -99,4 +98,3 @@ struct MatrixTraits<Imath::M44d>
 
 } // namespace IECore
 
-#endif // IE_CORE_MATRIXTRAITS_H

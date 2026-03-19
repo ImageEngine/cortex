@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_COLORALGO_H
-#define IECOREIMAGE_COLORALGO_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 
@@ -61,4 +60,3 @@ IECOREIMAGE_API void transformImage( ImagePrimitive *image, const std::string &i
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_COLORALGO_H

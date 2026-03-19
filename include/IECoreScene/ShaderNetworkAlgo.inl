@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SHADERNETWORKALGO_INL
-#define IECORESCENE_SHADERNETWORKALGO_INL
+#pragma once
 
 #include <unordered_set>
 
@@ -84,5 +83,3 @@ void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore
 } // namespace ShaderNetworkAlgo
 
 } // namespace IECoreScene
-
-#endif // IECORESCENE_SHADERNETWORKALGO_INL

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLPOINTSCONVERTERBINDING_H
-#define IECOREGL_TOGLPOINTSCONVERTERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindToGLPointsConverter();
 
 }
 
-#endif // IECOREGL_TOGLPOINTSCONVERTERBINDING_H

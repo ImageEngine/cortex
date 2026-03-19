@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SCENEALGOBINDING_H
-#define IECORESCENEMODULE_SCENEALGOBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindSceneAlgo();
 
 }
 
-#endif // IECORESCENEMODULE_SCENEALGOBINDING_H

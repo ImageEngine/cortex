@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SPACETRANSFORM_H
-#define IE_CORE_SPACETRANSFORM_H
+#pragma once
 
 namespace IECore
 {
@@ -63,4 +62,3 @@ struct SpaceTransform
 
 } // namespace IECore
 
-#endif // IE_CORE_SPACETRANSFORM_H

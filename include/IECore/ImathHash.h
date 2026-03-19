@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_IMATHHASH_H
-#define IE_CORE_IMATHHASH_H
+#pragma once
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "Imath/half.h"
@@ -90,4 +89,3 @@ template <> struct hash<Imath::Box3d> : public IECore::Detail::PodHash<Imath::Bo
 
 } // namespace std
 
-#endif // IE_CORE_IMATHHASH_H

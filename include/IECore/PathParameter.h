@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PATHPARAMETER_H
-#define IE_CORE_PATHPARAMETER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/SimpleTypedParameter.h"
@@ -82,4 +81,3 @@ IE_CORE_DECLAREPTR( PathParameter )
 
 } // namespace IECore
 
-#endif // IE_CORE_PATHPARAMETER_H

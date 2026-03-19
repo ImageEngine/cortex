@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DISPLAY_H
-#define IECOREGL_DISPLAY_H
+#pragma once
 
 #include "IECore/CompoundData.h"
 
@@ -63,4 +62,3 @@ class Display : public IECore::RefCounted
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_DISPLAY_H

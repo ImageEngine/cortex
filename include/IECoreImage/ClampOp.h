@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_CLAMPOP_H
-#define IECOREIMAGE_CLAMPOP_H
+#pragma once
 
 #include "IECoreImage/ChannelOp.h"
 #include "IECoreImage/Export.h"
@@ -83,5 +82,4 @@ IE_CORE_DECLAREPTR( ClampOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_CLAMPOP_H
 

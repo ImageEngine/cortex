@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CURVESPRIMITIVE_H
-#define IECOREGL_CURVESPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/VecAlgo.h"
 
@@ -96,7 +95,7 @@ vec4 ieCurvesPrimitiveCoefficients( in mat4x4 basis, in float t )
 	float t2 = t * t;
 	float t3 = t2 * t;
 
-	return vec4( 
+	return vec4(
 		basis[0][0] * t3 + basis[1][0] * t2 + basis[2][0] * t + basis[3][0],
 		basis[0][1] * t3 + basis[1][1] * t2 + basis[2][1] * t + basis[3][1],
 		basis[0][2] * t3 + basis[1][2] * t2 + basis[2][2] * t + basis[3][2],
@@ -188,4 +187,3 @@ void ieCurvesPrimitiveCubicFrame(
 	ieCurvesPrimitiveUTangentAndNormal( p, vTangent, uTangent, n );
 }
 
-#endif // IECOREGL_CURVESPRIMITIVE_H

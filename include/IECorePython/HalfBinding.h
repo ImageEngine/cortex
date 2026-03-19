@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_HALFBINDING_H
-#define IECOREPYTHON_HALFBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindHalf();
 }
 
-#endif // IECOREPYTHON_HALFBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DELETER_H
-#define IE_CORE_DELETER_H
+#pragma once
 
 
 namespace IECore
@@ -73,4 +72,3 @@ struct NullDeleter
 
 } // namespace IECore
 
-#endif // IE_CORE_DELETER_H

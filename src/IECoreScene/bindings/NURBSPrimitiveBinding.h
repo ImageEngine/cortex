@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_NURBSPRIMITIVEBINDING_H
-#define IECORESCENEMODULE_NURBSPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindNURBSPrimitive();
 }
 
-#endif // IECORESCENEMODULE_NURBSPRIMITIVEBINDING_H

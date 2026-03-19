@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_LEVENBERGMARQUARDTTEST_H
-#define IE_CORE_LEVENBERGMARQUARDTTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/LevenbergMarquardt.h"
@@ -128,4 +127,3 @@ struct LevenbergMarquardtTestSuite : public boost::unit_test::test_suite
 
 #include "LevenbergMarquardtTest.inl"
 
-#endif // IECORE_LEVENBERGMARQUARDTTEST_H

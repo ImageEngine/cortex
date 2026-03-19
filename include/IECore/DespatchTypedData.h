@@ -37,8 +37,7 @@
 /// TypedData instances when given only a Data *.
 
 
-#ifndef IE_CORE_DESPATCHTYPEDDATA_H
-#define IE_CORE_DESPATCHTYPEDDATA_H
+#pragma once
 
 #include "IECore/Data.h"
 #include "IECore/Exception.h"
@@ -150,4 +149,3 @@ struct TraitsTest;
 
 #include "IECore/DespatchTypedData.inl"
 
-#endif // IE_CORE_DESPATCHTYPEDDATA_H

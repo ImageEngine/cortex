@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PARTICLEREADER_H
-#define IECORESCENE_PARTICLEREADER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
@@ -151,4 +150,3 @@ IE_CORE_DECLAREPTR( ParticleReader );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PARTICLEREADER_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_BOXTYPEDPARAMETERBINDING_H
-#define IECOREPYTHON_BOXTYPEDPARAMETERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindBoxTypedParameter();
 }
 
-#endif // IECOREPYTHON_BOXTYPEDPARAMETERBINDING_H

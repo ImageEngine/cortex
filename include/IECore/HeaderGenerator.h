@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_HEADERGENERATOR_H
-#define IE_CORE_HEADERGENERATOR_H
+#pragma once
 
 #include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
@@ -61,4 +60,3 @@ class IECORE_API HeaderGenerator
 
 } // namespace IECore
 
-#endif // IE_CORE_HEADERGENERATOR_H

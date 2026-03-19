@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_EXPORT_H
-#define IECOREALEMBIC_EXPORT_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -46,5 +45,3 @@
 #else
 	#define IECOREALEMBIC_API IECORE_IMPORT
 #endif
-
-#endif // #ifndef IECOREALEMBIC_EXPORT_H

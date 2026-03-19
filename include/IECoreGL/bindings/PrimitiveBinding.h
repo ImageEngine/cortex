@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_PRIMITIVEBINDING_H
-#define IE_COREGL_PRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindPrimitive();
 
 }
 
-#endif // IE_COREGL_PRIMITIVEBINDING_H

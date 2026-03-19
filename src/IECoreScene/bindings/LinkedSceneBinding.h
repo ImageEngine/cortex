@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_LINKEDSCENEBINDING_H
-#define IECORESCENEMODULE_LINKEDSCENEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindLinkedScene();
 
 }
 
-#endif // IECORESCENEMODULE_LINKEDSCENEBINDING_H

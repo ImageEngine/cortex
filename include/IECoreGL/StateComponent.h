@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_STATECOMPONENT_H
-#define IECOREGL_STATECOMPONENT_H
+#pragma once
 
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/Export.h"
@@ -78,4 +77,3 @@ IE_CORE_DECLAREPTR( StateComponent );
 
 #include "IECoreGL/StateComponent.inl"
 
-#endif // IECOREGL_STATECOMPONENT_H

@@ -37,8 +37,7 @@
 #undef SearchPath
 #endif
 
-#ifndef IE_CORE_SEARCHPATH_H
-#define IE_CORE_SEARCHPATH_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -89,4 +88,3 @@ class IECORE_API SearchPath
 
 } // namespace IECore
 
-#endif // IE_CORE_SEARCHPATH_H

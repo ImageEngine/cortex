@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATACONVERSION_H
-#define IE_CORE_DATACONVERSION_H
+#pragma once
 
 #include "boost/type_traits/integral_constant.hpp"
 
@@ -73,4 +72,3 @@ struct DataConversion
 
 } // namespace IECore
 
-#endif // IE_CORE_DATACONVERSION_H

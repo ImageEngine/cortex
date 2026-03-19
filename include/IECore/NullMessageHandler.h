@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_NULLMESSAGEHANDLER_H
-#define IE_CORE_NULLMESSAGEHANDLER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
@@ -64,4 +63,3 @@ class IECORE_API NullMessageHandler : public MessageHandler
 
 }; // namespace IECore
 
-#endif // IE_CORE_NULLMESSAGEHANDLER_H

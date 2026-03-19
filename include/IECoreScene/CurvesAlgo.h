@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CURVESALGO_H
-#define IECORESCENE_CURVESALGO_H
+#pragma once
 
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/PrimitiveVariable.h"
@@ -72,4 +71,3 @@ IECORESCENE_API CurvesPrimitivePtr updateEndpointMultiplicity( const CurvesPrimi
 } // namespace IECoreScene
 
 
-#endif // IECORESCENE_CURVESALGO_H

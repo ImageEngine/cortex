@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_SUMMEDAREAOPBINDING_H
-#define IECOREIMAGEBINDINGS_SUMMEDAREAOPBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindSummedAreaOp();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_SUMMEDAREAOPBINDING_H

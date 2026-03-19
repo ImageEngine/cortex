@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLSTATECONVERTER_H
-#define IECOREGL_TOGLSTATECONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -82,4 +81,3 @@ IE_CORE_DECLAREPTR( ToGLStateConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLSTATECONVERTER_H

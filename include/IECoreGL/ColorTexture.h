@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_COLORTEXTURE_H
-#define IECOREGL_COLORTEXTURE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
@@ -97,4 +96,3 @@ IE_CORE_DECLAREPTR( ColorTexture );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_COLORTEXTURE_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_IFFFILE_H
-#define IE_CORE_IFFFILE_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
@@ -186,4 +185,3 @@ class IECORE_API IFFFile : public RefCounted
 
 #include "IFFFile.inl"
 
-#endif // IE_CORE_IFFFILE_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVE_INL
-#define IECORESCENE_PRIMITIVE_INL
+#pragma once
 
 namespace IECoreScene
 {
@@ -191,5 +190,3 @@ typename T::Ptr Primitive::expandedVariableData( const std::string &name, Primit
 }
 
 } // namespace IECoreScene
-
-#endif // IECORESCENE_PRIMITIVE_INL

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_LRUCACHEBINDING_H
-#define IECOREPYTHON_LRUCACHEBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindLRUCache();
 }
 
-#endif // IECOREPYTHON_LRUCACHEBINDING_H

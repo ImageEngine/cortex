@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_WRAPPERGARBAGECOLLECTOR_H
-#define IECOREPYTHON_WRAPPERGARBAGECOLLECTOR_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -133,4 +132,3 @@ class IECOREPYTHON_API WrapperGarbageCollector
 
 }
 
-#endif // IECOREPYTHON_WRAPPERGARBAGECOLLECTOR_H

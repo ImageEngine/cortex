@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHONMODULE_TBBBINDING_H
-#define IECOREPYTHONMODULE_TBBBINDING_H
+#pragma once
 
 namespace IECorePythonModule
 {
@@ -44,4 +43,3 @@ void bindTBB();
 
 } // namespace IECorePythonModule
 
-#endif // IECOREPYTHONMODULE_TBBBINDING_H

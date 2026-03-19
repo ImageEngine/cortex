@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_TRANSFORMOPBINDING_H
-#define IECORESCENEMODULE_TRANSFORMOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindTransformOp();
 }
 
-#endif // IECORESCENEMODULE_TRANSFORMOPBINDING_H

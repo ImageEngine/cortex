@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CUBICBASIS_INL
-#define IECORE_CUBICBASIS_INL
+#pragma once
 
 #include "IECore/CubicBasis.h"
 #include "IECore/Exception.h"
@@ -399,5 +398,3 @@ StandardCubicBasis CubicBasis<T>::standardBasis() const
 
 
 } // namespace IECore
-
-#endif // IECORE_CUBICBASIS_INL

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_EXCEPTION_H
-#define IECOREGL_EXCEPTION_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
@@ -67,4 +66,3 @@ class IECOREGL_API Exception : public IECore::Exception
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_EXCEPTION_H

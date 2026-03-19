@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_COLORALGO_H
-#define IECOREGL_COLORALGO_H
+#pragma once
 
 float ieLuminance( vec3 color, vec3 weights )
 {
@@ -164,4 +163,3 @@ vec3 ieRgbToHSV( vec3 rgb )
 	return result;
 }
 
-#endif // IECOREGL_COLORALGO_H

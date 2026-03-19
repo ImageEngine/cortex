@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_LOOKUPBINDING_H
-#define IECOREPYTHON_LOOKUPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindLookup();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_LOOKUPBINDING_H

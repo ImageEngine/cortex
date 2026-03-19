@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_SCENECACHEFILEFORMAT_H
-#define IECOREUSD_SCENECACHEFILEFORMAT_H
+#pragma once
 
 #include "USDScene.h"
 
@@ -113,5 +112,4 @@ class UsdSceneCacheFileFormat : public SdfFileFormat
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE
-#endif // IECOREUSD_SCENECACHEFILEFORMAT_H
 

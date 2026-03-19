@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SCENECACHEBINDING_H
-#define IECORESCENEMODULE_SCENECACHEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindSceneCache();
 
 }
 
-#endif // IECORESCENEMODULE_SCENECACHEBINDING_H

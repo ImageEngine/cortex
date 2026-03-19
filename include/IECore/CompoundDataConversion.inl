@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDDATACONVERSION_INL
-#define IE_CORE_COMPOUNDDATACONVERSION_INL
+#pragma once
 
 namespace IECore
 {
@@ -61,5 +60,3 @@ typename CompoundDataConversion<C1, C2>::InverseType CompoundDataConversion<C1, 
 }
 
 }
-
-#endif // IE_CORE_COMPOUNDDATACONVERSION_INL

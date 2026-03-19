@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_FACEVARYINGPROMOTIONOP_H
-#define IECORESCENE_FACEVARYINGPROMOTIONOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -86,5 +85,4 @@ IE_CORE_DECLAREPTR( FaceVaryingPromotionOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_FACEVARYINGPROMOTIONOP_H
 

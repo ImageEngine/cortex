@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TYPEDSTATECOMPONENT_INL
-#define IECOREGL_TYPEDSTATECOMPONENT_INL
+#pragma once
 
 namespace IECoreGL
 {
@@ -122,5 +121,3 @@ void TypedStateComponent<T,TId>::bind() const
 }
 
 } // namespace IECoreGL
-
-#endif // IECOREGL_TYPEDSTATECOMPONENT_INL

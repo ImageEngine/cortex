@@ -41,8 +41,7 @@
 /// give less intuitive syntax but are compatible with any classes for which
 /// a valid MatrixTraits specialisation exists.
 
-#ifndef IE_CORE_MATRIXOPS_H
-#define IE_CORE_MATRIXOPS_H
+#pragma once
 
 #include "IECore/MatrixTraits.h"
 
@@ -81,4 +80,3 @@ struct MatConvert
 
 #include "IECore/MatrixOps.inl"
 
-#endif // IE_CORE_MATRIXOPS_H

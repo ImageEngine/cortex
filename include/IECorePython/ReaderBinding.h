@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_READERBINDING_H
-#define IECOREPYTHON_READERBINDING_H
+#pragma once
 
 #include "IECorePython/ExceptionAlgo.h"
 #include "IECorePython/Export.h"
@@ -103,4 +102,3 @@ IECOREPYTHON_API void bindReader();
 
 #include "IECorePython/ReaderBinding.inl"
 
-#endif // IECOREPYTHON_READERBINDING_H

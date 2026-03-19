@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVEEVALUATOR_H
-#define IECORESCENE_PRIMITIVEEVALUATOR_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -192,4 +191,3 @@ IE_CORE_DECLAREPTR( PrimitiveEvaluator );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PRIMITIVEEVALUATOR_H

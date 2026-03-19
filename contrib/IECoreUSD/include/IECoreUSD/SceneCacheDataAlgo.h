@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_SCENECACHEDATAALGO_H
-#define IECOREUSD_SCENECACHEDATAALGO_H
+#pragma once
 
 #include "IECoreUSD/Export.h"
 
@@ -65,4 +64,3 @@ IECOREUSD_API std::string toInternalName( const IECore::InternedString& name );
 } // namespace IECoreUSD
 
 
-#endif // IECOREUSD_SCENECACHEDATAALGO_H

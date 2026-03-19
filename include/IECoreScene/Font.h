@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_FONT_H
-#define IECORESCENE_FONT_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
@@ -119,4 +118,3 @@ IE_CORE_DECLAREPTR( Font );
 
 }
 
-#endif // IECORESCENE_FONT_H

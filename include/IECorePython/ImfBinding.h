@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMFBINDING_H
-#define IECOREPYTHON_IMFBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindImf();
 
 }
 
-#endif // IECOREPYTHON_IMFBINDING_H

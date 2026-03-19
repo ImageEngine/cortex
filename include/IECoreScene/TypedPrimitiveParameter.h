@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TYPEDPRIMITIVEPARAMETER_H
-#define IECORESCENE_TYPEDPRIMITIVEPARAMETER_H
+#pragma once
 
 #include "IECore/TypedObjectParameter.h"
 
@@ -57,4 +56,3 @@ IE_CORE_DECLAREPTR( PointsPrimitiveParameter );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_TYPEDPRIMITIVEPARAMETER_H

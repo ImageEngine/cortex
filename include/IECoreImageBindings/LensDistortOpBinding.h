@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_LENSDISTORTOPBINDING_H
-#define IECOREIMAGEBINDINGS_LENSDISTORTOPBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindLensDistortOp();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_LENSDISTORTOPBINDING_H

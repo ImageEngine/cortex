@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/not.hpp"
 #include "boost/utility/enable_if.hpp"

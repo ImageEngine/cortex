@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_CLASSDATA_H
-#define IE_CORE_CLASSDATA_H
+#pragma once
 
 #include "IECore/Deleter.h"
 
@@ -121,5 +120,4 @@ class ClassData
 
 #include "IECore/ClassData.inl"
 
-#endif // IE_CORE_CLASSDATA_H
 

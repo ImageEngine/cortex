@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FILESEQUENCEPARAMETER_H
-#define IE_CORE_FILESEQUENCEPARAMETER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FileSequence.h"
@@ -100,4 +99,3 @@ IE_CORE_DECLAREPTR( FileSequenceParameter );
 
 } // namespace IECore
 
-#endif // IE_CORE_FILESEQUENCEPARAMETER_H

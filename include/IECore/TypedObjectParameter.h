@@ -35,8 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDOBJECTPARAMETER_H
-#define IE_CORE_TYPEDOBJECTPARAMETER_H
+#pragma once
 
 #include "IECore/ObjectParameter.h"
 
@@ -85,4 +84,3 @@ IE_CORE_DECLAREPTR( ObjectVectorParameter );
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPEDOBJECTPARAMETER_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TRANSFORMSTACK_H
-#define IECORESCENE_TRANSFORMSTACK_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 
@@ -102,4 +101,3 @@ class IECORESCENE_API TransformStack
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_TRANSFORMSTACK_H

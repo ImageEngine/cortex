@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DESPATCHTYPEDDATA_INL
-#define IE_CORE_DESPATCHTYPEDDATA_INL
+#pragma once
 
 #include "IECore/DateTimeData.h"
 #include "IECore/SimpleTypedData.h"
@@ -547,5 +546,3 @@ struct TraitsTest
 };
 
 }
-
-#endif // IE_CORE_DESPATCHTYPEDDATA_INL

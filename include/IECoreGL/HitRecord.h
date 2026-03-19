@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_HITRECORD_H
-#define IECOREGL_HITRECORD_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
@@ -76,4 +75,3 @@ class IECOREGL_API HitRecord
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_HITRECORD_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_REFCOUNTEDTHREADINGTEST_H
-#define IECORE_REFCOUNTEDTHREADINGTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addRefCountedThreadingTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_REFCOUNTEDTHREADINGTEST_H
 

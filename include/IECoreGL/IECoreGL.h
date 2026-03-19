@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_COREGL_H
-#define IECOREGL_COREGL_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 
@@ -53,4 +52,3 @@ IECOREGL_API int glslVersion();
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_COREGL_H

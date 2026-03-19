@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_POLYGONALGO_INL
-#define IECORE_POLYGONALGO_INL
+#pragma once
 
 #include "IECore/CircularIterator.h"
 
@@ -124,5 +123,3 @@ typename std::iterator_traits<Iterator>::value_type::BaseType polygonArea( Itera
 }
 
 } // namespace IECore
-
-#endif // IECORE_POLYGONALGO_INL

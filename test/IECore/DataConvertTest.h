@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATACONVERTTEST_H
-#define IE_CORE_DATACONVERTTEST_H
+#pragma once
 
 #include "IECore/DataConversion.h"
 #include "IECore/DataConvert.h"
@@ -144,5 +143,4 @@ struct DataConvertTestSuite : public boost::unit_test::test_suite
 
 }
 
-#endif // IE_CORE_DATACONVERTTEST_H
 

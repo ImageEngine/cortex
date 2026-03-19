@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVE_H
-#define IECOREGL_MESHPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
@@ -74,4 +73,3 @@ IE_CORE_DECLAREPTR( MeshPrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_MESHPRIMITIVE_H

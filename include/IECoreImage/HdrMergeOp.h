@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_HDRMERGEOP_H
-#define IECOREIMAGE_HDRMERGEOP_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -88,4 +87,3 @@ IE_CORE_DECLAREPTR( HdrMergeOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_HDRMERGEOP_H

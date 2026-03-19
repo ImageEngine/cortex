@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_STRINGALGOTEST_H
-#define IECORE_STRINGALGOTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addStringAlgoTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_STRINGALGOTEST_H
 

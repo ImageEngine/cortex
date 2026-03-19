@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_TYPEIDS_H
-#define IECOREUSD_TYPEIDS_H
+#pragma once
 
 namespace IECoreUSD
 {
@@ -46,4 +45,3 @@ enum TypeId
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_TYPEIDS_H

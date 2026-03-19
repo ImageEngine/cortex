@@ -32,13 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_MESHPRIMITIVEEVALUATORBINDING_H
-#define IECORESCENEMODULE_MESHPRIMITIVEEVALUATORBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindMeshPrimitiveEvaluator();
 }
 
-#endif // IECORESCENEMODULE_MESHPRIMITIVEEVALUATORBINDING_H
 

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIX_INL
-#define IE_CORE_TRANSFORMATIONMATRIX_INL
+#pragma once
 
 namespace IECore
 {
@@ -88,5 +87,3 @@ inline void murmurHashAppend( IECore::MurmurHash &h, const TransformationMatrix<
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_TRANSFORMATIONMATRIX_INL

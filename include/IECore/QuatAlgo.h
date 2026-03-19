@@ -36,8 +36,7 @@
 /// Defines algorithms for quaternions.
 /// \ingroup mathGroup
 
-#ifndef IECORE_QUATALGO_H
-#define IECORE_QUATALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -82,4 +81,3 @@ slerpShortestArc (const Imath::Quat<T> &q1, const Imath::Quat<T> &q2, T t)
 
 } // namespace IECore
 
-#endif // IECORE_QUATALGO_H

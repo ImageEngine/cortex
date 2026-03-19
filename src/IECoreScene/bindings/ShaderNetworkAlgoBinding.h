@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SHADERNETWORKALGOBINDING_H
-#define IECORESCENEMODULE_SHADERNETWORKALGOBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindShaderNetworkAlgo();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_SHADERNETWORKALGOBINDING_H

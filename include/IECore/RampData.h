@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_RAMPDATA_H
-#define IECORE_RAMPDATA_H
+#pragma once
 
 #include "IECore/Ramp.h"
 #include "IECore/TypedData.h"
@@ -49,4 +48,3 @@ IECORE_DECLARE_TYPEDDATA( RampfColor4fData, RampfColor4f, void, SharedDataHolder
 
 }
 
-#endif // IECORE_RAMPDATA_H

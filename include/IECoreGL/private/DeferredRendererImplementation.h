@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DEFERREDRENDERERIMPLEMENTATION_H
-#define IECOREGL_DEFERREDRENDERERIMPLEMENTATION_H
+#pragma once
 
 #include "IECoreGL/private/RendererImplementation.h"
 
@@ -133,4 +132,3 @@ IE_CORE_DECLAREPTR( DeferredRendererImplementation );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_DEFERREDRENDERERIMPLEMENTATION_H

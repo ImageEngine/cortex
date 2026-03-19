@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLBUFFERCONVERTER_H
-#define IECOREGL_TOGLBUFFERCONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -79,4 +78,3 @@ IE_CORE_DECLAREPTR( ToGLBufferConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLBUFFERCONVERTER_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TRIANGULATOR_H
-#define IECORESCENE_TRIANGULATOR_H
+#pragma once
 
 #include "IECoreScene/MeshPrimitiveBuilder.h"
 
@@ -115,4 +114,3 @@ typedef Triangulator<std::vector<Imath::V3d>::const_iterator> V3dTriangulator;
 
 #include "IECoreScene/Triangulator.inl"
 
-#endif // IECORESCENE_TRIANGULATOR_H

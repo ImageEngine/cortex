@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_REFCOUNTED_H
-#define IE_CORE_REFCOUNTED_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -186,4 +185,3 @@ inline size_t tbb_hasher( const boost::intrusive_ptr<T> &ptr )
 } // namespace IECore
 
 
-#endif // IE_CORE_REFCOUNTED_H

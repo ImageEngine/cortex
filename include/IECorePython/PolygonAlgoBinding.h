@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_POLYGONALGOBINDING_H
-#define IECOREPYTHON_POLYGONALGOBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindPolygonAlgo();
 }
 
-#endif // IECOREPYTHON_POLYGONALGOBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDDATACONVERSION_H
-#define IE_CORE_COMPOUNDDATACONVERSION_H
+#pragma once
 
 #include "IECore/DataConversion.h"
 
@@ -76,4 +75,3 @@ class CompoundDataConversion : public DataConversion< typename C1::FromType, typ
 
 #include "CompoundDataConversion.inl"
 
-#endif // IE_CORE_COMPOUNDDATACONVERSION_H

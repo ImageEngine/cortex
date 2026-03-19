@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_CORE_H
-#define IE_CORE_CORE_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Version.h"
@@ -304,4 +303,3 @@ IECORE_API bool withFreeType();
 /// <b>IECORE_OP_PRESET_PATHS</b><br>
 /// Used to save and load presets for use with Ops.
 
-#endif // IE_CORE_CORE_H

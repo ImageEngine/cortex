@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OP_H
-#define IE_CORE_OP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Parameterised.h"
@@ -98,4 +97,3 @@ IE_CORE_DECLAREPTR( Op );
 
 } // namespace IECore
 
-#endif // IE_CORE_OP_H

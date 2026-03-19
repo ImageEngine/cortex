@@ -36,8 +36,7 @@
 /// Defines for operating on tetrahedra.
 /// \ingroup mathGroup
 
-#ifndef IECORE_TETRAHEDRONALGO_H
-#define IECORE_TETRAHEDRONALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
@@ -95,4 +94,3 @@ IECORE_API inline Imath::V3i tetrahedronFaceIndices(int face);
 
 #include "IECore/TetrahedronAlgo.inl"
 
-#endif // IECORE_TETRAHEDRONALGO_H

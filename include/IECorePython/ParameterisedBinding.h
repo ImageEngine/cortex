@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_PARAMETERISEDBINDING_H
-#define IECOREPYTHON_PARAMETERISEDBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindParameterised();
 }
 
-#endif // IECOREPYTHON_PARAMETERISEDBINDING_H

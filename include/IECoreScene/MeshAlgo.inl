@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHALGO_INL
-#define IECORESCENE_MESHALGO_INL
+#pragma once
 
 namespace IECoreScene
 {
@@ -64,5 +63,3 @@ typename std::vector<T>::const_reference IECoreScene::MeshAlgo::MeshSplitter::va
 } // namespace MeshAlgo
 
 } // namespace IECoreScene
-
-#endif // IECORESCENE_MESHALGO_INL

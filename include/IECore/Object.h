@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OBJECT_H
-#define IE_CORE_OBJECT_H
+#pragma once
 
 #include "IECore/Canceller.h"
 #include "IECore/Export.h"
@@ -337,4 +336,3 @@ class IECORE_API Object : public RunTimeTyped
 
 #include "IECore/Object.inl"
 
-#endif // IE_CORE_OBJECT_H

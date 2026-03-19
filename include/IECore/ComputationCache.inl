@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_COMPUTATIONCACHE_INL
-#define IECORE_COMPUTATIONCACHE_INL
+#pragma once
 
 #include "IECore/MessageHandler.h"
 
@@ -163,6 +162,3 @@ ObjectPool *ComputationCache<T>::objectPool() const
 }
 
 } // namespace IECore
-
-#endif // IECORE_COMPUTATIONCACHE_H
-

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SCENEALGO_H
-#define IECORESCENE_SCENEALGO_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 
@@ -71,4 +70,3 @@ IECORESCENE_API void copy( const SceneInterface *src, SceneInterface *dst, int s
 
 } // IECoreScene
 
-#endif // IECORESCENE_SCENEALGO_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATACONVERT_H
-#define IE_CORE_DATACONVERT_H
+#pragma once
 
 #include "IECore/TypeTraits.h"
 
@@ -68,4 +67,3 @@ struct DataConvert
 
 #include "DataConvert.inl"
 
-#endif // IE_CORE_DATACONVERT_H

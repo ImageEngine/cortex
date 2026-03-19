@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_HITRECORDBINDING_H
-#define IECOREGL_HITRECORDBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindHitRecord();
 
 }
 
-#endif // IECOREGL_HITRECORDBINDING_H

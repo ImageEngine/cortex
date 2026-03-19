@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SHAREDSCENEINTERFACES_H
-#define IECORESCENE_SHAREDSCENEINTERFACES_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/SceneInterface.h"
@@ -67,4 +66,3 @@ class IECORESCENE_API SharedSceneInterfaces
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_SHAREDSCENEINTERFACES_H

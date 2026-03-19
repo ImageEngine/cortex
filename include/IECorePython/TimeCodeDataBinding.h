@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TIMECODEDATABINDING_H
-#define IECOREPYTHON_TIMECODEDATABINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindTimeCodeData();
 
 }
 
-#endif // IECOREPYTHON_TIMECODEDATABINDING_H

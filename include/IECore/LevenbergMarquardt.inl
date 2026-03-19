@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_LEVENBERGMARQUARDT_INL
-#define IE_CORE_LEVENBERGMARQUARDT_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -862,5 +861,3 @@ T LevenbergMarquardt<T, ErrorFn, Traits>::euclideanNorm( typename std::vector<T>
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_LEVENBERGMARQUARDT_INL

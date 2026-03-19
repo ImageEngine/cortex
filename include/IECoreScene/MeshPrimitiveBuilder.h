@@ -33,8 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef IECORESCENE_MESHPRIMITIVEBUILDER_H
-#define IECORESCENE_MESHPRIMITIVEBUILDER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -79,5 +78,3 @@ class IECORESCENE_API MeshPrimitiveBuilder : public IECore::RefCounted
 IE_CORE_DECLAREPTR( MeshPrimitiveBuilder );
 
 }
-
-#endif

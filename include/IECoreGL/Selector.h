@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SELECTOR_H
-#define IECOREGL_SELECTOR_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/HitRecord.h"
@@ -157,4 +156,3 @@ class IECOREGL_API Selector : boost::noncopyable
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SELECTOR_H

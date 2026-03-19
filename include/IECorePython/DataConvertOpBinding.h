@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_DATACONVERTOPBINDING_H
-#define IECOREPYTHON_DATACONVERTOPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindDataConvertOp();
 }
 
-#endif // IECOREPYTHON_DATACONVERTOPBINDING_H

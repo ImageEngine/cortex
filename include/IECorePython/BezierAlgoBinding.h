@@ -34,8 +34,7 @@
 
 #include "IECorePython/Export.h"
 
-#ifndef IECOREPYTHON_BEZIERALGOBINDING_H
-#define IECOREPYTHON_BEZIERALGOBINDING_H
+#pragma once
 
 namespace IECorePython
 {
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindBezierAlgo();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_BEZIERALGOBINDING_H

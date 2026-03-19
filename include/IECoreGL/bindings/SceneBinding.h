@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_SCENEBINDING_H
-#define IE_COREGL_SCENEBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindScene();
 
 }
 
-#endif // IE_COREGL_SCENEBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCURVESCONVERTERBINDING_H
-#define IECOREGL_TOGLCURVESCONVERTERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindToGLCurvesConverter();
 
 }
 
-#endif // IECOREGL_TOGLCURVESCONVERTERBINDING_H

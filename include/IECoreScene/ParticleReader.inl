@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PARTICLEREADER_INL
-#define IE_CORE_PARTICLEREADER_INL
+#pragma once
 
 #include "IECore/Convert.h"
 #include "IECore/MessageHandler.h"
@@ -123,5 +122,3 @@ typename T::Ptr ParticleReader::filterAttr( const F *attr, float percentage, con
 }
 
 } // namespace IECoreScene
-
-#endif // IE_CORE_PARTICLEREADER_INL

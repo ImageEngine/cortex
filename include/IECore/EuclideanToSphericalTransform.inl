@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_INL
-#define IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_INL
+#pragma once
 
 #include "IECore/Math.h"
 #include "IECore/VectorTraits.h"
@@ -76,8 +75,5 @@ typename EuclideanToSphericalTransform<F, T>::InverseType EuclideanToSphericalTr
 	return InverseType();
 }
 
-
 } // namespace IECore
-
-#endif // IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_INL
 

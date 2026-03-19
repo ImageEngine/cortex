@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_COLORTYPEDPARAMETERBINDING_H
-#define IECOREPYTHON_COLORTYPEDPARAMETERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindColorTypedParameter();
 }
 
-#endif // IECOREPYTHON_COLORTYPEDPARAMETERBINDING_H

@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #include "IECore/DataConversion.h"
 #include "IECore/HalfTypeTraits.h"
 

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FILESEQUENCEVECTORPARAMETER_H
-#define IE_CORE_FILESEQUENCEVECTORPARAMETER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FileSequence.h"
@@ -104,4 +103,3 @@ IE_CORE_DECLAREPTR( FileSequenceVectorParameter );
 
 } // namespace IECore
 
-#endif // IE_CORE_FILESEQUENCEVECTORPARAMETER_H

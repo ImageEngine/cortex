@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_TYPEDDATA_H
-#define IECORE_TYPEDDATA_H
+#pragma once
 
 #include "IECore/Data.h"
 #include "IECore/Export.h"
@@ -164,4 +163,3 @@ class IECORE_EXPORT TypedData : public Data
 
 } // namespace IECore
 
-#endif // IECORE_TYPEDDATA_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_SCENE_CACHE_DATA_H
-#define IECOREUSD_SCENE_CACHE_DATA_H
+#pragma once
 
 #include "IECoreScene/SceneInterface.h"
 #include "IECoreScene/SharedSceneInterfaces.h"
@@ -188,5 +187,4 @@ private:
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif // IECOREUSD_SCENE_CACHE_DATA_H
 

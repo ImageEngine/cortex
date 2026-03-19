@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREVDB_TYPEIDS_H
-#define IECOREVDB_TYPEIDS_H
+#pragma once
 
 namespace IECoreVDB
 {
@@ -49,4 +48,3 @@ enum TypeId
 
 } // namespace IECoreVDB
 
-#endif // IECOREVDB_TYPEIDS_H

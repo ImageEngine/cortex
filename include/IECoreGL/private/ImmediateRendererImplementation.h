@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_IMMEDIATERENDERERIMPLEMENTATION_H
-#define IECOREGL_IMMEDIATERENDERERIMPLEMENTATION_H
+#pragma once
 
 #include "IECoreGL/FrameBuffer.h"
 #include "IECoreGL/private/RendererImplementation.h"
@@ -102,4 +101,3 @@ IE_CORE_DECLAREPTR( ImmediateRendererImplementation );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_IMMEDIATERENDERERIMPLEMENTATION_H

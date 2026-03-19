@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_COMPUTATIONCACHE_H
-#define IECORE_COMPUTATIONCACHE_H
+#pragma once
 
 #include "IECore/LRUCache.h"
 #include "IECore/ObjectPool.h"
@@ -119,5 +118,4 @@ class ComputationCache : public RefCounted
 
 #include "IECore/ComputationCache.inl"
 
-#endif // IECORE_COMPUTATIONCACHE_H
 

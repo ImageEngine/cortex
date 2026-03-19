@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_EXPORT_H
-#define IECOREIMAGE_EXPORT_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -45,5 +44,3 @@
 #else
 	#define IECOREIMAGE_API IECORE_IMPORT
 #endif
-
-#endif // #ifndef IECOREIMAGE_EXPORT_H

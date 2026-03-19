@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_LINETYPEDPARAMETERBINDING_H
-#define IECOREPYTHON_LINETYPEDPARAMETERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindLineTypedParameter();
 }
 
-#endif // IECOREPYTHON_LINETYPEDPARAMETERBINDING_H

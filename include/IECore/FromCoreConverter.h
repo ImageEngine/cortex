@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_FROMCORECONVERTER_H
-#define IECORE_FROMCORECONVERTER_H
+#pragma once
 
 #include "IECore/Converter.h"
 #include "IECore/Export.h"
@@ -73,4 +72,3 @@ IE_CORE_DECLAREPTR( FromCoreConverter );
 
 } // namespace IECore
 
-#endif // IECORE_FROMCORECONVERTER_H

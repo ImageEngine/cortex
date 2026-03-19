@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CURVESPRIMITIVEBINDING_H
-#define IECORESCENEMODULE_CURVESPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindCurvesPrimitive();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_CURVESPRIMITIVEBINDING_H

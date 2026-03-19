@@ -32,13 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CURVESPRIMITIVEEVALUATORBINDING_H
-#define IECORESCENEMODULE_CURVESPRIMITIVEEVALUATORBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindCurvesPrimitiveEvaluator();
 }
 
-#endif // IECORESCENEMODULE_CURVESPRIMITIVEEVALUATORBINDING_H
 

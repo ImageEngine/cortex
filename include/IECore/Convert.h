@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CONVERT_H
-#define IECORE_CONVERT_H
+#pragma once
 
 namespace IECore
 {
@@ -51,4 +50,3 @@ T convert( const F &from )
 
 } // namespace IECore
 
-#endif // IECORE_CONVERT_H

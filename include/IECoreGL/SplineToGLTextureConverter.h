@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SPLINETOGLTEXTURECONVERTER_H
-#define IECOREGL_SPLINETOGLTEXTURECONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -78,4 +77,3 @@ IE_CORE_DECLAREPTR( SplineToGLTextureConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SPLINETOGLTEXTURECONVERTER_H

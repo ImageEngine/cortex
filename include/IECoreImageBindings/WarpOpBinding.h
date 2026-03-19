@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_WARPOPBINDING_H
-#define IECOREIMAGEBINDINGS_WARPOPBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindWarpOp();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_WARPOPBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATACASTOP_H
-#define IE_CORE_DATACASTOP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/NumericParameter.h"
@@ -75,4 +74,3 @@ IE_CORE_DECLAREPTR( DataCastOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_DATACASTOP_H

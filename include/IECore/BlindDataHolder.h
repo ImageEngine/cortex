@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BLINDDATAHOLDER_H
-#define IE_CORE_BLINDDATAHOLDER_H
+#pragma once
 
 #include "IECore/CompoundData.h"
 #include "IECore/Export.h"
@@ -71,4 +70,3 @@ IE_CORE_DECLAREPTR( BlindDataHolder )
 
 }
 
-#endif // IE_CORE_BLINDDATAHOLDER_H

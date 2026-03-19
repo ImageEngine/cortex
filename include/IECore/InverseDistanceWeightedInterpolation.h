@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INVERSEDISTANCEWEIGHTEDINTERPOLATION_H
-#define IE_CORE_INVERSEDISTANCEWEIGHTEDINTERPOLATION_H
+#pragma once
 
 #include "IECore/KDTree.h"
 
@@ -112,4 +111,3 @@ typedef InverseDistanceWeightedInterpolation< std::vector<Imath::V3d>::const_ite
 
 #include "InverseDistanceWeightedInterpolation.inl"
 
-#endif // IE_CORE_INVERSEDISTANCEWEIGHTEDINTERPOLATION_H

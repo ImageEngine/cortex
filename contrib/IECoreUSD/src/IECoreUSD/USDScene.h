@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_USDSCENE_H
-#define IECOREUSD_USDSCENE_H
+#pragma once
 
 #include "TypeIds.h"
 
@@ -133,4 +132,3 @@ IE_CORE_DECLAREPTR( USDScene )
 
 }
 
-#endif // IECOREUSD_USDSCENE_H

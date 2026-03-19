@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_VISIBLERENDERABLEBINDING_H
-#define IECORESCENEMODULE_VISIBLERENDERABLEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindVisibleRenderable();
 
 }
 
-#endif // IECORESCENEMODULE_VISIBLERENDERABLEBINDING_H

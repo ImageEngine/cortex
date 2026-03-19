@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_POLYGONITERATOR_INL
-#define IECORESCENE_POLYGONITERATOR_INL
+#pragma once
 
 namespace IECoreScene
 {
@@ -97,5 +96,3 @@ ValueIterator PolygonIterator::faceVaryingEnd( ValueIterator valuesBegin ) const
 
 } // namespace IECoreScene
 
-
-#endif // IECORESCENE_POLYGONITERATOR_INL

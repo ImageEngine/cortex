@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_INTERNEDSTRINGTEST_H
-#define IECORE_INTERNEDSTRINGTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addInternedStringTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_INTERNEDSTRINGTEST_H
 
