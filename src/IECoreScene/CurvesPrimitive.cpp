@@ -46,81 +46,95 @@ namespace
 const IndexedIO::EntryID g_basisMatrixEntry( "basisMatrix" );
 const IndexedIO::EntryID g_basisStepEntry( "basisStep" );
 const IndexedIO::EntryID g_periodicEntry( "periodic" );
+const IndexedIO::EntryID g_wrapEntry( "wrap" );
 const IndexedIO::EntryID g_verticesPerCurveEntry( "verticesPerCurve" );
 const IndexedIO::EntryID g_numVertsEntry( "numVerts" );
 const IndexedIO::EntryID g_numFaceVaryingEntry( "numFaceVarying" );
 
 /// Throws an exception if numVerts is an inappropriate number for the specified basis.
-unsigned int numSegmentsInternal( bool linear, int step, bool periodic, int numVerts )
+unsigned int numSegmentsInternal( StandardCubicBasis basis, int step, CurvesPrimitive::Wrap wrap, int numVerts )
 {
-	if( linear )
+	if( basis == StandardCubicBasis::Linear )
 	{
-		if( periodic )
+		switch( wrap )
 		{
-			if( numVerts < 3 )
-			{
-				throw Exception( "Linear periodic curve with less than 3 vertices." );
-			}
-			return numVerts;
-		}
-		else
-		{
-			if( numVerts < 2 )
-			{
-				throw Exception( "Linear non-periodic curve with less than 2 vertices." );
-			}
-			return numVerts - 1;
+			case CurvesPrimitive::Wrap::Periodic :
+				if( numVerts < 3 )
+				{
+					throw Exception( "Linear periodic curve with less than 3 vertices." );
+				}
+				return numVerts;
+			case CurvesPrimitive::Wrap::NonPeriodic :
+			case CurvesPrimitive::Wrap::Pinned :
+				if( numVerts < 2 )
+				{
+					throw Exception( "Linear non-periodic curve with less than 2 vertices." );
+				}
+				return numVerts - 1;
+			default :
+				return 0;
 		}
 	}
 	else
 	{
-		if( periodic )
+		switch( wrap )
 		{
-			if( numVerts < 3 )
-			{
-				throw Exception( "Cubic periodic curve with less than 3 vertices." );
-			}
-			if( (numVerts - 1) % step )
-			{
-				throw Exception( "Cubic curve with extra vertices." );
-			}
-			return numVerts / step;
-		}
-		else
-		{
-			if( numVerts < 4 )
-			{
-				throw Exception( "Cubic nonperiodic curve with less than 4 vertices." );
-			}
-			if( (numVerts - 4) % step )
-			{
-				throw Exception( "Cubic curve with extra vertices." );
-			}
-			return (numVerts - 4 )/ step + 1;
+			case CurvesPrimitive::Wrap::Periodic :
+				if( numVerts < 3 )
+				{
+					throw Exception( "Cubic periodic curve with less than 3 vertices." );
+				}
+				if( (numVerts - 1) % step )
+				{
+					throw Exception( "Cubic curve with extra vertices." );
+				}
+				return numVerts / step;
+			case CurvesPrimitive::Wrap::Pinned :
+				if( basis == StandardCubicBasis::BSpline || basis == StandardCubicBasis::CatmullRom )
+				{
+					if( numVerts < 2 )
+					{
+						throw Exception( "Cubic pinned curve with less than 2 vertices." );
+					}
+					return numVerts - 1;
+				}
+				[[fallthrough]]; // Treat as NonPeriodic.
+			case CurvesPrimitive::Wrap::NonPeriodic :
+				if( numVerts < 4 )
+				{
+					throw Exception( "Cubic non-periodic curve with less than 4 vertices." );
+				}
+				if( (numVerts - 4) % step )
+				{
+					throw Exception( "Cubic curve with extra vertices." );
+				}
+				return (numVerts - 4 ) / step + 1;
+			default :
+				return 0;
 		}
 	}
 }
 
 } // namespace
 
-const unsigned int CurvesPrimitive::m_ioVersion = 0;
+const unsigned int CurvesPrimitive::m_ioVersion = 1;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CurvesPrimitive );
 
 CurvesPrimitive::CurvesPrimitive()
 	:
 		m_basis( CubicBasisf::linear() ),
-		m_linear( true ),
-		m_periodic( false ),
+		m_standardBasis( StandardCubicBasis::Linear ),
+		m_wrap( Wrap::NonPeriodic ),
 		m_vertsPerCurve( new IntVectorData() ),
 		m_numVerts( 0 ),
 		m_numFaceVarying( 0 )
 {
 }
 
-CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis, bool periodic, ConstV3fVectorDataPtr p )
-	: 	m_basis( CubicBasisf::linear() )
+CurvesPrimitive::CurvesPrimitive( const IECore::IntVectorData *vertsPerCurve, const IECore::CubicBasisf &basis, Wrap wrap, const IECore::V3fVectorData *p )
+	:	m_basis( CubicBasisf::linear() )
 {
-	setTopology( vertsPerCurve, basis, periodic );
+	setTopology( vertsPerCurve, basis, wrap );
 
 	if( p )
 	{
@@ -128,6 +142,11 @@ CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const Cub
 		pData->setInterpretation( GeometricData::Point );
 		variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pData );
 	}
+}
+
+CurvesPrimitive::CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis, bool periodic, ConstV3fVectorDataPtr p )
+	:	CurvesPrimitive( vertsPerCurve.get(), basis, periodic ? Wrap::Periodic : Wrap::NonPeriodic, p.get() )
+{
 }
 
 CurvesPrimitive::~CurvesPrimitive()
@@ -145,7 +164,7 @@ bool CurvesPrimitive::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
-	if( m_periodic!=tOther->m_periodic )
+	if( m_wrap!=tOther->m_wrap )
 	{
 		return false;
 	}
@@ -162,8 +181,8 @@ void CurvesPrimitive::copyFrom( const Object *other, CopyContext *context )
 	Primitive::copyFrom( other, context );
 	const CurvesPrimitive *tOther = static_cast<const CurvesPrimitive *>( other );
 	m_basis = tOther->m_basis;
-	m_linear = tOther->m_linear;
-	m_periodic = tOther->m_periodic;
+	m_standardBasis = tOther->m_standardBasis;
+	m_wrap = tOther->m_wrap;
 	m_vertsPerCurve = tOther->m_vertsPerCurve->copy(); // don't need to use context as we don't share this data with anyone
 	m_numVerts = tOther->m_numVerts;
 	m_numFaceVarying = tOther->m_numFaceVarying;
@@ -176,8 +195,17 @@ void CurvesPrimitive::save( IECore::Object::SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_basisMatrixEntry, m_basis.matrix.getValue(), 16 );
 	container->write( g_basisStepEntry, m_basis.step );
-	int p = m_periodic;
-	container->write( g_periodicEntry, p );
+	int wrap = static_cast<int>( m_wrap );
+	container->write( g_wrapEntry, wrap );
+	if( m_wrap != Wrap::Pinned )
+	{
+		// Although it is redundant, we write the `periodic` entry for the benefit
+		// of old versions of the library, so that loading won't fail. We don't do
+		// this for pinned curves though, since they aren't supported in old versions.
+		/// \todo Remove
+		int p = periodic();
+		container->write( g_periodicEntry, p );
+	}
 	context->save( m_vertsPerCurve.get(), container.get(), g_verticesPerCurveEntry );
 	// we could recompute these on loading, but it'd take a while and the overhead
 	// of storing them isn't great.
@@ -194,10 +222,20 @@ void CurvesPrimitive::load( IECore::Object::LoadContextPtr context )
 	float *f = m_basis.matrix.getValue();
 	container->read( g_basisMatrixEntry, f, 16 );
 	container->read( g_basisStepEntry, m_basis.step );
-	m_linear = m_basis==CubicBasisf::linear();
-	int p = 0;
-	container->read( g_periodicEntry, p );
-	m_periodic = p;
+	m_standardBasis = m_basis.standardBasis();
+
+	if( v >= 1 )
+	{
+		int wrap = 0;
+		container->read( g_wrapEntry, wrap );
+		m_wrap = static_cast<Wrap>( wrap );
+	}
+	else
+	{
+		int p = 0;
+		container->read( g_periodicEntry, p );
+		m_wrap = p ? Wrap::Periodic : Wrap::NonPeriodic;
+	}
 	m_vertsPerCurve = context->load<IntVectorData>( container.get(), g_verticesPerCurveEntry );
 	container->read( g_numVertsEntry, m_numVerts );
 	container->read( g_numFaceVaryingEntry, m_numFaceVarying );
@@ -219,8 +257,7 @@ void CurvesPrimitive::topologyHash( MurmurHash &h ) const
 {
 	h.append( m_basis.matrix );
 	h.append( m_basis.step );
-	h.append( m_linear );
-	h.append( m_periodic );
+	h.append( m_wrap );
 	m_vertsPerCurve->hash( h );
 }
 
@@ -239,16 +276,21 @@ const CubicBasisf &CurvesPrimitive::basis() const
 	return m_basis;
 }
 
-bool CurvesPrimitive::periodic() const
+CurvesPrimitive::Wrap CurvesPrimitive::wrap() const
 {
-	return m_periodic;
+	return m_wrap;
 }
 
-void CurvesPrimitive::setTopology( ConstIntVectorDataPtr verticesPerCurve, const CubicBasisf &basis, bool periodic )
+bool CurvesPrimitive::periodic() const
+{
+	return m_wrap == Wrap::Periodic;
+}
+
+void CurvesPrimitive::setTopology( const IECore::IntVectorData *verticesPerCurve, const IECore::CubicBasisf &basis, Wrap wrap )
 {
 	m_basis = basis;
-	m_linear = m_basis==CubicBasisf::linear();
-	m_periodic = periodic;
+	m_standardBasis = m_basis.standardBasis();
+	m_wrap = wrap;
 	m_vertsPerCurve = verticesPerCurve->copy();
 
 	m_numVerts = 0;
@@ -259,6 +301,11 @@ void CurvesPrimitive::setTopology( ConstIntVectorDataPtr verticesPerCurve, const
 		m_numFaceVarying += variableSize( PrimitiveVariable::FaceVarying, i );
 		m_numVerts += v[i];
 	}
+}
+
+void CurvesPrimitive::setTopology( ConstIntVectorDataPtr verticesPerCurve, const CubicBasisf &basis, bool periodic )
+{
+	setTopology( verticesPerCurve.get(), basis, periodic ? Wrap::Periodic : Wrap::NonPeriodic );
 }
 
 size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
@@ -294,13 +341,16 @@ size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 			return 1;
 		case PrimitiveVariable::Varying :
 		case PrimitiveVariable::FaceVarying :
-			if( m_periodic )
+			switch( m_wrap )
 			{
-				return numSegments( curveIndex );
-			}
-			else
-			{
-				return 1 + numSegments( curveIndex );
+				case Wrap::Periodic :
+					return numSegments( curveIndex );
+				case Wrap::NonPeriodic :
+				case Wrap::Pinned :
+					return 1 + numSegments( curveIndex );
+				default :
+
+					return 0;
 			}
 		case PrimitiveVariable::Vertex :
 			return m_vertsPerCurve->readable()[curveIndex];
@@ -315,12 +365,17 @@ unsigned CurvesPrimitive::numSegments( unsigned curveIndex ) const
 	{
 		throw Exception( "Curve index out of range." );
 	}
-	return numSegmentsInternal( m_linear, m_basis.step, m_periodic, m_vertsPerCurve->readable()[curveIndex] );
+	return numSegmentsInternal( m_standardBasis, m_basis.step, m_wrap, m_vertsPerCurve->readable()[curveIndex] );
+}
+
+unsigned CurvesPrimitive::numSegments( const IECore::CubicBasisf &basis, Wrap wrap, unsigned numVerts )
+{
+	return numSegmentsInternal( basis.standardBasis(), basis.step, wrap, numVerts );
 }
 
 unsigned CurvesPrimitive::numSegments( const CubicBasisf &basis, bool periodic, unsigned numVerts )
 {
-	return numSegmentsInternal( basis==CubicBasisf::linear(), basis.step, periodic, numVerts );
+	return numSegmentsInternal( basis.standardBasis(), basis.step, periodic ? Wrap::Periodic : Wrap::NonPeriodic, numVerts );
 }
 
 CurvesPrimitivePtr CurvesPrimitive::createBox( const Imath::Box3f &b )

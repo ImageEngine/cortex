@@ -51,8 +51,17 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 {
 	public :
 
+		enum class Wrap
+		{
+			NonPeriodic,
+			Periodic,
+			Pinned
+		};
+
 		CurvesPrimitive();
-		/// Copies of vertsPerCurve and p are taken.
+		/// Copies of `vertsPerCurve` and `p` are taken.
+		CurvesPrimitive( const IECore::IntVectorData *vertsPerCurve, const IECore::CubicBasisf &basis=IECore::CubicBasisf::linear(), Wrap wrap = Wrap::NonPeriodic, const IECore::V3fVectorData *p = nullptr );
+		/// \deprecated Use the version taking `wrap` argument.
 		CurvesPrimitive( IECore::ConstIntVectorDataPtr vertsPerCurve, const IECore::CubicBasisf &basis=IECore::CubicBasisf::linear(), bool periodic = false, IECore::ConstV3fVectorDataPtr p = nullptr );
 		~CurvesPrimitive() override;
 
@@ -61,7 +70,12 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 		size_t numCurves() const;
 		const IECore::IntVectorData *verticesPerCurve() const;
 		const IECore::CubicBasisf &basis() const;
+		Wrap wrap() const;
+		/// \deprecated Use `wrap() == Wrap::Periodic`.
 		bool periodic() const;
+		/// A copy of `verticesPerCurve` is taken.
+		void setTopology( const IECore::IntVectorData *verticesPerCurve, const IECore::CubicBasisf &basis, Wrap wrap );
+		/// \deprecated Use the version taking `wrap` argument.
 		void setTopology( IECore::ConstIntVectorDataPtr verticesPerCurve, const IECore::CubicBasisf &basis, bool periodic );
 
 		/// Follows the RenderMan specification for variable sizes.
@@ -72,6 +86,8 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 		/// Returns the number of segments in a given curve.
 		unsigned numSegments( unsigned curveIndex ) const;
 		/// Returns the number of segments of a curve with the given topology.
+		static unsigned numSegments( const IECore::CubicBasisf &basis, Wrap wrap, unsigned numVerts );
+		/// \deprecated Use the version taking `wrap` argument.
 		static unsigned numSegments( const IECore::CubicBasisf &basis, bool periodic, unsigned numVerts );
 
 		/// Creates a wireframe box of the specified size.
@@ -82,8 +98,9 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 	private :
 
 		IECore::CubicBasisf m_basis;
-		bool m_linear;
-		bool m_periodic;
+		// Cached from `m_basis.standardBasis()`.
+		IECore::StandardCubicBasis m_standardBasis;
+		Wrap m_wrap;
 		IECore::IntVectorDataPtr m_vertsPerCurve;
 		unsigned m_numVerts;
 		unsigned m_numFaceVarying;

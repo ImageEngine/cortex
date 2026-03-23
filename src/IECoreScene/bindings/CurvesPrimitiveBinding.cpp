@@ -56,18 +56,34 @@ static IntVectorDataPtr verticesPerFace( const CurvesPrimitive &p )
 
 void bindCurvesPrimitive()
 {
-	RunTimeTypedClass<CurvesPrimitive>()
+	RunTimeTypedClass<CurvesPrimitive> curvesClass;
+
+	scope s = curvesClass;
+	enum_<CurvesPrimitive::Wrap>( "Wrap" )
+		.value( "NonPeriodic", CurvesPrimitive::Wrap::NonPeriodic )
+		.value( "Periodic", CurvesPrimitive::Wrap::Periodic )
+		.value( "Pinned", CurvesPrimitive::Wrap::Pinned )
+	;
+
+	curvesClass
 		.def( init<>() )
 		.def(
 			init<IntVectorDataPtr, const CubicBasisf &, bool, ConstV3fVectorDataPtr>(
 				( arg( "verticesPerCurve" ), arg( "basis" ) = IECore::CubicBasisf::linear(), arg( "periodic" ) = false, arg( "p" ) = object() )
 			)
 		)
+		.def(
+			init<const IntVectorData *, const CubicBasisf &, CurvesPrimitive::Wrap, const V3fVectorData *>(
+				( arg( "verticesPerCurve" ), arg( "basis" ) = IECore::CubicBasisf::linear(), arg( "wrap" ) = CurvesPrimitive::Wrap::NonPeriodic, arg( "p" ) = object() )
+			)
+		)
 		.def( "numCurves", &CurvesPrimitive::numCurves )
 		.def( "verticesPerCurve", &verticesPerFace, "A copy of the list of vertices per curve." )
 		.def( "basis", &CurvesPrimitive::basis, return_value_policy<copy_const_reference>() )
+		.def( "wrap", &CurvesPrimitive::wrap )
 		.def( "periodic", &CurvesPrimitive::periodic )
-		.def( "setTopology", &CurvesPrimitive::setTopology )
+		.def( "setTopology", (void (CurvesPrimitive::*)( ConstIntVectorDataPtr, const CubicBasisf &, bool ))&CurvesPrimitive::setTopology )
+		.def( "setTopology", (void (CurvesPrimitive::*)( const IntVectorData *, const CubicBasisf &, CurvesPrimitive::Wrap ))&CurvesPrimitive::setTopology )
 		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation )const)&CurvesPrimitive::variableSize )
 		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize, arg( "curveIndex" ) )
 		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments, arg( "curveIndex" ) )
