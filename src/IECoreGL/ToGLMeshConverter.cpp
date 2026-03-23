@@ -34,6 +34,7 @@
 
 #include "IECoreGL/ToGLMeshConverter.h"
 
+#include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/MeshPrimitive.h"
 
 #include "IECoreScene/FaceVaryingPromotionOp.h"
@@ -48,6 +49,49 @@
 #include <cassert>
 
 using namespace IECoreGL;
+
+namespace {
+
+void triangulateMeshIndices(
+    const IECoreScene::MeshPrimitive *mesh,
+    std::vector<int> &newIds
+)
+{
+	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
+
+	newIds.clear();
+
+	int numTris = 0;
+	for( auto n : verticesPerFace )
+	{
+		numTris += n - 2;
+	}
+
+	newIds.reserve( numTris * 3 );
+
+	int faceVertexIdStart = 0;
+	for( int faceIdx = 0; faceIdx < (int)verticesPerFace.size(); faceIdx++ )
+	{
+		int numFaceVerts = verticesPerFace[ faceIdx ];
+
+		const int i0 = faceVertexIdStart + 0;
+
+		for( int i = 1; i < numFaceVerts - 1; i++ )
+		{
+			const int i1 = faceVertexIdStart + i;
+			const int i2 = faceVertexIdStart + i + 1;
+
+			/// Store the indices required to rebuild the facevarying primvars
+			newIds.push_back( i0 );
+			newIds.push_back( i1 );
+			newIds.push_back( i2 );
+		}
+
+		faceVertexIdStart += numFaceVerts;
+	}
+}
+
+} // namespace
 
 IE_CORE_DEFINERUNTIMETYPED( ToGLMeshConverter );
 
@@ -74,6 +118,9 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 
 	if( mesh->variables.find( "N" )==mesh->variables.end() )
 	{
+		// \todo - this is a weird place for this - you don't always need normals in order to render a mesh.
+		// Pretty wasteful to be running a normalsOp on a mesh if you're using a shader that doesn't need normals.
+
 		// the mesh has no normals - we need to explicitly add some. if it's a polygon
 		// mesh (interpolation==linear) then we add per-face normals for a faceted look
 		// and if it's a subdivision mesh we add smooth per-vertex normals.
@@ -86,14 +133,15 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		normalOp->operate();
 	}
 
-	mesh = IECoreScene::MeshAlgo::triangulate( mesh.get() );
-
 	IECoreScene::FaceVaryingPromotionOpPtr faceVaryingOp = new IECoreScene::FaceVaryingPromotionOp;
 	faceVaryingOp->inputParameter()->setValue( mesh );
 	faceVaryingOp->copyParameter()->setTypedValue( false );
 	faceVaryingOp->operate();
 
-	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->numFaces() );
+	IECore::IntVectorDataPtr meshIndices = new IECore::IntVectorData();
+	triangulateMeshIndices( mesh.get(), IECoreScene::PrimitiveVariable::FaceVarying, meshIndices->writable(), nullptr );
+
+	MeshPrimitivePtr glMesh = new MeshPrimitive( meshIndices );
 
 	for ( IECoreScene::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{

@@ -35,6 +35,7 @@
 #ifndef IECOREGL_MESHPRIMITIVE_H
 #define IECOREGL_MESHPRIMITIVE_H
 
+#include "IECoreGL/Buffer.h"
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
@@ -51,7 +52,7 @@ class IECOREGL_API MeshPrimitive : public Primitive
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
-		MeshPrimitive( unsigned numTriangles );
+		MeshPrimitive( IECore::ConstIntVectorDataPtr meshIndices );
 		~MeshPrimitive() override;
 
 		Imath::Box3f bound() const override;
