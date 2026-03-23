@@ -1794,6 +1794,38 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		curves = self.curvesBad()
 		self.assertRaises( RuntimeError, IECoreScene.CurvesAlgo.deleteCurves, curves, deletePrimVar )
 
+	def testDeletePeriodicWithVarying( self ) :
+
+		sourceCurves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 3, 3 ], ), IECore.CubicBasisf.linear(), True, IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 6 ) ] )
+		)
+		sourceCurves["varying"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Varying,
+			IECore.FloatVectorData( range( 0, 6 ) )
+		)
+		self.assertTrue( sourceCurves.arePrimitiveVariablesValid() )
+
+		curves = IECoreScene.CurvesAlgo.deleteCurves(
+			sourceCurves, IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [ 1, 0 ] ) )
+		)
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+		self.assertEqual(
+			curves["P"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData(
+					[ imath.V3f( i ) for i in range( 3, 6 ) ],
+					IECore.GeometricData.Interpretation.Point
+				)
+			)
+		)
+		self.assertEqual(
+			curves["varying"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Varying,
+				IECore.FloatVectorData( range( 3, 6 ) ),
+			)
+		)
 
 class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 

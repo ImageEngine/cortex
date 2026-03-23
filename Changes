@@ -6,6 +6,11 @@ Improvements
 
 - CurvesPrimitive : Added argument names to `variableSize()` and `numSegments()` Python bindings, so they can be passed as keywords.
 
+Fixes
+-----
+
+- CurvesAlgo : Fixed handling of periodic curves in `deleteCurves()`.
+
 Breaking Changes
 ----------------
 

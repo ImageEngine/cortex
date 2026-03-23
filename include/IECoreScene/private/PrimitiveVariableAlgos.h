@@ -291,8 +291,7 @@ class DeleteFlaggedVaryingFunctor : public DeleteFlagged<U>
 			size_t offset = 0;
 			for( size_t c = 0; c < m_curvesPrimitive->numCurves(); ++c )
 			{
-				int numVarying = m_curvesPrimitive->numSegments( c ) + 1;
-
+				const int numVarying = m_curvesPrimitive->variableSize( PrimitiveVariable::Varying, c );
 				if( this->shouldKeepPrimitive( c ) )
 				{
 					for( int v = 0; v < numVarying; ++v )
