@@ -118,6 +118,10 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		};
 		IE_CORE_DECLAREPTR( Result );
 
+		/// > Note : If `curves` are Pinned, then they are converted to NonPeriodic
+		/// > internally. PrimitiveVariable queries must therefore be made using
+		/// > `CurvesPrimitiveEvaluator::primitive()` rather than the original `curves`
+		/// > object.
 		CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curves );
 		~CurvesPrimitiveEvaluator() override;
 
