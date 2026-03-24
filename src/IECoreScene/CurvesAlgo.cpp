@@ -469,6 +469,16 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 		return;
 	}
 
+	if( curves->variableSize( primitiveVariable.interpolation ) == curves->variableSize( interpolation ) )
+	{
+		// Various topologies have variable sizes that are compatible. Varying
+		// and FaceVarying are always identical. For linear curves and pinned
+		// cubic curves, they are also the same as Vertex. In these cases
+		// there is no need to resample at all.
+		primitiveVariable.interpolation = interpolation;
+		return;
+	}
+
 	DataPtr dstData = nullptr;
 	DataPtr srcData = nullptr;
 
@@ -558,10 +568,6 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 		{
 			CurvesVertexToVarying fn( curves, canceller );
 			dstData = despatchTypedData<CurvesVertexToVarying, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( srcData.get() ), fn );
-		}
-		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
-		{
-			dstData = srcData;
 		}
 	}
 

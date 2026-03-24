@@ -915,7 +915,7 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex)
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 0.5, 2, 2.5 ] ) )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2, 3 ] ) )
 
 	def testLinearCurvesVaryingToUniform( self ) :
 		curves = self.curvesLinear()
@@ -945,9 +945,8 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		curves = self.curvesLinear()
 		p = curves["e"]
 		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex)
-
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 0.5, 2, 2.5 ] ) )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2, 3 ] ) )
 
 	def testLinearCurvesFaceVaryingToUniform( self ) :
 		curves = self.curvesLinear()
@@ -1014,6 +1013,42 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertTrue( curves.isPrimitiveVariableValid( p ) )
 		self.assertEqual( p.data, origP.data )
+
+	def testPinnedVertexToVarying( self ) :
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 2 ] ), IECore.CubicBasisf.bSpline(),
+			IECoreScene.CurvesPrimitive.Wrap.Pinned,
+			IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ) ] )
+		)
+
+		primVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 0, 1 ] ) )
+		self.assertTrue( curves.isPrimitiveVariableValid( primVar ) )
+
+		originalData = primVar.data
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, primVar, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( primVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( primVar.data, IECore.FloatVectorData( [ 0, 1 ] ) )
+		self.assertTrue( primVar.data.isSame( originalData ) )
+		self.assertTrue( curves.isPrimitiveVariableValid( primVar ) )
+
+	def testPinnedVaryingToVertex( self ) :
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 2 ] ), IECore.CubicBasisf.bSpline(),
+			IECoreScene.CurvesPrimitive.Wrap.Pinned,
+			IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ) ] )
+		)
+
+		primVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( [ 0, 1 ] ) )
+		self.assertTrue( curves.isPrimitiveVariableValid( primVar ) )
+
+		originalData = primVar.data
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, primVar, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( primVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( primVar.data, IECore.FloatVectorData( [ 0, 1 ] ) )
+		self.assertTrue( primVar.data.isSame( originalData ) )
+		self.assertTrue( curves.isPrimitiveVariableValid( primVar ) )
 
 	def testCanSegmentUsingIntegerPrimvar( self ) :
 		curves = self.curvesLinear()
