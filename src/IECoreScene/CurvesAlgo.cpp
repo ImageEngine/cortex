@@ -402,7 +402,7 @@ CurvesPrimitivePtr deleteCurves(
 
 	IntVectorDataPtr verticesPerCurve = IECore::runTimeCast<IECore::IntVectorData>( outputVertsPerCurve.data );
 
-	CurvesPrimitivePtr outCurvesPrimitive = new CurvesPrimitive( verticesPerCurve, curvesPrimitive->basis(), curvesPrimitive->periodic() );
+	CurvesPrimitivePtr outCurvesPrimitive = new CurvesPrimitive( verticesPerCurve.get(), curvesPrimitive->basis(), curvesPrimitive->wrap() );
 
 	for (PrimitiveVariableMap::const_iterator it = curvesPrimitive->variables.begin(), e = curvesPrimitive->variables.end(); it != e; ++it)
 	{
