@@ -376,7 +376,7 @@ CurvesPrimitiveEvaluator::CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curv
 		varyingDataOffset += m_curvesPrimitive->variableSize( PrimitiveVariable::Varying, i );
 	}
 
-	PrimitiveVariableMap::iterator pIt = m_curvesPrimitive->variables.find( "P" );
+	auto pIt = m_curvesPrimitive->variables.find( "P" );
 	if( pIt==m_curvesPrimitive->variables.end() )
 	{
 		throw InvalidArgumentException( "No PrimitiveVariable named P on CurvesPrimitive." );
