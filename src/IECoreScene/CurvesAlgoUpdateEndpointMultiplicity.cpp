@@ -156,6 +156,13 @@ struct DuplicateEndPoints
 
 CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IECoreScene::CurvesPrimitive *curves, const IECore::CubicBasisf &cubicBasis, const Canceller *canceller )
 {
+	if( CurvesAlgo::isPinned( curves ) )
+	{
+		// Pinned curves provide a superior alternative to manually managing endpoint
+		// multiplicity, so it doesn't make sense to combine the two.
+		throw IECore::InvalidArgumentException( "Pinned curves not supported" );
+	}
+
 	CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive();
 
 	int vertexAdjustment = requiredMultiplicity( cubicBasis ) - requiredMultiplicity( curves->basis() );
