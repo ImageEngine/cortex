@@ -187,7 +187,7 @@ jobs:
       run: |
         scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
       env:
-        OCIO: ${{ env.CORTEX_BUILD_NAME }}/openColorIO/config.ocio
+        OCIO: ocio://studio-config-v1.0.0_aces-v1.3_ocio-v2.1
 
     - name: Build Package
       run: |
