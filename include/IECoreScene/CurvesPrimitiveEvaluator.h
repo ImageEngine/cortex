@@ -118,6 +118,10 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		};
 		IE_CORE_DECLAREPTR( Result );
 
+		/// > Note : If `curves` are Pinned, then they are converted to NonPeriodic
+		/// > internally. PrimitiveVariable queries must therefore be made using
+		/// > `CurvesPrimitiveEvaluator::primitive()` rather than the original `curves`
+		/// > object.
 		CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curves );
 		~CurvesPrimitiveEvaluator() override;
 
@@ -184,7 +188,7 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 		float integrateCurve( unsigned curveIndex, float vStart, float vEnd, int samples, Result& typedResult ) const;
 
-		CurvesPrimitivePtr m_curvesPrimitive;
+		ConstCurvesPrimitivePtr m_curvesPrimitive;
 		const std::vector<int> &m_verticesPerCurve;
 		std::vector<int> m_vertexDataOffsets; // one value per curve
 		std::vector<int> m_varyingDataOffsets; // one value per curve

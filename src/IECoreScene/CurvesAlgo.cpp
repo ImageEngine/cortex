@@ -402,7 +402,7 @@ CurvesPrimitivePtr deleteCurves(
 
 	IntVectorDataPtr verticesPerCurve = IECore::runTimeCast<IECore::IntVectorData>( outputVertsPerCurve.data );
 
-	CurvesPrimitivePtr outCurvesPrimitive = new CurvesPrimitive( verticesPerCurve, curvesPrimitive->basis(), curvesPrimitive->periodic() );
+	CurvesPrimitivePtr outCurvesPrimitive = new CurvesPrimitive( verticesPerCurve.get(), curvesPrimitive->basis(), curvesPrimitive->wrap() );
 
 	for (PrimitiveVariableMap::const_iterator it = curvesPrimitive->variables.begin(), e = curvesPrimitive->variables.end(); it != e; ++it)
 	{
@@ -466,6 +466,16 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 
 	if ( interpolation == primitiveVariable.interpolation)
 	{
+		return;
+	}
+
+	if( curves->variableSize( primitiveVariable.interpolation ) == curves->variableSize( interpolation ) )
+	{
+		// Various topologies have variable sizes that are compatible. Varying
+		// and FaceVarying are always identical. For linear curves and pinned
+		// cubic curves, they are also the same as Vertex. In these cases
+		// there is no need to resample at all.
+		primitiveVariable.interpolation = interpolation;
 		return;
 	}
 
@@ -558,10 +568,6 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 		{
 			CurvesVertexToVarying fn( curves, canceller );
 			dstData = despatchTypedData<CurvesVertexToVarying, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( srcData.get() ), fn );
-		}
-		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
-		{
-			dstData = srcData;
 		}
 	}
 

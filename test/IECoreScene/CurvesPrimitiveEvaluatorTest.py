@@ -1225,6 +1225,23 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		IECoreScene.testCurvesPrimitiveEvaluatorParallelClosestPoint()
 
+	def testPinnedCurves( self ) :
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.bSpline(),
+			IECoreScene.CurvesPrimitive.Wrap.Pinned, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 5 ) ] )
+		)
+		evaluator = IECoreScene.CurvesPrimitiveEvaluator( curves )
+		result = evaluator.createResult()
+
+		evaluator.pointAtV( 0, 0.0, result )
+		self.assertEqual( result.point(), imath.V3f( 0 ) )
+		self.assertEqual( result.vectorPrimVar( evaluator.primitive()["P"] ), imath.V3f( 0 ) )
+
+		evaluator.pointAtV( 0, 1.0, result )
+		self.assertEqual( result.point(), imath.V3f( 4 ) )
+		self.assertEqual( result.vectorPrimVar( evaluator.primitive()["P"] ), imath.V3f( 4 ) )
+
 if __name__ == "__main__":
 	unittest.main()
 

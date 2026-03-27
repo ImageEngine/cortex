@@ -34,6 +34,7 @@
 
 #include "IECoreScene/CurvesPrimitiveEvaluator.h"
 
+#include "IECoreScene/CurvesAlgo.h"
 #include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECore/Exception.h"
@@ -48,6 +49,24 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
 using namespace std;
+
+namespace
+{
+
+/// \todo Deal with pinned curves directly in CurvesPrimitiveEvaluator, so we
+/// don't generate any additional data. `IECoreGL::CurvesPrimitive` demonstrates
+/// one approach.
+ConstCurvesPrimitivePtr conformedCurves( const ConstCurvesPrimitivePtr &curves )
+{
+	CurvesPrimitivePtr result = curves->copy();
+	if( CurvesAlgo::isPinned( result.get() ) )
+	{
+		CurvesAlgo::convertPinnedToNonPeriodic( result.get() );
+	}
+	return result;
+}
+
+} // namespace
 
 IE_CORE_DEFINERUNTIMETYPED( CurvesPrimitiveEvaluator );
 
@@ -361,7 +380,7 @@ struct CurvesPrimitiveEvaluator::Line
 //////////////////////////////////////////////////////////////////////////
 
 CurvesPrimitiveEvaluator::CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curves )
-	:	m_curvesPrimitive( curves->copy() ), m_verticesPerCurve( m_curvesPrimitive->verticesPerCurve()->readable() ), m_haveTree( false )
+	:	m_curvesPrimitive( conformedCurves( curves ) ), m_verticesPerCurve( m_curvesPrimitive->verticesPerCurve()->readable() ), m_haveTree( false )
 {
 	m_vertexDataOffsets.reserve( m_verticesPerCurve.size() );
 	m_varyingDataOffsets.reserve( m_verticesPerCurve.size() );
@@ -376,7 +395,7 @@ CurvesPrimitiveEvaluator::CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curv
 		varyingDataOffset += m_curvesPrimitive->variableSize( PrimitiveVariable::Varying, i );
 	}
 
-	PrimitiveVariableMap::iterator pIt = m_curvesPrimitive->variables.find( "P" );
+	auto pIt = m_curvesPrimitive->variables.find( "P" );
 	if( pIt==m_curvesPrimitive->variables.end() )
 	{
 		throw InvalidArgumentException( "No PrimitiveVariable named P on CurvesPrimitive." );

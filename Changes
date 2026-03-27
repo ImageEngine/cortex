@@ -1,7 +1,25 @@
 10.7.x.x (relative to 10.7.0.0a7)
 ========
 
+Improvements
+------------
 
+- CurvesPrimitive :
+  - Added `Wrap` enum, with `Periodic`, `NonPeriodic` and `Pinned`. This generalises the previous `periodic` boolean property.
+  - Added argument names to `variableSize()` and `numSegments()` Python bindings, so they can be passed as keywords.
+- USDScene : Added support for pinned curves.
+- CurvesAlgo : Added `isPinned()` and `convertPinnedToNonPeriodic()` utilities.
+
+Fixes
+-----
+
+- CurvesAlgo : Fixed handling of periodic curves in `deleteCurves()`.
+- CurvesAlgo : Fixed `resamplePrimitiveVariable()` to handle Vertex<->Varying conversion for linear curves correctly.
+
+Breaking Changes
+----------------
+
+- CurvesPrimitive : Made protected members private.
 
 10.7.0.0a7 (relative to 10.7.0.0a6)
 ==========

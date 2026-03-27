@@ -54,6 +54,118 @@ using namespace Imath;
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
+// GLSL source
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+const string g_cubicLinesGeometrySource = R"(
+
+#version 150 compatibility
+#include "IECoreGL/CurvesPrimitive.h"
+
+IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS
+
+void main()
+{
+	IECOREGL_CURVESPRIMITIVE_SELECT_BASIS;
+
+	for( int i = 0; i < 10; i++ )
+	{
+		float t = float( i ) / 9.0;
+		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs );
+		gl_Position = IECOREGL_CURVESPRIMITIVE_POSITION( coeffs );
+		EmitVertex();
+	}
+}
+
+)";
+
+const string g_cubicRibbonsGeometrySource = R"(
+
+#version 150 compatibility
+#include "IECoreGL/CurvesPrimitive.h"
+
+IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_RIBBONS_PARAMETERS
+
+out vec3 fragmentI;
+out vec3 fragmentN;
+out vec2 fragmentuv;
+
+void main()
+{
+	IECOREGL_CURVESPRIMITIVE_SELECT_BASIS;
+
+	for( int i = 0; i < 10; i++ )
+	{
+
+		float t = float( i ) / 9.0;
+		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );
+		vec4 derivCoeffs = IECOREGL_CURVESPRIMITIVE_DERIVATIVE_COEFFICIENTS( t );
+		vec4 p, n, uTangent, vTangent;
+		IECOREGL_CURVESPRIMITIVE_CUBICFRAME( coeffs, derivCoeffs, p, n, uTangent, vTangent );
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		fragmentuv = vec2( 0, t );
+		gl_Position = p + width * uTangent;
+		EmitVertex();
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		fragmentuv = vec2( 1, t );
+		gl_Position = p - width * uTangent;
+		EmitVertex();
+
+	}
+}
+
+)";
+
+const string g_linearRibbonsGeometrySource = R"(
+
+#version 150 compatibility
+
+#include "IECoreGL/CurvesPrimitive.h"
+
+IECOREGL_CURVESPRIMITIVE_DECLARE_LINEAR_RIBBONS_PARAMETERS
+
+out vec3 fragmentI;
+out vec3 fragmentN;
+
+void main()
+{
+
+	for( int i = 0; i < 2; i++ )
+	{
+
+		vec4 p, n, uTangent, vTangent;
+		IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, n, uTangent, vTangent );
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		gl_Position = p + width * uTangent;
+		EmitVertex();
+
+		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )
+		fragmentN = n.xyz;
+		fragmentI = -n.xyz;
+		gl_Position = p - width * uTangent;
+		EmitVertex();
+
+	}
+}
+
+)";
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
 // StateComponents
 //////////////////////////////////////////////////////////////////////////
 
@@ -75,14 +187,22 @@ class CurvesPrimitive::MemberData : public IECore::RefCounted
 
 	public :
 
-		MemberData( const IECore::CubicBasisf &b, bool p, IECore::ConstIntVectorDataPtr v, float w )
-			:	basis( b ), periodic( p ), vertsPerCurve( v->copy() ), width( w )
+		MemberData( const IECore::CubicBasisf &b, IECoreScene::CurvesPrimitive::Wrap wrap, IECore::ConstIntVectorDataPtr v, float w )
+			:	basis( b ), wrap( wrap ), vertsPerCurve( v->copy() ), width( w )
 		{
+			if( wrap == IECoreScene::CurvesPrimitive::Wrap::Pinned )
+			{
+				if( basis != IECore::CubicBasisf::catmullRom() && basis != IECore::CubicBasisf::bSpline() )
+				{
+					// Pinning doesn't apply to this basis.
+					wrap = IECoreScene::CurvesPrimitive::Wrap::NonPeriodic;
+				}
+			}
 		}
 
 		Imath::Box3f bound;
 		IECore::CubicBasisf basis;
-		bool periodic;
+		IECoreScene::CurvesPrimitive::Wrap wrap;
 		IECore::IntVectorDataPtr vertsPerCurve;
 		float width;
 		IECore::V3fVectorData::ConstPtr points;
@@ -119,8 +239,13 @@ class CurvesPrimitive::MemberData : public IECore::RefCounted
 
 IE_CORE_DEFINERUNTIMETYPED( CurvesPrimitive );
 
+CurvesPrimitive::CurvesPrimitive( const IECore::CubicBasisf &basis, IECoreScene::CurvesPrimitive::Wrap wrap, IECore::ConstIntVectorDataPtr vertsPerCurve, float width )
+	:	m_memberData( new MemberData( basis, wrap, vertsPerCurve, width ) )
+{
+}
+
 CurvesPrimitive::CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, float width )
-	:	m_memberData( new MemberData( basis, periodic, vertsPerCurve, width ) )
+	:	CurvesPrimitive( basis, periodic ? IECoreScene::CurvesPrimitive::Wrap::Periodic : IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve, width )
 {
 }
 
@@ -184,11 +309,11 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 		{
 			if( linear )
 			{
-				geometryShader = shaderLoader->create( geometryShader->vertexSource(), linearRibbonsGeometrySource(), geometryShader->fragmentSource() );
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), g_linearRibbonsGeometrySource, geometryShader->fragmentSource() );
 			}
 			else
 			{
-				geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicRibbonsGeometrySource(), geometryShader->fragmentSource() );
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), g_cubicRibbonsGeometrySource, geometryShader->fragmentSource() );
 			}
 		}
 		else
@@ -196,7 +321,7 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 			// When drawing as lines, default to the constant fragment source, because using a facing ratio
 			// shader doesn't work
 			geometryShader = shaderLoader->create(
-				geometryShader->vertexSource(), cubicLinesGeometrySource(),
+				geometryShader->vertexSource(), g_cubicLinesGeometrySource,
 				geometryShader->fragmentSource() != "" ? geometryShader->fragmentSource() : Shader::constantFragmentSource()
 			);
 		}
@@ -207,6 +332,52 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 	addPrimitiveVariablesToShaderSetup( geometryShaderSetup.get() );
 	geometryShaderSetup->addUniformParameter( "basis", new IECore::M44fData( m_memberData->basis.matrix ) );
 	geometryShaderSetup->addUniformParameter( "width", new IECore::M44fData( m_memberData->width ) );
+
+	if( m_memberData->wrap == IECoreScene::CurvesPrimitive::Wrap::Pinned && !linear )
+	{
+		// To handle "phantom vertices" in the geometry shader, we need to know which
+		// vertices correspond to the original endpoints of the curve. We do that using
+		// the `vertexIsCurveEndPoint` attribute.
+		IECore::IntVectorDataPtr isEndPointData = new IECore::IntVectorData();
+		vector<int> &isEndPoint = isEndPointData->writable();
+		isEndPoint.resize( m_memberData->points->readable().size(), 0 );
+
+		int i = 0;
+		for( auto c : m_memberData->vertsPerCurve->readable() )
+		{
+			isEndPoint[i] = 1;
+			isEndPoint[i+c-1] = 1;
+			i += c;
+		}
+		geometryShaderSetup->addVertexAttribute( "vertexIsCurveEndPoint", isEndPointData );
+
+		// And we use specially adjusted basis matrices to give the effect of the
+		// phantom vertices being in the required position.
+		M44f phantomBasis0, phantomBasis1, phantomBasis2;
+		for( int x = 0; x < 4; ++x )
+		{
+			// Basis for first segment. The phantom vertex `p[0]` is required to be at `2 * p[1] - p[2]`,
+			// so we distribute its weights onto `p[1]` and `p[2]` appropriately.
+			phantomBasis0[x][0] = 0.0f;
+			phantomBasis0[x][1] = m_memberData->basis.matrix[x][1] + 2 * m_memberData->basis.matrix[x][0];
+			phantomBasis0[x][2] = m_memberData->basis.matrix[x][2] - m_memberData->basis.matrix[x][0];
+			phantomBasis0[x][3] = m_memberData->basis.matrix[x][3];
+			// Basis for last segment. The phantom vertex `p[3]` is required to be at `2 * p[2] - p[1]`.
+			phantomBasis1[x][0] = m_memberData->basis.matrix[x][0];
+			phantomBasis1[x][1] = m_memberData->basis.matrix[x][1] - m_memberData->basis.matrix[x][3];
+			phantomBasis1[x][2] = m_memberData->basis.matrix[x][2] + 2 * m_memberData->basis.matrix[x][3];
+			phantomBasis1[x][3] = 0.0f;
+			// Basis for single segment in which both endpoints are pinned.
+			phantomBasis2[x][0] = 0.0f;
+			phantomBasis2[x][1] = m_memberData->basis.matrix[x][1] + 2 * m_memberData->basis.matrix[x][0] - m_memberData->basis.matrix[x][3];
+			phantomBasis2[x][2] = m_memberData->basis.matrix[x][2] - m_memberData->basis.matrix[x][0] + 2 * m_memberData->basis.matrix[x][3];
+			phantomBasis2[x][3] = 0.0f;
+		}
+
+		geometryShaderSetup->addUniformParameter( "phantomBasis0", new IECore::M44fData( phantomBasis0 ) );
+		geometryShaderSetup->addUniformParameter( "phantomBasis1", new IECore::M44fData( phantomBasis1 ) );
+		geometryShaderSetup->addUniformParameter( "phantomBasis2", new IECore::M44fData( phantomBasis2 ) );
+	}
 
 	m_memberData->geometrySetups.push_back( MemberData::GeometrySetup( shader, geometryShaderSetup, linear, ribbons ) );
 
@@ -300,119 +471,6 @@ bool CurvesPrimitive::renderUsesGLLines( const State *state ) const
 	return glslVersion() < 150;
 }
 
-const std::string &CurvesPrimitive::cubicLinesGeometrySource()
-{
-	static std::string s =
-
-		"#version 150 compatibility\n"
-		""
-		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
-		""
-		"IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS\n"
-		""
-		"void main()"
-		"{"
-		""
-		"	for( int i = 0; i < 10; i++ )"
-		"	{"
-		"		float t = float( i ) / 9.0;"
-		"		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );"
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs );"
-		"		gl_Position = IECOREGL_CURVESPRIMITIVE_POSITION( coeffs );"
-		"		EmitVertex();"
-		""
-		"	}"
-		"}";
-
-	return s;
-}
-
-const std::string &CurvesPrimitive::cubicRibbonsGeometrySource()
-{
-	static std::string s =
-
-		"#version 150 compatibility\n"
-		""
-		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
-		""
-		"IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_RIBBONS_PARAMETERS\n"
-		""
-		"out vec3 fragmentI;"
-		"out vec3 fragmentN;"
-		"out vec2 fragmentuv;"
-		""
-		"void main()"
-		"{"
-		""
-		"	for( int i = 0; i < 10; i++ )"
-		"	{"
-		""
-		"		float t = float( i ) / 9.0;"
-		"		vec4 coeffs = IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t );"
-		"		vec4 derivCoeffs = IECOREGL_CURVESPRIMITIVE_DERIVATIVE_COEFFICIENTS( t );"
-		"		vec4 p, n, uTangent, vTangent;"
-		"		IECOREGL_CURVESPRIMITIVE_CUBICFRAME( coeffs, derivCoeffs, p, n, uTangent, vTangent );"
-		""
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		fragmentuv = vec2( 0, t );"
-		"		gl_Position = p + width * uTangent;"
-		"		EmitVertex();"
-		""
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		fragmentuv = vec2( 1, t );"
-		"		gl_Position = p - width * uTangent;"
-		"		EmitVertex();"
-		""
-		"	}"
-		"}";
-
-	return s;
-}
-
-const std::string &CurvesPrimitive::linearRibbonsGeometrySource()
-{
-	static std::string s =
-
-		"#version 150 compatibility\n"
-		""
-		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
-		""
-		"IECOREGL_CURVESPRIMITIVE_DECLARE_LINEAR_RIBBONS_PARAMETERS\n"
-		""
-		"out vec3 fragmentI;"
-		"out vec3 fragmentN;"
-		""
-		"void main()"
-		"{"
-
-		"	for( int i = 0; i < 2; i++ )"
-		"	{"
-
-		"		vec4 p, n, uTangent, vTangent;"
-		"		IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, n, uTangent, vTangent );"
-
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		gl_Position = p + width * uTangent;"
-		"		EmitVertex();"
-
-		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )"
-		"		fragmentN = n.xyz;"
-		"		fragmentI = -n.xyz;"
-		"		gl_Position = p - width * uTangent;"
-		"		EmitVertex();"
-		""
-		"	}"
-		"}";
-
-	return s;
-}
-
 void CurvesPrimitive::ensureVertIds() const
 {
 	if( m_memberData->vertIdsBuffer )
@@ -433,7 +491,7 @@ void CurvesPrimitive::ensureVertIds() const
 			vertIds.push_back( vertIndex );
 			vertIds.push_back( ++vertIndex );
 		}
-		if( m_memberData->periodic )
+		if( m_memberData->wrap == IECoreScene::CurvesPrimitive::Wrap::Periodic )
 		{
 			vertIds.push_back( vertIndex );
 			vertIds.push_back( vertIndex - numSegments );
@@ -462,10 +520,40 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
 	{
 		int numPoints = *it;
-		int numSegments = IECoreScene::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->periodic, numPoints );
+		int numSegments = IECoreScene::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->wrap, numPoints );
 		unsigned pi = 0;
 		for( int i=0; i<numSegments; i++ )
 		{
+			if( m_memberData->wrap == IECoreScene::CurvesPrimitive::Wrap::Pinned )
+			{
+				// Pinned curve. We give the first and last segment special
+				// treatment so as to interpolate all the way to the endpoint.
+				// This could be achieved by adding "phantom vertices", but we
+				// don't want to have to preprocess all the vertex primitive
+				// variables to add them. Instead we use custom basis matrices
+				// which have the same effect, by distributing the endpoint
+				// weights onto the two vertices from which the phantom vertex
+				// would be constructed. This means that the endpoint vertices
+				// are actually unused because their weights are zero.
+				if( i == 0 )
+				{
+					vertIds.push_back( baseIndex + pi ); // Unused
+					vertIds.push_back( baseIndex + pi );
+					vertIds.push_back( baseIndex + pi + 1 );
+					vertIds.push_back( baseIndex + pi + ( numSegments > 1 ? 2 : 1 ) );
+					continue;
+				}
+				else if( i == numSegments - 1 )
+				{
+					vertIds.push_back( baseIndex + pi );
+					vertIds.push_back( baseIndex + pi + 1 );
+					vertIds.push_back( baseIndex + pi + 2 );
+					vertIds.push_back( baseIndex + pi + 2 ); // Unused
+					continue;
+				}
+			}
+
+			// Regular segment.
 			vertIds.push_back( baseIndex + ( pi % numPoints ) );
 			vertIds.push_back( baseIndex + ( (pi+1) % numPoints ) );
 			vertIds.push_back( baseIndex + ( (pi+2) % numPoints ) );
@@ -474,7 +562,6 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 		}
 
 		baseIndex += numPoints;
-
 	}
 
 	m_memberData->numAdjacencyVertIds = vertIds.size();
@@ -498,11 +585,11 @@ void CurvesPrimitive::ensureLinearAdjacencyVertIds() const
 	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
 	{
 		unsigned int numPoints = *it;
-		int numSegments = IECoreScene::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->periodic, numPoints );
+		int numSegments = IECoreScene::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->wrap, numPoints );
 		int pi = 0;
 		for( int i=0; i<numSegments; i++ )
 		{
-			if( m_memberData->periodic )
+			if( m_memberData->wrap == IECoreScene::CurvesPrimitive::Wrap::Periodic )
 			{
 				vertIds.push_back( baseIndex + ( (pi-1) % numPoints ) );
 				vertIds.push_back( baseIndex + ( (pi) % numPoints ) );

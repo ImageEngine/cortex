@@ -95,8 +95,6 @@ class IECOREGL_API PointsPrimitive : public Primitive
 
 		Type effectiveType( const State *state ) const;
 
-		static std::string &instancingVertexSource();
-
 		IE_CORE_FORWARDDECLARE( MemberData );
 
 		MemberDataPtr m_memberData;

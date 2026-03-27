@@ -34,6 +34,7 @@
 
 import os
 import os.path
+import pathlib
 import math
 import unittest
 import imath
@@ -47,6 +48,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		c = IECoreScene.CurvesPrimitive()
 		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData() )
 		self.assertEqual( c.basis(), IECore.CubicBasisf.linear() )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.keys(), [] )
 		self.assertEqual( c.numCurves(), 0 )
@@ -54,6 +56,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 2 ] ) )
 		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 2 ] ) )
 		self.assertEqual( c.basis(), IECore.CubicBasisf.linear() )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.keys(), [] )
 		self.assertEqual( c.numCurves(), 1 )
@@ -61,22 +64,25 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline() )
 		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
 		self.assertEqual( c.basis(), IECore.CubicBasisf.bSpline() )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.keys(), [] )
 		self.assertEqual( c.numCurves(), 1 )
 
-		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), True )
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
 		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
 		self.assertEqual( c.basis(), IECore.CubicBasisf.bSpline() )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
 		self.assertEqual( c.periodic(), True )
 		self.assertEqual( c.keys(), [] )
 		self.assertEqual( c.numCurves(), 1 )
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
-		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
+		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic, p )
 		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
 		self.assertEqual( c.basis(), IECore.CubicBasisf.bSpline() )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
 		self.assertEqual( c.periodic(), True )
 		self.assertEqual( c.keys(), [ "P" ] )
 		self.assertNotEqual( c["P"].data, p )
@@ -88,6 +94,15 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertFalse( c["P"].data.isSame( pp ) )
 		self.assertFalse( c.verticesPerCurve().isSame( i ) )
 
+	def testLegacyConstructors( self ) :
+
+		for periodic in ( True, False ) :
+			curves = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), periodic )
+			self.assertEqual( curves.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
+			self.assertEqual( curves.basis(), IECore.CubicBasisf.bSpline() )
+			self.assertEqual( curves.wrap(), IECoreScene.CurvesPrimitive.Wrap.Periodic if periodic else IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
+			self.assertEqual( curves.periodic(), periodic )
+
 	def testConstructorValidation( self ) :
 
 		self.assertRaises( Exception, IECoreScene.CurvesPrimitive, IECore.IntVectorData( [ 1 ] ) )
@@ -95,6 +110,20 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertRaises( Exception, IECoreScene.CurvesPrimitive, IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.bezier() )
 
 	def testConstructorKeywords( self ) :
+
+		c = IECoreScene.CurvesPrimitive(
+			verticesPerCurve = IECore.IntVectorData( [ 3 ] ),
+			wrap = IECoreScene.CurvesPrimitive.Wrap.Periodic,
+			p = IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 3 ) ] )
+		)
+
+		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 3 ] ) )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
+		self.assertEqual( c.periodic(), True )
+		self.assertEqual( c.basis(), IECore.CubicBasisf.linear() )
+		self.assertEqual( c["P"].data, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 3 ) ], IECore.GeometricData.Interpretation.Point ) )
+
+	def testLegacyConstructorKeywords( self ) :
 
 		c = IECoreScene.CurvesPrimitive(
 			verticesPerCurve = IECore.IntVectorData( [ 3 ] ),
@@ -111,7 +140,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
-		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
+		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic, p )
 
 		cc = c.copy()
 		self.assertEqual( c, cc )
@@ -120,7 +149,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
-		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
+		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic, p )
 
 		IECore.Writer.create( c, os.path.join( "test", "IECore", "data", "curves.cob" ) ).write()
 
@@ -132,7 +161,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	def testVariableSize( self ) :
 
-		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), True )
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
 
 		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
@@ -151,7 +180,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, 0 ), 4 )
 		self.assertEqual( c.numSegments( 0 ), 4 )
 
-		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), False )
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
 
 		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
@@ -167,6 +196,34 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	def testSetTopology( self ) :
 
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
+
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 4 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying ), 4 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 4 )
+
+		newVertsPerCurve = IECore.IntVectorData( [ 4, 4 ] )
+		c.setTopology( newVertsPerCurve, IECore.CubicBasisf.bezier(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
+
+		self.assertEqual( c.verticesPerCurve(), newVertsPerCurve )
+		self.assertEqual( c.basis(), IECore.CubicBasisf.bezier() )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
+		self.assertEqual( c.periodic(), False )
+		self.assertEqual( c.numCurves(), 2 )
+
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 2 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying ), 4 )
+		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 4 )
+
+		newVertsPerCurve.append( 10 )
+		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 4, 4 ] ) )
+
+	def testLegacySetTopology( self ) :
+
 		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), True )
 
 		self.assertEqual( c.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -180,6 +237,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		self.assertEqual( c.verticesPerCurve(), newVertsPerCurve )
 		self.assertEqual( c.basis(), IECore.CubicBasisf.bezier() )
+		self.assertEqual( c.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.numCurves(), 2 )
 
@@ -194,7 +252,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	def testHash( self ) :
 
-		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), True )
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
 		h = c.hash()
 		t = c.topologyHash()
 
@@ -202,19 +260,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c2.hash(), h )
 		self.assertEqual( c2.topologyHash(), t )
 
-		c.setTopology( IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.bSpline(), True )
+		c.setTopology( IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.bSpline(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
 		self.assertNotEqual( c.hash(), h )
 		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
 		t = c.topologyHash()
 
-		c.setTopology( IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.catmullRom(), True )
+		c.setTopology( IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.catmullRom(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
 		self.assertNotEqual( c.hash(), h )
 		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
 		t = c.topologyHash()
 
-		c.setTopology( IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.catmullRom(), False )
+		c.setTopology( IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.catmullRom(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
 		self.assertNotEqual( c.hash(), h )
 		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
@@ -223,6 +281,52 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		c["primVar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
 		self.assertNotEqual( c.hash(), h )
 		self.assertEqual( c.topologyHash(), t )
+
+	def testIOVersion0( self ) :
+
+		dataDir = pathlib.Path( "test" ) / "IECoreScene" / "data"
+
+		curves = IECore.ObjectReader( str( dataDir / "curvesV0-periodic.cob" ) ).read()
+		self.assertEqual( curves.wrap(), IECoreScene.CurvesPrimitive.Wrap.Periodic )
+		self.assertTrue( curves.periodic() )
+
+		curves = IECore.ObjectReader( str( dataDir / "curvesV0-nonPeriodic.cob" ) ).read()
+		self.assertEqual( curves.wrap(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
+		self.assertFalse( curves.periodic() )
+
+	def testPinnedWrap( self ) :
+
+		for basis in ( IECore.CubicBasisf.catmullRom(), IECore.CubicBasisf.bSpline() ) :
+			with self.subTest( basis = basis ) :
+
+				curves = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 2 ] ), basis, IECoreScene.CurvesPrimitive.Wrap.Pinned )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 2 )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying ), 2 )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex, curveIndex = 0 ), 2 )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying, curveIndex = 0 ), 2 )
+				self.assertEqual( curves.numSegments( 0 ), 1 )
+
+				curves = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 3 ] ), basis, IECoreScene.CurvesPrimitive.Wrap.Pinned )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 3 )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying ), 3 )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex, curveIndex = 0 ), 3 )
+				self.assertEqual( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying, curveIndex = 0 ), 3 )
+				self.assertEqual( curves.numSegments( 0 ), 2 )
+
+	def testPinnedBezier( self ) :
+
+		# Pinning doesn't apply to beziers, so we can't make a 2-vertex curve.
+		with self.assertRaises( RuntimeError ) :
+			IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 2 ] ), IECore.CubicBasisf.bezier(), IECoreScene.CurvesPrimitive.Wrap.Pinned )
+
+		# But we should be able to make a 4-vertex curve and have it be interpreted
+		# as a normal non-periodic curve.
+		nonPeriodic = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bezier(), IECoreScene.CurvesPrimitive.Wrap.NonPeriodic )
+		pinned = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.bezier(), IECoreScene.CurvesPrimitive.Wrap.Pinned )
+
+		for interpolation in IECoreScene.PrimitiveVariable.Interpolation.values.values() :
+			self.assertEqual( nonPeriodic.variableSize( interpolation ), pinned.variableSize( interpolation ) )
+			self.assertEqual( nonPeriodic.numSegments( 0 ), pinned.numSegments( 0 ) )
 
 	def tearDown( self ) :
 

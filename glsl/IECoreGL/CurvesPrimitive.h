@@ -47,7 +47,12 @@
 	layout( lines_adjacency ) in;\
 	layout( line_strip, max_vertices = 10 ) out;\
 	\
+	in int geometryIsCurveEndPoint[];\
+	\
 	uniform mat4x4 basis;\
+	uniform mat4x4 phantomBasis0;\
+	uniform mat4x4 phantomBasis1;\
+	uniform mat4x4 phantomBasis2;\
 	\
 	IECOREGL_CURVESPRIMITIVE_DECLARE_VERTEX_PASS_THROUGH_PARAMETERS
 
@@ -65,16 +70,36 @@
 	layout( lines_adjacency ) in;\
 	layout( triangle_strip, max_vertices = 20 ) out;\
 	\
+	in int geometryIsCurveEndPoint[];\
+	\
 	uniform mat4x4 basis;\
+	uniform mat4x4 phantomBasis0;\
+	uniform mat4x4 phantomBasis1;\
+	uniform mat4x4 phantomBasis2;\
 	uniform float width;\
 	\
 	IECOREGL_CURVESPRIMITIVE_DECLARE_VERTEX_PASS_THROUGH_PARAMETERS
 
+#define IECOREGL_CURVESPRIMITIVE_SELECT_BASIS \
+	mat4x4 selectedBasis;\
+	if( bool( geometryIsCurveEndPoint[1] ) )\
+	{\
+		selectedBasis = bool( geometryIsCurveEndPoint[2] ) ? phantomBasis2 : phantomBasis0;\
+	}\
+	else if( bool( geometryIsCurveEndPoint[2] ) )\
+	{\
+		selectedBasis = phantomBasis1;\
+	}\
+	else\
+	{\
+		selectedBasis = basis;\
+	}
+
 #define IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t ) \
-	ieCurvesPrimitiveCoefficients( basis, t )
+	ieCurvesPrimitiveCoefficients( selectedBasis, t )
 
 #define IECOREGL_CURVESPRIMITIVE_DERIVATIVE_COEFFICIENTS( t ) \
-	ieCurvesPrimitiveDerivativeCoefficients( basis, t )
+	ieCurvesPrimitiveDerivativeCoefficients( selectedBasis, t )
 
 #define IECOREGL_CURVESPRIMITIVE_POSITION( coeffs )\
 	ieCurvesPrimitivePosition( coeffs )
@@ -96,7 +121,7 @@ vec4 ieCurvesPrimitiveCoefficients( in mat4x4 basis, in float t )
 	float t2 = t * t;
 	float t3 = t2 * t;
 
-	return vec4( 
+	return vec4(
 		basis[0][0] * t3 + basis[1][0] * t2 + basis[2][0] * t + basis[3][0],
 		basis[0][1] * t3 + basis[1][1] * t2 + basis[2][1] * t + basis[3][1],
 		basis[0][2] * t3 + basis[1][2] * t2 + basis[2][2] * t + basis[3][2],

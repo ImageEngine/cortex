@@ -62,6 +62,19 @@ void bindCurvesPrimitive()
 				arg_( "width" ) = 1.0f
 			) )
 		)
+		.def(
+			init<
+				const IECore::CubicBasisf &,
+				IECoreScene::CurvesPrimitive::Wrap,
+				IECore::ConstIntVectorDataPtr,
+				float
+			>( (
+				arg_( "basis" ),
+				arg_( "wrap" ),
+				arg_( "vertsPerCurve" ),
+				arg_( "width" ) = 1.0f
+			) )
+		)
 	;
 
 	bindTypedStateComponent<CurvesPrimitive::IgnoreBasis>( "IgnoreBasis" );

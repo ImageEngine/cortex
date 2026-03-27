@@ -56,7 +56,7 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readCurves( pxr::UsdGeomCurves &curves, pxr::UsdTimeCode time, const IECore::CubicBasisf &basis, bool periodic, const Canceller *canceller )
+IECore::ObjectPtr readCurves( pxr::UsdGeomCurves &curves, pxr::UsdTimeCode time, const IECore::CubicBasisf &basis, CurvesPrimitive::Wrap wrap, const Canceller *canceller )
 {
 	Canceller::check( canceller );
 	pxr::VtIntArray vertexCountsArray;
@@ -64,7 +64,7 @@ IECore::ObjectPtr readCurves( pxr::UsdGeomCurves &curves, pxr::UsdTimeCode time,
 	IECore::IntVectorDataPtr countData = DataAlgo::fromUSD( vertexCountsArray );
 
 	Canceller::check( canceller );
-	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, basis, periodic );
+	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData.get(), basis, wrap );
 	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get(), canceller );
 
 	Canceller::check( canceller );
@@ -116,19 +116,23 @@ IECore::ObjectPtr readBasisCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTime
 
 	// Wrap
 
-	bool periodic = false;
-	pxr::TfToken wrap;
-	curves.GetWrapAttr().Get( &wrap, time );
-	if( wrap == pxr::UsdGeomTokens->periodic )
+	CurvesPrimitive::Wrap wrap = IECoreScene::CurvesPrimitive::Wrap::NonPeriodic;
+	pxr::TfToken usdWrap;
+	curves.GetWrapAttr().Get( &usdWrap, time );
+	if( usdWrap == pxr::UsdGeomTokens->periodic )
 	{
-		periodic = true;
+		wrap = IECoreScene::CurvesPrimitive::Wrap::Periodic;
 	}
-	else if( wrap != pxr::UsdGeomTokens->nonperiodic )
+	else if( usdWrap == pxr::UsdGeomTokens->pinned )
 	{
-		IECore::msg( IECore::Msg::Warning, "USDScene", "Unsupported wrap \"{}\" reading \"{}\"", wrap.GetString(), curves.GetPath().GetAsString() );
+		wrap = IECoreScene::CurvesPrimitive::Wrap::Pinned;
+	}
+	else if( usdWrap != pxr::UsdGeomTokens->nonperiodic )
+	{
+		IECore::msg( IECore::Msg::Warning, "USDScene", "Unsupported wrap \"{}\" reading \"{}\"", usdWrap.GetString(), curves.GetPath().GetAsString() );
 	}
 
-	return readCurves( curves, time, basis, periodic, canceller );
+	return readCurves( curves, time, basis, wrap, canceller );
 }
 
 bool basisCurvesMightBeTimeVarying( pxr::UsdGeomBasisCurves &curves )
@@ -153,7 +157,7 @@ IECore::ObjectPtr readNurbsCurves( pxr::UsdGeomNurbsCurves &curves, pxr::UsdTime
 		basis = CubicBasisf::bSpline();
 	}
 
-	return readCurves( curves, time, basis, false, canceller );
+	return readCurves( curves, time, basis, CurvesPrimitive::Wrap::NonPeriodic, canceller );
 }
 
 bool nurbsCurvesMightBeTimeVarying( pxr::UsdGeomNurbsCurves &curves )
@@ -185,10 +189,20 @@ bool writeCurves( const IECoreScene::CurvesPrimitive *curves, const pxr::UsdStag
 
 	usdCurves.CreateCurveVertexCountsAttr().Set( DataAlgo::toUSD( curves->verticesPerCurve() ), time );
 
-	usdCurves.CreateWrapAttr().Set(
-		curves->periodic() ? pxr::UsdGeomTokens->periodic : pxr::UsdGeomTokens->nonperiodic,
-		time
-	);
+	pxr::TfToken wrap;
+	switch( curves->wrap() )
+	{
+		case CurvesPrimitive::Wrap::NonPeriodic :
+			wrap = pxr::UsdGeomTokens->nonperiodic;
+			break;
+		case CurvesPrimitive::Wrap::Periodic :
+			wrap = pxr::UsdGeomTokens->periodic;
+			break;
+		case CurvesPrimitive::Wrap::Pinned :
+			wrap = pxr::UsdGeomTokens->pinned;
+			break;
+	}
+	usdCurves.CreateWrapAttr().Set( wrap, time );
 
 	pxr::TfToken basis;
 	if( curves->basis() == CubicBasisf::bezier() )
