@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_MESHPRIMITIVEBUILDERBINDING_H
-#define IECORESCENEMODULE_MESHPRIMITIVEBUILDERBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindMeshPrimitiveBuilder();
 }
 
-#endif // IECORESCENEMODULE_MESHPRIMITIVEBUILDERBINDING_H

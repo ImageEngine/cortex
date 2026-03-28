@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_BOUNDEDKDTREEBINDING_H
-#define IECOREPYTHON_BOUNDEDKDTREEBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindBoundedKDTree();
 }
 
-#endif // IECOREPYTHON_BOUNDEDKDTREEBINDING_H

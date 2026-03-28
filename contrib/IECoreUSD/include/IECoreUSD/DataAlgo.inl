@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_DATAALGO_INL
-#define IECOREUSD_DATAALGO_INL
+#pragma once
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/quatf.h"
@@ -156,5 +155,3 @@ typename CortexTypeTraits<T>::USDType toUSD( const T &value, typename std::enabl
 } // namespace DataAlgo
 
 } // namespace IECoreUSD
-
-#endif // IECOREUSD_DATAALGO_INL

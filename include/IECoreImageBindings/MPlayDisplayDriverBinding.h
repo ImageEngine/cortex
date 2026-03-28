@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_MPLAYDISPLAYDRIVERBINDING_H
-#define IECOREIMAGEBINDINGS_MPLAYDISPLAYDRIVERBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindMPlayDisplayDriver();
 
 }
 
-#endif // IECOREIMAGEBINDINGS_MPLAYDISPLAYDRIVERBINDING_H

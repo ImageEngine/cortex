@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_PRIMITIVEREADER_H
-#define IECOREALEMBIC_PRIMITIVEREADER_H
+#pragma once
 
 #include "IECoreAlembic/ObjectReader.h"
 
@@ -67,4 +66,3 @@ class PrimitiveReader : public ObjectReader
 
 #include "IECoreAlembic/PrimitiveReader.inl"
 
-#endif // IECOREALEMBIC_PRIMITIVEREADER_H

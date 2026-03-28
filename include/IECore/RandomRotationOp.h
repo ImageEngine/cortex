@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_RANDOMROTATIONOP_H
-#define IE_CORE_RANDOMROTATIONOP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/NumericParameter.h"
@@ -98,4 +97,3 @@ IE_CORE_DECLAREPTR( RandomRotationOp );
 
 #include "IECore/RandomRotationOp.inl"
 
-#endif // IE_CORE_RANDOMROTATIONOP_H

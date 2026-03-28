@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_COMPOUNDOBJECTTEST_H
-#define IECORE_COMPOUNDOBJECTTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addCompoundObjectTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_COMPOUNDOBJECTTEST_H
 

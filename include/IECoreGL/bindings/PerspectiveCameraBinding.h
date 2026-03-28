@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_PERSPECTIVECAMERABINDING_H
-#define IE_COREGL_PERSPECTIVECAMERABINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindPerspectiveCamera();
 
 }
 
-#endif // IE_COREGL_PERSPECTIVECAMERABINDING_H

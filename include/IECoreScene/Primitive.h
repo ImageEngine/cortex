@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVE_H
-#define IECORESCENE_PRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveVariable.h"
@@ -160,4 +159,3 @@ IE_CORE_DECLAREPTR( Primitive );
 
 #include "IECoreScene/Primitive.inl"
 
-#endif // IECORESCENE_PRIMITIVE_H

@@ -33,8 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef IE_CORE_LEVENBERGMARQUARDT_H
-#define IE_CORE_LEVENBERGMARQUARDT_H
+#pragma once
 
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
@@ -172,4 +171,3 @@ class LevenbergMarquardt : public boost::noncopyable
 
 #include "IECore/LevenbergMarquardt.inl"
 
-#endif // IE_CORE_LEVENBERGMARQUARDT_H

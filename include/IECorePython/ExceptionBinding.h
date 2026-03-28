@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_EXCEPTIONBINDING_H
-#define IECOREPYTHON_EXCEPTIONBINDING_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -66,6 +65,5 @@ IECOREPYTHON_API void bindException();
 
 }
 
-#endif // IECOREPYTHON_EXCEPTIONBINDING_H
 
 #include "IECorePython/ExceptionBinding.inl"

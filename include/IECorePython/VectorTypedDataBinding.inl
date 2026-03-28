@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_VECTORTYPEDDATABINDING_INL
-#define IECOREPYTHON_VECTORTYPEDDATABINDING_INL
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -797,5 +796,3 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 		}
 
 } // namespace IECorePython
-
-#endif // IECOREPYTHON_VECTORTYPEDDATABINDING_INL

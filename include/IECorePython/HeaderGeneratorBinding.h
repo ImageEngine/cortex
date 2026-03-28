@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_HEADERGENERATORBINGING_H
-#define IECOREPYTHON_HEADERGENERATORBINGING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindHeaderGenerator();
 }
 
-#endif // IECOREPYTHON_HEADERGENERATORBINGING_H

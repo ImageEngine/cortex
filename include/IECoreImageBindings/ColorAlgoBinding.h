@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_COLORALGOBINDING_H
-#define IECOREIMAGEBINDINGS_COLORALGOBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindColorAlgo();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_COLORALGOBINDING_H

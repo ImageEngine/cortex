@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_WRITER_INL
-#define IE_CORE_WRITER_INL
+#pragma once
 
 namespace IECore
 {
@@ -51,5 +50,3 @@ WriterPtr Writer::WriterDescription<T>::creator()
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_WRITER_INL

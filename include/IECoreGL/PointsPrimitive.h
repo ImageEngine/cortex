@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_POINTSPRIMITIVE_H
-#define IECOREGL_POINTSPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
@@ -105,4 +104,3 @@ IE_CORE_DECLAREPTR( PointsPrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_POINTSPRIMITIVE_H

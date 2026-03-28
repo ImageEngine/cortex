@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PATCHMESHPRIMITIVE_H
-#define IECORESCENE_PATCHMESHPRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -104,4 +103,3 @@ IE_CORE_DECLAREPTR( PatchMeshPrimitive );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PATCHMESHPRIMITIVE_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_COMPOUNDDATABASE_H
-#define IECORE_COMPOUNDDATABASE_H
+#pragma once
 
 #include "IECore/TypedData.h"
 
@@ -53,4 +52,3 @@ IECORE_DECLARE_TYPEDDATA( CompoundDataBase, CompoundDataMap, void, SimpleDataHol
 
 } // namespace IECore
 
-#endif // IECORE_COMPOUNDDATABASE_H

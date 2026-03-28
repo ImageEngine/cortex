@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_MATRIXMULTIPLYOPBINDING_H
-#define IECOREPYTHON_MATRIXMULTIPLYOPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindMatrixMultiplyOp();
 }
 
-#endif // IECOREPYTHON_MATRIXMULTIPLYOPBINDING_H

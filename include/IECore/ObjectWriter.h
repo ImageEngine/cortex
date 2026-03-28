@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OBJECTWRITER_H
-#define IE_CORE_OBJECTWRITER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Writer.h"
@@ -77,4 +76,3 @@ IE_CORE_DECLAREPTR( ObjectWriter );
 
 } // namespace IECore
 
-#endif // IE_CORE_OBJECTWRITER_H

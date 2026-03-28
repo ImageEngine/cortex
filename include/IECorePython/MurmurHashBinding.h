@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_MURMURHASHBINDING_H
-#define IECOREPYTHON_MURMURHASHBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindMurmurHash();
 
 }
 
-#endif // IECOREPYTHON_MURMURHASHBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SPECULAR_H
-#define IECOREGL_SPECULAR_H
+#pragma once
 
 #define M_PI 3.1415926535897932384626433832795
 
@@ -72,4 +71,3 @@ vec3 ieSpecular( vec3 P, vec3 N, vec3 V, float roughness, vec3 lightColors[gl_Ma
 	return result;
 }
 
-#endif // IECOREGL_SPECULAR_H

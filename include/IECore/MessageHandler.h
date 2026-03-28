@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESSAGEHANDLER_H
-#define IECORE_MESSAGEHANDLER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
@@ -162,4 +161,3 @@ inline void msg( MessageHandler::Level level, const std::string &context, fmt::f
 
 }; // namespace IECore
 
-#endif // IECORE_MESSAGEHANDLER_H

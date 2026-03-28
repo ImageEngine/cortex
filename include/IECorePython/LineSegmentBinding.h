@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_LINESEGMENTBINDING_H
-#define IECOREPYTHON_LINESEGMENTBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindLineSegment();
 }
 
-#endif // IECOREPYTHON_LINESEGMENTBINDING_H

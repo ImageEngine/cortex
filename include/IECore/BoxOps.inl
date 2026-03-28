@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BOXOPS_INL
-#define IE_CORE_BOXOPS_INL
+#pragma once
 
 #include "IECore/VectorOps.h"
 
@@ -370,7 +369,4 @@ int boxMajorAxis( const T &box )
 
 
 } // namespace IECore
-
-
-#endif // IE_CORE_BOXOPS_INL
 

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_SIMPLETYPEDDATA_H
-#define IECORE_SIMPLETYPEDDATA_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/GeometricTypedData.h"
@@ -138,4 +137,3 @@ extern template class TypedData<LineSegment3d>;
 
 } // namespace IECore
 
-#endif // IECORE_SIMPLETYPEDDATA_H

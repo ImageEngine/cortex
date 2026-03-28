@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DIFFUSE_H
-#define IECOREGL_DIFFUSE_H
+#pragma once
 
 #define M_PI 3.1415926535897932384626433832795
 
@@ -48,4 +47,3 @@ vec3 ieDiffuse( vec3 P, vec3 N, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int
 	return result;
 }
 
-#endif // IECOREGL_DIFFUSE_H

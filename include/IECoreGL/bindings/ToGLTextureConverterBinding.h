@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_TOGLTEXTURECONVERTERBINDING_H
-#define IE_COREGL_TOGLTEXTURECONVERTERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindToGLTextureConverter();
 
 }
 
-#endif // IE_COREGL_TOGLTEXTURECONVERTERBINDING_H

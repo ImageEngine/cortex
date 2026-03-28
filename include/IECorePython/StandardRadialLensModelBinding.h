@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_STANDARDRADIALLENSMODEL_BINDING
-#define IECOREPYTHON_STANDARDRADIALLENSMODEL_BINDING
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -41,6 +40,4 @@ namespace IECorePython
 {
 IECOREPYTHON_API void bindStandardRadialLensModel();
 }
-
-#endif // IECOREPYTHON_STANDARDRADIALLENSMODEL_BINDING
 

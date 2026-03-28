@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_VECTORTYPEDDATA_H
-#define IECORE_VECTORTYPEDDATA_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/GeometricTypedData.h"
@@ -135,4 +134,3 @@ extern template class TypedData<std::vector<Imath::Color4f>>;
 
 } // namespace IECore
 
-#endif // IECORE_VECTORTYPEDDATA_H

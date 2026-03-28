@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_IMATHRANDADAPTER_H
-#define IE_CORE_IMATHRANDADAPTER_H
+#pragma once
 
 #include "Imath/ImathRandom.h"
 
@@ -65,4 +64,3 @@ typedef ImathRandAdapter<Imath::Rand48> ImathRand48Adapter;
 } // namespace IECore
 
 
-#endif // IE_CORE_IMATHRANDADAPTER_H

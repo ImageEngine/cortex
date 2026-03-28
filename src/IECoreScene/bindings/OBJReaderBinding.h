@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_OBJREADERBINDING_H
-#define IECORESCENEMODULE_OBJREADERBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindOBJReader();
 }
 
-#endif // IECORESCENEMODULE_OBJREADERBINDING_H

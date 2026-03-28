@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_POINTSPRIMITIVEBINDING_H
-#define IECORESCENEMODULE_POINTSPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindPointsPrimitive();
 }
 
-#endif // IECORESCENEMODULE_POINTSPRIMITIVEBINDING_H

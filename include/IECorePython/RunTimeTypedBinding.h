@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_RUNTIMETYPEDBINDING_H
-#define IECOREPYTHON_RUNTIMETYPEDBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 #include "IECorePython/RefCountedBinding.h"
@@ -86,4 +85,3 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, TWrap
 
 #include "IECorePython/RunTimeTypedBinding.inl"
 
-#endif // IECOREPYTHON_RUNTIMETYPEDBINDING_H

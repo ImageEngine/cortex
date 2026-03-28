@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDOBJECT_INL
-#define IE_CORE_COMPOUNDOBJECT_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -157,5 +156,3 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions, boo
 }
 
 }; // namespace IECore
-
-#endif // IE_CORE_COMPOUNDOBJECT_INL

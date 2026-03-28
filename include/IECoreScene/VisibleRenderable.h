@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_VISIBLERENDERABLE_H
-#define IECORESCENE_VISIBLERENDERABLE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderable.h"
@@ -74,4 +73,3 @@ IE_CORE_DECLAREPTR( VisibleRenderable );
 
 }
 
-#endif // IECORESCENE_VISIBLERENDERABLE_H

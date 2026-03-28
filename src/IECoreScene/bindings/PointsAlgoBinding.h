@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_POINTSALGOBINDING_H
-#define IECORESCENEMODULE_POINTSALGOBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindPointsAlgo();
 }
 
-#endif // IECORESCENEMODULE_POINTSALGOBINDING_H

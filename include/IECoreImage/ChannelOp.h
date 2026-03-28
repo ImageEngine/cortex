@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_CHANNELOP_H
-#define IECOREIMAGE_CHANNELOP_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -90,5 +89,4 @@ IE_CORE_DECLAREPTR( ChannelOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_CHANNELOP_H
 

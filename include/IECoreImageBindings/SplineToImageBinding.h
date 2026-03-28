@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_SPLINETOIMAGEBINDING_H
-#define IECOREIMAGEBINDINGS_SPLINETOIMAGEBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindSplineToImage();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_SPLINETOIMAGEBINDING_H

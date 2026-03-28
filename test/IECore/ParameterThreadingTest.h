@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_PARAMETERTHREADINGTEST_H
-#define IECORE_PARAMETERTHREADINGTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addParameterThreadingTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_PARAMETERTHREADINGTEST_H
 

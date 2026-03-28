@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL
-#define IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL
+#pragma once
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
@@ -50,5 +49,3 @@ void bindTypedStateComponent( const char *className )
 }
 
 }
-
-#endif // IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL

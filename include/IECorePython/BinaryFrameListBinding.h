@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_BINARYFRAMELISTBINDING_H
-#define IECOREPYTHON_BINARYFRAMELISTBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindBinaryFrameList();
 }
 
-#endif // IECOREPYTHON_BINARYFRAMELISTBINDING_H

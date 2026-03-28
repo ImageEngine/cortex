@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREVDB_VDBOBJECT_H
-#define IECOREVDB_VDBOBJECT_H
+#pragma once
 
 #include "IECoreVDB/Export.h"
 #include "IECoreVDB/TypeIds.h"
@@ -154,4 +153,3 @@ IE_CORE_DECLAREPTR( VDBObject )
 
 } // namespace IECoreVDB
 
-#endif // IECOREVDB_VDBOBJECT_H

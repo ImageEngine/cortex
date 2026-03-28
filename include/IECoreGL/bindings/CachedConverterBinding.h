@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CACHEDCONVERTERBINDING_H
-#define IECOREGL_CACHEDCONVERTERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindCachedConverter();
 
 }
 
-#endif // IECOREGL_CACHEDCONVERTERBINDING_H

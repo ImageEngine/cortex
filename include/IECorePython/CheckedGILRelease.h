@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_CHECKEDGILRELEASE_H
-#define IECOREPYTHON_CHECKEDGILRELEASE_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -63,4 +62,3 @@ class IECOREPYTHON_API CheckedGILRelease : boost::noncopyable
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_CHECKEDGILRELEASE_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CANCELLER_H
-#define IECORE_CANCELLER_H
+#pragma once
 
 #include "IECore/RefCounted.h"
 
@@ -137,4 +136,3 @@ IE_CORE_DECLAREPTR( Canceller )
 
 #include "IECore/Canceller.inl"
 
-#endif // IECORE_CANCELLER_H

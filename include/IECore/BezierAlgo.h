@@ -36,8 +36,7 @@
 /// Defines algorithms for bezier curves.
 /// \ingroup mathGroup
 
-#ifndef IECORE_BEZIERALGO_H
-#define IECORE_BEZIERALGO_H
+#pragma once
 
 namespace IECore
 {
@@ -56,4 +55,3 @@ void bezierSubdivide( const Vec &v0, const Vec &v1, const Vec &v2, typename Vec:
 
 #include "IECore/BezierAlgo.inl"
 
-#endif // IECORE_BEZIERALGO_H

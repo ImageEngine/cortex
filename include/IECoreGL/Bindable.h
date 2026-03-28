@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_BINDABLE_H
-#define IECOREGL_BINDABLE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
@@ -67,4 +66,3 @@ IE_CORE_DECLAREPTR( Bindable );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_BINDABLE_H

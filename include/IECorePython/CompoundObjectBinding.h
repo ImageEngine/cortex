@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_COMPOUNDOBJECTBINDING_H
-#define IECOREPYTHON_COMPOUNDOBJECTBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindCompoundObject();
 }
 
-#endif // IECOREPYTHON_COMPOUNDOBJECTBINDING_H

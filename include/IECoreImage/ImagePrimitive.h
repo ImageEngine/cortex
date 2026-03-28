@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_IMAGEPRIMITIVE_H
-#define IECOREIMAGE_IMAGEPRIMITIVE_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -209,4 +208,3 @@ IE_CORE_DECLAREPTR(ImagePrimitive);
 
 #include "IECoreImage/ImagePrimitive.inl"
 
-#endif // IECOREIMAGE_IMAGEPRIMITIVE_H

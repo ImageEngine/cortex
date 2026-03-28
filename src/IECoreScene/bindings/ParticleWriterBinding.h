@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_PARTICLEWRITERBINDING_H
-#define IECORESCENEMODULE_PARTICLEWRITERBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindParticleWriter();
 }
 
-#endif // IECORESCENEMODULE_PARTICLEWRITERBINDING_H

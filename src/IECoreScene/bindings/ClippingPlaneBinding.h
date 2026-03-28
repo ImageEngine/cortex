@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CLIPPINGPLANEBINDING_H
-#define IECORESCENEMODULE_CLIPPINGPLANEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindClippingPlane();
 
 }
 
-#endif // IECORESCENEMODULE_CLIPPINGPLANEBINDING_H

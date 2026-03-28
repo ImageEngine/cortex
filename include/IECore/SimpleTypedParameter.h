@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SIMPLETYPEDPARAMETER_H
-#define IE_CORE_SIMPLETYPEDPARAMETER_H
+#pragma once
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrix.h"
@@ -92,4 +91,3 @@ IE_CORE_DECLAREPTR( LineSegment3dParameter );
 
 }
 
-#endif // IE_CORE_SIMPLETYPEDPARAMETER_H

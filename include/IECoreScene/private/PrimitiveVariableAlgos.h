@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVEVARIABLEALGOS_H
-#define IECORESCENE_PRIMITIVEVARIABLEALGOS_H
+#pragma once
 
 #include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/CurvesPrimitive.h"
@@ -422,6 +421,3 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 } // PrimitiveVariableAlgos
 
 } // IECoreScene
-
-
-#endif  // IECORESCENE_PRIMITIVEVARIABLEALGOS_H

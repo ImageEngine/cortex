@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_TYPEDOBJECTPARAMETERBINDING_H
-#define IECORESCENEMODULE_TYPEDOBJECTPARAMETERBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindTypedObjectParameter();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_TYPEDOBJECTPARAMETERBINDING_H

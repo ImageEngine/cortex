@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CACHEDCONVERTER_H
-#define IECOREGL_CACHEDCONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 
@@ -93,4 +92,3 @@ class IECOREGL_API CachedConverter : public IECore::RefCounted
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_CACHEDCONVERTER_H

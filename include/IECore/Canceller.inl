@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CANCELLER_INL
-#define IECORE_CANCELLER_INL
+#pragma once
 
 namespace IECore
 {
@@ -126,5 +125,3 @@ inline Canceller::ScopedChild::~ScopedChild()
 }
 
 }; // namespace IECore
-
-#endif // IECORE_CANCELLER_INL

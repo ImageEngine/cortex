@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_CUBICBASISBINDING_H
-#define IECOREPYTHON_CUBICBASISBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindCubicBasis();
 
 }
 
-#endif // IECOREPYTHON_CUBICBASISBINDING_H

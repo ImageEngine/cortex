@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_EXCEPTIONALGO_H
-#define IECOREPYTHON_EXCEPTIONALGO_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -61,4 +60,3 @@ IECOREPYTHON_API std::string formatPythonException( bool withStacktrace = true, 
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_EXCEPTIONALGO_H

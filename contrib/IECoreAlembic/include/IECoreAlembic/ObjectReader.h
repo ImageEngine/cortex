@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_OBJECTREADER_H
-#define IECOREALEMBIC_OBJECTREADER_H
+#pragma once
 
 #include "IECoreAlembic/Export.h"
 
@@ -107,5 +106,3 @@ class ObjectReader : private boost::noncopyable
 };
 
 } // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_OBJECTREADER_H

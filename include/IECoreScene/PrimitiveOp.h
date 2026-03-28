@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVEOP_H
-#define IECORESCENE_PRIMITIVEOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
@@ -69,4 +68,3 @@ IE_CORE_DECLAREPTR( PrimitiveOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PRIMITIVEOP_H

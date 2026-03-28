@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_CHANNELOPBINDING_H
-#define IECOREIMAGEBINDINGS_CHANNELOPBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindChannelOp();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_CHANNELOPBINDING_H

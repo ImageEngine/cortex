@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_IMAGECROPOP_H
-#define IECOREIMAGE_IMAGECROPOP_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -87,4 +86,3 @@ IE_CORE_DECLAREPTR( ImageCropOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_IMAGECROPOP_H

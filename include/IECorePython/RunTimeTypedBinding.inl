@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_RUNTIMETYPEDBINDING_INL
-#define IECOREPYTHON_RUNTIMETYPEDBINDING_INL
+#pragma once
 
 #include "IECorePython/ExceptionAlgo.h"
 #include "IECorePython/Export.h"
@@ -182,7 +181,7 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( const char *typeName ) const
 				return boost::python::extract<bool>( res );
 			}
 		}
-		
+
 		catch( const boost::python::error_already_set & )
 		{
 			ExceptionAlgo::translatePythonException();
@@ -228,5 +227,3 @@ RunTimeTypedClass<T, TWrapper>::RunTimeTypedClass( const char *docString )
 }
 
 } // namespace IECorePython
-
-#endif // IECOREPYTHON_RUNTIMETYPEDBINDING_INL

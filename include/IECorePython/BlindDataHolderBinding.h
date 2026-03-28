@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_BLINDDATAHOLDERBINDING_H
-#define IECOREPYTHON_BLINDDATAHOLDERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindBlindDataHolder();
 }
 
-#endif // IECOREPYTHON_BLINDDATAHOLDERBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_MEDIANCUTSAMPLERBINDING_H
-#define IECOREIMAGEBINDINGS_MEDIANCUTSAMPLERBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindMedianCutSampler();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_MEDIANCUTSAMPLERBINDING_H

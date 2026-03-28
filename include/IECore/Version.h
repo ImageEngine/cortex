@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_VERSION_H
-#define IECORE_VERSION_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -75,4 +74,3 @@ IECORE_API const std::string &versionString();
 
 } // namespace IECore
 
-#endif // IECORE_VERSION_H

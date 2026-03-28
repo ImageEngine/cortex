@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_COMPOUNDDATABINDING_H
-#define IECOREPYTHON_COMPOUNDDATABINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindCompoundData();
 }
 
-#endif // IECOREPYTHON_COMPOUNDDATABINDING_H

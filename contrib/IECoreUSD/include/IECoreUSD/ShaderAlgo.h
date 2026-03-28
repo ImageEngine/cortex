@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_SHADERALGO_H
-#define IECOREUSD_SHADERALGO_H
+#pragma once
 
 #include "IECoreUSD/Export.h"
 
@@ -72,4 +71,3 @@ IECOREUSD_API bool lightMightBeTimeVarying( const pxr::UsdLuxLightAPI &light );
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_SHADERALGO_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_VECTORTRAITS_H
-#define IE_CORE_VECTORTRAITS_H
+#pragma once
 
 namespace IECore
 {
@@ -86,4 +85,3 @@ struct VectorTraits<double>
 
 } // namespace IECore
 
-#endif // IE_CORE_VECTORTRAITS_H

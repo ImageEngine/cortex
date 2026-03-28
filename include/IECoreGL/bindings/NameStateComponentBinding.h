@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_NAMESTATECOMPONENTBINDING_H
-#define IECOREGL_NAMESTATECOMPONENTBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindNameStateComponent();
 
 }
 
-#endif // IECOREGL_NAMESTATECOMPONENTBINDING_H

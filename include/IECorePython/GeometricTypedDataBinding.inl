@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_GEOMETRICTYPEDDATABINDING_INL
-#define IECOREPYTHON_GEOMETRICTYPEDDATABINDING_INL
+#pragma once
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -266,5 +265,3 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 		} \
 
 } // namespace IECorePython;
-
-#endif // IECOREPYTHON_GEOMETRICTYPEDDATABINDING_INL

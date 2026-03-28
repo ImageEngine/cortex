@@ -35,8 +35,7 @@
 //! \file HexConversion.h
 /// Defines template conversions between hex and decimal
 
-#ifndef IE_CORE_HEXCONVERSION_H
-#define IE_CORE_HEXCONVERSION_H
+#pragma once
 
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_same.hpp"
@@ -192,4 +191,3 @@ inline void hexToDec( InputIterator first, InputIterator last, OutputIterator re
 
 } // namespace IECore
 
-#endif // IE_CORE_HEXCONVERSION_H

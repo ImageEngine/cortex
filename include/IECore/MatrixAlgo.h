@@ -36,8 +36,7 @@
 /// Defines useful operations on Imath::Matrix types.
 /// \ingroup mathGroup
 
-#ifndef IE_CORE_MATRIXALGO_H
-#define IE_CORE_MATRIXALGO_H
+#pragma once
 
 #include "IECore/Convert.h"
 #include "IECore/Export.h"
@@ -69,4 +68,3 @@ template<> IECORE_API Imath::M44f convert( const Imath::M44d &in );
 
 #include "IECore/MatrixAlgo.inl"
 
-#endif // IE_CORE_MATRIXALGO_H

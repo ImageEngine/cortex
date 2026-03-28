@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MEMORYSTREAM_H
-#define IE_CORE_MEMORYSTREAM_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
@@ -121,4 +120,3 @@ struct MemoryStreamSink : private MemoryStream
 
 } // namespace IECore
 
-#endif // IE_CORE_MEMORYSTREAM_H

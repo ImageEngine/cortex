@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MEANSQUAREDERROR_H
-#define IE_CORE_MEANSQUAREDERROR_H
+#pragma once
 
 namespace IECore
 {
@@ -54,4 +53,3 @@ struct MeanSquaredError
 
 #include "MeanSquaredError.inl"
 
-#endif // IE_CORE_MEANSQUAREDERROR_H

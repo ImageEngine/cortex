@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_COMPOUNDDATATEST_H
-#define IECORE_COMPOUNDDATATEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addCompoundDataTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_COMPOUNDDATATEST_H
 

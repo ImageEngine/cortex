@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_FILTERALGO_H
-#define IECOREGL_FILTERALGO_H
+#pragma once
 
 float ieFilteredStep( float edge, float x, float w )
 {
@@ -57,4 +56,3 @@ float ieFilteredPulse( float edge0, float edge1, float x )
 	return ieFilteredPulse( edge0, edge1, x, max( 1.0e-6, fwidth( x ) ) );
 }
 
-#endif // IECOREGL_FILTERALGO_H

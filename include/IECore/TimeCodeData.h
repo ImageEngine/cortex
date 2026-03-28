@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_TIMECODEDATA_H
-#define IECORE_TIMECODEDATA_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/TypedData.h"
@@ -50,4 +49,3 @@ IECORE_DECLARE_TYPEDDATA( TimeCodeData, Imf::TimeCode, unsigned int, SimpleDataH
 
 } // namespace IECore
 
-#endif // IECORE_TIMECODEDATA_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_SIMPLETYPEDDATABINDING_H
-#define IECOREPYTHON_SIMPLETYPEDDATABINDING_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -60,5 +59,4 @@ IECOREPYTHON_API extern void bindAllSimpleTypedData();
 
 #include "IECorePython/SimpleTypedDataBinding.inl"
 
-#endif // IECOREPYTHON_SIMPLETYPEDDATABINDING_H
 

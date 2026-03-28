@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_RUNTIMETYPED_INL
-#define IE_CORE_RUNTIMETYPED_INL
+#pragma once
 
 #include <cassert>
 
@@ -89,5 +88,3 @@ RunTimeTyped::TypeDescription<T>::TypeDescription()
 };
 
 } // namespace IECore
-
-#endif // IE_CORE_RUNTIMETYPED_INL

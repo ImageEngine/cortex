@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CURVETANGENTSOPBINDING_H
-#define IECORESCENEMODULE_CURVETANGENTSOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindCurveTangentsOp();
 }
 
-#endif // IECORESCENEMODULE_CURVETANGENTSOPBINDING_H

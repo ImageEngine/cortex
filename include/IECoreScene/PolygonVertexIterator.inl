@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_POLYGONVERTEXITERATOR_INL
-#define IECORESCENE_POLYGONVERTEXITERATOR_INL
+#pragma once
 
 namespace IECoreScene
 {
@@ -89,5 +88,3 @@ bool PolygonVertexIterator<VertexValueIterator, VertexIndexIterator>::operator!=
 }
 
 } // namespace IECoreScene
-
-#endif // IECORESCENE_POLYGONVERTEXITERATOR_INL

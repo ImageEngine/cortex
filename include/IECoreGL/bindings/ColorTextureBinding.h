@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_COLORTEXTUREBINDING_H
-#define IE_COREGL_COLORTEXTUREBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindColorTexture();
 
 }
 
-#endif // IE_COREGL_COLORTEXTUREBINDING_H

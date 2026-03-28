@@ -36,8 +36,7 @@
 /// Defines algorithms for operating on polygons.
 /// \ingroup mathGroup
 
-#ifndef IECORE_POLYGONALGO_H
-#define IECORE_POLYGONALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -91,4 +90,3 @@ typename std::iterator_traits<Iterator>::value_type::BaseType polygonArea( Itera
 
 #include "IECore/PolygonAlgo.inl"
 
-#endif // IECORE_POLYGONALGO_H

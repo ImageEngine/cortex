@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_BOXPRIMITIVE_H
-#define IECOREGL_BOXPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
@@ -76,4 +75,3 @@ IE_CORE_DECLAREPTR( BoxPrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_BOXPRIMITIVE_H

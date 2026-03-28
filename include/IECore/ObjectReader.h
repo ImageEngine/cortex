@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OBJECTREADER_H
-#define IE_CORE_OBJECTREADER_H
+#pragma once
 
 #include "IECore/CompoundData.h"
 #include "IECore/Export.h"
@@ -80,4 +79,3 @@ IE_CORE_DECLAREPTR( ObjectReader );
 
 } // namespace IECore
 
-#endif // IE_CORE_OBJECTREADER_H

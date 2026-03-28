@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_MESHNORMALSOPBINDING_H
-#define IECORESCENEMODULE_MESHNORMALSOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindMeshNormalsOp();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_MESHNORMALSOPBINDING_H

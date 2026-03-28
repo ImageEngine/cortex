@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CAMELCASE_INL
-#define IECORE_CAMELCASE_INL
+#pragma once
 
 #include "IECore/StringAlgo.h"
 
@@ -157,5 +156,3 @@ std::string CamelCase::join( Iterator begin, Iterator end, Caps caps, const std:
 }
 
 } // namespace IECore
-
-#endif // IECORE_CAMELCASE_INL

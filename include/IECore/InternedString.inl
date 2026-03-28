@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_INTERNEDSTRING_INL
-#define IECORE_INTERNEDSTRING_INL
+#pragma once
 
 #include <fmt/ostream.h>
 
@@ -145,5 +144,3 @@ namespace fmt
 template <> struct formatter<IECore::InternedString> : ostream_formatter { };
 
 } // namespace fmt
-
-#endif // IECORE_INTERNEDSTRING_INL

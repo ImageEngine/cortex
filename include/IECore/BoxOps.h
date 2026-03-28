@@ -41,8 +41,7 @@
 /// give less intuitive syntax but are compatible with any classes for which
 /// a valid BoxTraits specialisation exists.
 
-#ifndef IE_CORE_BOXOPS_H
-#define IE_CORE_BOXOPS_H
+#pragma once
 
 #include "IECore/BoxTraits.h"
 #include "IECore/VectorTraits.h"
@@ -108,4 +107,3 @@ int boxMajorAxis( const T &box );
 
 #include "IECore/BoxOps.inl"
 
-#endif // IE_CORE_BOXOPS_H

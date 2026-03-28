@@ -40,6 +40,8 @@
 /// and the relevant template classes are explicitly instantiated there. This cuts down compilation
 /// times.
 
+#pragma once
+
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
 #include "IECore/TypedObjectParameter.h"

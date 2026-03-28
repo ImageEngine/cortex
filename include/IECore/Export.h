@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_EXPORT_H
-#define IE_CORE_EXPORT_H
+#pragma once
 
 // Define platform-specific macros for importing/exporting symbols
 #ifdef _MSC_VER
@@ -70,5 +69,3 @@
 #else
 	#define IECORE_API IECORE_IMPORT
 #endif
-
-#endif // #ifndef IE_CORE_EXPORT_H

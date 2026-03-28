@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_DATAINTERLEAVEOPBINDING_H
-#define IECOREPYTHON_DATAINTERLEAVEOPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindDataInterleaveOp();
 }
 
-#endif // IECOREPYTHON_DATAINTERLEAVEOPBINDING_H

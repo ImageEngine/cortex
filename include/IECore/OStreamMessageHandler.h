@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OSTREAMMESSAGEHANDLER_H
-#define IE_CORE_OSTREAMMESSAGEHANDLER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
@@ -94,4 +93,3 @@ class IECORE_API OStreamMessageHandler : public MessageHandler
 
 }; // namespace IECore
 
-#endif // IE_CORE_OSTREAMMESSAGEHANDLER_H

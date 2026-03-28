@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_VERTEXSHADER_H
-#define IECOREGL_VERTEXSHADER_H
+#pragma once
 
 #if __VERSION__ <= 120
 #define IECOREGL_VERTEXSHADER_IN attribute
@@ -43,4 +42,3 @@
 #define IECOREGL_VERTEXSHADER_OUT out
 #endif
 
-#endif // IECOREGL_VERTEXSHADER_H

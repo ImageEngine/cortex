@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_PRIMITIVEREADER_INL
-#define IECOREALEMBIC_PRIMITIVEREADER_INL
+#pragma once
 
 #include "IECoreAlembic/IGeomParamTraits.h"
 
@@ -161,5 +160,3 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 }
 
 } // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_PRIMITIVEREADER_INL

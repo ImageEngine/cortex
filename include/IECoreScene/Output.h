@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_OUTPUT_H
-#define IECORESCENE_OUTPUT_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderable.h"
@@ -84,4 +83,3 @@ IE_CORE_DECLAREPTR( Output );
 
 }
 
-#endif // IECORESCENE_OUTPUT_H

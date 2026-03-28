@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_UINTTEXTURE_H
-#define IECOREGL_UINTTEXTURE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
@@ -60,4 +59,3 @@ IE_CORE_DECLAREPTR( UIntTexture );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_UINTTEXTURE_H

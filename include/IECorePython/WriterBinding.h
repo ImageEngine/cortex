@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_WRITERBINDING_H
-#define IECOREPYTHON_WRITERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindWriter();
 }
 
-#endif // IECOREPYTHON_WRITERBINDING_H

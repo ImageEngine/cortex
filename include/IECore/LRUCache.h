@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LRUCACHE_H
-#define IECORE_LRUCACHE_H
+#pragma once
 
 #include "boost/function.hpp"
 #include "boost/noncopyable.hpp"
@@ -205,4 +204,3 @@ class LRUCache : private boost::noncopyable
 
 #include "IECore/LRUCache.inl"
 
-#endif // IECORE_LRUCACHE_H

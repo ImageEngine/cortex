@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SCALEDDATACONVERSION_H
-#define IE_CORE_SCALEDDATACONVERSION_H
+#pragma once
 
 #include "IECore/DataConversion.h"
 
@@ -62,4 +61,3 @@ struct ScaledDataConversion : public DataConversion< F, T >
 
 #include "ScaledDataConversion.inl"
 
-#endif // IE_CORE_SCALEDDATACONVERSION_H

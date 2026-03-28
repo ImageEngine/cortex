@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BOXTRAITS_H
-#define IE_CORE_BOXTRAITS_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
@@ -172,4 +171,3 @@ struct BoxTypeTraits<Imath::Box2d>
 
 } // namespace IECore
 
-#endif // IE_CORE_BOXTRAITS_H

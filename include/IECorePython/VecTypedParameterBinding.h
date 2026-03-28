@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_VECTYPEDPARAMETERBINDING_H
-#define IECOREPYTHON_VECTYPEDPARAMETERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindVecTypedParameter();
 }
 
-#endif // IECOREPYTHON_VECTYPEDPARAMETERBINDING_H

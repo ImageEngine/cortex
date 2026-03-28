@@ -36,8 +36,7 @@
 /// Defines useful mathematical operations that don't seem to belong
 /// elsewhere.
 
-#ifndef IECORE_MATH_H
-#define IECORE_MATH_H
+#pragma once
 
 #include <cmath>
 
@@ -62,4 +61,3 @@ T smoothstep( T v0, T v1, T x );
 
 #include "IECore/Math.inl"
 
-#endif // IECORE_MATH_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDDATATEST_H
-#define IE_CORE_TYPEDDATATEST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/SimpleTypedData.h"
@@ -163,4 +162,3 @@ struct TypedDataTestSuite : public boost::unit_test::test_suite
 
 #include "TypedDataTest.inl"
 
-#endif // IE_CORE_TYPEDDATATEST_H

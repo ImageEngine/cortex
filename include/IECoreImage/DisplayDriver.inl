@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_DISPLAYDRIVER_INL
-#define IECOREIMAGE_DISPLAYDRIVER_INL
+#pragma once
 
 namespace IECoreImage
 {
@@ -52,5 +51,3 @@ DisplayDriverPtr DisplayDriver::DisplayDriverDescription<T>::creator( const Imat
 
 }  // namespace IECoreImage
 
-
-#endif // IECOREIMAGE_DISPLAYDRIVER_INL

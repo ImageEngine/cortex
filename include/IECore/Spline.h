@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_SPLINE_H
-#define IECORE_SPLINE_H
+#pragma once
 
 #include "IECore/CubicBasis.h"
 #include "IECore/Export.h"
@@ -123,4 +122,3 @@ inline void murmurHashAppend( IECore::MurmurHash &h, const Spline<X,Y> &data );
 
 #include "IECore/Spline.inl"
 
-#endif // IECORE_SPLINE_H

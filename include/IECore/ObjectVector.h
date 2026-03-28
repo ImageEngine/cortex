@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_OBJECTVECTOR_H
-#define IECORE_OBJECTVECTOR_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Object.h"
@@ -68,4 +67,3 @@ IE_CORE_DECLAREPTR( ObjectVector )
 
 }
 
-#endif // IECORE_OBJECTVECTOR_H

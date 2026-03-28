@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DESPATCHTYPEDDATATEST_H
-#define IE_CORE_DESPATCHTYPEDDATATEST_H
+#pragma once
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/Export.h"
@@ -114,5 +113,4 @@ struct DespatchTypedDataTestSuite : public boost::unit_test::test_suite
 
 }
 
-#endif // IE_CORE_DESPATCHTYPEDDATATEST_H
 

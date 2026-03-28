@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_GEOMETRICTYPEDDATA_INL
-#define IECORE_GEOMETRICTYPEDDATA_INL
+#pragma once
 
 namespace IECore
 {
@@ -156,5 +155,3 @@ void GeometricTypedData<T>::memoryUsage( Object::MemoryAccumulator &accumulator 
 }
 
 } // namespace IECore
-
-#endif // IECORE_GEOMETRICTYPEDDATA_INL

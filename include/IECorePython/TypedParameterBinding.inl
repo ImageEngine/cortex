@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TYPEDPARAMETERBINDING_INL
-#define IECOREPYTHON_TYPEDPARAMETERBINDING_INL
+#pragma once
 
 #include "IECorePython/ParameterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -101,5 +100,3 @@ void bindTypedParameter()
 }
 
 }
-
-#endif // IECOREPYTHON_TYPEDPARAMETERBINDING_INL

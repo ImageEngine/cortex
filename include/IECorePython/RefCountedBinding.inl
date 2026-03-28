@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREBINDINGS_REFCOUNTEDBINDING_INL
-#define IECOREBINDINGS_REFCOUNTEDBINDING_INL
+#pragma once
 
 #include "IECorePython/ScopedGILRelease.h"
 #include "IECorePython/WrapperGarbageCollector.h"
@@ -225,5 +224,3 @@ RefCountedClass<T, Base, TWrapper>::RefCountedClass( const char *className, cons
 }
 
 } // namespace IECorePython
-
-#endif // IECOREBINDINGS_REFCOUNTEDBINDING_INL

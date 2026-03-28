@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_STREAMINDEXEDIO_H
-#define IE_CORE_STREAMINDEXEDIO_H
+#pragma once
 
 #include "IECore/Exception.h"
 #include "IECore/Export.h"
@@ -287,4 +286,3 @@ IE_CORE_DECLAREPTR( StreamIndexedIO )
 
 }
 
-#endif // IE_CORE_STREAMINDEXEDIO_H

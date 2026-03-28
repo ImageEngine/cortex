@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_TYPEDDATAINTERNALS_H
-#define IECORE_TYPEDDATAINTERNALS_H
+#pragma once
 
 #include "IECore/MurmurHash.h"
 
@@ -200,4 +199,3 @@ class IECORE_EXPORT TypedDataTraits
 
 } // namespace IECore
 
-#endif // IECORE_TYPEDDATAINTERNALS_H

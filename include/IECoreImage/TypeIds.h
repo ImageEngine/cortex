@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_TYPEIDS_H
-#define IECOREIMAGE_TYPEIDS_H
+#pragma once
 
 namespace IECoreImage
 {
@@ -70,4 +69,3 @@ enum TypeId
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_TYPEIDS_H

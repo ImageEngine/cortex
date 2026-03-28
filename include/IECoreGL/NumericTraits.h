@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_NUMERICTRAITS_H
-#define IECOREGL_NUMERICTRAITS_H
+#pragma once
 
 #include "IECoreGL/GL.h"
 
@@ -88,4 +87,3 @@ IECOREGL_API GLenum glType( const IECore::Data *data );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_NUMERICTRAITS_H

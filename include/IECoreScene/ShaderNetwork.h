@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SHADERNETWORK_H
-#define IECORESCENE_SHADERNETWORK_H
+#pragma once
 
 #include "IECoreScene/Shader.h"
 #include "IECoreScene/TypeIds.h"
@@ -235,4 +234,3 @@ IE_CORE_DECLAREPTR( ShaderNetwork )
 
 #include "IECoreScene/ShaderNetwork.inl"
 
-#endif // IECORESCENE_SHADERNETWORK_H

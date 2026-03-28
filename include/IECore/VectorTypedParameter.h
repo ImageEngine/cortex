@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_VECTORTYPEDPARAMETER_H
-#define IE_CORE_VECTORTYPEDPARAMETER_H
+#pragma once
 
 #include "IECore/TypedParameter.h"
 #include "IECore/VectorTypedData.h"
@@ -89,4 +88,3 @@ IE_CORE_DECLAREPTR( Color4fVectorParameter );
 
 }
 
-#endif // IE_CORE_VECTORTYPEDPARAMETER_H

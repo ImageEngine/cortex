@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_IMAGECROPOPBINDING_H
-#define IECOREIMAGEBINDINGS_IMAGECROPOPBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindImageCropOp();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_IMAGECROPOPBINDING_H

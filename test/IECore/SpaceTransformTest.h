@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SPACETRANSFORMTEST_H
-#define IE_CORE_SPACETRANSFORMTEST_H
+#pragma once
 
 #include "IECore/EuclideanToSphericalTransform.h"
 #include "IECore/Export.h"
@@ -130,5 +129,4 @@ struct SpaceTransformTestSuite : public boost::unit_test::test_suite
 
 }
 
-#endif // IE_CORE_SPACETRANSFORMTEST_H
 

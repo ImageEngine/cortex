@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCONVERTER_INL
-#define IECOREGL_TOGLCONVERTER_INL
+#pragma once
 
 namespace IECoreGL
 {
@@ -63,5 +62,3 @@ ToGLConverterPtr ToGLConverter::ConverterDescription<T>::creator( IECore::ConstO
 }
 
 } // namespace IECoreGL
-
-#endif // IECOREGL_TOGLCONVERTER_INL

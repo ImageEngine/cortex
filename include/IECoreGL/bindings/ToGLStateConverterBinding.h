@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLSTATECONVERTERBINDING_H
-#define IECOREGL_TOGLSTATECONVERTERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindToGLStateConverter();
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLSTATECONVERTERBINDING_H

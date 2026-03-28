@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_PRIMITIVEBINDING_H
-#define IECORESCENEMODULE_PRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindPrimitive();
 }
 
-#endif // IECORESCENEMODULE_PRIMITIVEBINDING_H

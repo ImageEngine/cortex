@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_SEARCHPATHBINDING_H
-#define IECOREPYTHON_SEARCHPATHBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindSearchPath();
 }
 
-#endif // IECOREPYTHON_SEARCHPATHBINDING_H

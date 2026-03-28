@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MESHPRIMITIVEBINDING_H
-#define IECOREGL_MESHPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindMeshPrimitive();
 
 }
 
-#endif // IECOREGL_MESHPRIMITIVEBINDING_H

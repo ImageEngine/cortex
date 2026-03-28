@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_LEVENBERGMARQUARDTBINDING_H
-#define IECOREPYTHON_LEVENBERGMARQUARDTBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindLevenbergMarquardt();
 
 }
 
-#endif // IECOREPYTHON_LEVENBERGMARQUARDTBINDING_H

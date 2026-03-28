@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TYPEIDBINDING_H
-#define IECOREPYTHON_TYPEIDBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindTypeId();
 }
 
-#endif // IECOREPYTHON_TYPEIDBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SHADERNETWORKBINDING_H
-#define IECORESCENEMODULE_SHADERNETWORKBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindShaderNetwork();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_SHADERNETWORKBINDING_H

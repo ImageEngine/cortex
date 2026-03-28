@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_POINTDISTRIBUTION_H
-#define IECORE_POINTDISTRIBUTION_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -122,4 +121,3 @@ class IECORE_API PointDistribution : public boost::noncopyable
 
 #include "IECore/PointDistribution.inl"
 
-#endif // IECORE_POINTDISTRIBUTION_H

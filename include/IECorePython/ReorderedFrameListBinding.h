@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_REORDEREDFRAMELISTBINDING_H
-#define IECOREPYTHON_REORDEREDFRAMELISTBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindReorderedFrameList();
 }
 
-#endif // IECOREPYTHON_REORDEREDFRAMELISTBINDING_H

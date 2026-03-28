@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_PRIMITIVEALGO_H
-#define IECOREUSD_PRIMITIVEALGO_H
+#pragma once
 
 #include "IECoreUSD/Export.h"
 
@@ -89,4 +88,3 @@ IECOREUSD_API IECoreScene::PrimitiveVariable::Interpolation fromUSD( pxr::TfToke
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_PRIMITIVEALGO_H

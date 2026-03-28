@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVEVARIABLE_INL
-#define IECORESCENE_PRIMITIVEVARIABLE_INL
+#pragma once
 
 #include "IECoreScene/Export.h"
 
@@ -182,5 +181,3 @@ typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedV
 typedef std::map<std::string, PrimitiveVariable> PrimitiveVariableMap;
 
 } // namespace IECoreScene
-
-#endif // IECORESCENE_PRIMITIVEVARIABLE_INL

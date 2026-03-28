@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SHADERNETWORK_INL
-#define IECORESCENE_SHADERNETWORK_INL
+#pragma once
 
 #include "boost/functional/hash.hpp"
 #include "boost/iterator/iterator_facade.hpp"
@@ -199,5 +198,3 @@ struct hash<IECoreScene::ShaderNetwork::Parameter>
 };
 
 } // namespace std
-
-#endif // IECORESCENE_SHADERNETWORK_INL

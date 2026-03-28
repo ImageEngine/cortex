@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LOOKUP_H
-#define IECORE_LOOKUP_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -89,4 +88,3 @@ typedef Lookup<float, Imath::Color4f> LookupfColor4f;
 
 #include "IECore/Lookup.inl"
 
-#endif // IECORE_LOOKUP_H

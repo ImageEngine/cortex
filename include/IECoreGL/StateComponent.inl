@@ -1,5 +1,4 @@
-#ifndef IECOREGL_STATECOMPONENT_INL
-#define IECOREGL_STATECOMPONENT_INL
+#pragma once
 
 #include "IECoreGL/State.h"
 
@@ -19,5 +18,3 @@ StateComponentPtr StateComponent::Description<T>::creator()
 }
 
 } // namespace IECoreGL
-
-#endif // IECOREGL_STATECOMPONENT_INL

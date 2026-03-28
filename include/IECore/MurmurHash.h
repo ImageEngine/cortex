@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MURMURHASH_H
-#define IECORE_MURMURHASH_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -125,4 +124,3 @@ IECORE_API std::ostream &operator << ( std::ostream &o, const MurmurHash &hash )
 
 #include "IECore/MurmurHash.inl"
 
-#endif // IECORE_MURMURHASH_H

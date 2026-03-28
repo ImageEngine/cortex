@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_DATAALGOBINDING_H
-#define IECOREPYTHON_DATAALGOBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindDataAlgo();
 }
 
-#endif // IECOREPYTHON_DATAALGOBINDING_H
