@@ -55,6 +55,7 @@ namespace
 const pxr::TfToken g_arnold( "arnold" );
 const pxr::TfToken g_arnoldAlembic( "ArnoldAlembic" );
 const pxr::TfToken g_arnoldNodeEntry( "arnold:node_entry" );
+const pxr::TfToken g_arnoldProcedural( "ArnoldProcedural" );
 const pxr::TfToken g_arnoldProceduralCustom( "ArnoldProceduralCustom" );
 const pxr::TfToken g_arnoldUsd( "ArnoldUsd" );
 
@@ -86,6 +87,10 @@ IECore::ObjectPtr readArnoldProcedural( pxr::UsdGeomGprim &gprim, pxr::UsdTimeCo
 		std::string nodeEntry;
 		gprim.GetPrim().GetAttribute( g_arnoldNodeEntry ).Get( &nodeEntry, time );
 		result->setFileName( nodeEntry );
+	}
+	else if( gprim.GetPrim().IsA( g_arnoldProcedural ) )
+	{
+		result->setFileName( "procedural" );
 	}
 	else if( gprim.GetPrim().IsA( g_arnoldUsd ) )
 	{
@@ -157,6 +162,7 @@ bool arnoldProceduralMightBeTimeVarying( pxr::UsdGeomGprim &gprim )
 }
 
 ObjectAlgo::ReaderDescription<pxr::UsdGeomGprim> g_arnoldAlembicReaderDescription( g_arnoldAlembic, readArnoldProcedural, arnoldProceduralMightBeTimeVarying );
+ObjectAlgo::ReaderDescription<pxr::UsdGeomGprim> g_arnoldProceduralReaderDescription( g_arnoldProcedural, readArnoldProcedural, arnoldProceduralMightBeTimeVarying );
 ObjectAlgo::ReaderDescription<pxr::UsdGeomGprim> g_arnoldProceduralCustomReaderDescription( g_arnoldProceduralCustom, readArnoldProcedural, arnoldProceduralMightBeTimeVarying );
 ObjectAlgo::ReaderDescription<pxr::UsdGeomGprim> g_arnoldUsdReaderDescription( g_arnoldUsd, readArnoldProcedural, arnoldProceduralMightBeTimeVarying );
 

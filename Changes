@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.4.0)
 ========
 
+Improvements
+------------
 
+- USDScene : Added loading of ArnoldProcedural prims as Cortex ExternalProcedural objects.
 
 10.6.4.0 (relative to 10.6.3.1)
 ========
