@@ -40,18 +40,12 @@ namespace IECore
 template<typename T>
 void LinearInterpolator<T>::operator()(const T &y0, const T & y1, double x, T &result) const
 {
-	assert(x >= 0.0);
-	assert(x <= 1.0);
-
 	result = static_cast<T>(y0 + (y1 - y0) * x);
 }
 
 template<typename T>
 void CubicInterpolator<T>::operator()(const T &y0, const T &y1, const T &y2, const T &y3, double x, T &result ) const
 {
-	assert(x >= 0.0);
-	assert(x <= 1.0);
-
 	T a0 = y3 - y2 - y0 + y1;
 	T a1 = y0 - y1 - a0;
 	T a2 = y2 - y0;
