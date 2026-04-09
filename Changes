@@ -6,6 +6,11 @@ Improvements
 
 - USDScene : Added loading of ArnoldProcedural prims as Cortex ExternalProcedural objects.
 
+Fixes
+-----
+
+- USDScene : Fixed writing of animated camera parameters.
+
 10.6.4.0 (relative to 10.6.3.1)
 ========
 
