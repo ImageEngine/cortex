@@ -1306,7 +1306,7 @@ class USDSceneTest( unittest.TestCase ) :
 		for name, cortexCam in testCameras.items() :
 
 			cG = pxr.UsdGeom.Camera.Get( usdFile, "/" + name )
-			c = cG.GetCamera()
+			c = cG.GetCamera( 0.0 )
 
 			self.assertEqual( c.projection.name.lower(), cortexCam.getProjection() )
 
@@ -1329,8 +1329,8 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertEqual( c.fStop, cortexCam.getFStop() )
 			self.assertEqual( c.focusDistance, cortexCam.getFocusDistance() )
 			if cortexCam.hasShutter() :
-				self.assertEqual( cG.GetShutterOpenAttr().Get(), cortexCam.getShutter()[0] )
-				self.assertEqual( cG.GetShutterCloseAttr().Get(), cortexCam.getShutter()[1] )
+				self.assertEqual( cG.GetShutterOpenAttr().Get( 0.0 ), cortexCam.getShutter()[0] )
+				self.assertEqual( cG.GetShutterCloseAttr().Get( 0.0 ), cortexCam.getShutter()[1] )
 			else :
 				self.assertFalse( cG.GetShutterOpenAttr().HasAuthoredValue() )
 				self.assertFalse( cG.GetShutterCloseAttr().HasAuthoredValue() )
@@ -1425,6 +1425,34 @@ class USDSceneTest( unittest.TestCase ) :
 			roundTripCamera = roundTripRoot.child( name ).readObject( 0.0 )
 
 			self.assertEqual( camera, roundTripCamera )
+
+	def testWriteAnimatedCamera( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "camera" )
+
+		cameras = {}
+		for time in range( 0, 10 ) :
+
+			camera = IECoreScene.Camera()
+			camera.setProjection( "perspective" )
+			camera.setShutter( imath.V2f( time - 0.25, time + 0.25 ) )
+			camera.setFocalLength( 1.0 + time * 0.1 )
+			camera.setClippingPlanes( imath.V2f( time, 1000 ) )
+
+			child.writeObject( camera, time )
+			cameras[time] = camera
+
+		del child, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "camera" )
+
+		for time in range( 0, 10 ) :
+			camera = child.readObject( time )
+			for parameter in ( "shutter", "focalLength", "clippingPlanes" ) :
+				self.assertEqual( camera.parameters()[parameter], cameras[time].parameters()[parameter] )
 
 	def testCornersAndCreases( self ) :
 

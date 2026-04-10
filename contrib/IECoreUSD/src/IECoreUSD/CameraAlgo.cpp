@@ -154,27 +154,27 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	auto usdCamera = pxr::UsdGeomCamera::Define( stage, path );
 	if( camera->getProjection() == "orthographic" )
 	{
-		usdCamera.GetProjectionAttr().Set( pxr::UsdGeomTokens->orthographic );
+		usdCamera.GetProjectionAttr().Set( pxr::UsdGeomTokens->orthographic, time );
 
 		// For ortho cameras, USD uses aperture units of tenths of scene units
-		usdCamera.GetHorizontalApertureAttr().Set( 10.0f * camera->getAperture()[0] );
-		usdCamera.GetVerticalApertureAttr().Set( 10.0f * camera->getAperture()[1] );
-		usdCamera.GetHorizontalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[0] );
-		usdCamera.GetVerticalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[1] );
+		usdCamera.GetHorizontalApertureAttr().Set( 10.0f * camera->getAperture()[0], time );
+		usdCamera.GetVerticalApertureAttr().Set( 10.0f * camera->getAperture()[1], time );
+		usdCamera.GetHorizontalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[0], time );
+		usdCamera.GetVerticalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[1], time );
 	}
 	else if( camera->getProjection() == "perspective" )
 	{
-		usdCamera.GetProjectionAttr().Set( pxr::UsdGeomTokens->perspective );
+		usdCamera.GetProjectionAttr().Set( pxr::UsdGeomTokens->perspective, time );
 
 		// We store focalLength and aperture in arbitary units.  USD uses tenths
 		// of scene units
 		float scale = 10.0f * camera->getFocalLengthWorldScale();
 
-		usdCamera.GetFocalLengthAttr().Set( camera->getFocalLength() * scale );
-		usdCamera.GetHorizontalApertureAttr().Set( camera->getAperture()[0] * scale );
-		usdCamera.GetVerticalApertureAttr().Set( camera->getAperture()[1] * scale );
-		usdCamera.GetHorizontalApertureOffsetAttr().Set( camera->getApertureOffset()[0] * scale );
-		usdCamera.GetVerticalApertureOffsetAttr().Set( camera->getApertureOffset()[1] * scale );
+		usdCamera.GetFocalLengthAttr().Set( camera->getFocalLength() * scale, time );
+		usdCamera.GetHorizontalApertureAttr().Set( camera->getAperture()[0] * scale, time );
+		usdCamera.GetVerticalApertureAttr().Set( camera->getAperture()[1] * scale, time );
+		usdCamera.GetHorizontalApertureOffsetAttr().Set( camera->getApertureOffset()[0] * scale, time );
+		usdCamera.GetVerticalApertureOffsetAttr().Set( camera->getApertureOffset()[1] * scale, time );
 	}
 	else
 	{
@@ -185,9 +185,9 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 		);
 	}
 
-	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ) );
-	usdCamera.GetFStopAttr().Set( camera->getFStop() );
-	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance() );
+	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ), time );
+	usdCamera.GetFStopAttr().Set( camera->getFStop(), time );
+	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance(), time );
 
 	if( camera->hasShutter() )
 	{
@@ -197,8 +197,8 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 		/// and Houdini plugin sources, I've been unable to find evidence for
 		/// anyone else doing this though, so maybe it's one of those things
 		/// everyone is just getting wrong?
-		usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
-		usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
+		usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0], time );
+		usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1], time );
 	}
 
 	return true;
