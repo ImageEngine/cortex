@@ -4798,5 +4798,149 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( shaderNetwork.outputShader().name, "LamaSurface" )
 
+	def testReadGeomSubsets( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/geomSubset.usda", IECore.IndexedIO.OpenMode.Read )
+
+		subsetNonOverlapping = root.child( "meshSubsetNonOverlapping" )
+		self.assertTrue( subsetNonOverlapping.hasObject() )
+		meshSubsetNonOverlapping = subsetNonOverlapping.readObject( 0.0 )
+		self.assertTrue( "surface" in subsetNonOverlapping.attributeNames() )
+		self.assertTrue( "surface:geomSubset:redFace" in subsetNonOverlapping.attributeNames() )
+		self.assertFalse( "surface:geomSubset:greenFace" in subsetNonOverlapping.attributeNames() )
+		self.assertTrue( "surface:geomSubset:blueFace" in subsetNonOverlapping.attributeNames() )
+		self.assertIsInstance( meshSubsetNonOverlapping["geomSubset:materialBind"].data, IECore.StringVectorData )
+		self.assertEqual( meshSubsetNonOverlapping["geomSubset:materialBind"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertTrue( meshSubsetNonOverlapping["geomSubset:materialBind"].indices )
+		self.assertEqual( meshSubsetNonOverlapping["geomSubset:materialBind"].data, IECore.StringVectorData(["", "redFace", "blueFace"]) )
+		self.assertEqual( meshSubsetNonOverlapping["geomSubset:materialBind"].indices, IECore.IntVectorData([1, 1, 0, 0, 2, 2]) )
+		# "Fancy" GeomSubset familyName which doesn't do anything for material binds but should come in.
+		self.assertEqual( meshSubsetNonOverlapping["geomSubset:fancy"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertTrue( meshSubsetNonOverlapping["geomSubset:fancy"].indices )
+		self.assertEqual( meshSubsetNonOverlapping["geomSubset:fancy"].data, IECore.StringVectorData(["fancy1", "fancy2"]) )
+		self.assertEqual( meshSubsetNonOverlapping["geomSubset:fancy"].indices, IECore.IntVectorData([0, 1, 1, 0, 1, 0]) )
+		# GeomSubsets without a familyName shouldn't come through as they're always set to "unrestricted" familyType
+		self.assertFalse( "geomSubset" in meshSubsetNonOverlapping )
+
+		subsetPartition = root.child( "meshSubsetPartition" )
+		self.assertTrue( subsetPartition.hasObject() )
+		meshSubsetPartition = subsetPartition.readObject( 0.0 )
+		self.assertFalse( "surface" in subsetPartition.attributeNames() )
+		self.assertTrue( "surface:geomSubset:redFace" in subsetPartition.attributeNames() )
+		self.assertTrue( "surface:geomSubset:greenFace" in subsetPartition.attributeNames() )
+		self.assertTrue( "surface:geomSubset:blueFace" in subsetPartition.attributeNames() )
+		self.assertIsInstance( meshSubsetPartition["geomSubset:materialBind"].data, IECore.StringVectorData )
+		self.assertEqual( meshSubsetPartition["geomSubset:materialBind"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertTrue( meshSubsetPartition["geomSubset:materialBind"].indices )
+		self.assertEqual( meshSubsetPartition["geomSubset:materialBind"].data, IECore.StringVectorData(["redFace", "greenFace", "blueFace"]) )
+		self.assertEqual( meshSubsetPartition["geomSubset:materialBind"].indices, IECore.IntVectorData([0, 0, 1, 1, 2, 2]) )
+		# "Fancy" GeomSubset familyName which doesn't do anything for material binds but should come in.
+		self.assertEqual( meshSubsetPartition["geomSubset:fancy"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertTrue( meshSubsetPartition["geomSubset:fancy"].indices )
+		self.assertEqual( meshSubsetPartition["geomSubset:fancy"].data, IECore.StringVectorData(["", "fancy1", "fancy2"]) )
+		self.assertEqual( meshSubsetPartition["geomSubset:fancy"].indices, IECore.IntVectorData([1, 2, 2, 1, 0, 0]) )
+		# GeomSubsets without a familyName shouldn't come through as they're always set to "unrestricted" familyType
+		self.assertFalse( "geomSubset" in meshSubsetPartition )
+
+		# Unsupported familyType "unrestricted"
+		subsetUnrestricted = root.child( "meshSubsetUnrestricted" )
+		self.assertTrue( subsetUnrestricted.hasObject() )
+		meshSubsetUnrestricted = subsetUnrestricted.readObject( 0.0 )
+		self.assertTrue( "surface" in subsetUnrestricted.attributeNames() )
+		self.assertFalse( "surface:geomSubset:redFace" in subsetUnrestricted.attributeNames() )
+		self.assertFalse( "surface:geomSubset:greenFace" in subsetUnrestricted.attributeNames() )
+		self.assertFalse( "surface:geomSubset:blueFace" in subsetUnrestricted.attributeNames() )
+		self.assertFalse( "geomSubset:materialBind" in meshSubsetUnrestricted )
+
+	def testWriteGeomSubsets( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		mats = []
+		for c in [ imath.Color3f( 1, 0, 0 ), imath.Color3f( 0, 1, 0 ), imath.Color3f( 0, 0, 1 ) ] :
+			surface = IECoreScene.Shader( "UsdPreviewSurface", "surface" )
+			surface.parameters["diffuseColor"] = IECore.Color3fData( c )
+			network = IECoreScene.ShaderNetwork()
+			network.addShader( "surface", surface )
+			network.setOutput( IECoreScene.ShaderNetwork.Parameter( "surface", "surface" ) )
+			mats.append( network )
+
+		meshSubsetNonOverlapping = IECoreScene.MeshPrimitive.createBox( imath.Box3f ( imath.V3f( 0, 0, 0 ), imath.V3f( 1, 1, 1 ) ) )
+		meshSubsetNonOverlapping["geomSubset:materialBind"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.StringVectorData( ["", "redFace", "blueFace"] ),
+			IECore.IntVectorData( [ 1, 1, 0, 0, 2, 2 ] )
+		)
+		subsetNonOverlapping = root.createChild( "meshSubsetNonOverlapping" )
+		subsetNonOverlapping.writeObject( meshSubsetNonOverlapping, 0 )
+		subsetNonOverlapping.writeAttribute( "surface", mats[1], 0 )
+		subsetNonOverlapping.writeAttribute( "surface:geomSubset:redFace", mats[0], 0 )
+		subsetNonOverlapping.writeAttribute( "surface:geomSubset:blueFace", mats[2], 0 )
+
+		meshSubsetPartition = IECoreScene.MeshPrimitive.createBox( imath.Box3f ( imath.V3f( 0, 0, 0 ), imath.V3f( 1, 1, 1 ) ) )
+		meshSubsetPartition["geomSubset:materialBind"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.StringVectorData( ["redFace", "greenFace", "blueFace"] ),
+			IECore.IntVectorData( [ 0, 0, 1, 1, 2, 2 ] )
+		)
+		subsetPartition = root.createChild( "meshSubsetPartition" )
+		subsetPartition.writeObject( meshSubsetPartition, 0 )
+		subsetPartition.writeAttribute( "surface:geomSubset:redFace", mats[0], 0 )
+		subsetPartition.writeAttribute( "surface:geomSubset:greenFace", mats[1], 0 )
+		subsetPartition.writeAttribute( "surface:geomSubset:blueFace", mats[2], 0 )
+
+		del root, subsetNonOverlapping, subsetPartition
+
+		# Now read in the UsdGeomSubsets
+
+		stage = pxr.Usd.Stage.Open( fileName )
+
+		primSubsetNonOverlapping = stage.GetPrimAtPath( "/meshSubsetNonOverlapping" )
+		imageableSubsetNonOverlapping = pxr.UsdGeom.Imageable.Get( stage, primSubsetNonOverlapping.GetPath() )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( primSubsetNonOverlapping )
+		self.assertFalse( primvarsAPI.GetPrimvar( "geomSubset:materialBind" ) )
+		subsets = pxr.UsdGeom.Subset.GetGeomSubsets( imageableSubsetNonOverlapping, pxr.UsdGeom.Tokens.face, pxr.UsdShade.Tokens.materialBind )
+		self.assertEqual( len( subsets ), 2 )
+		self.assertEqual( subsets[0].GetPrim().GetName(), "redFace" )
+		self.assertEqual( subsets[1].GetPrim().GetName(), "blueFace" )
+		for subset in subsets :
+			self.assertTrue( subset.GetIndicesAttr().HasAuthoredValue() )
+			self.assertIsInstance( pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ subset.GetPrim() ] )[0][0], pxr.UsdShade.Material )
+			self.assertEqual( subset.GetElementTypeAttr().Get( 0.0 ), pxr.UsdGeom.Tokens.face )
+			self.assertEqual( subset.GetFamilyNameAttr().Get( 0.0 ), pxr.UsdShade.Tokens.materialBind )
+		self.assertIsInstance( pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ primSubsetNonOverlapping ] )[0][0], pxr.UsdShade.Material )
+		self.assertEqual( subsets[0].GetIndicesAttr().Get( 0.0 ), pxr.Vt.IntArray( [0, 1] ) )
+		self.assertEqual( subsets[1].GetIndicesAttr().Get( 0.0 ), pxr.Vt.IntArray( [4, 5] ) )
+		self.assertEqual( pxr.UsdGeom.Subset.GetFamilyType( imageableSubsetNonOverlapping, pxr.UsdShade.Tokens.materialBind ), pxr.UsdGeom.Tokens.nonOverlapping )
+
+		primSubsetPartition = stage.GetPrimAtPath( "/meshSubsetPartition" )
+		imageableSubsetPartition = pxr.UsdGeom.Imageable.Get( stage, primSubsetPartition.GetPath() )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( primSubsetPartition )
+		self.assertFalse( primvarsAPI.GetPrimvar( "geomSubset:materialBind" ) )
+		subsets = pxr.UsdGeom.Subset.GetGeomSubsets( imageableSubsetPartition, pxr.UsdGeom.Tokens.face, pxr.UsdShade.Tokens.materialBind )
+		self.assertEqual( len( subsets ), 3 )
+		self.assertEqual( subsets[0].GetPrim().GetName(), "redFace" )
+		self.assertEqual( subsets[1].GetPrim().GetName(), "greenFace" )
+		self.assertEqual( subsets[2].GetPrim().GetName(), "blueFace" )
+		for subset in subsets :
+			self.assertTrue( subset.GetIndicesAttr().HasAuthoredValue() )
+			self.assertIsInstance( pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ subset.GetPrim() ] )[0][0], pxr.UsdShade.Material )
+			self.assertEqual( subset.GetElementTypeAttr().Get( 0.0 ), pxr.UsdGeom.Tokens.face )
+			self.assertEqual( subset.GetFamilyNameAttr().Get( 0.0 ), pxr.UsdShade.Tokens.materialBind )
+		self.assertEqual( subsets[0].GetIndicesAttr().Get( 0.0 ), pxr.Vt.IntArray( [0, 1] ) )
+		self.assertEqual( subsets[1].GetIndicesAttr().Get( 0.0 ), pxr.Vt.IntArray( [2, 3] ) )
+		self.assertEqual( subsets[2].GetIndicesAttr().Get( 0.0 ), pxr.Vt.IntArray( [4, 5] ) )
+		self.assertEqual( pxr.UsdGeom.Subset.GetFamilyType( imageableSubsetPartition, pxr.UsdShade.Tokens.materialBind ), pxr.UsdGeom.Tokens.partition )
+
+		# And that we can load them back in successfully.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		meshSubsetNonOverlapping2 = root.child( "meshSubsetNonOverlapping" ).readObject( 0.0 )
+		meshSubsetPartition2 = root.child( "meshSubsetPartition" ).readObject( 0.0 )
+		self.assertEqual( meshSubsetNonOverlapping, meshSubsetNonOverlapping2 )
+		self.assertEqual( meshSubsetPartition, meshSubsetPartition2 )
+
+
 if __name__ == "__main__":
 	unittest.main()

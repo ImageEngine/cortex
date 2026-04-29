@@ -62,6 +62,8 @@ IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECore
 IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomGprim &gprim, pxr::UsdTimeCode time );
 /// As above, but redirects "P", "N" etc to the relevant attributes of `pointBased`.
 IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
+/// Writes a PrimitiveVariable with "geomSubset:<familyName>" to multiple UsdGeomSubsets found in the indexed StringVectorData name.
+IECOREUSD_API void writeGeomSubsets( const pxr::TfToken &familyName, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
 /// Equivalent to `DataAlgo::toUSD( primitiveVariable.expandedData() )`, but avoiding
 /// the creation of the temporary expanded data.
 IECOREUSD_API pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable, bool arrayRequired = false );
@@ -77,6 +79,8 @@ IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primva
 IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const IECore::Canceller *canceller = nullptr );
 /// Reads the value for `attribute`, adding it as a primitive variable with the specified `name` and `interpolation`.
 IECOREUSD_API void readPrimitiveVariable( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const std::string &name, IECoreScene::PrimitiveVariable::Interpolation interpolation = IECoreScene::PrimitiveVariable::Vertex );
+/// Reads all compatible UsdGeomSubsets, adding them to `primitive` under `geomSubset:familyName` with the UsdGeomSubset name in that family into an indexed StringVectorData.
+IECOREUSD_API void readGeomSubsets( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const IECore::Canceller *canceller = nullptr );
 /// Returns true if any of the primitive variables might be animated.
 IECOREUSD_API bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimvarsAPI &primvarsAPI );
 /// Returns true if any of the primitive variables might be animated, including the
@@ -84,6 +88,8 @@ IECOREUSD_API bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimv
 IECOREUSD_API bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPointBased &pointBased );
 /// Converts interpolation from USD.
 IECOREUSD_API IECoreScene::PrimitiveVariable::Interpolation fromUSD( pxr::TfToken interpolationToken );
+/// Converts element type from UsdGeomSubset to interpolation.
+IECOREUSD_API IECoreScene::PrimitiveVariable::Interpolation elementTypeFromUSD( pxr::TfToken elementType );
 
 } // namespace PrimitiveAlgo
 
