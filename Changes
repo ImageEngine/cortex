@@ -10,6 +10,7 @@ Improvements
 ------------
 
 - PrimitiveVariable : Added Python bindings for `IndexedView` class.
+- USDScene : Added support for writing `IECoreScene::PointInstancer` as `UsdGeomPointInstancer`.
 
 Fixes
 -----
@@ -28,6 +29,7 @@ Breaking Changes
 - USD :
   - Removed support for `IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES` environment variable. Prototype paths are now always specified as relative where possible.
   - Removed `./` prefix from relative prototype paths.
+  - UsdGeomPointInstancer `inactiveIds` are now merged into the `invisibleIds` primitive variable on loading, instead of being loaded separately.
 
 Build
 -----

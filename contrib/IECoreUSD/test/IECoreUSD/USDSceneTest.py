@@ -3924,7 +3924,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( points.keys(), ['P', 'myColor', 'prototypeRoots'] )
 
-		self.assertIsInstance( points, IECoreScene.PointsPrimitive )
+		self.assertIsInstance( points, IECoreScene.PointInstancer )
 		self.assertIn( "myColor", points )
 		self.assertEqual(
 			points["myColor"].data,
@@ -3935,7 +3935,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		# Now try deactivating some ids
 
-		pointInstancer.DeactivateIds( [ 0, 2 ] )
+		pointInstancer.DeactivateIds( [ 0, 1, 2 ] )
 		pointInstancer.InvisIds( [ 1, 4 ], 0 )
 
 		stage.GetRootLayer().Save()
@@ -3943,10 +3943,9 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		points = root.child( "points" ).readObject( 0 )
 
-		self.assertEqual( points.keys(), ['P', 'inactiveIds', 'invisibleIds', 'myColor', 'prototypeRoots'] )
+		self.assertEqual( points.keys(), ['P', 'invisibleIds', 'myColor', 'prototypeRoots'] )
 
-		self.assertEqual( points["inactiveIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 0, 2 ] ) ) )
-		self.assertEqual( points["invisibleIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 1, 4 ] ) ) )
+		self.assertEqual( points["invisibleIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 0, 1, 2, 4 ] ) ) )
 
 	def testArnoldArrayInputs( self ) :
 
@@ -4624,6 +4623,38 @@ class USDSceneTest( unittest.TestCase ) :
 		obj = pointInstancer.readObject(0.0)
 
 		self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ 'Prototypes/sphere', '/cube' ] ) )
+
+	def testPointInstancerRoundTrip( self ) :
+
+		instancer = IECoreScene.PointInstancer( 4 )
+		instancer.setPrototypes( IECore.StringVectorData( [ "prototypes/p1", "prototypes/p2" ] ) )
+		instancer.setPrototypeIndex( IECore.IntVectorData( [ 0, 1, 0, 1 ] ) )
+		instancer.setPosition( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 4 ) ] ) )
+		instancer.setScale( IECore.V3fVectorData( [ imath.V3f( x + 1 ) for x in range( 4 ) ] ) )
+		instancer.setOrientation( IECore.QuatfVectorData( [ imath.Quatf( x, x, x, x ) for x in range( 4 ) ] ) )
+		instancer.setID( IECore.Int64VectorData( [ 10, 11, 12, 13 ] ) )
+		instancer.setInvisibleIDs( IECore.Int64VectorData( [ 10 ] ) )
+		instancer["test"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.StringData( "test" )
+		)
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "test.usda" ),
+			IECore.IndexedIO.OpenMode.Write
+		)
+		root.createChild( "instancer" ).writeObject( instancer, 0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "test.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		self.assertEqual(
+			root.child( "instancer").readObject( 0 ),
+			instancer
+		)
 
 	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
 	def testUsdVolVolumeSlashes( self ) :
