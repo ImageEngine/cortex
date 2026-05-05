@@ -1,6 +1,11 @@
 10.7.x.x (relative to 10.7.0.0a10)
 ========
 
+Features
+--------
+
+- PointInstancer : Added class to provide first-class encoding of point instancers.
+
 Improvements
 ------------
 

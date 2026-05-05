@@ -91,6 +91,7 @@ from ShaderNetworkAlgoTest import ShaderNetworkAlgoTest
 from SharedSceneInterfacesTest import SharedSceneInterfacesTest
 from SceneInterfaceTest import SceneInterfaceTest
 from TypedPrimitiveOp import TestTypedPrimitiveOp
+from PointInstancerTest import PointInstancerTest
 
 if IECore.withFreeType() :
 	from FontTest import *

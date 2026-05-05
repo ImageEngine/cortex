@@ -66,6 +66,7 @@
 #include "ParticleWriterBinding.h"
 #include "PatchMeshPrimitiveBinding.h"
 #include "PointsAlgoBinding.h"
+#include "PointInstancerBinding.h"
 #include "PointsPrimitiveBinding.h"
 #include "PointsPrimitiveEvaluatorBinding.h"
 #include "PrimitiveBinding.h"
@@ -160,5 +161,5 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindTypedObjectParameter();
 	bindTypeId();
 	bindSceneAlgo();
-
+	bindPointInstancer();
 }
