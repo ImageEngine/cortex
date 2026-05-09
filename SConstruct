@@ -470,6 +470,18 @@ o.Add(
 	"",
 )
 
+o.Add(
+	"NANOBIND_INCLUDE_PATH",
+	"The path to the nanobind include directory.",
+	"",
+)
+
+o.Add(
+	"NANOBIND_LIB_PATH",
+	"The path to the nanobind lib directory.",
+	"",
+)
+
 # Build options
 
 o.Add(
@@ -1841,6 +1853,21 @@ if doConfigure :
 	c.Finish()
 
 	if haveVDB :
+
+		vdbVersion = None
+		vdbVersionHeader = env.FindFile( "openvdb/version.h", dependencyIncludes )
+		for line in open( str( vdbVersionHeader ) ) :
+			m = re.compile( r"^#define OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER\s*([0-9]+)" ).match( line )
+			if m :
+				vdbVersion = m.group( 1 )
+				break
+
+		if vdbVersion and int( vdbVersion ) >= 12 :
+			vdbPythonModuleEnv.Append(
+				LIBPATH = [ "$NANOBIND_LIB_PATH" ],
+				LIBS = [ "nanobind-static" ],
+				CXXFLAGS = [ "-fPIC", systemIncludeArgument, "$NANOBIND_INCLUDE_PATH" ]
+			)
 
 		vdbEnv.Append(
 			LIBS = [

@@ -41,18 +41,24 @@
 
 #include "IECoreVDB/VDBObject.h"
 
-// OpenVDB 10.0 and earlier used `boost::python` for its Python bindings, but
-// this was switched to PyBind11 in OpenVDB 10.1. We need to take a different
-// approach to binding VDBObject's grid accessors in each case.
-#if OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER > 10 || OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER == 10 && OPENVDB_LIBRARY_MINOR_VERSION_NUMBER >= 1
+// OpenVDB 10.0 and earlier used `boost::python` for its Python bindings,
+// OpenVDB 10.1 to 11.x used PyBind11, and OpenVDB 12 onwards uses Nanobind.
+// We need to take a different approach to binding VDBObject's grid accessors
+// in each case.
+#if OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER >= 12
+#include "IECorePython/NanobindConverter.h"
+#define IECOREVDB_USE_NANOBIND
+#define IECOREVDB_CONVERT_GRID_BINDING
+#elif OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER == 11 || OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER == 10 && OPENVDB_LIBRARY_MINOR_VERSION_NUMBER >= 1
 #include "IECorePython/PyBindConverter.h"
 #define IECOREVDB_USE_PYBIND
+#define IECOREVDB_CONVERT_GRID_BINDING
 #endif
 
 using namespace boost::python;
 using namespace IECoreVDB;
 
-#ifndef IECOREVDB_USE_PYBIND
+#ifndef IECOREVDB_CONVERT_GRID_BINDING
 
 namespace
 {
@@ -148,7 +154,7 @@ void insertGrid( VDBObject::Ptr vdbObject, boost::python::object pyObject )
 
 } // namespace
 
-#endif // #ifndef IECOREVDB_USE_PYBIND
+#endif // #ifndef IECOREVDB_CONVERT_GRID_BINDING
 
 namespace
 {
@@ -169,7 +175,9 @@ boost::python::list gridNames( VDBObject::Ptr vdbObject )
 BOOST_PYTHON_MODULE( _IECoreVDB )
 {
 
-#ifdef IECOREVDB_USE_PYBIND
+#if defined( IECOREVDB_USE_NANOBIND )
+	IECorePython::NanobindConverter<openvdb::GridBase::Ptr>::registerConverters();
+#elif defined( IECOREVDB_USE_PYBIND )
 	IECorePython::PyBindConverter<openvdb::GridBase::Ptr>::registerConverters();
 #endif
 
@@ -179,7 +187,7 @@ BOOST_PYTHON_MODULE( _IECoreVDB )
 		.def("gridNames", &::gridNames)
 		.def("metadata", &VDBObject::metadata)
 		.def("removeGrid", &VDBObject::removeGrid)
-#ifdef IECOREVDB_USE_PYBIND
+#ifdef IECOREVDB_CONVERT_GRID_BINDING
 		.def( "findGrid", (openvdb::GridBase::Ptr (VDBObject::*)( const std::string &name ))&VDBObject::findGrid )
 		.def( "insertGrid", &VDBObject::insertGrid )
 #else

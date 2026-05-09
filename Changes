@@ -6,6 +6,11 @@ Features
 
 - NanobindConverter : Added new class providing interoperability between Boost Python bindings and Nanobind bindings.
 
+Fixes
+-----
+
+- VDBObject : Fixed Python bindings for OpenVDB 12.
+
 10.7.0.0a9 (relative to 10.7.0.0a8)
 ==========
 
