@@ -11,6 +11,11 @@ Fixes
 
 - VDBObject : Fixed Python bindings for OpenVDB 12.
 
+Breaking Changes
+----------------
+
+- VDBObject : Removed support for OpenVDB 10.0 and earlier.
+
 10.7.0.0a9 (relative to 10.7.0.0a8)
 ==========
 

@@ -35,16 +35,10 @@
 __import__( "IECore" )
 __import__( "IECoreScene" )
 
-import warnings
-# the first import of pyopenvdb results in a duplicate c++ -> python
-# boost python type conversions warnings.
-# we use the warnings module to suppress these during the import
-with warnings.catch_warnings():
-	warnings.simplefilter("ignore")
-	try :
-		import openvdb
-	except ImportError :
-		import pyopenvdb
+try :
+	import openvdb
+except ImportError :
+	import pyopenvdb
 
 from ._IECoreVDB import *
 
