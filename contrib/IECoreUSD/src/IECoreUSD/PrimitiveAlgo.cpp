@@ -46,6 +46,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix4f.h"
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/usd/usdGeom/mesh.h"
+#include "pxr/usd/usdGeom/subset.h"
 #include "pxr/usd/usdSkel/animQuery.h"
 #include "pxr/usd/usdSkel/bindingAPI.h"
 #include "pxr/usd/usdSkel/blendShapeQuery.h"
@@ -55,6 +56,10 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdSkel/root.h"
 #include "pxr/usd/usdSkel/utils.h"
 IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/algorithm/string/split.hpp"
 
 #include "fmt/ostream.h"
 
@@ -67,6 +72,47 @@ using namespace IECoreUSD;
 //////////////////////////////////////////////////////////////////////////
 // Writing primitive variables
 //////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+pxr::TfToken toUSDElementType( const pxr::UsdPrim &prim )
+{
+	if( prim.IsA<pxr::UsdGeomMesh>() )
+	{
+		return pxr::UsdGeomTokens->face;
+	}
+	return pxr::TfToken();
+}
+
+void writeGeomSubsetIndices( const pxr::TfToken &familyName, const StringVectorData *data, const IntVectorData *indicesData, const pxr::TfToken &elementType, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time )
+{
+	int32_t subsetNameIdx = 0;
+	pxr::TfToken familyType = pxr::UsdGeomTokens->partition;
+
+	for( const std::string &subsetName : data->readable() )
+	{
+		if( subsetName.empty() && subsetNameIdx == 0 )
+		{
+			familyType = pxr::UsdGeomTokens->nonOverlapping;
+			subsetNameIdx++;
+			continue;
+		}
+		pxr::VtIntArray usdIndices;
+		int32_t idx = 0;
+		for( const int32_t &faceIdx : indicesData->readable() )
+		{
+			if( faceIdx == subsetNameIdx )
+			{
+				usdIndices.push_back( idx );
+			}
+			idx++;
+		}
+		pxr::UsdGeomSubset::CreateGeomSubset( pointBased, pxr::TfToken( subsetName ), elementType, usdIndices, familyName, familyType );
+		++subsetNameIdx;
+	}
+}
+
+}; // namespace
 
 void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
 {
@@ -124,6 +170,35 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 	writePrimitiveVariable( name, primitiveVariable, pxr::UsdGeomPrimvarsAPI( gPrim.GetPrim() ), time );
 }
 
+void IECoreUSD::PrimitiveAlgo::writeGeomSubsets( const pxr::TfToken &familyName, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time )
+{
+	if( !primitiveVariable.indices )
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "No index data for UsdGeomSubset family {}", familyName.GetString() );
+		return;
+	}
+
+	if( pointBased.GetPrim().IsA<pxr::UsdGeomMesh>() &&
+		primitiveVariable.interpolation != IECoreScene::PrimitiveVariable::Uniform )
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Invalid Interpolation {} for UsdGeomSubset family {}", primitiveVariable.interpolation, familyName.GetString() );
+		return;
+	}
+
+	const pxr::TfToken elementType = toUSDElementType( pointBased.GetPrim() );
+
+	if( elementType.IsEmpty() )
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Invalid elementType for GeomSubset family {}", familyName.GetString() );
+		return;
+	}
+
+	if( const StringVectorData *data = static_cast<const StringVectorData *>( primitiveVariable.data.get() ) )
+	{
+		writeGeomSubsetIndices( familyName, data, primitiveVariable.indices.get(), elementType, pointBased, time );
+	}
+}
+
 void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &value, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time )
 {
 	if( name == "P" )
@@ -137,6 +212,15 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 	else if( name == "acceleration" )
 	{
 		pointBased.CreateAccelerationsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
+	}
+	else if( boost::algorithm::starts_with( name, "geomSubset:" ) )
+	{
+		std::vector<std::string> split;
+		boost::algorithm::split( split, name, boost::algorithm::is_any_of( ":" ) );
+		if( split.size() > 1 )
+		{
+			writeGeomSubsets( pxr::TfToken( split[1] ), value, pointBased, time );
+		}
 	}
 	else
 	{
@@ -498,6 +582,74 @@ bool skelAnimMightBeTimeVarying( const pxr::UsdPrim &prim )
 	return animQuery.JointTransformsMightBeTimeVarying() || animQuery.BlendShapeWeightsMightBeTimeVarying();
 }
 
+bool geomSubsetsMightBeTimeVarying( const pxr::UsdGeomPointBased &pointBased )
+{
+	for( const pxr::UsdGeomSubset &geomSubset : pxr::UsdGeomSubset::GetAllGeomSubsets( pointBased ) )
+	{
+		// We don't check ElementType here as it is considered invalid if it is TimeVarying.
+		if( geomSubset.GetIndicesAttr().ValueMightBeTimeVarying() )
+		{
+			return true;
+		}
+		if( geomSubset.GetFamilyNameAttr().ValueMightBeTimeVarying() )
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void readGeomSubsetNamesAndIndices(
+	const pxr::UsdGeomPointBased &pointBased,
+	const pxr::TfToken &elementType,
+	const pxr::TfToken &familyName,
+	pxr::UsdTimeCode time,
+	const IECoreScene::Primitive *primitive,
+	std::vector<std::string> &geomSubsetNames,
+	std::vector<int> &geomSubsetIndices,
+	const Canceller *canceller
+)
+{
+	int32_t geomSubsetIdx = 0;
+
+	const pxr::TfToken familyType = pxr::UsdGeomSubset::GetFamilyType( pointBased, familyName );
+	const pxr::VtIntArray unassignedIndices = pxr::UsdGeomSubset::GetUnassignedIndices( pointBased, elementType, familyName, time );
+	if( unassignedIndices.size() && familyType == pxr::UsdGeomTokens->uniform )
+	{
+		// This shouldn't happen based on the ValidateFamily functions above, but leaving in here if it does happen.
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "FamilyName: {} familyType: {} has unassigned indices.", familyName.GetString(), familyType.GetString() );
+	}
+
+	const auto &geomSubsets = pxr::UsdGeomSubset::GetGeomSubsets( pointBased, elementType, familyName );
+	geomSubsetNames.resize( unassignedIndices.size() || familyType == pxr::UsdGeomTokens->nonOverlapping ? geomSubsets.size() + 1 : geomSubsets.size() );
+	geomSubsetIndices.resize( primitive->variableSize( IECoreUSD::PrimitiveAlgo::elementTypeFromUSD( elementType ) ) );
+
+	if( unassignedIndices.size() || familyType == pxr::UsdGeomTokens->nonOverlapping )
+	{
+		Canceller::check( canceller );
+		geomSubsetNames[geomSubsetIdx] = std::string();
+		for( const int &idx : unassignedIndices )
+		{
+			geomSubsetIndices[idx] = geomSubsetIdx;
+		}
+		++geomSubsetIdx;
+	}
+
+	for( const pxr::UsdGeomSubset &geomSubset : geomSubsets )
+	{
+		Canceller::check( canceller );
+		geomSubsetNames[geomSubsetIdx] = geomSubset.GetPrim().GetName().GetString();
+		pxr::UsdAttribute indicesAttr = geomSubset.GetIndicesAttr();
+		pxr::VtIntArray geomIndices;
+		indicesAttr.Get( &geomIndices, time );
+		for( const int &idx : geomIndices )
+		{
+			geomSubsetIndices[idx] = geomSubsetIdx;
+		}
+		++geomSubsetIdx;
+	}
+}
+
 } // namespace
 
 void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
@@ -562,7 +714,72 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 			primitive->variables.erase( it );
 		}
 	}
+}
 
+void IECoreUSD::PrimitiveAlgo::readGeomSubsets( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
+{
+	// We're only interested in a subset of element types based on UsdGeom types.
+	const pxr::TfToken elementType = toUSDElementType( pointBased.GetPrim() );
+
+	if( elementType.IsEmpty() )
+	{
+		if( pxr::UsdGeomSubset::GetGeomSubsets( pointBased ).size() )
+		{
+			IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Prim {} with UsdGeomSubsets has unsupported elementType - skipping", pointBased.GetPrim().GetName().GetString() );
+		}
+		return;
+	}
+
+	// Collect all valid family names.
+	std::set<pxr::TfToken> validGeomSubsetFamilyNames;
+
+	// UsdGeomSubsets without a familyName always default to familyType unrestricted so we don't bother accessing those.
+	for( const auto &geomSubset : pxr::UsdGeomSubset::GetGeomSubsets( pointBased, elementType ) )
+	{
+		if( !geomSubset.GetFamilyNameAttr().HasAuthoredValue() )
+		{
+			IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Prim {} has UsdGeomSubsets without familyName - skipping", pointBased.GetPrim().GetName().GetString() );
+			break;
+		}
+	}
+
+	for( const auto &familyName : pxr::UsdGeomSubset::GetAllGeomSubsetFamilyNames( pointBased ) )
+	{
+		std::string reason;
+		pxr::TfToken familyType = pxr::UsdGeomSubset::GetFamilyType( pointBased, familyName );
+		if( familyType == pxr::UsdGeomTokens->unrestricted )
+		{
+			IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "UsdGeomSubset family: {} familyType: {} not supported - skipping", familyName.GetString(), familyType.GetString() );
+			continue;
+		}
+		else if( !pxr::UsdGeomSubset::ValidateFamily( pointBased, elementType, familyName, &reason ) )
+		{
+			IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "UsdGeomSubset family: {} not supported - {}", familyName.GetString(), reason );
+			continue;
+		}
+		else
+		{
+			validGeomSubsetFamilyNames.emplace( familyName );
+		}
+	}
+
+	// Convert family GeomSubsets to indexed string primitive variables under geomSubset or geomSubset:<familyName>.
+	for( const auto &familyName : validGeomSubsetFamilyNames )
+	{
+		Canceller::check( canceller );
+
+		std::vector<std::string> geomSubsetNames;
+		std::vector<int> geomSubsetIndices;
+		readGeomSubsetNamesAndIndices( pointBased, elementType, familyName, time, primitive, geomSubsetNames, geomSubsetIndices, canceller );
+
+		const std::string geomSubsetPrimvarName = std::string( "geomSubset:" ) + familyName.GetString();
+
+		const StringVectorDataPtr data = new StringVectorData( geomSubsetNames );
+		const IntVectorDataPtr indices = new IntVectorData( geomSubsetIndices );
+
+		// Note: Using the pointsBased points attribute for the error print log.
+		addPrimitiveVariableIfValid( primitive, geomSubsetPrimvarName, IECoreScene::PrimitiveVariable( IECoreUSD::PrimitiveAlgo::elementTypeFromUSD( elementType ), data, indices ), pointBased.GetPointsAttr() );
+	}
 }
 
 void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
@@ -589,6 +806,8 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 
 	Canceller::check( canceller );
 	readPrimitiveVariable( pointBased.GetAccelerationsAttr(), time, primitive, "acceleration" );
+
+	readGeomSubsets( pointBased, time, primitive, canceller );
 }
 
 void IECoreUSD::PrimitiveAlgo::readPrimitiveVariable( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const std::string &name, IECoreScene::PrimitiveVariable::Interpolation interpolation )
@@ -619,7 +838,8 @@ bool IECoreUSD::PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( const pxr::
 		pointBased.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
 		pointBased.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
 		primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ) ) ||
-		skelAnimMightBeTimeVarying( pointBased.GetPrim() )
+		skelAnimMightBeTimeVarying( pointBased.GetPrim() ) ||
+		geomSubsetsMightBeTimeVarying( pointBased )
 	;
 }
 
@@ -646,5 +866,14 @@ IECoreScene::PrimitiveVariable::Interpolation IECoreUSD::PrimitiveAlgo::fromUSD(
 		return IECoreScene::PrimitiveVariable::Constant;
 	}
 
+	return IECoreScene::PrimitiveVariable::Invalid;
+}
+
+IECoreScene::PrimitiveVariable::Interpolation IECoreUSD::PrimitiveAlgo::elementTypeFromUSD( pxr::TfToken elementType )
+{
+	if( elementType == pxr::UsdGeomTokens->face )
+	{
+		return IECoreScene::PrimitiveVariable::Uniform;
+	}
 	return IECoreScene::PrimitiveVariable::Invalid;
 }

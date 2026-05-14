@@ -63,6 +63,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/primvar.h"
 #include "pxr/usd/usdGeom/primvarsAPI.h"
 #include "pxr/usd/usdGeom/scope.h"
+#include "pxr/usd/usdGeom/subset.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
 #include "pxr/usd/usdLux/lightAPI.h"
@@ -493,26 +494,45 @@ void populateMaterial( pxr::UsdShadeMaterial &mat, const boost::container::flat_
 	}
 }
 
-std::tuple<pxr::TfToken, pxr::TfToken> materialOutputAndPurpose( const std::string &attributeName )
+std::tuple<pxr::TfToken, pxr::TfToken, pxr::TfToken> materialOutputAndPurpose( const std::string &attributeName )
 {
+	std::string attrName = attributeName;
+	pxr::TfToken geomSubset = pxr::TfToken();
+	size_t pos = attributeName.find( "geomSubset:" );
+	if( pos != std::string::npos )
+	{
+		attrName = attributeName.substr(0, pos - 1);
+		geomSubset = pxr::TfToken( attributeName.substr( pos + 11 ) );
+	}
+
 	for( const auto &purpose : { pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
 	{
 		if(
-			boost::ends_with( attributeName, purpose.GetString() ) &&
-			attributeName.size() > purpose.GetString().size()
+			boost::ends_with( attrName, purpose.GetString() ) &&
+			attrName.size() > purpose.GetString().size()
 		)
 		{
-			size_t colonIndex = attributeName.size() - purpose.GetString().size() - 1;
-			if( attributeName[colonIndex] == ':' )
+			size_t colonIndex = attrName.size() - purpose.GetString().size() - 1;
+			if( attrName[colonIndex] == ':' )
 			{
 				return std::make_tuple(
-					AttributeAlgo::nameToUSD( attributeName.substr( 0, colonIndex ) ).name,
-					pxr::TfToken( attributeName.substr( colonIndex + 1 ) )
+					AttributeAlgo::nameToUSD( attrName.substr( 0, colonIndex ) ).name,
+					pxr::TfToken( attrName.substr( colonIndex + 1 ) ),
+					geomSubset
 				);
 			}
 		}
 	}
-	return { AttributeAlgo::nameToUSD( attributeName ).name, pxr::UsdShadeTokens->allPurpose };
+	return { AttributeAlgo::nameToUSD( attrName ).name, pxr::UsdShadeTokens->allPurpose, geomSubset };
+}
+
+pxr::TfToken geomSubsetElementTypeForMaterial( const pxr::UsdPrim &prim )
+{
+	if( prim.IsA<pxr::UsdGeomMesh>() )
+	{
+		return pxr::UsdGeomTokens->face;
+	}
+	return pxr::TfToken();
 }
 
 using ShaderNetworkCacheKey = std::pair<pxr::SdfPath, pxr::UsdTimeCode>;
@@ -927,30 +947,50 @@ USDScene::~USDScene()
 				materialContainer.GetPrim().SetMetadata( g_metadataAutoMaterials, true );
 			}
 
-			for( const auto &[purpose, material] : m_materials )
+			for( const auto &[purpose, materialSubsets] : m_materials )
 			{
-				// Use a hash to identify the combination of shaders in this material.
-				IECore::MurmurHash materialHash;
-				for( const auto &[output, shaderNetwork] : material )
+				for( const auto &[materialSubset, material] : materialSubsets )
 				{
-					materialHash.append( output );
-					materialHash.append( shaderNetwork->Object::hash() );
-				}
-				pxr::TfToken matName( "material_" + materialHash.toString() );
+					// Use a hash to identify the combination of shaders in this material.
+					IECore::MurmurHash materialHash;
+					for( const auto &[output, shaderNetwork] : material )
+					{
+						materialHash.append( output );
+						materialHash.append( shaderNetwork->Object::hash() );
+					}
+					pxr::TfToken matName( "material_" + materialHash.toString() );
 
-				// Write the material if it hasn't been written already.
-				pxr::SdfPath matPath = materialContainer.GetPrim().GetPath().AppendChild( matName );
-				pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( materialContainer.GetPrim().GetStage(), matPath );
-				if( !mat )
-				{
-					mat = pxr::UsdShadeMaterial::Define( materialContainer.GetPrim().GetStage(), matPath );
-					populateMaterial( mat, material );
-				}
+					// Write the material if it hasn't been written already.
+					pxr::SdfPath matPath = materialContainer.GetPrim().GetPath().AppendChild( matName );
+					pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( materialContainer.GetPrim().GetStage(), matPath );
+					if( !mat )
+					{
+						mat = pxr::UsdShadeMaterial::Define( materialContainer.GetPrim().GetStage(), matPath );
+						populateMaterial( mat, material );
+					}
 
-				// Bind the material to this location
-				pxr::UsdShadeMaterialBindingAPI::Apply( m_location->prim ).Bind(
-					mat, pxr::UsdShadeTokens->fallbackStrength, purpose
-				);
+					// Bind the material to GeomSubset or directly to this location
+					if( materialSubset.IsEmpty() )
+					{
+						pxr::UsdShadeMaterialBindingAPI::Apply( m_location->prim ).Bind(
+							mat, pxr::UsdShadeTokens->fallbackStrength, purpose
+						);
+					}
+					else
+					{
+						pxr::TfToken elementType = geomSubsetElementTypeForMaterial( m_location->prim );
+						for( auto &geomSubset : pxr::UsdGeomSubset::GetGeomSubsets( pxr::UsdGeomImageable( m_location->prim ), elementType, pxr::UsdShadeTokens->materialBind ) )
+						{
+							if( geomSubset.GetPrim().GetName() == materialSubset )
+							{
+								pxr::UsdShadeMaterialBindingAPI::Apply( geomSubset.GetPrim() ).Bind(
+									mat, pxr::UsdShadeTokens->fallbackStrength, purpose
+								);
+								break;
+							}
+						}
+					}
+				}
 			}
 		}
 		catch( std::exception &e )
@@ -1114,14 +1154,38 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 	}
 	else
 	{
-		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
-		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
+		const auto &[output, purpose, geomSubsetName] = materialOutputAndPurpose( name.string() );
+		if( !geomSubsetName.IsEmpty() )
+		{
+			pxr::TfToken familyType = pxr::UsdGeomSubset::GetFamilyType( pxr::UsdGeomImageable( m_location->prim ), pxr::UsdShadeTokens->materialBind );
+			if( familyType == pxr::UsdGeomTokens->unrestricted )
+			{
+				return false;
+			}
+			pxr::TfToken elementType = geomSubsetElementTypeForMaterial( m_location->prim );
+			for( auto &geomSubset : pxr::UsdGeomSubset::GetGeomSubsets( pxr::UsdGeomImageable( m_location->prim ), elementType, pxr::UsdShadeTokens->materialBind ) )
+			{
+				if( geomSubset.GetPrim().GetName() == geomSubsetName )
+				{
+					if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( geomSubset.GetPrim(), purpose ) )
+					{
+						if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
+						{
+							return ShaderAlgo::canReadShaderNetwork( o );
+						}
+					}
+					break;
+				}
+			}
+		}
+		else if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
 				return ShaderAlgo::canReadShaderNetwork( o );
 			}
 		}
+
 		return false;
 	}
 }
@@ -1191,6 +1255,31 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 					attrName = attrName.string() + ":" + purpose.GetString();
 				}
 				attrs.push_back( attrName );
+			}
+		}
+		pxr::TfToken familyType = pxr::UsdGeomSubset::GetFamilyType( pxr::UsdGeomImageable( m_location->prim ), pxr::UsdShadeTokens->materialBind );
+		if( familyType != pxr::UsdGeomTokens->unrestricted )
+		{
+			pxr::TfToken elementType = geomSubsetElementTypeForMaterial( m_location->prim );
+			for( auto &geomSubset : pxr::UsdGeomSubset::GetGeomSubsets( pxr::UsdGeomImageable( m_location->prim ), elementType, pxr::UsdShadeTokens->materialBind ) )
+			{
+				if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( geomSubset.GetPrim(), purpose ) )
+				{
+					for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
+					{
+						if( !ShaderAlgo::canReadShaderNetwork( o ) )
+						{
+							continue;
+						}
+						InternedString attrName = AttributeAlgo::nameFromUSD( { o.GetBaseName() , false } );
+						if( !purpose.IsEmpty() )
+						{
+							attrName = attrName.string() + ":" + purpose.GetString();
+						}
+						attrName = attrName.string() + ":geomSubset:" + geomSubset.GetPrim().GetName().GetString();
+						attrs.push_back( attrName );
+					}
+				}
 			}
 		}
 	}
@@ -1273,8 +1362,31 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	}
 	else
 	{
-		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
-		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
+		const auto &[output, purpose, geomSubsetName] = materialOutputAndPurpose( name.string() );
+		if( !geomSubsetName.IsEmpty() )
+		{
+			pxr::TfToken familyType = pxr::UsdGeomSubset::GetFamilyType( pxr::UsdGeomImageable( m_location->prim ), pxr::UsdShadeTokens->materialBind );
+			if( familyType == pxr::UsdGeomTokens->unrestricted )
+			{
+				return nullptr;
+			}
+			pxr::TfToken elementType = geomSubsetElementTypeForMaterial( m_location->prim );
+			for( auto &geomSubset : pxr::UsdGeomSubset::GetGeomSubsets( pxr::UsdGeomImageable( m_location->prim ), elementType, pxr::UsdShadeTokens->materialBind ) )
+			{
+				if( geomSubset.GetPrim().GetName() == geomSubsetName )
+				{
+					if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( geomSubset.GetPrim(), purpose ) )
+					{
+						if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
+						{
+							return m_root->readShaderNetwork( o, m_root->timeCode( time ) );
+						}
+					}
+					break;
+				}
+			}
+		}
+		else if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
@@ -1350,8 +1462,8 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 		}
 		else
 		{
-			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
-			m_materials[purpose][output] = shaderNetwork;
+			const auto &[output, purpose, geomSubset] = materialOutputAndPurpose( name.string() );
+			m_materials[purpose][geomSubset][output] = shaderNetwork;
 		}
 	}
 	else if( name.string() == "gaffer:globals" )
@@ -1760,6 +1872,22 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 				mightBeTimeVarying = mightBeTimeVarying || m_root->shaderNetworkMightBeTimeVarying( o );
 			}
 			haveMaterials = true;
+		}
+		pxr::TfToken familyType = pxr::UsdGeomSubset::GetFamilyType( pxr::UsdGeomImageable( m_location->prim ), pxr::UsdShadeTokens->materialBind );
+		if( familyType != pxr::UsdGeomTokens->unrestricted )
+		{
+			for( auto &geomSubset : pxr::UsdGeomSubset::GetGeomSubsets( pxr::UsdGeomImageable( m_location->prim ), geomSubsetElementTypeForMaterial( m_location->prim ), pxr::UsdShadeTokens->materialBind ) )
+			{
+				if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( geomSubset.GetPrim(), purpose ) )
+				{
+					append( mat.GetPrim().GetPath(), h );
+					for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
+					{
+						mightBeTimeVarying = mightBeTimeVarying || m_root->shaderNetworkMightBeTimeVarying( o );
+					}
+				}
+				haveMaterials = true;
+			}
 		}
 	}
 

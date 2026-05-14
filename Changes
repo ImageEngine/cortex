@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.0.0a10)
 ========
 
+Features
+--------
 
+- IECoreUSD : GeomSubsets support for meshes and material binds.
 
 10.7.0.0a10 (relative to 10.7.0.0a9)
 ===========

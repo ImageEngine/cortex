@@ -123,8 +123,10 @@ class USDScene : public IECoreScene::SceneInterface
 		// Contains all the shader networks for a single material, mapping from material output
 		// (e.g. "surface", "displacement" etc) to the shading network that drives that output.
 		using MaterialNetworks = boost::container::flat_map<pxr::TfToken, IECoreScene::ConstShaderNetworkPtr>;
+		// Contains the materials to be bound for a geom subset.
+		using MaterialSubset = boost::container::flat_map<pxr::TfToken, MaterialNetworks>;
 		// Contains the materials to be bound for this location, indexed by purpose.
-		using Materials = boost::container::flat_map<pxr::TfToken, MaterialNetworks>;
+		using Materials = boost::container::flat_map<pxr::TfToken, MaterialSubset>;
 		Materials m_materials;
 
 };
