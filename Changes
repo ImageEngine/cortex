@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.0.0a10)
 ========
 
+Build
+-----
 
+- CI : Updated to GafferHQ/dependencies 11.0.0a8.
 
 10.7.0.0a10 (relative to 10.7.0.0a9)
 ===========
