@@ -1,6 +1,11 @@
 10.7.x.x (relative to 10.7.0.0a10)
 ========
 
+Fixes
+-----
+
+- RunTimeTyped : Fixed unnecessary overhead of `runTimeCast()` and `isInstanceOf()` for subclasses implemented in Python. The GIL is now never needed when the cast is to a C++ type.
+
 Breaking Changes
 ----------------
 
