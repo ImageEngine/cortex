@@ -5,6 +5,7 @@ Breaking Changes
 ----------------
 
 - ClassParameter, ClassVectorParameter : Replaced statically allocated TypeIds with ids allocated dynamically by `IECore.registerRunTimeTyped()`. If the id is needed from C++, it can be queried at runtime with `RunTimeTyped::typeIdFromTypeName()`.
+- RunTimeTyped : Removed `typId` argument from `registerRunTimeTyped()` Python function. TypeIds are now always allocated dynamically for Python classes.
 
 Build
 -----

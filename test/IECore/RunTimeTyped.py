@@ -131,13 +131,6 @@ class TestRunTimeTyped( unittest.TestCase ) :
 
 	def testRegisterRunTimeTyped( self ) :
 
-		# should raise because given type ID is different than the FileSequenceParameter type id
-		self.assertRaises( Exception, IECore.registerRunTimeTyped, IECore.FileSequenceParameter, 100009 )
-		# should raise because SequenceLsOp is registered with dynamic type id.
-		self.assertRaises( Exception, IECore.registerRunTimeTyped, IECore.SequenceLsOp, 100009 )
-		# should raise because FileSequenceParameter is registered with a non-dynamic type id
-		self.assertRaises( Exception, IECore.registerRunTimeTyped, IECore.FileSequenceParameter )
-
 		# should not raise because SequenceLsOp was already registered with a dynamic type id
 		IECore.registerRunTimeTyped( IECore.SequenceLsOp )
 
