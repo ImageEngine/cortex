@@ -68,6 +68,8 @@ __nextTypeId = 300000 # Same as `TypeId::FirstPythonTypeId` defined in TypeIds.h
 # If `typeName` is not specified then the name of the class itself is used -
 # you may wish to provide an explicit typeName in order to prefix the name
 # with a module name.
+## \todo It feels like this could probably be done automatically using a
+# custom metaclass for RunTimeTyped?
 def registerRunTimeTyped( typ, typeName = None ) :
 
 	if typeName is None :
