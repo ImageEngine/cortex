@@ -1063,7 +1063,7 @@ const std::string &Shader::defaultFragmentSource()
 			vec3 Nf = faceforward( fragmentN, -fragmentI, fragmentN );
 			float f = dot( normalize( fragmentI ), normalize(Nf) );
 			gl_FragColor = vec4( f * fragmentCs, 1 );
-		};
+		}
 
 	)";
 
@@ -1083,7 +1083,7 @@ const std::string &Shader::constantFragmentSource()
 		void main()
 		{
 			gl_FragColor = vec4( fragmentCs, 1 );
-		};
+		}
 
 	)";
 
@@ -1118,7 +1118,7 @@ const std::string &Shader::lambertFragmentSource()
 			vec3 Cdiffuse = ieDiffuse( fragmentP, n, Cl, L, gl_MaxLights );
 
 			gl_FragColor = vec4( Cdiffuse, 1.0 );
-		};
+		}
 
 	)";
 
