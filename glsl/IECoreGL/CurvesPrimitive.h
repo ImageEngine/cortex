@@ -47,7 +47,7 @@
 	layout( lines_adjacency ) in;\
 	layout( line_strip, max_vertices = 10 ) out;\
 	\
-	in int geometryIsCurveEndPoint[];\
+	in float geometryIsCurveEndPoint[];\
 	\
 	uniform mat4x4 basis;\
 	uniform mat4x4 phantomBasis0;\
@@ -70,7 +70,7 @@
 	layout( lines_adjacency ) in;\
 	layout( triangle_strip, max_vertices = 20 ) out;\
 	\
-	in int geometryIsCurveEndPoint[];\
+	in float geometryIsCurveEndPoint[];\
 	\
 	uniform mat4x4 basis;\
 	uniform mat4x4 phantomBasis0;\

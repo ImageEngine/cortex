@@ -338,15 +338,18 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 		// To handle "phantom vertices" in the geometry shader, we need to know which
 		// vertices correspond to the original endpoints of the curve. We do that using
 		// the `vertexIsCurveEndPoint` attribute.
-		IECore::IntVectorDataPtr isEndPointData = new IECore::IntVectorData();
-		vector<int> &isEndPoint = isEndPointData->writable();
+		/// \todo `vertexIsCurveEndPoint` is a float attribute only to maintain compatibility
+		/// with OpenGL 2.1. Use an int attribute once we we're able to move IECoreGL to
+		/// OpenGL 3.3 Core Profile.
+		IECore::FloatVectorDataPtr isEndPointData = new IECore::FloatVectorData();
+		vector<float> &isEndPoint = isEndPointData->writable();
 		isEndPoint.resize( m_memberData->points->readable().size(), 0 );
 
 		int i = 0;
 		for( auto c : m_memberData->vertsPerCurve->readable() )
 		{
-			isEndPoint[i] = 1;
-			isEndPoint[i+c-1] = 1;
+			isEndPoint[i] = 1.0f;
+			isEndPoint[i+c-1] = 1.0f;
 			i += c;
 		}
 		geometryShaderSetup->addVertexAttribute( "vertexIsCurveEndPoint", isEndPointData );

@@ -970,7 +970,7 @@ const std::string &Shader::defaultVertexSource()
 {
 	static const string g_s = R"(
 
-		#version 150 compatibility
+		#version 120
 
 		#if __VERSION__ <= 120
 		#define in attribute
@@ -985,14 +985,14 @@ const std::string &Shader::defaultVertexSource()
 		in vec3 vertexN;
 		in vec2 vertexuv;
 		in vec3 vertexCs;
-		in int vertexIsCurveEndPoint;
+		in float vertexIsCurveEndPoint;
 
 		out vec3 geometryI;
 		out vec3 geometryP;
 		out vec3 geometryN;
 		out vec2 geometryuv;
 		out vec3 geometryCs;
-		out int geometryIsCurveEndPoint;
+		out float geometryIsCurveEndPoint;
 
 		out vec3 fragmentI;
 		out vec3 fragmentP;
