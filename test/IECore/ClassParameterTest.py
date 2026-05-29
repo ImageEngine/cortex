@@ -148,5 +148,17 @@ class ClassParameterTest( unittest.TestCase ) :
 		self.assertEqual( c["a"].getNumericValue(), 10 )
 		self.assertEqual( c["b"].getNumericValue(), 20 )
 
+	def testTypeId( self ) :
+
+		parameter = IECore.ClassParameter(
+			"n",
+			"d",
+			"IECORE_OP_PATHS",
+			os.path.join( "maths", "multiply" ),
+			2
+		)
+
+		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( "ClassParameter" ), parameter.typeId() )
+
 if __name__ == "__main__" :
 	unittest.main()

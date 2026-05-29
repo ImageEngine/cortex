@@ -1,6 +1,11 @@
 10.7.x.x (relative to 10.7.0.0a10)
 ========
 
+Breaking Changes
+----------------
+
+- ClassParameter, ClassVectorParameter : Replaced statically allocated TypeIds with ids allocated dynamically by `IECore.registerRunTimeTyped()`. If the id is needed from C++, it can be queried at runtime with `RunTimeTyped::typeIdFromTypeName()`.
+
 Build
 -----
 

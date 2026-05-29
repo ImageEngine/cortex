@@ -220,8 +220,8 @@ enum TypeId
 	FileSequenceParameterTypeId = 289,
 	FileSequenceVectorParameterTypeId = 290,
 	CompoundDataBaseTypeId = 311,
-	ClassParameterTypeId = 313,
-	ClassVectorParameterTypeId = 314,
+	ObsoleteClassParameterTypeId = 313, // Replaced by dynamically registered TypeId
+	ObsoleteClassVectorParameterTypeId = 314, // Replaced by dynamically registered TypeId
 	TransformationMatrixfParameterTypeId = 334,
 	TransformationMatrixdParameterTypeId = 335,
 	LineSegment3fDataTypeId = 344,

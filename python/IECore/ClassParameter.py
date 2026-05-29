@@ -103,6 +103,6 @@ class ClassParameter( IECore.CompoundParameter ) :
 		parameter.setClass( args[0], int( args[1] ), args[2] )
 		del args[0:3]
 
-IECore.registerRunTimeTyped( ClassParameter, IECore.TypeId.ClassParameter )
+IECore.registerRunTimeTyped( ClassParameter )
 
 IECore.ParameterParser.registerType( ClassParameter.staticTypeId(), ClassParameter._parse, ClassParameter._serialise )
