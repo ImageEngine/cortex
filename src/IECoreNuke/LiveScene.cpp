@@ -498,11 +498,15 @@ ConstObjectPtr LiveScene::readObject( double time, const IECore::Canceller *canc
 		if ( result == IECore::PathMatcher::ExactMatch )
 		{
 			auto geoInfo = object( i, &time );
-			if ( !geoInfo )
+			if ( !geoInfo || geoInfo->primitives() == 0 )
 			{
 				return IECore::NullObject::defaultNullObject();
 			}
-			if ( geoInfo->primitives() == 1 && ( geoInfo->primitive( 0 )->getPrimitiveType() == DD::Image::PrimitiveType::eParticlesSprite ) )
+
+			auto primitiveType = geoInfo->primitive( 0 )->getPrimitiveType();
+			if ( primitiveType == DD::Image::PrimitiveType::eParticlesSprite
+				|| primitiveType == DD::Image::PrimitiveType::eParticles
+				|| primitiveType == DD::Image::PrimitiveType::ePoint )
 			{
 				auto converter = new IECoreNuke::FromNukePointsConverter( geoInfo, m_op->input0() );
 				return converter->convert();

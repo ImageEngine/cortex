@@ -377,6 +377,73 @@ class LiveSceneKnobTest( IECoreNuke.TestCase ) :
 		self.assertEqual( objectA.topologyHash(), expectedObjectA.topologyHash() )
 		self.assertEqual( objectA.keys(), [ "P", "uv" ] )
 
+	def testReadObjectParticles(self):
+		import IECoreScene
+		import tempfile, os
+
+		noise = nuke.createNode("Noise")
+		card = nuke.createNode("Card2")
+		card.setInput(0, noise)
+		particle = nuke.createNode("ParticleEmitter")
+		particle.setInput(1, card)
+
+		# Read through ieLiveScene at frame 5 (after simulation)
+		nuke.frame(5)
+		n = nuke.createNode("ieLiveScene")
+		n.setInput(0, particle)
+		n.forceValidate()
+
+		liveScene = n.knob("scene").getValue()
+		self.assertGreater(len(liveScene.childNames()), 0)
+
+		child = liveScene.scene(["object0"])
+		self.assertTrue(child.hasObject())
+
+		obj = child.readObject(1.0)
+		self.assertIsInstance(obj, IECoreScene.PointsPrimitive)
+
+	def testReadObjectDeepToPoints(self):
+		import IECoreScene
+
+		checker = nuke.createNode("CheckerBoard2")
+		deepFromImage = nuke.createNode("DeepFromImage")
+		deepFromImage["z"].setValue(1000)
+		deepFromImage["set_z"].setValue(True)
+		deepFromImage.setInput(0, checker)
+
+		camera = nuke.createNode("Camera")
+
+		deepToPoints = nuke.createNode("DeepToPoints")
+		deepToPoints.setInput(0, deepFromImage)
+		deepToPoints.setInput(1, camera)
+
+		n = nuke.createNode("ieLiveScene")
+		n.setInput(0, deepToPoints)
+		n.forceValidate()
+
+		liveScene = n.knob("scene").getValue()
+		self.assertGreater(len(liveScene.childNames()), 0)
+
+		child = liveScene.scene(["object0"])
+		self.assertTrue(child.hasObject())
+
+		obj = child.readObject(0)
+		self.assertIsInstance(obj, IECoreScene.PointsPrimitive)
+
+	def testReadObjectMesh(self):
+		import IECoreScene
+
+		sphere = nuke.createNode("Sphere")
+
+		n = nuke.createNode("ieLiveScene")
+		n.setInput(0, sphere)
+
+		liveScene = n.knob("scene").getValue()
+		child = liveScene.scene(["object0"])
+		self.assertTrue(child.hasObject())
+
+		obj = child.readObject(0)
+		self.assertIsInstance(obj, IECoreScene.MeshPrimitive)
 
 if __name__ == "__main__":
 	unittest.main()
