@@ -1,7 +1,14 @@
-10.5.x.x (relative to 10.5.16.0)
+10.5.x.x (relative to 10.5.16.1)
 ========
 
 
+10.5.16.1 (relative to 10.5.16.0)
+========
+
+Fixes
+-----
+
+- IECoreNuke.LiveScene : Fixed point clouds from DeepToPoints to be supported. The geometry was incorrectly treated as a mesh instead of points.
 
 10.5.16.0 (relative to 10.5.15.4)
 =========
