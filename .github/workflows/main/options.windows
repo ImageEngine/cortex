@@ -36,6 +36,7 @@ FREETYPE_INCLUDE_PATH = includes + "\\freetype2"
 VDB_INCLUDE_PATH = includes
 ALEMBIC_INCLUDE_PATH = includes
 HDF5_INCLUDE_PATH = includes
+NANOBIND_INCLUDE_PATH = includes
 
 WITH_GL = "1"
 GLEW_INCLUDE_PATH = includes
