@@ -41,6 +41,7 @@
 
 #include "DDImage/Box.h"
 #include "DDImage/Box3.h"
+#include "DDImage/Matrix3.h"
 #include "DDImage/Matrix4.h"
 #include "DDImage/Vector2.h"
 #include "DDImage/Vector3.h"
@@ -118,6 +119,12 @@ IECORENUKE_API Imath::Color4f convert( const DD::Image::Vector4 &from );
 /// Discards from.w
 template<>
 IECORENUKE_API Imath::V3d convert( const DD::Image::Vector4 &from );
+
+template<>
+IECORENUKE_API Imath::M33f convert( const DD::Image::Matrix3 &from );
+
+template<>
+IECORENUKE_API Imath::M33d convert( const DD::Image::Matrix3 &from );
 
 template<>
 IECORENUKE_API Imath::M44f convert( const DD::Image::Matrix4 &from );
