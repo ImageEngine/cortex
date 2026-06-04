@@ -37,9 +37,11 @@
 
 #include "IECoreNuke/ToNukeConverter.h"
 
+#include "IECore/CompoundObject.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/Object.h"
 #include "IECore/SimpleTypedParameter.h"
+#include "IECore/TypedObjectParameter.h"
 
 #include "DDImage/GeometryList.h"
 
@@ -99,6 +101,7 @@ class IECORENUKE_API ToNukeGeometryConverter : public ToNukeConverter
 
 		IECore::IntParameterPtr m_objIndexParameter;
 		IECore::StringParameterPtr m_pathParameter;
+		IECore::CompoundObjectParameterPtr m_attributesParameter;
 
 };
 

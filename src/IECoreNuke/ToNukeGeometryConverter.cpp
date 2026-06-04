@@ -33,16 +33,123 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreNuke/ToNukeGeometryConverter.h"
+#include "IECoreNuke/Convert.h"
 #include "IECoreNuke/LiveScene.h"
 
 #include "IECore/CompoundData.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
+#include "IECore/SimpleTypedData.h"
 
 #include <cassert>
+
+#include "boost/format.hpp"
 
 using namespace IECoreNuke;
 using namespace IECore;
 using namespace DD::Image;
+
+namespace
+{
+
+void writeAttribute( DD::Image::GeometryList &geoList, int objIndex, const char *name, const IECore::Object *value )
+{
+	switch( value->typeId() )
+	{
+		case IECore::FloatDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::FLOAT_ATTRIB );
+			attr->flt() = static_cast<const IECore::FloatData *>( value )->readable();
+			break;
+		}
+		case IECore::IntDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::INT_ATTRIB );
+			attr->integer() = static_cast<const IECore::IntData *>( value )->readable();
+			break;
+		}
+		case IECore::BoolDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::INT_ATTRIB );
+			attr->integer() = static_cast<const IECore::BoolData *>( value )->readable() ? 1 : 0;
+			break;
+		}
+		case IECore::StringDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::STD_STRING_ATTRIB );
+			attr->stdstring() = static_cast<const IECore::StringData *>( value )->readable();
+			break;
+		}
+		case IECore::V2fDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::VECTOR2_ATTRIB );
+			const auto &v = static_cast<const IECore::V2fData *>( value )->readable();
+			attr->vector2() = DD::Image::Vector2( v.x, v.y );
+			break;
+		}
+		case IECore::V3fDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::VECTOR3_ATTRIB );
+			attr->vector3() = IECore::convert<DD::Image::Vector3>( static_cast<const IECore::V3fData *>( value )->readable() );
+			break;
+		}
+		case IECore::Color4fDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::VECTOR4_ATTRIB );
+			const auto &c = static_cast<const IECore::Color4fData *>( value )->readable();
+			attr->vector4() = DD::Image::Vector4( c.r, c.g, c.b, c.a );
+			break;
+		}
+		case IECore::M33fDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::MATRIX3_ATTRIB );
+			const auto &m = static_cast<const IECore::M33fData *>( value )->readable();
+			DD::Image::Matrix3 result;
+			for( int i = 0; i < 3; i++ )
+			{
+				for( int j = 0; j < 3; j++ )
+				{
+					result[j][i] = m[j][i];
+				}
+			}
+			attr->matrix3() = result;
+			break;
+		}
+		case IECore::M44fDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::MATRIX4_ATTRIB );
+			attr->matrix4() = IECore::convert<DD::Image::Matrix4>( Imath::M44d( static_cast<const IECore::M44fData *>( value )->readable() ) );
+			break;
+		}
+		case IECore::M44dDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::MATRIX4_ATTRIB );
+			attr->matrix4() = IECore::convert<DD::Image::Matrix4>( static_cast<const IECore::M44dData *>( value )->readable() );
+			break;
+		}
+		case IECore::M33dDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::MATRIX3_ATTRIB );
+			const auto &m = static_cast<const IECore::M33dData *>( value )->readable();
+			DD::Image::Matrix3 result;
+			for( int i = 0; i < 3; i++ )
+			{
+				for( int j = 0; j < 3; j++ )
+				{
+					result[j][i] = m[j][i];
+				}
+			}
+			attr->matrix3() = result;
+			break;
+		}
+		default :
+			IECore::msg( IECore::Msg::Warning, "ToNukeGeometryConverter", boost::format( "Unsupported attribute type \"%s\" for \"%s\"" ) % value->typeName() % name );
+			break;
+	}
+}
+
+} // namespace
 
 IE_CORE_DEFINERUNTIMETYPED( ToNukeGeometryConverter );
 
@@ -56,6 +163,9 @@ ToNukeGeometryConverter::ToNukeGeometryConverter( const std::string &description
 
 	m_pathParameter = new StringParameter( "path", "The object path in the hierarchy.", new StringData() );
 	parameters()->addParameter( m_pathParameter );
+
+	m_attributesParameter = new CompoundObjectParameter( "attributes", "Scene attributes to write as Group_Object attributes.", new CompoundObject() );
+	parameters()->addParameter( m_attributesParameter );
 
 }
 
@@ -71,6 +181,13 @@ void ToNukeGeometryConverter::convert( GeometryList &geoList ) const
 	// add path attribute
 	auto nameAttribute = geoList.writable_attribute( objIndex, GroupType::Group_Object, IECoreNuke::LiveScene::nameAttribute.data(), AttribType::STD_STRING_ATTRIB);
 	nameAttribute->stdstring() = m_pathParameter->getTypedValue();
+
+	// add scene attributes as Group_Object attributes
+	ConstCompoundObjectPtr attributes = m_attributesParameter->getTypedValue<CompoundObject>();
+	for( const auto &attr : attributes->members() )
+	{
+		writeAttribute( geoList, objIndex, attr.first.c_str(), attr.second.get() );
+	}
 
 	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
 	doConversion( srcParameter()->getValidatedValue(), geoList, objIndex, operands.get() );
