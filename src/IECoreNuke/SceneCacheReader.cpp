@@ -38,6 +38,8 @@
 #include "IECoreNuke/Hash.h"
 #include "IECoreNuke/ToNukeGeometryConverter.h"
 
+#include "IECore/CompoundObject.h"
+
 #include "IECoreGL/BoxPrimitive.h"
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/Exception.h"
@@ -1094,6 +1096,18 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 		if (converter)
 		{
 			converter->parameters()->parameter<IECore::StringParameter>( "path" )->setValue( new IECore::StringData( itemPath ) );
+
+			IECore::CompoundObjectPtr sceneAttributes = new IECore::CompoundObject();
+			IECoreScene::SceneInterface::NameList attrNames;
+			sceneInterface->attributeNames( attrNames );
+			for( const auto &attrName : attrNames )
+			{
+				// Safe to cast away const as the CompoundObject is only used to pass
+				// attribute values through to the converter, which only reads them.
+				sceneAttributes->members()[attrName] = boost::const_pointer_cast<IECore::Object>( sceneInterface->readAttribute( attrName, time ) );
+			}
+			converter->parameters()->parameter<IECore::CompoundObjectParameter>( "attributes" )->setValue( sceneAttributes );
+
 			converter->convert( out );
 			// store the world matrix to apply in geometry_engine because
 			// somewhere after the create_geometry nuke reset the matrix in the SourceGeo base class.
