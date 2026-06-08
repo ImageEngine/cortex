@@ -491,6 +491,29 @@ class DeletePointsTest( unittest.TestCase ) :
 
 		self.assertRaises( RuntimeError, IECoreScene.PointsAlgo.deletePoints, points, delete )
 
+	def testPointInstancer( self ) :
+
+		points = IECoreScene.PointInstancer( 2 )
+		points["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ) ] ) )
+		points["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 1, 2 ] ) )
+
+		toDelete = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 1, 0 ] ) )
+		points = IECoreScene.PointsAlgo.deletePoints( points, toDelete )
+
+		self.assertIsInstance( points, IECoreScene.PointInstancer )
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		self.assertEqual( points["P"].data, IECore.V3fVectorData( [ imath.V3f( 1 ) ] ) )
+		self.assertEqual( points["a"].data, IECore.IntVectorData( [ 2 ] ) )
+
+	def testBlindData( self ) :
+
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 4 ) ] ) )
+		points.blindData()["test"] = IECore.IntData( 10 )
+
+		toDelete = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 1, 0, 1, 0 ] ) )
+		points = IECoreScene.PointsAlgo.deletePoints( points, toDelete )
+
+		self.assertEqual( points.blindData()["test"], IECore.IntData( 10 ) )
 
 class MergePointsTest( unittest.TestCase ) :
 
