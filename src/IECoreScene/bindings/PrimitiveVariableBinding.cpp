@@ -215,6 +215,47 @@ string primitiveVariableRepr( const PrimitiveVariable &p )
 	return result;
 }
 
+template<typename T>
+size_t indexedViewSizeWrapper( const PrimitiveVariable::IndexedView<T> &view )
+{
+	return view ? view.size() : 0;
+}
+
+template<typename T>
+T indexedViewGetItemWrapper( const PrimitiveVariable::IndexedView<T> &view, long index )
+{
+	const long s = view ? view.size() : 0;
+
+	if( index < 0 )
+	{
+		index += s;
+	}
+
+	if( index >= s || index < 0 )
+	{
+		PyErr_SetString( PyExc_IndexError, "Index out of range" );
+		throw_error_already_set();
+	}
+
+	return view[index];
+}
+
+template<typename T>
+void bindIndexedView( const char *name )
+{
+	using ViewType = PrimitiveVariable::IndexedView<T>;
+
+	class_<ViewType>( name )
+		.def( init<const PrimitiveVariable &>() )
+		.def( "size", &indexedViewSizeWrapper<T> )
+		.def( "index", &ViewType::index )
+		.def( "__len__", &ViewType::size )
+		.def( "__getitem__", &indexedViewGetItemWrapper<T> )
+		.def( "__bool__", &ViewType::isValid )
+		.def( "isValid", &ViewType::isValid )
+	;
+}
+
 } // namespace
 
 namespace IECoreSceneModule
@@ -239,6 +280,7 @@ void bindPrimitiveVariable()
 		.def( self != self )
 		.def( "__repr__", &primitiveVariableRepr )
 	;
+
 	enum_<PrimitiveVariable::Interpolation>( "Interpolation" )
 		.value( "Invalid", PrimitiveVariable::Invalid )
 		.value( "Constant", PrimitiveVariable::Constant )
@@ -247,6 +289,18 @@ void bindPrimitiveVariable()
 		.value( "Varying", PrimitiveVariable::Varying )
 		.value( "FaceVarying", PrimitiveVariable::FaceVarying )
 	;
+
+	bindIndexedView<bool>( "BoolIndexedView" );
+	bindIndexedView<int>( "IntIndexedView" );
+	bindIndexedView<int64_t>( "Int64IndexedView" );
+	bindIndexedView<float>( "FloatIndexedView" );
+	bindIndexedView<string>( "StringIndexedView" );
+	bindIndexedView<Imath::V2f>( "V2fIndexedView" );
+	bindIndexedView<Imath::V3f>( "V3fIndexedView" );
+	bindIndexedView<Imath::Color3f>( "Color3fIndexedView" );
+	bindIndexedView<Imath::Color4f>( "Color4fIndexedView" );
+	bindIndexedView<Imath::M44f>( "M44fIndexedView" );
+	bindIndexedView<Imath::Quatf>( "QuatfIndexedView" );
 
 }
 
