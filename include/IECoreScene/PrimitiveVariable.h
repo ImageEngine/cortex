@@ -138,8 +138,8 @@ class PrimitiveVariable::IndexedView
 
 		class Iterator;
 
-		Iterator begin();
-		Iterator end();
+		Iterator begin() const;
+		Iterator end() const;
 
 		typename std::vector<T>::const_reference operator[]( size_t i ) const
 		{

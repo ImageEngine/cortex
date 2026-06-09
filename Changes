@@ -10,6 +10,7 @@ Fixes
 -----
 
 - RunTimeTyped : Fixed unnecessary overhead of `runTimeCast()` and `isInstanceOf()` for subclasses implemented in Python. The GIL is now never needed when the cast is to a C++ type.
+- PrimitiveVariable : Made IndexedView `begin()` and `end()` const.
 
 Breaking Changes
 ----------------
