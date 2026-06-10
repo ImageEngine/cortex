@@ -4614,7 +4614,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotIn( "\\", xform.readAttribute( "render:testAsset", 0 ).value )
 		self.assertTrue( pathlib.Path( xform.readAttribute( "render:testAsset", 0 ).value ).is_file() )
 
-	def _testPointInstancerRelativePrototypes( self ) :
+	def testPointInstancerRelativePrototypes( self ) :
 
 		root = IECoreScene.SceneInterface.create(
 			os.path.join( os.path.dirname( __file__ ), "data", "pointInstancerWeirdPrototypes.usda" ),
@@ -4623,30 +4623,7 @@ class USDSceneTest( unittest.TestCase ) :
 		pointInstancer = root.child( "inst" )
 		obj = pointInstancer.readObject(0.0)
 
-		if os.environ.get( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", "0" ) != "0" :
-			self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ './Prototypes/sphere', '/cube' ] ) )
-		else :
-			self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ '/inst/Prototypes/sphere', '/cube' ] ) )
-
-	def testPointInstancerRelativePrototypes( self ) :
-
-		for relative in [ "0", "1", None ] :
-
-			with self.subTest( relative = relative ) :
-
-				env = os.environ.copy()
-				if relative is not None :
-					env["IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES"] = relative
-				else :
-					env.pop( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", None )
-
-				try :
-					subprocess.check_output(
-						[ sys.executable, __file__, "USDSceneTest._testPointInstancerRelativePrototypes" ],
-						env = env, stderr = subprocess.STDOUT
-					)
-				except subprocess.CalledProcessError as e :
-					self.fail( e.output )
+		self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ 'Prototypes/sphere', '/cube' ] ) )
 
 	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
 	def testUsdVolVolumeSlashes( self ) :
