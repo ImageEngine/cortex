@@ -62,6 +62,10 @@ IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECore
 IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomGprim &gprim, pxr::UsdTimeCode time );
 /// As above, but redirects "P", "N" etc to the relevant attributes of `pointBased`.
 IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
+
+/// Expands an IndexedView into a VtArray.
+template<typename T>
+IECOREUSD_API pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable::IndexedView<T> &view );
 /// Equivalent to `DataAlgo::toUSD( primitiveVariable.expandedData() )`, but avoiding
 /// the creation of the temporary expanded data.
 IECOREUSD_API pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable, bool arrayRequired = false );
@@ -88,5 +92,7 @@ IECOREUSD_API IECoreScene::PrimitiveVariable::Interpolation fromUSD( pxr::TfToke
 } // namespace PrimitiveAlgo
 
 } // namespace IECoreUSD
+
+#include "IECoreUSD/PrimitiveAlgo.inl"
 
 #endif // IECOREUSD_PRIMITIVEALGO_H
