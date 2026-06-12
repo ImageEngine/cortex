@@ -220,8 +220,8 @@ enum TypeId
 	FileSequenceParameterTypeId = 289,
 	FileSequenceVectorParameterTypeId = 290,
 	CompoundDataBaseTypeId = 311,
-	ClassParameterTypeId = 313,
-	ClassVectorParameterTypeId = 314,
+	ObsoleteClassParameterTypeId = 313, // Replaced by dynamically registered TypeId
+	ObsoleteClassVectorParameterTypeId = 314, // Replaced by dynamically registered TypeId
 	TransformationMatrixfParameterTypeId = 334,
 	TransformationMatrixdParameterTypeId = 335,
 	LineSegment3fDataTypeId = 344,
@@ -315,9 +315,11 @@ enum TypeId
 	FirstAtomsGafferTypeId = 128000,  // Used by AtomsGaffer
 	LastAtomsGafferTypeId = 128999,
 
-	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
-	FirstDynamicTypeId = 300000,
-	LastDynamicTypeId = 399999,
+	// TypeIds dynamically allocated for Python classes by
+	// `IECore.registerRunTimeTyped()`. Do not use for any
+	// other purpose.
+	FirstPythonTypeId = 300000,
+	LastPythonTypeId = 399999,
 
 	LastExtensionTypeId = 399999,
 	// Any TypeIds beyond this point can be considered safe for private internal use.

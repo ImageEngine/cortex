@@ -60,72 +60,52 @@ def __registerTypeId( typeId, typeName, baseTypeId ) :
 	# register the new type id
 	IECore.RunTimeTyped.registerType( typeId, typeName, baseTypeId )
 
-__nextDynamicRunTimeTypedId = None
+__nextTypeId = 300000 # Same as `TypeId::FirstPythonTypeId` defined in TypeIds.h
 
 ## This function adds the necessary function definitions to a python
 # class for it to properly implement the RunTimeTyped interface. It should
-# be called once for all python classes inheriting from RunTimeTyped. It also
-# calls registerTypeId() for you.
-# typId is optional and if not defined, this function will associate a dynamic Id
-#       in the range FirstDynamicTypeId and LastDynamicTypeId from TypeIds.h.
-#       It's necessary to specify type Id for Object derived class or anything that
-#       is serializable.
-# If typeName is not specified then the name of the class itself is used - you may wish
-# to provide an explicit typeName in order to prefix the name with a module name.
-def registerRunTimeTyped( typ, typId = None, typeName = None ) :
+# be called once for all python classes inheriting from RunTimeTyped.
+# If `typeName` is not specified then the name of the class itself is used -
+# you may wish to provide an explicit typeName in order to prefix the name
+# with a module name.
+## \todo It feels like this could probably be done automatically using a
+# custom metaclass for RunTimeTyped?
+def registerRunTimeTyped( typ, typeName = None ) :
 
 	if typeName is None :
 		typeName = typ.__name__
 
 	runTypedBaseClass = next( c for c in typ.__bases__ if issubclass( c, IECore.RunTimeTyped ) )
 
-	# constants below are the same as in TypeIds.h
-	FirstDynamicTypeId = 300000
-	LastDynamicTypeId = 399999
+	# As defined in TypeIds.h
+	LastPythonTypeId = 399999
 
-	# check if overwritting registration.
 	if not hasattr( IECore.TypeId, typeName ) :
 
-		if typId is None :
+		# First registration.
 
-			global __nextDynamicRunTimeTypedId
+		global __nextTypeId
+		if __nextTypeId > LastPythonTypeId :
+			raise Exception( "Too many dynamic RunTimeTyped registered classes! You must change TypeIds.h and rebuild Cortex." )
 
-			if __nextDynamicRunTimeTypedId is None :
-				__nextDynamicRunTimeTypedId = FirstDynamicTypeId
-			elif __nextDynamicRunTimeTypedId > LastDynamicTypeId:
-				raise Exception( "Too many dynamic RunTimeTyped registered classes! You must change TypeIds.h and rebuild Cortex." )
+		typeId = IECore.TypeId( __nextTypeId )
+		__nextTypeId += 1
 
-			typId = __nextDynamicRunTimeTypedId
-
-			__nextDynamicRunTimeTypedId += 1
-
-		__registerTypeId( IECore.TypeId( typId ), typeName, IECore.TypeId( runTypedBaseClass.staticTypeId() ) )
+		__registerTypeId( typeId, typeName, IECore.TypeId( runTypedBaseClass.staticTypeId() ) )
 
 	else :
-		# check if the new type Id is compatible with the previously registered one.
-		prevTypId = getattr( IECore.TypeId, typeName )
-		if prevTypId in range( FirstDynamicTypeId, LastDynamicTypeId+1 ) :
-			if not typId is None :
-				raise Exception( "Trying to set a type ID for %s previously registered as a dynamic type Id!" % typeName )
-		else :
-			if typId is None :
-				raise Exception( "Trying to re-register type %s as dynamic type Id!" % typeName )
-			elif typId != prevTypId :
-				raise Exception( "Trying to re-register %s under different type Id: %s != %s" % ( typeName, str(typId), prevTypId ) )
-		# necessary when the typeid is defined in IECore/TypeIds.h and bound in TypeIdBinding.cpp, but then
-		# the class for that typeid is implemented in python (currently ClassParameter does this).
-		if IECore.RunTimeTyped.typeNameFromTypeId( prevTypId )=="" :
-			IECore.RunTimeTyped.registerType( prevTypId, typeName, IECore.TypeId( runTypedBaseClass.staticTypeId() ) )
 
-	# Retrieve the correct value from the enum
-	tId = getattr( IECore.TypeId, typeName )
+		# Re-registration - this can happen when reloading an Op for example.
+
+		typeId = getattr( IECore.TypeId, typeName )
+		assert( IECore.RunTimeTyped.typeNameFromTypeId( typeId ) != "" )
 
 	# add the typeId and typeName method overrides
-	typ.typeId = lambda x : tId
+	typ.typeId = lambda x : typeId
 	typ.typeName = lambda x: typeName
 
 	# add the staticTypeId, staticTypeName, baseTypeId, and baseTypeName overrides
-	typ.staticTypeId = staticmethod( lambda : tId )
+	typ.staticTypeId = staticmethod( lambda : typeId )
 	typ.staticTypeName = staticmethod( lambda : typeName )
 	typ.baseTypeId = staticmethod( lambda : runTypedBaseClass.staticTypeId() )
 	typ.baseTypeName = staticmethod( lambda : runTypedBaseClass.staticTypeName() )

@@ -213,6 +213,6 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 
 		parameter.setClasses( list( zip( parameterNames, classNames, classVersions ) ) )
 
-IECore.registerRunTimeTyped( ClassVectorParameter, IECore.TypeId.ClassVectorParameter )
+IECore.registerRunTimeTyped( ClassVectorParameter )
 
 IECore.ParameterParser.registerType( ClassVectorParameter.staticTypeId(), ClassVectorParameter._parse, ClassVectorParameter._serialise )

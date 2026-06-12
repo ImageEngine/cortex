@@ -137,9 +137,13 @@ const char *RunTimeTypedWrapper<T>::typeName() const
 template<typename T>
 bool RunTimeTypedWrapper<T>::isInstanceOf( IECore::TypeId typeId ) const
 {
-	if( T::isInstanceOf( typeId ) )
+	if( typeId < IECore::FirstPythonTypeId || typeId > IECore::LastPythonTypeId )
 	{
-		return true;
+		// TypeId belongs to a C++ class, so there is no need to check the
+		// result of Python override of `isInstanceOf()`. This is a crucial
+		// performance optimisation for `runTimeCast()` calls in C++, as it
+		// avoids taking the GIL unnecessarily.
+		return T::isInstanceOf( typeId );
 	}
 
 	if( this->isSubclassed() )
@@ -182,7 +186,7 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( const char *typeName ) const
 				return boost::python::extract<bool>( res );
 			}
 		}
-		
+
 		catch( const boost::python::error_already_set & )
 		{
 			ExceptionAlgo::translatePythonException();

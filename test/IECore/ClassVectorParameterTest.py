@@ -514,6 +514,10 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 
 		self.assertEqual( c["p0"].userData(), IECore.CompoundObject() )
 
+	def testTypeId( self ) :
+
+		parameter = IECore.ClassVectorParameter( "n", "d", "IECORE_OP_PATHS" )
+		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( "ClassVectorParameter" ), parameter.typeId() )
 
 if __name__ == "__main__" :
 	unittest.main()
