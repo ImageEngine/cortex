@@ -53,6 +53,7 @@ import IECoreUSD
 
 import pxr.Usd
 import pxr.UsdGeom
+import pxr.UsdLux
 
 if pxr.Usd.GetVersion() < ( 0, 19, 3 ) :
 	pxr.Usd.Attribute.HasAuthoredValue = pxr.Usd.Attribute.HasAuthoredValueOpinion
@@ -3899,6 +3900,53 @@ class USDSceneTest( unittest.TestCase ) :
 		light = pxr.UsdLux.DomeLight( stage.GetPrimAtPath( "/light" ) )
 		self.assertEqual( light.GetTextureFileAttr().Get(), "test.exr" )
 		self.assertEqual( light.GetTextureFormatAttr().Get(), "latlong" )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testWriteMeshLight( self ) :
+
+		# Write to USD
+
+		fileName = os.path.join( self.temporaryDirectory(), "meshLight.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		lightNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader(
+					"MeshLight",
+					"light",
+					{
+						"intensity" : IECore.FloatData( 2.0 ),
+						"color" : IECore.Color3fData( imath.Color3f( 1, 2, 3 ) ),
+						"enableColorTemperature" : IECore.BoolData( True )
+					}
+				),
+			},
+			output = "output",
+		)
+
+		meshLightObject = IECoreScene.MeshPrimitive.createPlane(
+			imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) ),
+			imath.V2i( 16, 16 )
+		)
+
+		meshLight = root.createChild( "meshLight" )
+		meshLight.writeObject( meshLightObject, 0 )
+		meshLight.writeAttribute( "light", lightNetwork, 0 )
+
+		del meshLight, root
+
+		# Verify via USD API.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		prim = stage.GetPrimAtPath( "/meshLight" )
+
+		self.assertTrue( prim.IsValid() )
+		self.assertTrue( prim.IsA( pxr.UsdGeom.Mesh ) )
+		self.assertTrue( prim.HasAPI( pxr.UsdLux.MeshLightAPI ) )
+		self.assertEqual( prim.GetAttribute( "inputs:intensity" ).Get( 0 ), 2.0 )
+		self.assertEqual( prim.GetAttribute( "inputs:color" ).Get( 0 ), pxr.Gf.Vec3f( 1, 2, 3 ) )
+		self.assertEqual( prim.GetAttribute( "inputs:enableColorTemperature" ).Get( 0 ), True )
+		self.assertFalse( pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ prim ] )[0][0] )
 
 	def testPointInstancerPrimvars( self ) :
 

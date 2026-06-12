@@ -44,6 +44,7 @@
 #include "pxr/usd/usdLux/cylinderLight.h"
 #include "pxr/usd/usdLux/nonboundableLightBase.h"
 #include "pxr/usd/usdLux/sphereLight.h"
+#include "pxr/usd/usdLux/meshLightAPI.h"
 
 #include "pxr/usd/usd/schemaRegistry.h"
 
@@ -645,7 +646,8 @@ void IECoreUSD::ShaderAlgo::writeLight( const IECoreScene::ShaderNetwork *shader
 	pxr::TfType type = pxr::UsdSchemaRegistry::GetInstance().GetTypeFromName( pxr::TfToken( outputShader->getName() ) );
 	if(
 		!type.IsA<pxr::UsdLuxBoundableLightBase>() &&
-		!type.IsA<pxr::UsdLuxNonboundableLightBase>()
+		!type.IsA<pxr::UsdLuxNonboundableLightBase>() &&
+		outputShader->getName() != "MeshLight"
 	)
 	{
 		IECore::msg( IECore::Msg::Warning, "ShaderAlgo::writeLight", "Shader `{}` is not a valid UsdLux light type", outputShader->getName() );
@@ -655,7 +657,14 @@ void IECoreUSD::ShaderAlgo::writeLight( const IECoreScene::ShaderNetwork *shader
 	// Write the light itself onto the prim we've been given.
 
 	ShaderMap usdShaders;
-	prim.SetTypeName( pxr::TfToken( outputShader->getName() ) );
+	if( outputShader->getName() == "MeshLight" )
+	{
+		pxr::UsdLuxMeshLightAPI::Apply( prim );
+	}
+	else
+	{
+		prim.SetTypeName( pxr::TfToken( outputShader->getName() ) );
+	}
 	writeShaderParameterValues( outputShader, pxr::UsdShadeConnectableAPI( prim ) );
 	usdShaders[shaderNetwork->getOutput().shader] = pxr::UsdShadeConnectableAPI( prim );
 

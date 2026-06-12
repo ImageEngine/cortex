@@ -10,7 +10,9 @@ Improvements
 ------------
 
 - PrimitiveVariable : Added Python bindings for `IndexedView` class.
-- USDScene : Added support for writing `IECoreScene::PointInstancer` as `UsdGeomPointInstancer`.
+- USDScene :
+  - Added support for writing `IECoreScene::PointInstancer` as `UsdGeomPointInstancer`.
+  - Added support for reading and writing mesh lights.
 
 Fixes
 -----
