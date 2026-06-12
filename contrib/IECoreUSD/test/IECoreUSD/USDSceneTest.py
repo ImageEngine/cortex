@@ -3948,6 +3948,66 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( prim.GetAttribute( "inputs:enableColorTemperature" ).Get( 0 ), True )
 		self.assertFalse( pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ prim ] )[0][0] )
 
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testReadMeshLight( self ) :
+
+		fileName = os.path.dirname( __file__ ) + "/data/meshLight.usda"
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		meshLightXForm = root.child( "meshLight" )
+
+		self.assertEqual( meshLightXForm.attributeNames(), [] )
+		self.assertEqual( meshLightXForm.childNames(), ["meshLightMesh"] )
+
+		meshLight = meshLightXForm.child( "meshLightMesh" )
+
+		meshLightObject = meshLight.readObject( 0 )
+		self.assertIsInstance( meshLightObject, IECoreScene.MeshPrimitive )
+		self.assertTrue( meshLightObject.arePrimitiveVariablesValid() )
+		self.assertEqual( len( meshLightObject["P"].data ), 8 )
+
+		self.assertTrue( meshLight.hasAttribute( "light" ) )
+		network = meshLight.readAttribute( "light", 0 )
+
+		self.assertEqual(
+			network,
+			IECoreScene.ShaderNetwork(
+				shaders = {
+					"meshLightMesh" : IECoreScene.Shader(
+						"MeshLight",
+						"light",
+						{
+							"color" : IECore.Color3fData( imath.Color3f( 0, 1, 0 ) ),
+							"intensity" : IECore.FloatData( 2.0 ),
+						}
+					),
+				},
+				output = "meshLightMesh"
+			)
+		)
+
+		self.assertTrue( meshLight.hasAttribute( "surface" ) )
+		network = meshLight.readAttribute( "surface", 0 )
+
+		self.assertEqual(
+			network,
+			IECoreScene.ShaderNetwork(
+				shaders = {
+					"previewSurface" : IECoreScene.Shader(
+						"UsdPreviewSurface",
+						"surface",
+						{
+							"diffuseColor" : IECore.Color3fData( imath.Color3f( 0, 1, 0 ) ),
+							"roughness" : IECore.FloatData( 0.5 ),
+						}
+					),
+				},
+				output = ( "previewSurface", "surface" ),
+			)
+		)
+
+		self.assertIn( "__lights", root.setNames() )
+		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/meshLight/meshLightMesh" ] ) )
+
 	def testPointInstancerPrimvars( self ) :
 
 		# Use the USD API to author a point instancer with primvars on it.
