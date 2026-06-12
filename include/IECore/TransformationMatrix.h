@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIX_H
-#define IE_CORE_TRANSFORMATIONMATRIX_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/MurmurHash.h"
@@ -100,4 +99,3 @@ typedef TransformationMatrix<float> TransformationMatrixf;
 
 #include "IECore/TransformationMatrix.inl"
 
-#endif // IE_CORE_TRANSFORMATIONMATRIX_H

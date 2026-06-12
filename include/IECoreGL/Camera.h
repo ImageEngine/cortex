@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CAMERA_H
-#define IECOREGL_CAMERA_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Renderable.h"
@@ -123,4 +122,3 @@ IE_CORE_DECLAREPTR( Camera );
 
 };
 
-#endif // IECOREGL_CAMERA_H

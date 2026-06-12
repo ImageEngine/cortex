@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHVERTEXREORDEROP_H
-#define IECORESCENE_MESHVERTEXREORDEROP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -76,5 +75,4 @@ IE_CORE_DECLAREPTR( MeshVertexReorderOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_MESHVERTEXREORDEROP_H
 

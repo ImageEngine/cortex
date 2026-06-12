@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLPOINTSCONVERTER_H
-#define IECOREGL_TOGLPOINTSCONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -75,4 +74,3 @@ class IECOREGL_API ToGLPointsConverter : public ToGLConverter
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLPOINTSCONVERTER_H

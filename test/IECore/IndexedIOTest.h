@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INDEXEDIOTEST_H
-#define IE_CORE_INDEXEDIOTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/IECore.h"
@@ -258,7 +257,4 @@ struct IndexedIOTestSuite : public boost::unit_test::test_suite
 	void getFilenames( FilenameList &filenames );
 };
 }
-
-
-#endif
 

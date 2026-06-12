@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BOXALGO_INL
-#define IE_CORE_BOXALGO_INL
+#pragma once
 
 namespace IECore
 {
@@ -128,5 +127,3 @@ void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high )
 } // namespace BoxAlgo
 
 } // namespace IECore
-
-#endif // IE_CORE_BOXALGO_INL

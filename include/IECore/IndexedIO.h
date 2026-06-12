@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INDEXEDIO_H
-#define IE_CORE_INDEXEDIO_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/InternedString.h"
@@ -563,4 +562,3 @@ class IECORE_API IndexedIO : public RunTimeTyped
 
 #include "IndexedIO.inl"
 
-#endif // IE_CORE_INDEXEDIO_H

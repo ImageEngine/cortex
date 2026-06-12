@@ -33,8 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef IECOREPYTHON_FRAMELISTBINDING_H
-#define IECOREPYTHON_FRAMELISTBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -45,4 +44,3 @@ IECOREPYTHON_API void bindFrameList();
 
 }
 
-#endif // IECOREPYTHON_FRAMELISTBINDING_H

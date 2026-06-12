@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_MESSAGEHANDLERBINDING_H
-#define IECOREPYTHON_MESSAGEHANDLERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindMessageHandler();
 }
 
-#endif // IECOREPYTHON_MESSAGEHANDLERBINDING_H

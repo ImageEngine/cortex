@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_EXTERNALPROCEDURAL_H
-#define IECORESCENE_EXTERNALPROCEDURAL_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/VisibleRenderable.h"
@@ -79,4 +78,3 @@ IE_CORE_DECLAREPTR( ExternalProcedural );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_EXTERNALPROCEDURAL_H

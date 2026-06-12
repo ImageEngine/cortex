@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_ENVMAPSAMPLER_H
-#define IECOREIMAGE_ENVMAPSAMPLER_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
@@ -81,4 +80,3 @@ IE_CORE_DECLAREPTR( EnvMapSampler );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_ENVMAPSAMPLER_H

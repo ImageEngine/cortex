@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_INVERSEDISTANCEWEIGHTEDINTERPOLATIONBINDING_H
-#define IECOREPYTHON_INVERSEDISTANCEWEIGHTEDINTERPOLATIONBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindInverseDistanceWeightedInterpolation();
 }
 
-#endif // IECOREPYTHON_INVERSEDISTANCEWEIGHTEDINTERPOLATIONBINDING_H

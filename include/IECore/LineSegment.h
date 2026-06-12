@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LINESEGMENT_H
-#define IECORE_LINESEGMENT_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
@@ -132,4 +131,3 @@ std::ostream &operator << ( std::ostream &o, const LineSegment<T> &lineSegment )
 
 #include "IECore/LineSegment.inl"
 
-#endif // IECORE_LINESEGMENT_H

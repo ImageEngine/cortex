@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_IMAGEPRIMITIVEPARAMETER_H
-#define IECOREIMAGE_IMAGEPRIMITIVEPARAMETER_H
+#pragma once
 
 #include "IECore/TypedObjectParameter.h"
 
@@ -48,4 +47,3 @@ IE_CORE_DECLAREPTR( ImagePrimitiveParameter );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_IMAGEPRIMITIVEPARAMETER_H

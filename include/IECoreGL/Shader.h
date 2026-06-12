@@ -35,8 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SHADER_H
-#define IECOREGL_SHADER_H
+#pragma once
 
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/Export.h"
@@ -250,4 +249,3 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SHADER_H

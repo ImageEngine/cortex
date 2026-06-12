@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_RANDOMALGO_H
-#define IECORE_RANDOMALGO_H
+#pragma once
 
 #include "Imath/ImathRandom.h"
 
@@ -62,4 +61,3 @@ Vec cosineHemisphereRand( Rand &rand );
 
 #include "IECore/RandomAlgo.inl"
 
-#endif // IECORE_RANDOMALGO_H

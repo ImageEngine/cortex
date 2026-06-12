@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SHADERSTATECOMPONENTBINDING_H
-#define IECOREGL_SHADERSTATECOMPONENTBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindShaderStateComponent();
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SHADERSTATECOMPONENTBINDING_H

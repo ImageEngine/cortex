@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DEBUG_H
-#define IECOREGL_DEBUG_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 
@@ -54,4 +53,3 @@ IECOREGL_API void debugPrintErrors( const char *file, int line  );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_DEBUG_H

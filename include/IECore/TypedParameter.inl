@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDPARAMETER_INL
-#define IE_CORE_TYPEDPARAMETER_INL
+#pragma once
 
 #include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
@@ -228,5 +227,3 @@ void TypedParameter<T>::setTypedValue( const T &value )
 	template class TypedParameter<T>;
 
 }
-
-#endif // IE_CORE_TYPEDPARAMETER_INL

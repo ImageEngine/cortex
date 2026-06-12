@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_MATRIXALGO_H
-#define IECOREGL_MATRIXALGO_H
+#pragma once
 
 mat4 ieMatrixFromBasis( in vec3 x, in vec3 y, in vec3 z, in vec3 o )
 {
@@ -57,4 +56,3 @@ mat4 ieMatrixFromBasis( in vec3 x, in vec3 y, in vec3 z, in vec3 o )
 	return result;
 }
 
-#endif // IECOREGL_MATRIXALGO_H

@@ -32,11 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_INDEXEDIOBINDING_H
-#define IECOREPYTHON_INDEXEDIOBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
 extern IECOREPYTHON_API void bindIndexedIO();
 
-#endif // IECOREPYTHON_INDEXEDIOBINDING_H

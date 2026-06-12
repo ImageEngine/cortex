@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_OBJREADER_H
-#define IECORESCENE_OBJREADER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
@@ -100,4 +99,3 @@ IE_CORE_DECLAREPTR(OBJReader);
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_OBJREADER_H

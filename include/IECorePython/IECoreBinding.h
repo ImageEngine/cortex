@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IECOREBINDING_H
-#define IECOREPYTHON_IECOREBINDING_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -93,4 +92,3 @@ IECOREPYTHON_API inline Py_ssize_t len( const boost::python::object &obj )
 
 }
 
-#endif // IECOREPYTHON_IECOREBINDING_H

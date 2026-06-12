@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DISKPRIMITIVE_H
-#define IECOREGL_DISKPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
@@ -69,4 +68,3 @@ IE_CORE_DECLAREPTR( DiskPrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_DISKPRIMITIVE_H

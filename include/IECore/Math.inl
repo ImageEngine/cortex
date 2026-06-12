@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MATH_INL
-#define IECORE_MATH_INL
+#pragma once
 
 namespace IECore
 {
@@ -61,5 +60,3 @@ T smoothstep( T v0, T v1, T v )
 }
 
 } // namespace IECore
-
-#endif // IECORE_MATH_INL

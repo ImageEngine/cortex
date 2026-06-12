@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_BEZIERALGO_INL
-#define IECORE_BEZIERALGO_INL
+#pragma once
 
 #include "IECore/LineSegment.h"
 
@@ -103,5 +102,3 @@ void bezierSubdivide( const Vec &v0, const Vec &v1, const Vec &v2, typename Vec:
 }
 
 } // namespace IECore
-
-#endif // IECORE_BEZIERALGO_INL

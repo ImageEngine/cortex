@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_POINTSPRIMITIVE_H
-#define IECORESCENE_POINTSPRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -88,4 +87,3 @@ IE_CORE_DECLAREPTR( PointsPrimitive );
 
 }
 
-#endif // IECORESCENE_POINTSPRIMITIVE_H

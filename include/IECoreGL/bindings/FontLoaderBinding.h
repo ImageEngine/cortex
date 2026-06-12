@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_FONTLOADERBINDING_H
-#define IECOREGL_FONTLOADERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindFontLoader();
 
 }
 
-#endif // IECOREGL_FONTLOADERBINDING_H

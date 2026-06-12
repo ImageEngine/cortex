@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LOOKUPTEST_H
-#define IECORE_LOOKUPTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addLookupTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_LOOKUPTEST_H
 

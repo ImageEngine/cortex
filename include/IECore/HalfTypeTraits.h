@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_HALFTYPETRAITS_H
-#define IE_CORE_HALFTYPETRAITS_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -99,4 +98,3 @@ struct is_unsigned<const volatile half> : public false_type{};
 
 }
 
-#endif // IE_CORE_HALFTYPETRAITS_H

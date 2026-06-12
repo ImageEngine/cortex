@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLMESHCONVERTER_H
-#define IECOREGL_TOGLMESHCONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -77,4 +76,3 @@ IE_CORE_DECLAREPTR( ToGLMeshConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLMESHCONVERTER_H

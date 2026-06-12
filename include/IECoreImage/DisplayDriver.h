@@ -35,8 +35,7 @@
 //! \file DisplayDriver.h
 /// Defines the DisplayDriver abstract base class.
 
-#ifndef IECOREIMAGE_DISPLAYDRIVER_H
-#define IECOREIMAGE_DISPLAYDRIVER_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -140,4 +139,3 @@ class IECOREIMAGE_API DisplayDriver : public IECore::RunTimeTyped
 
 #include "IECoreImage/DisplayDriver.inl"
 
-#endif // IECOREIMAGE_DISPLAYDRIVER_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INDEXEDIOALGO_H
-#define IE_CORE_INDEXEDIOALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/IndexedIO.h"
@@ -184,4 +183,3 @@ inline std::ostream &operator <<( std::ostream &s, const FileStats<T> &stats)
 
 
 
-#endif // IE_CORE_INDEXEDIOALGO_H

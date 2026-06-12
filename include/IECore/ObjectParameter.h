@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OBJECTPARAMETER_H
-#define IE_CORE_OBJECTPARAMETER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Parameter.h"
@@ -74,4 +73,3 @@ IE_CORE_DECLAREPTR( ObjectParameter );
 
 } // namespace IECore
 
-#endif // IE_CORE_OBJECTPARAMETER_H

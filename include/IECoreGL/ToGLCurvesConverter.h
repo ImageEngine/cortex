@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCURVESCONVERTER_H
-#define IECOREGL_TOGLCURVESCONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -77,4 +76,3 @@ class IECOREGL_API ToGLCurvesConverter : public ToGLConverter
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLCURVESCONVERTER_H

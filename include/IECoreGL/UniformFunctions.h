@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_UNIFORMFUNCTIONS_H
-#define IECOREGL_UNIFORMFUNCTIONS_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
@@ -67,4 +66,3 @@ IECOREGL_API const std::vector<std::vector<UniformMatrixFunction> > &uniformMatr
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_UNIFORMFUNCTIONS_H

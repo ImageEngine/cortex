@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLTEXTURECONVERTER_H
-#define IECOREGL_TOGLTEXTURECONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -109,4 +108,3 @@ IE_CORE_DECLAREPTR( ToGLTextureConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLTEXTURECONVERTER_H

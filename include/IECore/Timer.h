@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TIMER_H
-#define IE_CORE_TIMER_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -103,4 +102,3 @@ class IECORE_API ScopedTimer
 
 } // namespace IECore
 
-#endif // IE_CORE_TIMER_H

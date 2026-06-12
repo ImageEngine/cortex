@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TOCORECONVERTERBINDING_H
-#define IECOREPYTHON_TOCORECONVERTERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindToCoreConverter();
 
 }
 
-#endif // IECOREPYTHON_TOCORECONVERTERBINDING_H

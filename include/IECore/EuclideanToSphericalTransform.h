@@ -32,9 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_H
-#define IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_H
-
+#pragma once
 #include "IECore/SpaceTransform.h"
 #include "IECore/TypeTraits.h"
 
@@ -75,4 +73,3 @@ typedef EuclideanToSphericalTransform<Imath::V3d, Imath::V3d> EuclideanToSpheric
 
 #include "IECore/EuclideanToSphericalTransform.inl"
 
-#endif // IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_H

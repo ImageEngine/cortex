@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_TRIANGLEALGO_INL
-#define IECORE_TRIANGLEALGO_INL
+#pragma once
 
 #include "IECore/VectorOps.h"
 
@@ -410,5 +409,3 @@ bool triangleRayIntersection( const Vec &v0, const Vec &v1, const Vec &v2, const
 }
 
 } // namespace IECore
-
-#endif // IECORE_TRIANGLEALGO_INL

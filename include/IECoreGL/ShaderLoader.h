@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SHADERLOADER_H
-#define IECOREGL_SHADERLOADER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 
@@ -105,4 +104,3 @@ class IECOREGL_API ShaderLoader : public IECore::RefCounted
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SHADERLOADER_H

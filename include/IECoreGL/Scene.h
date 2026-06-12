@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SCENE_H
-#define IECOREGL_SCENE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/HitRecord.h"
@@ -98,4 +97,3 @@ IE_CORE_DECLAREPTR( Scene );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SCENE_H

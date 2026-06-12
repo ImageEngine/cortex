@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MATRIXMULTIPLYOP_H
-#define IE_CORE_MATRIXMULTIPLYOP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
@@ -71,6 +70,5 @@ IE_CORE_DECLAREPTR( MatrixMultiplyOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_MATRIXMULTIPLYOP_H
 
 

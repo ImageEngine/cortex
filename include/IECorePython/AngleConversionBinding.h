@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_ANGLECONVERSIONBINDING_H
-#define IECOREPYTHON_ANGLECONVERSIONBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindAngleConversion();
 
 }
 
-#endif // IECOREPYTHON_ANGLECONVERSIONBINDING_H

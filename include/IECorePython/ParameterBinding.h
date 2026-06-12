@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_PARAMETERBINDING_H
-#define IECOREPYTHON_PARAMETERBINDING_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -124,4 +123,3 @@ IECOREPYTHON_API void bindParameter();
 
 #include "IECorePython/ParameterBinding.inl"
 
-#endif // IECOREPYTHON_PARAMETERBINDING_H

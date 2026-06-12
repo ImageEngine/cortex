@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_POINTSALGO_H
-#define IECORESCENE_POINTSALGO_H
+#pragma once
 
 
 #include "IECoreScene/PointsPrimitive.h"
@@ -72,4 +71,3 @@ IECORESCENE_API std::vector<PointsPrimitivePtr> segment( const PointsPrimitive *
 } // namespace IECoreScene
 
 
-#endif // IECORESCENE_POINTSALGO_H

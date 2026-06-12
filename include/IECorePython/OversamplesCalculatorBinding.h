@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_OVERSAMPLESCALCULATORBINDING_H
-#define IECOREPYTHON_OVERSAMPLESCALCULATORBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindOversamplesCalculator();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_OVERSAMPLESCALCULATORBINDING_H

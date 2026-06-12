@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CURVELINEARISER_H
-#define IECORESCENE_CURVELINEARISER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -67,5 +66,4 @@ IE_CORE_DECLAREPTR( CurveLineariser );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_CURVELINEARISER_H
 

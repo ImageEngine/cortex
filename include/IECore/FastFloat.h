@@ -38,8 +38,7 @@
 /// because apparently a simple (int)myFloat is actually fairly slow. See
 /// Physically Based Rendering p.856 for more detail.
 
-#ifndef IE_CORE_FASTFLOAT_H
-#define IE_CORE_FASTFLOAT_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -55,4 +54,3 @@ IECORE_API inline int fastFloatCeil(double v);
 
 #include "IECore/FastFloat.inl"
 
-#endif // IE_CORE_FASTFLOAT_H

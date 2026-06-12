@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_TYPEDPARAMETERINTERNALS_H
-#define IECORE_TYPEDPARAMETERINTERNALS_H
+#pragma once
 
 #include "IECore/GeometricTypedData.h"
 #include "IECore/TypedData.h"
@@ -78,4 +77,3 @@ class TypedParameterTraits<std::vector<Imath::Vec3<T> > >
 
 } // namespace IECore
 
-#endif // IECORE_TYPEDPARAMETERINTERNALS_H

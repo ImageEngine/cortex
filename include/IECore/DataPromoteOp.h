@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATAPROMOTEOP_H
-#define IE_CORE_DATAPROMOTEOP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/NumericParameter.h"
@@ -82,4 +81,3 @@ IE_CORE_DECLAREPTR( DataPromoteOp );
 
 } // namespace IECore
 
-#endif // IE_CORE_DATAPROMOTEOP_H

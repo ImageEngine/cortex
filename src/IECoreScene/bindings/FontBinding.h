@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_FONTBINDING_H
-#define IECORESCENEMODULE_FONTBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindFont();
 }
 
-#endif // IECORESCENEMODULE_FONTBINDING_H

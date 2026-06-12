@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_NAMESTATECOMPONENT_H
-#define IECOREGL_NAMESTATECOMPONENT_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
@@ -114,4 +113,3 @@ IE_CORE_DECLAREPTR( NameStateComponent );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_NAMESTATECOMPONENT_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LENSMODEL_H
-#define IECORE_LENSMODEL_H
+#pragma once
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/Export.h"
@@ -174,5 +173,4 @@ IE_CORE_DECLAREPTR(LensModel);
 
 #include "LensModel.inl"
 
-#endif // IECORE_LENSMODEL_H
 

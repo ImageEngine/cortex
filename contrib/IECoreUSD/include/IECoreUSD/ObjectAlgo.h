@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_OBJECTALGO_H
-#define IECOREUSD_OBJECTALGO_H
+#pragma once
 
 #include "IECoreUSD/Export.h"
 
@@ -132,4 +131,3 @@ struct WriterDescription
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_OBJECTALGO_H

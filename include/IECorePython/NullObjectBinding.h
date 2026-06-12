@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_NULLOBJECTBINDING_H
-#define IECOREPYTHON_NULLOBJECTBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindNullObject();
 }
 
-#endif // IECOREPYTHON_NULLOBJECTBINDING_H

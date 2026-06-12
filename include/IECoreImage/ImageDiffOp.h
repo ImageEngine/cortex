@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_IMAGEDIFFOP_H
-#define IECOREIMAGE_IMAGEDIFFOP_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
@@ -103,4 +102,3 @@ IE_CORE_DECLAREPTR( ImageDiffOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_IMAGEDIFFOP_H

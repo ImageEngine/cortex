@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_RAMPDATABINDING_H
-#define IECOREPYTHON_RAMPDATABINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindRampData();
 }
 
-#endif // IECOREPYTHON_RAMPDATABINDING_H

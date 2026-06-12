@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_H
-#define IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -48,4 +47,3 @@ class IECOREPYTHON_API TypedObjectParameterWrap;
 
 #include "IECorePython/TypedObjectParameterBinding.inl"
 
-#endif // IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_H

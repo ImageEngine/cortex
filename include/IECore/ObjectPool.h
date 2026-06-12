@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_OBJECTPOOL_H
-#define IECORE_OBJECTPOOL_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/MurmurHash.h"
@@ -118,5 +117,4 @@ class IECORE_API ObjectPool : public RefCounted
 
 } // namespace IECore
 
-#endif // IECORE_OBJECTPOOL_H
 

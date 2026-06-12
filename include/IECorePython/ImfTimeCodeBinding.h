@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMFTIMECODEBINDING_H
-#define IECOREPYTHON_IMFTIMECODEBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindImfTimeCode();
 
 }
 
-#endif // IECOREPYTHON_IMFTIMECODEBINDING_H

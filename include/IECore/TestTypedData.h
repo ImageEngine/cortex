@@ -33,8 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef IE_CORE_TESTTYPEDDATA_H
-#define IE_CORE_TESTTYPEDDATA_H
+#pragma once
 
 #include "IECore/Data.h"
 
@@ -51,4 +50,3 @@ bool testTypedData( const Data *data );
 
 #include "IECore/TestTypedData.inl"
 
-#endif // IE_CORE_TESTTYPEDDATA_H

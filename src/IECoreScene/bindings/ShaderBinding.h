@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SHADERBINDING_H
-#define IECORESCENEMODULE_SHADERBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindShader();
 }
 
-#endif // IECORESCENEMODULE_SHADERBINDING_H

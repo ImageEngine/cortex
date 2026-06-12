@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_MATRIXTYPEDPARAMETERBINDING_H
-#define IECOREPYTHON_MATRIXTYPEDPARAMETERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindMatrixTypedParameter();
 }
 
-#endif // IECOREPYTHON_MATRIXTYPEDPARAMETERBINDING_H

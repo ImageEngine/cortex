@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_EXCEPTION_H
-#define IE_CORE_EXCEPTION_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
@@ -137,4 +136,3 @@ namespace IECore
 	};
 }
 
-#endif // IE_CORE_EXCEPTION_H

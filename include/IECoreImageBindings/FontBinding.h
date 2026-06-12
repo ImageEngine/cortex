@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_FONTBINDING_H
-#define IECOREIMAGE_FONTBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
 void bindFont();
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGE_FONTBINDING_H

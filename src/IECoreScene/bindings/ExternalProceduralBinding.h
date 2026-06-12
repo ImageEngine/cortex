@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_EXTERNALPROCEDURALBINDING_H
-#define IECORESCENEMODULE_EXTERNALPROCEDURALBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindExternalProcedural();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_EXTERNALPROCEDURALBINDING_H

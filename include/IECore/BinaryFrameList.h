@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BINARYFRAMELIST_H
-#define IE_CORE_BINARYFRAMELIST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/ReorderedFrameList.h"
@@ -74,4 +73,3 @@ IE_CORE_DECLAREPTR( BinaryFrameList );
 
 } // namespace IECore
 
-#endif // IE_CORE_BINARYFRAMELIST_H

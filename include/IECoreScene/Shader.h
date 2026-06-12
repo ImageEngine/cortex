@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SHADER_H
-#define IECORESCENE_SHADER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderable.h"
@@ -86,4 +85,3 @@ IE_CORE_DECLAREPTR( Shader );
 } // namespace IECoreScene
 
 
-#endif // IECORESCENE_SHADER_H

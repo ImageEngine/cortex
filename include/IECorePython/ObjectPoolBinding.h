@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_OBJECTPOOL_H
-#define IECOREPYTHON_OBJECTPOOL_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindObjectPool();
 }
 
-#endif // IECOREPYTHON_OBJECTPOOL_H

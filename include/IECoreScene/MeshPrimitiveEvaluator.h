@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHPRIMITIVEEVALUATOR_H
-#define IECORESCENE_MESHPRIMITIVEEVALUATOR_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -223,4 +222,3 @@ IE_CORE_DECLAREPTR( MeshPrimitiveEvaluator );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_MESHPRIMITIVEEVALUATOR_H

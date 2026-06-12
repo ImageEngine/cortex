@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_ALPHATEXTURE_H
-#define IECOREGL_ALPHATEXTURE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
@@ -70,4 +69,3 @@ IE_CORE_DECLAREPTR( AlphaTexture );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_ALPHATEXTURE_H

@@ -35,8 +35,7 @@
 //! \file DisplayDriverServer.h
 /// Defines the DisplayDriverServer class.
 
-#ifndef IECOREIMAGE_DISPLAYDRIVERSERVER
-#define IECOREIMAGE_DISPLAYDRIVERSERVER
+#pragma once
 
 #include "IECoreImage/DisplayDriver.h"
 #include "IECoreImage/Export.h"
@@ -108,5 +107,3 @@ class IECOREIMAGE_API DisplayDriverServer : public IECore::RunTimeTyped
 IE_CORE_DECLAREPTR( DisplayDriverServer )
 
 } // namespace IECoreImage
-
-#endif // IECOREIMAGE_DISPLAYDRIVERSERVER

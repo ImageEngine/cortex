@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TYPEIDS_H
-#define IECORESCENE_TYPEIDS_H
+#pragma once
 
 namespace IECoreScene
 {
@@ -143,4 +142,3 @@ enum TypeId
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_TYPEIDS_H

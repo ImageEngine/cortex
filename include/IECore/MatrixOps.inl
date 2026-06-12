@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MATRIXOPS_INL
-#define IE_CORE_MATRIXOPS_INL
+#pragma once
 
 namespace IECore
 {
@@ -92,5 +91,3 @@ inline S MatConvert<T,S>::operator()( const T &m ) const
 
 } // namespace IECore
 
-
-#endif // IE_CORE_MATRIXOPS_INL

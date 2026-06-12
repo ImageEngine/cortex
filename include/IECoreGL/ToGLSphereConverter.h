@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLSPHERECONVERTER_H
-#define IECOREGL_TOGLSPHERECONVERTER_H
+#pragma once
 
 #include "IECoreGL/ToGLConverter.h"
 
@@ -76,4 +75,3 @@ IE_CORE_DECLAREPTR( ToGLSphereConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLSPHERECONVERTER_H

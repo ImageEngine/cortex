@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_DATACONVERTOP_H
-#define IECORE_DATACONVERTOP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/NumericParameter.h"
@@ -88,4 +87,3 @@ IE_CORE_DECLAREPTR( DataConvertOp );
 
 } // namespace IECore
 
-#endif // IECORE_DATACONVERTOP_H

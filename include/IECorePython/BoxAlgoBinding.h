@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_BOXALGOBINDING_H
-#define IECOREPYTHON_BOXALGOBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindBoxAlgo();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_BOXALGOBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_TYPEIDS_H
-#define IE_COREGL_TYPEIDS_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -128,4 +127,3 @@ enum TypeId
 
 } // namespace IECoreGL
 
-#endif // IE_COREGL_TYPEIDS_H

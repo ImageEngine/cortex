@@ -38,6 +38,8 @@
 /// a host of problems to do with the definition of the same symbols in multiple object
 /// files.
 
+#pragma once
+
 #include "IECore/MurmurHash.h"
 
 #include "boost/type_traits/is_void.hpp"

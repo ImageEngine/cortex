@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_MODIFYOPBINDING_H
-#define IECOREPYTHON_MODIFYOPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindModifyOp();
 }
 
-#endif // IECOREPYTHON_MODIFYOPBINDING_H

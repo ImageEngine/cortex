@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDMESSAGEHANDLER_H
-#define IE_CORE_COMPOUNDMESSAGEHANDLER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
@@ -72,4 +71,3 @@ IE_CORE_DECLAREPTR( CompoundMessageHandler );
 
 }; // namespace IECore
 
-#endif // IE_CORE_COMPOUNDMESSAGEHANDLER_H

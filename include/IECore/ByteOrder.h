@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BYTEORDER_H
-#define IE_CORE_BYTEORDER_H
+#pragma once
 
 #include <stdint.h>
 
@@ -192,4 +191,3 @@ inline T asBigEndian( const T &x )
 
 }
 
-#endif // IE_CORE_BYTEORDER_H

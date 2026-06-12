@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SHADERNETWORKALGO_H
-#define IECORESCENE_SHADERNETWORKALGO_H
+#pragma once
 
 #include "IECore/ObjectVector.h"
 
@@ -175,4 +174,3 @@ IECORESCENE_API void applyRenderAdaptors( ShaderNetwork *shaderNetwork, IECore::
 } // namespace IECoreScene
 
 #include "IECoreScene/ShaderNetworkAlgo.inl"
-#endif // IECORESCENE_SHADERNETWORKALGO_H

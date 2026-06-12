@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MEMORYINDEXEDIO_H
-#define IE_CORE_MEMORYINDEXEDIO_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/StreamIndexedIO.h"
@@ -72,4 +71,3 @@ IE_CORE_DECLAREPTR( MemoryIndexedIO )
 
 }
 
-#endif // IE_CORE_MEMORYINDEXEDIO_H

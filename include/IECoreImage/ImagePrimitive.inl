@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_IMAGEPRIMITIVE_INL
-#define IECOREIMAGE_IMAGEPRIMITIVE_INL
+#pragma once
 
 #include "IECore/Exception.h"
 #include "IECore/Export.h"
@@ -124,5 +123,3 @@ ImagePrimitivePtr ImagePrimitive::createGreyscale( const T fillValue, const Imat
 
 
 }
-
-#endif // IECOREIMAGE_IMAGEPRIMITIVE_INL

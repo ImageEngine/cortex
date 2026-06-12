@@ -33,8 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef IECORE_COMPOUNDDATA_H
-#define IECORE_COMPOUNDDATA_H
+#pragma once
 
 #include "IECore/CompoundDataBase.h"
 #include "IECore/Export.h"
@@ -77,4 +76,3 @@ IE_CORE_DECLAREPTR( CompoundData );
 
 #include "IECore/CompoundData.inl"
 
-#endif // IE_CORE_COMPOUNDDATA_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_IGEOMPARAMTRAITS_H
-#define IECOREALEMBIC_IGEOMPARAMTRAITS_H
+#pragma once
 
 #include "IECore/VectorTypedData.h"
 
@@ -93,5 +92,3 @@ IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN3dGeomParam, IECore
 IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IBoolGeomParam, IECore::BoolVectorData, IECore::GeometricData::None )
 
 } // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_IGEOMPARAMTRAITS_H

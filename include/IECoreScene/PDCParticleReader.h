@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PDCPARTICLEREADER_H
-#define IECORESCENE_PDCPARTICLEREADER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/ParticleReader.h"
@@ -117,4 +116,3 @@ IE_CORE_DECLAREPTR( PDCParticleReader );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PDCPARTICLEREADER_H

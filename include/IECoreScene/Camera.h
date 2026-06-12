@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CAMERA_H
-#define IECORESCENE_CAMERA_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderable.h"
@@ -255,4 +254,3 @@ IE_CORE_DECLAREPTR( Camera );
 
 }
 
-#endif // IECORESCENE_CAMERA_H

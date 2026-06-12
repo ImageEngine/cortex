@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_SPLINEBINDING_H
-#define IECOREPYTHON_SPLINEBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindSpline();
 
 }
 
-#endif // IECOREPYTHON_SPLINEBINDING_H

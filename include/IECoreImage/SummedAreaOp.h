@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_SUMMEDAREAOP_H
-#define IECOREIMAGE_SUMMEDAREAOP_H
+#pragma once
 
 #include "IECoreImage/ChannelOp.h"
 #include "IECoreImage/Export.h"
@@ -67,5 +66,4 @@ IE_CORE_DECLAREPTR( SummedAreaOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_SUMMEDAREAOP_H
 

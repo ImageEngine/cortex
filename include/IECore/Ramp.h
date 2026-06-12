@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_RAMP_H
-#define IECORE_RAMP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Spline.h"
@@ -143,4 +142,3 @@ inline void murmurHashAppend( IECore::MurmurHash &h, const Ramp<X,Y> &data )
 
 } // namespace IECore
 
-#endif // IECORE_RAMP_H

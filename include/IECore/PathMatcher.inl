@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_PATHMATCHER_INL
-#define IECORE_PATHMATCHER_INL
+#pragma once
 
 namespace IECore
 {
@@ -241,5 +240,3 @@ inline void PathMatcher::Iterator::satisfyTerminatorRequirement()
 }
 
 } // namespace IECore
-
-#endif // IECORE_PATHMATCHER_INL

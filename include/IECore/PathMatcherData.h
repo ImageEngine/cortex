@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_PATHMATCHERDATA_H
-#define IECORE_PATHMATCHERDATA_H
+#pragma once
 
 #include "IECore/PathMatcher.h"
 #include "IECore/TypedData.h"
@@ -45,4 +44,3 @@ IECORE_DECLARE_TYPEDDATA( PathMatcherData, PathMatcher, void, SharedDataHolder )
 
 } // namespace IECore
 
-#endif // IECORE_PATHMATCHERDATA_H

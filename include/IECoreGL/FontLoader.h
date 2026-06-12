@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_FONTLOADER_H
-#define IECOREGL_FONTLOADER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 
@@ -81,4 +80,3 @@ class IECOREGL_API FontLoader : public IECore::RefCounted
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_FONTLOADER_H

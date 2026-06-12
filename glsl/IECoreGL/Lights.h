@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_LIGHTS_H
-#define IECOREGL_LIGHTS_H
+#pragma once
 
 #include "IECoreGL/Light.h"
 
@@ -45,4 +44,3 @@ void lights( vec3 p, out vec3 Cl[gl_MaxLights], out vec3 L[gl_MaxLights], int n 
 	}
 }
 
-#endif // IECOREGL_LIGHTS_H

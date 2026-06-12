@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_RENDERABLE_H
-#define IECOREGL_RENDERABLE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
@@ -79,4 +78,3 @@ IE_CORE_DECLAREPTR( Renderable );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_RENDERABLE_H

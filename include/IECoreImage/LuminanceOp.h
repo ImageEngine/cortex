@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_LUMINANCEOP_H
-#define IECOREIMAGE_LUMINANCEOP_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -99,4 +98,3 @@ IE_CORE_DECLAREPTR( LuminanceOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_LUMINANCEOP_H

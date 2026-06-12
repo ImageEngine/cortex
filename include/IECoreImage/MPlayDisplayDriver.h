@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_MPLAYDISPLAYDRIVER_H
-#define IECOREIMAGE_MPLAYDISPLAYDRIVER_H
+#pragma once
 
 #include "IECoreImage/DisplayDriver.h"
 #include "IECoreImage/Export.h"
@@ -83,4 +82,3 @@ IE_CORE_DECLAREPTR( MPlayDisplayDriver )
 
 }  // namespace IECoreImage
 
-#endif // IECOREIMAGE_MPLAYDISPLAYDRIVER_H

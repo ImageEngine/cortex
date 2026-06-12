@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CAMELCASE_H
-#define IECORE_CAMELCASE_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -72,4 +71,3 @@ class IECORE_API CamelCase
 
 #include "IECore/CamelCase.inl"
 
-#endif // IECORE_CAMELCASE_H

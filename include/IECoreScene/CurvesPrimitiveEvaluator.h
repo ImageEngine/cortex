@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CURVESPRIMITIVEEVALUATOR_H
-#define IECORESCENE_CURVESPRIMITIVEEVALUATOR_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveEvaluator.h"
@@ -211,4 +210,3 @@ IE_CORE_DECLAREPTR( CurvesPrimitiveEvaluator );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_CURVESPRIMITIVEEVALUATOR_H

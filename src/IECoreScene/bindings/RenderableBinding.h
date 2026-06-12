@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_RENDERABLEBINDING_H
-#define IECORESCENEMODULE_RENDERABLEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindRenderable();
 }
 
-#endif // IECORESCENEMODULE_RENDERABLEBINDING_H

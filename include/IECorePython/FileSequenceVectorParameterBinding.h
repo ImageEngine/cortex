@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_FILESEQUENCEVECTORPARAMETERBINDING_H
-#define IECOREPYTHON_FILESEQUENCEVECTORPARAMETERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindFileSequenceVectorParameter();
 
 }
 
-#endif // IECOREPYTHON_FILESEQUENCEVECTORPARAMETERBINDING_H

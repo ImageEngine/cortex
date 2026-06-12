@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_FRAMERANGEBINDING_H
-#define IECOREPYTHON_FRAMERANGEBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindFrameRange();
 }
 
-#endif // IECOREPYTHON_FRAMERANGEBINDING_H

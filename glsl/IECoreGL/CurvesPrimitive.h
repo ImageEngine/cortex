@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CURVESPRIMITIVE_H
-#define IECOREGL_CURVESPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/VecAlgo.h"
 
@@ -213,4 +212,3 @@ void ieCurvesPrimitiveCubicFrame(
 	ieCurvesPrimitiveUTangentAndNormal( p, vTangent, uTangent, n );
 }
 
-#endif // IECOREGL_CURVESPRIMITIVE_H

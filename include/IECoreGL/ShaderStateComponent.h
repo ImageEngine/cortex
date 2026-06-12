@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SHADERSTATECOMPONENT_H
-#define IECOREGL_SHADERSTATECOMPONENT_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Shader.h"
@@ -104,4 +103,3 @@ IE_CORE_DECLAREPTR( ShaderStateComponent );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SHADERSTATECOMPONENT_H

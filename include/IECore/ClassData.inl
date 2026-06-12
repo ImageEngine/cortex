@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_CLASSDATA_INL
-#define IE_CORE_CLASSDATA_INL
+#pragma once
 
 #include <cassert>
 
@@ -117,5 +116,3 @@ void ClassData<ClassType, DataType, DataDeletePolicy>::erase( const ClassType *c
 
 
 }
-
-#endif

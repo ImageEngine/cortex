@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FILTEREDMESSAGEHANDLER_H
-#define IE_CORE_FILTEREDMESSAGEHANDLER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
@@ -70,4 +69,3 @@ class IECORE_API FilteredMessageHandler : public MessageHandler
 
 }; // namespace IECore
 
-#endif // IE_CORE_FILTEREDMESSAGEHANDLER_H

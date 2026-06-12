@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CLIPPINGPLANE_H
-#define IECORESCENE_CLIPPINGPLANE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderable.h"
@@ -56,4 +55,3 @@ IE_CORE_DECLAREPTR( ClippingPlane );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_CLIPPINGPLANE_H

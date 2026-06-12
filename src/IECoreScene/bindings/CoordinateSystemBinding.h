@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef ICOREPYTHON_COORDINATESYSTEMBINDING_H
-#define ICOREPYTHON_COORDINATESYSTEMBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindCoordinateSystem();
 }
 
-#endif // ICOREPYTHON_COORDINATESYSTEMBINDING_H

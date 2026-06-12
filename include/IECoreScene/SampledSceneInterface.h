@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SAMPLEDSCENEINTERFACE_H
-#define IECORESCENE_SAMPLEDSCENEINTERFACE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/SceneInterface.h"
@@ -125,4 +124,3 @@ class IECORESCENE_API SampledSceneInterface : public SceneInterface
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_SAMPLEDSCENEINTERFACE_H

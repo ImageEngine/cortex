@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LOOKUP_INL
-#define IECORE_LOOKUP_INL
+#pragma once
 
 #include "IECore/FastFloat.h"
 
@@ -93,5 +92,3 @@ inline Y Lookup<X, Y>::operator() ( X x ) const
 }
 
 } // namespace IECore
-
-#endif // IECORE_LOOKUP_INL

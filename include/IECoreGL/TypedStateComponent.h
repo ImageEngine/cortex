@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TYPEDSTATECOMPONENT_H
-#define IECOREGL_TYPEDSTATECOMPONENT_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
@@ -263,4 +262,3 @@ IE_CORE_DECLAREPTR( AutomaticInstancingStateComponent );
 
 #include "IECoreGL/TypedStateComponent.inl"
 
-#endif // IECOREGL_TYPEDSTATECOMPONENT_H

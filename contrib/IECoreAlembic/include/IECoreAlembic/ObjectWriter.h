@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_OBJECTWRITER_H
-#define IECOREALEMBIC_OBJECTWRITER_H
+#pragma once
 
 #include "IECoreAlembic/Export.h"
 
@@ -105,4 +104,3 @@ class ObjectWriter : private boost::noncopyable
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_OBJECTWRITER_H

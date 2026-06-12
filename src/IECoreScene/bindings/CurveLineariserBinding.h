@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CURVELINEARISERBINDING_H
-#define IECORESCENEMODULE_CURVELINEARISERBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindCurveLineariser();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_CURVELINEARISERBINDING_H

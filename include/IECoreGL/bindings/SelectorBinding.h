@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SELECTORBINDING_H
-#define IECOREGL_SELECTORBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindSelector();
 
 }
 
-#endif // IECOREGL_SELECTORBINDING_H

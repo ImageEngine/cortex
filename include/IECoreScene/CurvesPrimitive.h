@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CURVESPRIMITIVE_H
-#define IECORESCENE_CURVESPRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -113,4 +112,3 @@ IE_CORE_DECLAREPTR( CurvesPrimitive );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_CURVESPRIMITIVE_H

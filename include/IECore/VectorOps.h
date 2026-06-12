@@ -41,8 +41,7 @@
 /// give less intuitive syntax but are compatible with any classes for which
 /// a valid VectorTraits specialisation exists.
 
-#ifndef IE_CORE_VECTOROPS_H
-#define IE_CORE_VECTOROPS_H
+#pragma once
 
 #include "IECore/VectorTraits.h"
 
@@ -168,4 +167,3 @@ inline T vecCross( const T &v1, const T &v2 );
 
 #include "IECore/VectorOps.inl"
 
-#endif // IE_CORE_VECTOROPS_H

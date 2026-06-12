@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMATHCOLORVECTORBINDING_H
-#define IECOREPYTHON_IMATHCOLORVECTORBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,5 +41,4 @@ namespace IECorePython
 IECOREPYTHON_API extern void bindImathColorVectorTypedData();
 }
 
-#endif // IECOREPYTHON_IMATHCOLORVECTORBINDING_H
 

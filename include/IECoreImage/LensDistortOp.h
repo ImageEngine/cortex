@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_LENSDISTORT_H
-#define IECOREIMAGE_LENSDISTORT_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -89,5 +88,4 @@ IE_CORE_DECLAREPTR( LensDistortOp );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_LENSDISTORT_H
 

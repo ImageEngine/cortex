@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_RANDOMROTATIONOP_H
-#define IECORE_RANDOMROTATIONOP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Math.h"
@@ -76,4 +75,3 @@ void RandomRotationOp::generate(
 
 } // namespace IECore
 
-#endif // IECORE_RANDOMROTATIONOP_H

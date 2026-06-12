@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CUBICBASIS_H
-#define IECORE_CUBICBASIS_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -155,4 +154,3 @@ typedef CubicBasis<double> CubicBasisd;
 
 #include "IECore/CubicBasis.inl"
 
-#endif // IECORE_CUBICBASIS_H

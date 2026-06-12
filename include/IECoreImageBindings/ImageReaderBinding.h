@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H
-#define IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
 void bindImageReader();
 }
 
-#endif // IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_DATAINTERLEAVEOP_H
-#define IECORE_DATAINTERLEAVEOP_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/NumericParameter.h"
@@ -85,4 +84,3 @@ IE_CORE_DECLAREPTR( DataInterleaveOp );
 
 } // namespace IECore
 
-#endif // IECORE_DATAINTERLEAVEOP_H

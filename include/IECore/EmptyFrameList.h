@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_EMPTYFRAMELIST_H
-#define IE_CORE_EMPTYFRAMELIST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FrameList.h"
@@ -69,4 +68,3 @@ IE_CORE_DECLAREPTR( EmptyFrameList );
 } // namespace IECore
 
 
-#endif // IE_CORE_EMPTYFRAMELIST_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_MESHVERTEXREORDEROPBINDING_H
-#define IECORESCENEMODULE_MESHVERTEXREORDEROPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindMeshVertexReorderOp();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_MESHVERTEXREORDEROPBINDING_H

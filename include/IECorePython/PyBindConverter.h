@@ -35,8 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_PYBINDCONVERTER_H
-#define IECOREPYTHON_PYBINDCONVERTER_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -98,5 +97,4 @@ struct PyBindConverter
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_PYBINDCONVERTER_H
 

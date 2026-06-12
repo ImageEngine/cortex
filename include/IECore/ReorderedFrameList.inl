@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_REORDEREDFRAMELIST_INL
-#define IE_CORE_REORDEREDFRAMELIST_INL
+#pragma once
 
 #include <cassert>
 
@@ -62,5 +61,3 @@ FrameListPtr ReorderedFrameList::parseForChildList( const std::string &frameList
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_REORDEREDFRAMELIST_INL

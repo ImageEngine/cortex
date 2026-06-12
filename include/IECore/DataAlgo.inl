@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_DATAALGO_INL
-#define IECORE_DATAALGO_INL
+#pragma once
 
 #include "IECore/DateTimeData.h"
 #include "IECore/PathMatcherData.h"
@@ -399,5 +398,3 @@ bool trait( const IECore::Data *data )
 }
 
 } // namespace IECore
-
-#endif // IECORE_DATAALGO_INL

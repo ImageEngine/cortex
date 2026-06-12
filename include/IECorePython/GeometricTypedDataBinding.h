@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_GEOMETRICTYPEDDATABINDING_H
-#define IECOREPYTHON_GEOMETRICTYPEDDATABINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API extern void bindGeometricTypedData();
 
 #include "GeometricTypedDataBinding.inl"
 
-#endif // IECOREPYTHON_GEOMETRICTYPEDDATABINDING_H

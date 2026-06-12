@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_TYPETRAITS_H
-#define IECOREUSD_TYPETRAITS_H
+#pragma once
 
 #include "IECore/GeometricTypedData.h"
 #include "IECore/InternedString.h"
@@ -125,4 +124,3 @@ IECOREUSD_USDTYPETRAITS_SPECIALISATION( Imath::Quatf, pxr::GfQuath, false, IECor
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_TYPETRAITS_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_OBJECT_INL
-#define IE_CORE_OBJECT_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -93,5 +92,3 @@ inline const Canceller *Object::LoadContext::canceller()
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_OBJECT_INL

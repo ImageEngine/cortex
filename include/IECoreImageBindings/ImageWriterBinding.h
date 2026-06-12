@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H
-#define IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
 void bindImageWriter();
 }
 
-#endif // IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H

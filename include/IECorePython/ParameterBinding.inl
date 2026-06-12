@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_PARAMETERBINDING_INL
-#define IECOREPYTHON_PARAMETERBINDING_INL
+#pragma once
 
 #include "IECorePython/IECoreBinding.h"
 
@@ -84,5 +83,3 @@ ParameterClass<T, TWrapper>::ParameterClass( const char *docString )
 }
 
 } // namespace IECorePython
-
-#endif // IECOREPYTHON_PARAMETERBINDING_INL

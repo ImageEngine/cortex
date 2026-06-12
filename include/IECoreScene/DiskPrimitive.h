@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_DISKPRIMITIVE_H
-#define IECORESCENE_DISKPRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -84,4 +83,3 @@ IE_CORE_DECLAREPTR( DiskPrimitive );
 
 }
 
-#endif // IECORESCENE_DISKPRIMITIVE_H

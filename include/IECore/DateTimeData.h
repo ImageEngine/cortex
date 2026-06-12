@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_DATETIMEDATA_H
-#define IECORE_DATETIMEDATA_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/TypedData.h"
@@ -57,4 +56,3 @@ IECORE_API void murmurHashAppend( IECore::MurmurHash &h, const boost::posix_time
 
 } // namespace IECore
 
-#endif // IECORE_DATETIMEDATA_H

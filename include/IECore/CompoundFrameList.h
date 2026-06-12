@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDFRAMELIST_H
-#define IE_CORE_COMPOUNDFRAMELIST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FrameList.h"
@@ -87,4 +86,3 @@ IE_CORE_DECLAREPTR( CompoundFrameList );
 } // namespace IECore
 
 
-#endif // IE_CORE_COMPOUNDFRAMELIST_H

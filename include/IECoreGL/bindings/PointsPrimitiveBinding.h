@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_POINTSPRIMITIVEBINDING_H
-#define IE_COREGL_POINTSPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindPointsPrimitive();
 
 }
 
-#endif // IE_COREGL_POINTSPRIMITIVEBINDING_H

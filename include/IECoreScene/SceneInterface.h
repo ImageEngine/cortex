@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SCENEINTERFACE_H
-#define IECORESCENE_SCENEINTERFACE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveVariable.h"
@@ -312,4 +311,3 @@ IECORESCENE_API std::ostream &operator <<( std::ostream &o, const SceneInterface
 
 #include "IECoreScene/SceneInterface.inl"
 
-#endif // IECORESCENE_SCENEINTERFACE_H

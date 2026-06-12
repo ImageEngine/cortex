@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BOUNDEDKDTREE_H
-#define IE_CORE_BOUNDEDKDTREE_H
+#pragma once
 
 #include "IECore/BoxTraits.h"
 #include "IECore/Export.h"
@@ -172,4 +171,3 @@ typedef BoundedKDTree<std::vector<Imath::Box3d>::const_iterator> Box3dTree;
 
 #include "BoundedKDTree.inl"
 
-#endif // IE_CORE_BOUNDEDKDTREE_H

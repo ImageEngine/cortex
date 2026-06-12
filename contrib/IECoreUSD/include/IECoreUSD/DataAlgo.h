@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_DATAALGO_H
-#define IECOREUSD_DATAALGO_H
+#pragma once
 
 #include "IECoreUSD/Export.h"
 #include "IECoreUSD/TypeTraits.h"
@@ -108,4 +107,3 @@ IECOREUSD_API pxr::TfToken role( IECore::GeometricData::Interpretation interpret
 
 #include "IECoreUSD/DataAlgo.inl"
 
-#endif // IECOREUSD_DATAALGO_H

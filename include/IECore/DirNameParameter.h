@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DIRNAMEPARAMETER_H
-#define IE_CORE_DIRNAMEPARAMETER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/PathParameter.h"
@@ -66,4 +65,3 @@ IE_CORE_DECLAREPTR( DirNameParameter )
 
 } // namespace IECore
 
-#endif // IE_CORE_DIRNAMEPARAMETER_H

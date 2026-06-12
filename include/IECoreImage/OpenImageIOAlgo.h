@@ -35,8 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_OIIOALGO_H
-#define IECOREIMAGE_OIIOALGO_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 
@@ -102,4 +101,3 @@ IECOREIMAGE_API IECore::DataPtr data( const OIIO::ParamValue &value );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_OIIOALGO_H

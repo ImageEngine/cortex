@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FRAMELIST_INL
-#define IE_CORE_FRAMELIST_INL
+#pragma once
 
 namespace IECore
 {
@@ -45,5 +44,3 @@ FrameList::Parser<T>::Parser()
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_FRAMELIST_INL

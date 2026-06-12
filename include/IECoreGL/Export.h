@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_EXPORT_H
-#define IECOREGL_EXPORT_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -46,5 +45,3 @@
 #else
 	#define IECOREGL_API IECORE_IMPORT
 #endif
-
-#endif // #ifndef IECOREGL_EXPORT_H

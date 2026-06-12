@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPEDPARAMETER_H
-#define IE_CORE_TYPEDPARAMETER_H
+#pragma once
 
 #include "IECore/Parameter.h"
 #include "IECore/TypedData.h"
@@ -94,4 +93,3 @@ class IECORE_EXPORT TypedParameter : public Parameter
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPEDPARAMETER_H

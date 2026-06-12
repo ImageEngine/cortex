@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TRANSFORMOP_H
-#define IECORESCENE_TRANSFORMOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveOp.h"
@@ -79,4 +78,3 @@ IE_CORE_DECLAREPTR( TransformOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_TRANSFORMOP_H

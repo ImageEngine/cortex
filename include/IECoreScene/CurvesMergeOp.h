@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CURVESMERGEOP_H
-#define IECORESCENE_CURVESMERGEOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -72,5 +71,4 @@ IE_CORE_DECLAREPTR( CurvesMergeOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_CURVESMERGEOP_H
 

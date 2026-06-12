@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_POINTERFROMSWIG_H
-#define IECOREPYTHON_POINTERFROMSWIG_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -64,4 +63,3 @@ class IECOREPYTHON_API PointerFromSWIG
 
 #include "IECorePython/PointerFromSWIG.inl"
 
-#endif // IECOREPYTHON_POINTERFROMSWIG_H

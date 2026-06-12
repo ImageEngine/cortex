@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DATETIMEPARAMETER_H
-#define IE_CORE_DATETIMEPARAMETER_H
+#pragma once
 
 #include "IECore/DateTimeData.h"
 #include "IECore/TypedParameter.h"
@@ -47,4 +46,3 @@ IE_CORE_DECLAREPTR( DateTimeParameter );
 
 }
 
-#endif // IE_CORE_DATETIMEPARAMETER_H

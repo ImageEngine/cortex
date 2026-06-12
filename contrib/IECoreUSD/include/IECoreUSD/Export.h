@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_EXPORT_H
-#define IECOREUSD_EXPORT_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -42,5 +41,3 @@
 #else
 	#define IECOREUSD_API IECORE_IMPORT
 #endif
-
-#endif // #ifndef IECOREUSD_EXPORT_H

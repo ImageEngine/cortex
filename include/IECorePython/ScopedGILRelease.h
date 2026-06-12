@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_SCOPEDGILRELEASE_H
-#define IECOREPYTHON_SCOPEDGILRELEASE_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -64,4 +63,3 @@ class IECOREPYTHON_API ScopedGILRelease : boost::noncopyable
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_SCOPEDGILRELEASE_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_POLYGONVERTEXITERATOR_H
-#define IECORESCENE_POLYGONVERTEXITERATOR_H
+#pragma once
 
 #include <vector>
 
@@ -86,4 +85,3 @@ class PolygonVertexIterator
 
 #include "IECoreScene/PolygonVertexIterator.inl"
 
-#endif // IECORESCENE_POLYGONVERTEXITERATOR_H

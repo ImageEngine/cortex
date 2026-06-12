@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPILERTEST_H
-#define IE_CORE_COMPILERTEST_H
+#pragma once
 
 #include "IECore/BoxOps.h"
 #include "IECore/Export.h"
@@ -98,6 +97,4 @@ struct CompilerTestSuite : public boost::unit_test::test_suite
 };
 
 }
-
-#endif
 

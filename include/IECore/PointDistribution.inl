@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_POINTDISTRIBUTION_INL
-#define IECORE_POINTDISTRIBUTION_INL
+#pragma once
 
 #include "IECore/FastFloat.h"
 
@@ -183,5 +182,3 @@ inline unsigned int PointDistribution::hash( int x, int y ) const
 }
 
 } // namespace IECore
-
-#endif // IECORE_POINTDISTRIBUTION_INL

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_DATAALGO_H
-#define IECORE_DATAALGO_H
+#pragma once
 
 #include "IECore/Data.h"
 #include "IECore/GeometricTypedData.h"
@@ -108,4 +107,3 @@ typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *
 
 #include "IECore/DataAlgo.inl"
 
-#endif // IECORE_DATAALGO_H

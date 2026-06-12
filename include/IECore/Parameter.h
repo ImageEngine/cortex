@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PARAMETER_H
-#define IE_CORE_PARAMETER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Object.h"
@@ -205,4 +204,3 @@ IE_CORE_DECLAREPTR( Parameter );
 
 #include "IECore/Parameter.inl"
 
-#endif // IE_CORE_PARAMETER_H

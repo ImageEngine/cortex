@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_CURVETANGENTSOP_H
-#define IECORESCENE_CURVETANGENTSOP_H
+#pragma once
 
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/Export.h"
@@ -77,7 +76,6 @@ IE_CORE_DECLAREPTR( CurveTangentsOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_CURVETANGENTSOP_H
 
 
 

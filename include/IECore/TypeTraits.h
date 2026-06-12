@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TYPETRAITS_H
-#define IE_CORE_TYPETRAITS_H
+#pragma once
 
 #include "IECore/DateTimeData.h"
 #include "IECore/HalfTypeTraits.h"
@@ -312,4 +311,3 @@ template<> struct IsStringVectorTypedData< TypedData<std::vector<IECore::Interne
 
 } // namespace IECore
 
-#endif // IE_CORE_TYPETRAITS_H

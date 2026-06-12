@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_STATECOMPONENTBINDING_H
-#define IE_COREGL_STATECOMPONENTBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindStateComponent();
 
 }
 
-#endif // IE_COREGL_STATECOMPONENTBINDING_H

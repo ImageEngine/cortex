@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TESTTYPEDDATA_INL
-#define IE_CORE_TESTTYPEDDATA_INL
+#pragma once
 
 #include "IECore/DespatchTypedData.h"
 
@@ -64,5 +63,3 @@ bool testTypedData( const Data *data )
 }
 
 }
-
-#endif // IE_CORE_TESTTYPEDDATA_INL

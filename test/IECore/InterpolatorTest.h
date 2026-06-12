@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INTERPOLATORTEST_H
-#define IE_CORE_INTERPOLATORTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Interpolator.h"
@@ -194,6 +193,4 @@ struct InterpolatorTestSuite : public boost::unit_test::test_suite
 }
 
 #include "InterpolatorTest.inl"
-
-#endif
 

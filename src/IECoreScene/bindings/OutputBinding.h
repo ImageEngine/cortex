@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_OUTPUTBINDING_H
-#define IECORESCENEMODULE_OUTPUTBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindOutput();
 
 }
 
-#endif // IECORESCENEMODULE_OUTPUTBINDING_H

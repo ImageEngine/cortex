@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PARTICLEWRITER_H
-#define IECORESCENE_PARTICLEWRITER_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
@@ -84,4 +83,3 @@ IE_CORE_DECLAREPTR( ParticleWriter );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PARTICLEWRITER_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCAMERACONVERTER_H
-#define IECOREGL_TOGLCAMERACONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
@@ -74,4 +73,3 @@ IE_CORE_DECLAREPTR( ToGLCameraConverter );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TOGLCAMERACONVERTER_H

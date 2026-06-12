@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_SCOPEDGILLOCK_H
-#define IECOREPYTHON_SCOPEDGILLOCK_H
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -64,4 +63,3 @@ class IECOREPYTHON_API ScopedGILLock : boost::noncopyable
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_SCOPEDGILLOCK_H

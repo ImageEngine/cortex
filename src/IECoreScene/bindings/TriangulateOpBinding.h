@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_TRIANGULATEOPBINDING_H
-#define IECORESCENEMODULE_TRIANGULATEOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindTriangulateOp();
 }
 
-#endif // IECORESCENEMODULE_TRIANGULATEOPBINDING_H

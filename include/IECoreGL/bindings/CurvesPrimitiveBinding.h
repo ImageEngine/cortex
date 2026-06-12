@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_CURVESPRIMITIVEBINDING_H
-#define IECOREGL_CURVESPRIMITIVEBINDING_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 
@@ -44,4 +43,3 @@ void bindCurvesPrimitive();
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_CURVESPRIMITIVEBINDING_H

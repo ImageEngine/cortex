@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TIMERBINDING_H
-#define IECOREPYTHON_TIMERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindTimer();
 }
 
-#endif // IECOREPYTHON_TIMERBINDING_H

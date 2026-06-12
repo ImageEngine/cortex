@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_BINDABLEBINDING_H
-#define IE_COREGL_BINDABLEBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindBindable();
 
 }
 
-#endif // IE_COREGL_BINDABLEBINDING_H

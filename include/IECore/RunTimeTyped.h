@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_RUNTIMETYPED_H
-#define IE_CORE_RUNTIMETYPED_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
@@ -358,4 +357,3 @@ inline T* assertedStaticCast( S* src );
 
 #include "IECore/RunTimeTyped.inl"
 
-#endif // IE_CORE_RUNTIMETYPED_H

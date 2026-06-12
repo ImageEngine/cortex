@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_SPLINEDATA_H
-#define IECORE_SPLINEDATA_H
+#pragma once
 
 #include "IECore/Spline.h"
 #include "IECore/TypedData.h"
@@ -50,4 +49,3 @@ IECORE_DECLARE_TYPEDDATA( SplinefColor4fData, SplinefColor4f, void, SharedDataHo
 
 }
 
-#endif // IECORE_SPLINEDATA_H

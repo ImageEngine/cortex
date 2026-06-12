@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_TETRAHEDRONALGO_INL
-#define IECORE_TETRAHEDRONALGO_INL
+#pragma once
 
 #include "IECore/TriangleAlgo.h"
 #include "IECore/VectorOps.h"
@@ -184,7 +183,5 @@ inline Imath::V3i tetrahedronFaceIndices( int face )
 }
 
 } // namespace IECore
-
-#endif // IECORE_TETRAHEDRONALGO_INL
 
 

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CAMERABINDING_H
-#define IECORESCENEMODULE_CAMERABINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindCamera();
 
 }
 
-#endif // IECORESCENEMODULE_CAMERABINDING_H

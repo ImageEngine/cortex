@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_SPLINE_INL
-#define IECORE_SPLINE_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -400,5 +399,3 @@ inline void murmurHashAppend( IECore::MurmurHash &h, const Spline<X,Y> &data )
 }
 
 } // namespace IECore
-
-#endif // IECORE_SPLINE_INL

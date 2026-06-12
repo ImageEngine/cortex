@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DIMENSIONTRAITS_INL
-#define IE_CORE_DIMENSIONTRAITS_INL
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/LineSegment.h"
@@ -85,5 +84,3 @@ struct DimensionTraits<3, T>
 };
 
 }
-
-#endif // IE_CORE_DIMENSIONTRAITS_INL

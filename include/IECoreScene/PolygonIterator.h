@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_POLYGONITERATOR_H
-#define IECORESCENE_POLYGONITERATOR_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PolygonVertexIterator.h"
@@ -101,4 +100,3 @@ class IECORESCENE_API PolygonIterator
 
 #include "IECoreScene/PolygonIterator.inl"
 
-#endif // IECORESCENE_POLYGONITERATOR_H

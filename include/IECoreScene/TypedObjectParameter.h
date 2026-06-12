@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TYPEDOBJECTPARAMETER_H
-#define IECORESCENE_TYPEDOBJECTPARAMETER_H
+#pragma once
 
 #include "IECore/TypedObjectParameter.h"
 
@@ -54,4 +53,3 @@ IE_CORE_DECLAREPTR( VisibleRenderableParameter );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_TYPEDOBJECTPARAMETER_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_GL_INL
-#define IECOREGL_GL_INL
+#pragma once
 
 namespace IECoreGL
 {
@@ -69,5 +68,3 @@ inline void glTranslate( const Imath::V3f &t )
 }
 
 } // namespace IECoreGL
-
-#endif // IECOREGL_GL_INL

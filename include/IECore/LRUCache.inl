@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LRUCACHE_INL
-#define IECORE_LRUCACHE_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -785,5 +784,3 @@ void LRUCache<Key, Value, Policy, GetterKey>::nullRemovalCallback( const Key &ke
 }
 
 } // namespace IECore
-
-#endif // IECORE_LRUCACHE_INL

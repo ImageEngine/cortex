@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MURMURHASH_INL
-#define IECORE_MURMURHASH_INL
+#pragma once
 
 #include "IECore/InternedString.h"
 
@@ -460,5 +459,3 @@ struct std::hash<IECore::MurmurHash>
 		return h.h1() ^ h.h2();
 	}
 };
-
-#endif // IECORE_MURMURHASH_INL

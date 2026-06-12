@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_RENDERABLE_H
-#define IECORESCENE_RENDERABLE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
@@ -63,4 +62,3 @@ IE_CORE_DECLAREPTR( Renderable );
 
 }
 
-#endif // IECORESCENE_RENDERABLE_H

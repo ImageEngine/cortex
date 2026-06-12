@@ -36,8 +36,7 @@
 /// Defines for operating on triangles.
 /// \ingroup mathGroup
 
-#ifndef IECORE_TRIANGLEALGO_H
-#define IECORE_TRIANGLEALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
@@ -100,4 +99,3 @@ bool triangleRayIntersection( const Vec &v0, const Vec &v1, const Vec &v2, const
 
 #include "IECore/TriangleAlgo.inl"
 
-#endif // IECORE_TRIANGLEALGO_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVEVARIABLE_H
-#define IECORESCENE_PRIMITIVEVARIABLE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 
@@ -192,4 +191,3 @@ typedef std::map<std::string, PrimitiveVariable> PrimitiveVariableMap;
 
 #include "IECoreScene/PrimitiveVariable.inl"
 
-#endif // IECORESCENE_PRIMITIVEVARIABLE_H

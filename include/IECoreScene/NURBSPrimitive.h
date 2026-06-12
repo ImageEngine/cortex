@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_NURBSPRIMITIVE_H
-#define IECORESCENE_NURBSPRIMITIVE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
@@ -100,4 +99,3 @@ IE_CORE_DECLAREPTR( NURBSPrimitive );
 
 }
 
-#endif // IECORESCENE_NURBSPRIMITIVE_H

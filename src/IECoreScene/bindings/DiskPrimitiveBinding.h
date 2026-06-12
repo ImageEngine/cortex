@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_DISKPRIMITIVEBINDING_H
-#define IECORESCENEMODULE_DISKPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindDiskPrimitive();
 }
 
-#endif // IECORESCENEMODULE_DISKPRIMITIVEBINDING_H

@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #include "IECore/BoxOps.h"
 #include "IECore/VectorOps.h"
 #include "IECore/VectorTraits.h"

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_STATE_H
-#define IECOREGL_STATE_H
+#pragma once
 
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/Export.h"
@@ -150,4 +149,3 @@ class IECOREGL_API State : public Bindable
 
 #include "IECoreGL/State.inl"
 
-#endif // IECOREGL_STATE_H

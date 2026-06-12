@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_MESHMERGEOPBINDING_H
-#define IECORESCENEMODULE_MESHMERGEOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindMeshMergeOp();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_MESHMERGEOPBINDING_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LRUCACHETHREADINGTEST_H
-#define IECORE_LRUCACHETHREADINGTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -48,5 +47,4 @@ void addLRUCacheThreadingTest( boost::unit_test::test_suite *test );
 
 }
 
-#endif // IECORE_LRUCACHETHREADINGTEST_H
 

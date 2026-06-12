@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_POINTERFROMSWIG_INL
-#define IECOREPYTHON_POINTERFROMSWIG_INL
+#pragma once
 
 #include "boost/python.hpp"
 
@@ -74,5 +73,3 @@ PointerFromSWIG<T>::PointerFromSWIG()
 }
 
 } // namespace IECorePython
-
-#endif // IECOREPYTHON_POINTERFROMSWIG_INL

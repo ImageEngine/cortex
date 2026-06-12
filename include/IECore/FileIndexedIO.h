@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FILEINDEXEDIO_H
-#define IE_CORE_FILEINDEXEDIO_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/StreamIndexedIO.h"
@@ -82,4 +81,3 @@ IE_CORE_DECLAREPTR( FileIndexedIO )
 
 }
 
-#endif // IE_CORE_FILEINDEXEDIO_H

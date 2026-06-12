@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_INL
-#define IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_INL
+#pragma once
 
 #include "IECorePython/ParameterBinding.h"
 
@@ -57,5 +56,3 @@ class TypedObjectParameterWrapper : public ParameterWrapper< IECore::TypedObject
 };
 
 }
-
-#endif // IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_INL

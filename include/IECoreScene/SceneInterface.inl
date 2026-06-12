@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SCENEINTERFACE_INL
-#define IE_CORE_SCENEINTERFACE_INL
+#pragma once
 
 namespace IECoreScene
 {
@@ -51,5 +50,3 @@ SceneInterfacePtr SceneInterface::FileFormatDescription<T>::creator( const std::
 }
 
 } // namespace IECoreScene
-
-#endif // IE_CORE_SCENEINTERFACE_INL

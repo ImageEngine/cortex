@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_READERBINDING_INL
-#define IECOREPYTHON_READERBINDING_INL
+#pragma once
 
 #include "IECorePython/IECoreBinding.h"
 
@@ -68,5 +67,3 @@ ReaderClass<T, TWrapper>::ReaderClass( const char *docString )
 }
 
 } // namespace IECorePython
-
-#endif // IECOREPYTHON_READERBINDING_INL

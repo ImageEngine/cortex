@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LINESEGMENT_INL
-#define IECORE_LINESEGMENT_INL
+#pragma once
 
 #include "Imath/ImathFun.h"
 
@@ -244,5 +243,3 @@ std::ostream &operator << ( std::ostream &o, const LineSegment<T> &lineSegment )
 }
 
 } // namespace IECore
-
-#endif // IECORE_LINESEGMENT_INL

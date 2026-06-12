@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_TRANSFORMATIONMATRIXDATA_H
-#define IE_CORE_TRANSFORMATIONMATRIXDATA_H
+#pragma once
 
 #include "IECore/TransformationMatrix.h"
 #include "IECore/TypedData.h"
@@ -47,4 +46,3 @@ IECORE_DECLARE_TYPEDDATA( TransformationMatrixdData, TransformationMatrixd, doub
 
 }
 
-#endif // IE_CORE_TRANSFORMATIONMATRIXDATA_H

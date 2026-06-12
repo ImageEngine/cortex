@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_ALEMBICSCENE_H
-#define IECOREALEMBIC_ALEMBICSCENE_H
+#pragma once
 
 #include "IECoreAlembic/Export.h"
 #include "IECoreAlembic/TypeIds.h"
@@ -126,5 +125,3 @@ class IECOREALEMBIC_API AlembicScene : public IECoreScene::SampledSceneInterface
 };
 
 } // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_ALEMBICSCENE_H

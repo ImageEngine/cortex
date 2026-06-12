@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_FONT_H
-#define IECOREGL_FONT_H
+#pragma once
 
 #include "IECoreGL/AlphaTexture.h"
 #include "IECoreGL/Export.h"
@@ -85,4 +84,3 @@ IE_CORE_DECLAREPTR( Font );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_FONT_H

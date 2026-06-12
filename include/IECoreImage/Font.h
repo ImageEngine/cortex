@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_FONT_H
-#define IECOREIMAGE_FONT_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -102,4 +101,3 @@ IE_CORE_DECLAREPTR( Font );
 
 }
 
-#endif // IECOREIMAGE_FONT_H

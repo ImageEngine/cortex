@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SAMPLEDSCENEINTERFACEBINDING_H
-#define IECORESCENEMODULE_SAMPLEDSCENEINTERFACEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindSampledSceneInterface();
 
 }
 
-#endif // IECORESCENEMODULE_SAMPLEDSCENEINTERFACEBINDING_H

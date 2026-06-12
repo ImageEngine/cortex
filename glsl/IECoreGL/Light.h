@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_LIGHT_H
-#define IECOREGL_LIGHT_H
+#pragma once
 
 vec3 ieLight( vec3 p, int lightIndex, out vec3 L )
 {
@@ -77,4 +76,3 @@ vec3 ieLight( vec3 p, int lightIndex, out vec3 L )
 }
 
 
-#endif // IECOREGL_LIGHT_H

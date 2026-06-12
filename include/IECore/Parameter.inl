@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PARAMETER_INL
-#define IE_CORE_PARAMETER_INL
+#pragma once
 
 #include "IECore/Parameter.h"
 
@@ -70,5 +69,3 @@ const T *Parameter::getTypedValidatedValue() const
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_PARAMETER_INL

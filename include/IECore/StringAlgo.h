@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_STRINGALGO_H
-#define IECORE_STRINGALGO_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/InternedString.h"
@@ -195,4 +194,3 @@ std::string concat( StringsFoldType const& ... strs);
 
 #include "IECore/StringAlgo.inl"
 
-#endif // IECORE_STRINGALGO_H

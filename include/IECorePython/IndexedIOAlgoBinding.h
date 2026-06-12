@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_INDEXEDIOALGOBINDING_H
-#define IECOREPYTHON_INDEXEDIOALGOBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindIndexedIOAlgo();
 
 }
 
-#endif // IECOREPYTHON_INDEXEDIOALGOBINDING_H

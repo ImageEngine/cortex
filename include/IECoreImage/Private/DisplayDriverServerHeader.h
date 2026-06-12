@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_DISPLAYDRIVERSERVERHEADER
-#define IECOREIMAGE_DISPLAYDRIVERSERVERHEADER
+#pragma once
 
 #include "IECoreImage/DisplayDriverServer.h"
 
@@ -81,5 +80,3 @@ class DisplayDriverServerHeader
 };
 
 } // namespace IECoreImage
-
-#endif // IECOREIMAGE_DISPLAYDRIVERSERVERHEADER

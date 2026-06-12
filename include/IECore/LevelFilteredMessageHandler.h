@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_LEVELFILTEREDMESSAGEHANDLER_H
-#define IE_CORE_LEVELFILTEREDMESSAGEHANDLER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FilteredMessageHandler.h"
@@ -84,4 +83,3 @@ class IECORE_API LevelFilteredMessageHandler : public FilteredMessageHandler
 
 }; // namespace IECore
 
-#endif // IE_CORE_LEVELFILTEREDMESSAGEHANDLER_H

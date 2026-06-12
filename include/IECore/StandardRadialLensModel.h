@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_STANDARDRADIALLENSMODEL_H
-#define IECORE_STANDARDRADIALLENSMODEL_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/LensModel.h"
@@ -103,5 +102,4 @@ IE_CORE_DECLAREPTR( StandardRadialLensModel );
 
 } // namespace IECore
 
-#endif // IECORE_STANDARDRADIALLENSMODEL_H
 

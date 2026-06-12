@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PARAMETERISEDINTERFACE_H
-#define IE_CORE_PARAMETERISEDINTERFACE_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
@@ -62,4 +61,3 @@ class IECORE_API ParameterisedInterface
 
 } // namespace IECore
 
-#endif // IE_CORE_PARAMETERISEDINTERFACE_H

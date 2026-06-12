@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CONVERTER_H
-#define IECORE_CONVERTER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Parameterised.h"
@@ -67,4 +66,3 @@ IE_CORE_DECLAREPTR( Converter );
 
 } // namespace IECore
 
-#endif // IECORE_CONVERTER_H

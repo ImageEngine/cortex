@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_EXPORT_H
-#define IECORESCENE_EXPORT_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -42,5 +41,3 @@
 #else
 	#define IECORESCENE_API IECORE_IMPORT
 #endif
-
-#endif // #ifndef IECORESCENE_EXPORT_H

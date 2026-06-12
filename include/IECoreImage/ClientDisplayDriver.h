@@ -35,8 +35,7 @@
 //! \file ClientDisplayDriver.h
 /// Defines the ClientDisplayDriver class.
 
-#ifndef IECOREIMAGE_CLIENTDISPLAYDRIVER
-#define IECOREIMAGE_CLIENTDISPLAYDRIVER
+#pragma once
 
 #include "IECoreImage/DisplayDriver.h"
 #include "IECoreImage/Export.h"
@@ -92,5 +91,3 @@ class IECOREIMAGE_API ClientDisplayDriver : public DisplayDriver
 IE_CORE_DECLAREPTR( ClientDisplayDriver )
 
 }  // namespace IECoreImage
-
-#endif // IECOREIMAGE_CLIENTDISPLAYDRIVER

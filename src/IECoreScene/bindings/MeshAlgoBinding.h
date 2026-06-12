@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_MESHALGOBINDING_H
-#define IECORESCENEMODULE_MESHALGOBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindMeshAlgo();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_MESHALGOBINDING_H

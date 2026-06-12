@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHMERGEOP_H
-#define IECORESCENE_MESHMERGEOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -71,5 +70,4 @@ IE_CORE_DECLAREPTR( MeshMergeOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_MESHMERGEOP_H
 

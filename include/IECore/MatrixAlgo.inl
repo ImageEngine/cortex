@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_MATRIXALGO_INL
-#define IE_CORE_MATRIXALGO_INL
+#pragma once
 
 namespace IECore
 {
@@ -128,4 +127,3 @@ float determinant( const Imath::Matrix44<T> &m )
 
 } // namespace IECore
 
-#endif // IE_CORE_MATRIXALGO_INL

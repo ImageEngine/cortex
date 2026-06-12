@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_TYPEIDBINDING_H
-#define IECORESCENEMODULE_TYPEIDBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindTypeId();
 
 }
 
-#endif // IECORESCENEMODULE_TYPEIDBINDING_H

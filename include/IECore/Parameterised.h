@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PARAMETERISED_H
-#define IE_CORE_PARAMETERISED_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/ParameterisedInterface.h"
@@ -88,4 +87,3 @@ IE_CORE_DECLAREPTR( Parameterised );
 
 } // namespace IECore
 
-#endif // IE_CORE_PARAMETERISED_H

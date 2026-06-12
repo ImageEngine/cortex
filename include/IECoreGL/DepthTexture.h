@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_DEPTHTEXTURE_H
-#define IECOREGL_DEPTHTEXTURE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
@@ -62,4 +61,3 @@ IE_CORE_DECLAREPTR( DepthTexture );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_DEPTHTEXTURE_H

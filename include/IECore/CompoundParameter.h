@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDPARAMETER_H
-#define IE_CORE_COMPOUNDPARAMETER_H
+#pragma once
 
 #include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
@@ -173,4 +172,3 @@ IE_CORE_DECLAREPTR( CompoundParameter );
 
 #include "IECore/CompoundParameter.inl"
 
-#endif // IE_CORE_COMPOUNDPARAMETER_H

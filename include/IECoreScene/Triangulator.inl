@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TRIANGULATOR_INL
-#define IECORESCENE_TRIANGULATOR_INL
+#pragma once
 
 #include "IECore/TriangleAlgo.h"
 
@@ -259,5 +258,3 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( VertexList &vertices
 }
 
 } // namespace IECoreScene
-
-#endif // IECORESCENE_TRIANGULATOR_INL

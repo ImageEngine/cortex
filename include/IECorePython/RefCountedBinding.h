@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_REFCOUNTEDBINDING_H
-#define IECOREPYTHON_REFCOUNTEDBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 #include "IECorePython/WrapperGarbageCollector.h"
@@ -117,4 +116,3 @@ struct CastToIntrusivePtr
 
 #include "IECorePython/RefCountedBinding.inl"
 
-#endif // IECOREPYTHON_REFCOUNTEDBINDING_H

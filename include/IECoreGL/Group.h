@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_GROUP_H
-#define IECOREGL_GROUP_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Renderable.h"
@@ -104,4 +103,3 @@ IE_CORE_DECLAREPTR( Group );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_GROUP_H

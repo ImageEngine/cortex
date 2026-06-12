@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TYPEDPRIMITIVEOP_H
-#define IECORESCENE_TYPEDPRIMITIVEOP_H
+#pragma once
 
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -78,4 +77,3 @@ IE_CORE_DEFINETYPEDPRIMITIVEOP( CurvesPrimitive )
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_TYPEDPRIMITIVEOP_H

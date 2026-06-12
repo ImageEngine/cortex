@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_WRITER_H
-#define IE_CORE_WRITER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FileNameParameter.h"
@@ -152,4 +151,3 @@ class IECORE_API Writer : public Op
 
 #include "IECore/Writer.inl"
 
-#endif // IE_CORE_WRITER_H

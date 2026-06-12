@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_SDFFILEFORMATSHAREDSCENEWRITERS_H
-#define IECOREUSD_SDFFILEFORMATSHAREDSCENEWRITERS_H
+#pragma once
 
 #include "IECoreScene/SceneInterface.h"
 
@@ -69,5 +68,4 @@ class SdfFileFormatSharedSceneWriters
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_SDFFILEFORMATSHAREDSCENEWRITERS_H
 

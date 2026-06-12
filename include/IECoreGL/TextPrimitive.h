@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TEXTPRIMITIVE_H
-#define IECOREGL_TEXTPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
@@ -91,4 +90,3 @@ IE_CORE_DECLAREPTR( TextPrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TEXTPRIMITIVE_H

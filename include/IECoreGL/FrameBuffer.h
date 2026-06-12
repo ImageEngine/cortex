@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_FRAMEBUFFER_H
-#define IECOREGL_FRAMEBUFFER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
@@ -128,4 +127,3 @@ IE_CORE_DECLAREPTR( FrameBuffer );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_FRAMEBUFFER_H

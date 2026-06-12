@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_PRIMITIVEALGOUTILS_H
-#define IECORESCENE_PRIMITIVEALGOUTILS_H
+#pragma once
 
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -336,4 +335,3 @@ class TaskSegmenter
 } // namespace Detail
 } // namespace IECoreScene
 
-#endif // IECORESCENE_PRIMITIVEALGOUTILS_H

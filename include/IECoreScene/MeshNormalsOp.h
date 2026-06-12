@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHNORMALSOP_H
-#define IECORESCENE_MESHNORMALSOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -79,5 +78,4 @@ IE_CORE_DECLAREPTR( MeshNormalsOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_MESHNORMALSOP_H
 

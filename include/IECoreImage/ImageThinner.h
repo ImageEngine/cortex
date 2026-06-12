@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_IMAGETHINNER_H
-#define IECOREIMAGE_IMAGETHINNER_H
+#pragma once
 
 #include "IECoreImage/ChannelOp.h"
 #include "IECoreImage/Export.h"
@@ -85,5 +84,4 @@ IE_CORE_DECLAREPTR( ImageThinner );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_IMAGETHINNER_H
 

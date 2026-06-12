@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_DATAPROMOTEOPBINDING_H
-#define IECOREPYTHON_DATAPROMOTEOPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindDataPromoteOp();
 }
 
-#endif // IECOREPYTHON_DATAPROMOTEOPBINDING_H

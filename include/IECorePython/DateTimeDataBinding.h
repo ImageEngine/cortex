@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_DATETIMEDATABINDING_H
-#define IECOREPYTHON_DATETIMEDATABINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -42,4 +41,3 @@ namespace IECorePython
 IECOREPYTHON_API void bindDateTimeData();
 }
 
-#endif // IECOREPYTHON_DATETIMEDATABINDING_H

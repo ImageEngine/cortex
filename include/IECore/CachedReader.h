@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_CACHEDREADER_H
-#define IE_CORE_CACHEDREADER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
@@ -132,4 +131,3 @@ IE_CORE_DECLAREPTR( CachedReader )
 
 } // namespace IECore
 
-#endif // IE_CORE_CACHEDREADER_H

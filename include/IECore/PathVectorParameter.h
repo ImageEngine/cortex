@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_PATHVECTORPARAMETER_H
-#define IE_CORE_PATHVECTORPARAMETER_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/VectorTypedParameter.h"
@@ -87,4 +86,3 @@ IE_CORE_DECLAREPTR( PathVectorParameter )
 
 } // namespace IECore
 
-#endif // IE_CORE_PATHVECTORPARAMETER_H

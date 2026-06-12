@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CIRCULARITERATOR_H
-#define IECORE_CIRCULARITERATOR_H
+#pragma once
 
 namespace IECore
 {
@@ -105,4 +104,3 @@ class CircularIterator
 
 #include "IECore/CircularIterator.inl"
 
-#endif // IECORE_CIRCULARITERATOR_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_KDTREE_H
-#define IE_CORE_KDTREE_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
@@ -224,4 +223,3 @@ typedef KDTree<std::vector<Imath::V3d>::const_iterator> V3dTree;
 
 #include "KDTree.inl"
 
-#endif // IE_CORE_KDTREE_H

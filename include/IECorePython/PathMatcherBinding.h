@@ -34,8 +34,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_PATHMATCHERBINDING_H
-#define IECOREPYTHON_PATHMATCHERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -46,4 +45,3 @@ IECOREPYTHON_API void bindPathMatcher();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_PATHMATCHERBINDING_H

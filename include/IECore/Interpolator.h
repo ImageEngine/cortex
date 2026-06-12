@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_INTERPOLATOR_H
-#define IE_CORE_INTERPOLATOR_H
+#pragma once
 
 #include <cassert>
 #include <vector>
@@ -77,4 +76,3 @@ struct CubicInterpolator
 #include "TypedDataInterpolator.inl"
 #include "GeometricTypedDataInterpolator.inl"
 
-#endif // IE_CORE_INTERPOLATOR_H

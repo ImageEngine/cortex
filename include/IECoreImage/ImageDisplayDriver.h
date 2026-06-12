@@ -35,8 +35,7 @@
 //! \file ImageDisplayDriver.h
 /// Defines the ImageDisplayDriver class.
 
-#ifndef IECOREIMAGE_IMAGEDISPLAYDRIVER
-#define IECOREIMAGE_IMAGEDISPLAYDRIVER
+#pragma once
 
 #include "IECoreImage/DisplayDriver.h"
 #include "IECoreImage/Export.h"
@@ -96,5 +95,3 @@ class IECOREIMAGE_API ImageDisplayDriver : public DisplayDriver
 IE_CORE_DECLAREPTR( ImageDisplayDriver )
 
 } // namespace IECore
-
-#endif // IE_CORE_IMAGEDISPLAYDRIVER

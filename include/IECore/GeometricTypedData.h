@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_GEOMETRICTYPEDDATA_H
-#define IECORE_GEOMETRICTYPEDDATA_H
+#pragma once
 
 #include "IECore/TypedData.h"
 
@@ -139,4 +138,3 @@ class IECORE_EXPORT GeometricTypedData : public TypedData<T>
 
 } // namespace IECore
 
-#endif // IECORE_GEOMETRICTYPEDDATA_H

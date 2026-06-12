@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_TEXTUREBINDING_H
-#define IE_COREGL_TEXTUREBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindTexture();
 
 }
 
-#endif // IE_COREGL_TEXTUREBINDING_H

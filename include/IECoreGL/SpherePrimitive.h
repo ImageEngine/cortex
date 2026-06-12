@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SPHEREPRIMITIVE_H
-#define IECOREGL_SPHEREPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
@@ -76,4 +75,3 @@ IE_CORE_DECLAREPTR( SpherePrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_SPHEREPRIMITIVE_H

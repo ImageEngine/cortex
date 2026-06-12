@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_QUADPRIMITIVE_H
-#define IECOREGL_QUADPRIMITIVE_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
@@ -71,4 +70,3 @@ IE_CORE_DECLAREPTR( QuadPrimitive );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_QUADPRIMITIVE_H

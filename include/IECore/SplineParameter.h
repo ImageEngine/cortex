@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SPLINEPARAMETER_H
-#define IE_CORE_SPLINEPARAMETER_H
+#pragma once
 
 #include "IECore/SplineData.h"
 #include "IECore/TypedParameter.h"
@@ -59,4 +58,3 @@ IE_CORE_DECLAREPTR( SplinefColor4fParameter );
 
 }
 
-#endif // IE_CORE_SPLINEPARAMETER_H

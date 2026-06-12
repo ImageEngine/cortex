@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_CANCELLERBINDING_H
-#define IECOREPYTHON_CANCELLERBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 
@@ -44,4 +43,3 @@ IECOREPYTHON_API void bindCanceller();
 
 } // namespace IECorePython
 
-#endif // IECOREPYTHON_CANCELLERBINDING_H

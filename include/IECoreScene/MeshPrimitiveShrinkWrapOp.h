@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHPRIMITIVESHRINKWRAPOP_H
-#define IECORESCENE_MESHPRIMITIVESHRINKWRAPOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -115,4 +114,3 @@ IE_CORE_DECLAREPTR( MeshPrimitiveShrinkWrapOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_MESHPRIMITIVESHRINKWRAPOP_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_IMAGETHINNERBINDING_H
-#define IECOREIMAGEBINDINGS_IMAGETHINNERBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindImageThinner();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_IMAGETHINNERBINDING_H

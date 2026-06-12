@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_PATCHMESHPRIMITIVEBINDING_H
-#define IECORESCENEMODULE_PATCHMESHPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindPatchMeshPrimitive();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_PATCHMESHPRIMITIVEBINDING_H

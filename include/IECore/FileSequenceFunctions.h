@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FILESEQUENCEFUNCTIONS_H
-#define IE_CORE_FILESEQUENCEFUNCTIONS_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FileSequence.h"
@@ -65,4 +64,3 @@ IECORE_API FrameListPtr frameListFromList( const std::vector< FrameList::Frame >
 
 } // namespace IECore
 
-#endif // IE_CORE_FILESEQUENCEFUNCTIONS_H

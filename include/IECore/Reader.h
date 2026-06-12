@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_READER_H
-#define IE_CORE_READER_H
+#pragma once
 
 #include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
@@ -154,4 +153,3 @@ class IECORE_API Reader : public Op
 
 #include "IECore/Reader.inl"
 
-#endif // IE_CORE_READER_H

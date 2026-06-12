@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FASTFLOAT_INL
-#define IE_CORE_FASTFLOAT_INL
+#pragma once
 
 #include <math.h>
 
@@ -121,5 +120,3 @@ namespace IECore
 #endif
 
 } // namespace IECore
-
-#endif // IE_CORE_FASTFLOAT_INL

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_COMPUTATIONCACHETEST_H
-#define IECORE_COMPUTATIONCACHETEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -47,6 +46,4 @@ namespace IECore
 void addComputationCacheTest( boost::unit_test::test_suite *test );
 
 }
-
-#endif  // IECORE_COMPUTATIONCACHETEST_H
 

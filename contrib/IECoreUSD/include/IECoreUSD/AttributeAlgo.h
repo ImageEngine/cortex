@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_ATTRIBUTEALGO_H
-#define IECOREUSD_ATTRIBUTEALGO_H
+#pragma once
 
 #include "IECoreUSD/Export.h"
 
@@ -85,4 +84,3 @@ IECOREUSD_API pxr::TfToken cortexPrimitiveVariableMetadataTokenDeprecated();
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_ATTRIBUTEALGO_H

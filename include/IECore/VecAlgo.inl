@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_VECALGO_INL
-#define IECORE_VECALGO_INL
+#pragma once
 
 #ifdef IMATH_INTERNAL_NAMESPACE
 namespace IMATH_INTERNAL_NAMESPACE
@@ -80,5 +79,3 @@ bool operator < ( const Imath::Vec3<T> &left, const Imath::Vec3<T> &right )
 
 } // namespace Imath
 
-
-#endif // IECORE_VECALGO_INL

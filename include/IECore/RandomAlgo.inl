@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_RANDOMALGO_INL
-#define IECORE_RANDOMALGO_INL
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -85,5 +84,3 @@ Vec cosineHemisphereRand( Rand &rand )
 } // namespace RandomAlgo
 
 } // namespace IECore
-
-#endif // IECORE_RANDOMALGO_INL

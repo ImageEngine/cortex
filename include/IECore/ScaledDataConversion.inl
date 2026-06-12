@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #include "IECore/DataConversion.h"
 #include "IECore/HalfTypeTraits.h"
 
@@ -141,7 +143,7 @@ struct ScaledDataConversion<
 		static_assert( boost::is_signed< T >::value );
 		f = std::max<F>( f, (F)( -1.0 ) );
 		f = std::min<F>( f, (F)( 1.0 ) );
-		float result = static_cast<float>(f) * std::numeric_limits<T>::max();
+		float result = static_cast<float>(f) * static_cast<float>( std::numeric_limits<T>::max() );
 		return static_cast<T>( round( result ) );
 	}
 };

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_KDTREETEST_H
-#define IE_CORE_KDTREETEST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/KDTree.h"
@@ -119,4 +118,3 @@ struct KDTreeTestSuite : public boost::unit_test::test_suite
 
 #include "KDTreeTest.inl"
 
-#endif // IE_CORE_KDTREETEST_H

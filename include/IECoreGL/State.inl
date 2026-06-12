@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_STATE_INL
-#define IECOREGL_STATE_INL
+#pragma once
 
 namespace IECoreGL
 {
@@ -57,5 +56,3 @@ void State::remove()
 }
 
 } // namespace IECoreGL
-
-#endif // IECOREGL_STATE_INL

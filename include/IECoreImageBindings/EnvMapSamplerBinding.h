@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_ENVMAPSAMPLERBINDING_H
-#define IECOREIMAGEBINDINGS_ENVMAPSAMPLERBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
@@ -42,4 +41,3 @@ void bindEnvMapSampler();
 
 } // namespace IECoreImageBindings
 
-#endif // IECOREIMAGEBINDINGS_ENVMAPSAMPLERBINDING_H

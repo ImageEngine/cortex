@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_PARTICLEREADERBINDING_H
-#define IECORESCENEMODULE_PARTICLEREADERBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindParticleReader();
 }
 
-#endif // IECORESCENEMODULE_PARTICLEREADERBINDING_H

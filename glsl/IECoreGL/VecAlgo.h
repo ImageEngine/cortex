@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_VECALGO_H
-#define IECOREGL_VECALGO_H
+#pragma once
 
 /// Same as Imath::Vec::normalize(), in that it just returns the input
 /// if it has zero length (rather than dividing by zero).
@@ -63,4 +62,3 @@ vec3 ieNormalize( in vec3 v )
 	}
 }
 
-#endif // IECOREGL_VECALGO_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_REORDEREDFRAMELIST_H
-#define IE_CORE_REORDEREDFRAMELIST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FrameList.h"
@@ -77,4 +76,3 @@ IE_CORE_DECLAREPTR( ReorderedFrameList );
 
 #include "IECore/ReorderedFrameList.inl"
 
-#endif // IE_CORE_REORDEREDFRAMELIST_H

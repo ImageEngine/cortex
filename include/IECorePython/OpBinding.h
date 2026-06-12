@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_OPBINDING_H
-#define IECOREPYTHON_OPBINDING_H
+#pragma once
 
 #include "IECorePython/Export.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -103,4 +102,3 @@ IECOREPYTHON_API void bindOp();
 
 }
 
-#endif // IECOREPYTHON_OPBINDING_H

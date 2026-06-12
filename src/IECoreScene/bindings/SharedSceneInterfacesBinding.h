@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SHAREDSCENEINTERFACESBINDING_H
-#define IECORESCENEMODULE_SHAREDSCENEINTERFACESBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindSharedSceneInterfaces();
 
 }
 
-#endif // IECORESCENEMODULE_SHAREDSCENEINTERFACESBINDING_H

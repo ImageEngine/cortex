@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FRAMELIST_H
-#define IE_CORE_FRAMELIST_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
@@ -106,4 +105,3 @@ class IECORE_API FrameList : public RunTimeTyped
 
 #include "IECore/FrameList.inl"
 
-#endif // IE_CORE_FRAMELIST_H

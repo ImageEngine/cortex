@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TRIANGULATEOP_H
-#define IECORESCENE_TRIANGULATEOP_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
@@ -79,5 +78,4 @@ IE_CORE_DECLAREPTR( TriangulateOp );
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_TRIANGULATEOP_H
 

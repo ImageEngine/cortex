@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_NUMERICPARAMETER_H
-#define IE_CORE_NUMERICPARAMETER_H
+#pragma once
 
 #include "IECore/Parameter.h"
 #include "IECore/TypedData.h"
@@ -111,4 +110,3 @@ IE_CORE_DECLAREPTR( DoubleParameter );
 
 } // namespace IECore
 
-#endif // IE_CORE_NUMERICPARAMETER_H

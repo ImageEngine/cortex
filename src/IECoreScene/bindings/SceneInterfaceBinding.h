@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_SCENEINTERFACEBINDING_H
-#define IECORESCENEMODULE_SCENEINTERFACEBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindSceneInterface();
 
 }
 
-#endif // IECORESCENEMODULE_SCENEINTERFACEBINDING_H

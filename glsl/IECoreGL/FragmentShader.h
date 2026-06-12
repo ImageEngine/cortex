@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_FRAGMENTSHADER_H
-#define IECOREGL_FRAGMENTSHADER_H
+#pragma once
 
 #if __VERSION__ <= 120
 #define IECOREGL_FRAGMENTSHADER_IN varying
@@ -41,4 +40,3 @@
 #define IECOREGL_FRAGMENTSHADER_IN in
 #endif
 
-#endif // IECOREGL_FRAGMENTSHADER_H

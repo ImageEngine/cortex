@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_COMPOUNDDATA_INL
-#define IECORE_COMPOUNDDATA_INL
+#pragma once
 
 #include "IECore/Exception.h"
 
@@ -132,5 +131,3 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 
 
 }; // namespace IECore
-
-#endif // IECORE_COMPOUNDDATA_INL

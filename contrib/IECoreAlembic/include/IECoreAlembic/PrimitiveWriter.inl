@@ -33,8 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_PRIMITIVEWRITER_INL
-#define IECOREALEMBIC_PRIMITIVEWRITER_INL
+#pragma once
 
 namespace IECoreAlembic
 {
@@ -65,5 +64,3 @@ typename GeomParamType::Sample PrimitiveWriter::geomParamSample( const IECoreSce
 }
 
 } // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_PRIMITIVEWRITER_INL

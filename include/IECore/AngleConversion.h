@@ -36,8 +36,7 @@
 /// Defines templates conversions between radians and degrees
 /// \ingroup mathGroup
 
-#ifndef IE_CORE_ANGLECONVERSION_H
-#define IE_CORE_ANGLECONVERSION_H
+#pragma once
 
 #include "IECore/Math.h"
 
@@ -58,4 +57,3 @@ inline T radiansToDegrees( const T &value )
 
 } // namespace IECore
 
-#endif // IE_CORE_ANGLECONVERSION_H

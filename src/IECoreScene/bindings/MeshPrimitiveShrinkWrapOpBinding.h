@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_MESHPRIMITIVESHRINKWRAPOPBINDING_H
-#define IECORESCENEMODULE_MESHPRIMITIVESHRINKWRAPOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
 void bindMeshPrimitiveShrinkWrapOp();
 }
 
-#endif // IECORESCENEMODULE_MESHPRIMITIVESHRINKWRAPOPBINDING_H

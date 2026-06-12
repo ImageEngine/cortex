@@ -32,12 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H
-#define IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H
+#pragma once
 
 namespace IECoreImageBindings
 {
 void bindImagePrimitive();
 }
 
-#endif // IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H

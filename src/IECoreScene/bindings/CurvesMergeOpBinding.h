@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_CURVESMERGEOPBINDING_H
-#define IECORESCENEMODULE_CURVESMERGEOPBINDING_H
+#pragma once
 
 namespace IECoreSceneModule
 {
@@ -42,4 +41,3 @@ void bindCurvesMergeOp();
 
 } // namespace IECoreSceneModule
 
-#endif // IECORESCENEMODULE_CURVESMERGEOPBINDING_H

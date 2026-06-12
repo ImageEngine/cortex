@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H
-#define IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindSplineToGLTextureConverter();
 
 }
 
-#endif // IECOREGL_SPLINETOGLTEXTURECONVERTERBINDING_H

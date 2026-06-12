@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TEXTURE_H
-#define IECOREGL_TEXTURE_H
+#pragma once
 
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/Export.h"
@@ -106,4 +105,3 @@ IE_CORE_DECLAREPTR( Texture );
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_TEXTURE_H

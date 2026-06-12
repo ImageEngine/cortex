@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_COMPOUNDOBJECT_H
-#define IE_CORE_COMPOUNDOBJECT_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Object.h"
@@ -97,4 +96,3 @@ IE_CORE_DECLAREPTR( CompoundObject );
 
 #include "IECore/CompoundObject.inl"
 
-#endif // IE_CORE_COMPOUNDOBJECT_H

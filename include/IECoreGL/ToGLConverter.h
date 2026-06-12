@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TOGLCONVERTER_H
-#define IECOREGL_TOGLCONVERTER_H
+#pragma once
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
@@ -119,4 +118,3 @@ class IECOREGL_API ToGLConverter : public IECore::FromCoreConverter
 
 #include "IECoreGL/ToGLConverter.inl"
 
-#endif // IECOREGL_TOGLCONVERTER_H

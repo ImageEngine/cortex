@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_OBJECTMATRIX_H
-#define IECORE_OBJECTMATRIX_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Object.h"
@@ -82,4 +81,3 @@ IE_CORE_DECLAREPTR( ObjectMatrix );
 
 } // namespace IECore
 
-#endif // IECORE_OBJECTMATRIX_H

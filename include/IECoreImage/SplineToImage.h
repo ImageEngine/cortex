@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_SPLINETOIMAGE_H
-#define IECOREIMAGE_SPLINETOIMAGE_H
+#pragma once
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -89,4 +88,3 @@ IE_CORE_DECLAREPTR( SplineToImage );
 
 } // namespace IECoreImage
 
-#endif // IECOREIMAGE_SPLINETOIMAGE_H

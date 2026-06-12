@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_PRIMITIVEWRITER_H
-#define IECOREALEMBIC_PRIMITIVEWRITER_H
+#pragma once
 
 #include "IECoreAlembic/ObjectWriter.h"
 
@@ -76,4 +75,3 @@ class PrimitiveWriter : public ObjectWriter
 
 #include "IECoreAlembic/PrimitiveWriter.inl"
 
-#endif // IECOREALEMBIC_PRIMITIVEWRITER_H

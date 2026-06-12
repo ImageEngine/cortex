@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREGL_BUFFERBINDING_H
-#define IE_COREGL_BUFFERBINDING_H
+#pragma once
 
 namespace IECoreGL
 {
@@ -42,4 +41,3 @@ void bindBuffer();
 
 } // namespace IECoreGL
 
-#endif // IE_COREGL_BUFFERBINDING_H

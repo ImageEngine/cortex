@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_MESHALGO_H
-#define IECORESCENE_MESHALGO_H
+#pragma once
 
 #include "IECore/Canceller.h"
 #include "IECore/ImathHash.h"
@@ -227,4 +226,3 @@ IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> co
 
 #include "IECoreScene/MeshAlgo.inl"
 
-#endif // IECORESCENE_MESHALGO_H

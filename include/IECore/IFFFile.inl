@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_IFFFILE_INL
-#define IE_CORE_IFFFILE_INL
+#pragma once
 
 #include "IECore/ByteOrder.h"
 #include "IECore/MessageHandler.h"
@@ -127,5 +126,3 @@ void IFFFile::readData( const char *dataBuffer, T *attrBuffer, size_t n )
 }
 
 } // namespace IECore
-
-#endif // IE_CORE_IFFFILE_INL

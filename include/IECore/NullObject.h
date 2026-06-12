@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_NULLOBJECT_H
-#define IE_CORE_NULLOBJECT_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/Object.h"
@@ -66,4 +65,3 @@ class IECORE_API NullObject : public Object
 
 }
 
-#endif // IE_CORE_NULLOBJECT_H

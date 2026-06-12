@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_BOOSTUNITTESTTEST_H
-#define IE_CORE_BOOSTUNITTESTTEST_H
+#pragma once
 
 #include "IECore/Export.h"
 
@@ -88,6 +87,4 @@ struct BoostUnitTestTestSuite : public boost::unit_test::test_suite
 };
 
 }
-
-#endif
 

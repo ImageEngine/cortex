@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_LINKEDSCENE_H
-#define IECORESCENE_LINKEDSCENE_H
+#pragma once
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/SampledSceneInterface.h"
@@ -193,5 +192,3 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 };
 
 } // namespace IECoreScene
-
-#endif  // IECORESCENE_LINKEDSCENE_H

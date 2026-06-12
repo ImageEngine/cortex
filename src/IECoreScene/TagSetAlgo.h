@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_TAGSETALGO_H
-#define IECORESCENE_TAGSETALGO_H
+#pragma once
 
 #include "IECoreScene/SceneInterface.h"
 
@@ -76,5 +75,3 @@ namespace IECoreScene
 	} // private
 
 } // IECoreScene
-
-#endif //IECORESCENE_TAGSETALGO_H

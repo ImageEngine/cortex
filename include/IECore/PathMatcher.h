@@ -35,8 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_PATHMATCHER_H
-#define IECORE_PATHMATCHER_H
+#pragma once
 
 #include "IECore/InternedString.h"
 #include "IECore/MurmurHash.h"
@@ -355,4 +354,3 @@ IECORE_API void murmurHashAppend( IECore::MurmurHash &h, const IECore::PathMatch
 
 #include "IECore/PathMatcher.inl"
 
-#endif // IECORE_PATHMATCHER_H

@@ -32,8 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_FRAMERANGE_H
-#define IE_CORE_FRAMERANGE_H
+#pragma once
 
 #include "IECore/Export.h"
 #include "IECore/FrameList.h"
@@ -85,4 +84,3 @@ IE_CORE_DECLAREPTR( FrameRange );
 } // namespace IECore
 
 
-#endif // IE_CORE_FRAMERANGE_H
