@@ -44,6 +44,7 @@
 
 #include "IECore/Exception.h"
 #include "IECore/NullObject.h"
+#include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
 
 #include "OpenEXR/OpenEXRConfig.h"
@@ -80,6 +81,38 @@ IECore::TransformationMatrixd convertTransformMatrix( DD::Image::Matrix4& from )
 }
 
 tbb::recursive_mutex g_mutex;
+
+IECore::ConstObjectPtr convertAttribute( const DD::Image::Attribute *attribute )
+{
+	switch( attribute->type() )
+	{
+		case DD::Image::FLOAT_ATTRIB :
+			return new IECore::FloatData( attribute->flt( 0 ) );
+		case DD::Image::INT_ATTRIB :
+			return new IECore::IntData( attribute->integer( 0 ) );
+		case DD::Image::STD_STRING_ATTRIB :
+			return new IECore::StringData( attribute->stdstring( 0 ) );
+		case DD::Image::STRING_ATTRIB :
+		{
+			const char *s = attribute->string( 0 );
+			return new IECore::StringData( s ? s : "" );
+		}
+		case DD::Image::VECTOR2_ATTRIB :
+			return new IECore::V2fData( IECore::convert<Imath::V2f>( attribute->vector2( 0 ) ) );
+		case DD::Image::VECTOR3_ATTRIB :
+			return new IECore::V3fData( IECore::convert<Imath::V3f>( attribute->vector3( 0 ) ) );
+		case DD::Image::NORMAL_ATTRIB :
+			return new IECore::V3fData( IECore::convert<Imath::V3f>( attribute->normal( 0 ) ) );
+		case DD::Image::VECTOR4_ATTRIB :
+			return new IECore::Color4fData( IECore::convert<Imath::Color4f>( attribute->vector4( 0 ) ) );
+		case DD::Image::MATRIX3_ATTRIB :
+			return new IECore::M33fData( IECore::convert<Imath::M33f>( attribute->matrix3( 0 ) ) );
+		case DD::Image::MATRIX4_ATTRIB :
+			return new IECore::M44fData( IECore::convert<Imath::M44f>( attribute->matrix4( 0 ) ) );
+		default :
+			return nullptr;
+	}
+}
 
 LiveScene::LiveSceneGeometryCache &cachedGeometryListMap()
 {
@@ -424,15 +457,85 @@ void LiveScene::writeTransform( const Data *transform, double time )
 
 bool LiveScene::hasAttribute( const Name &name ) const
 {
+	const unsigned numObjects = objectNum();
+	for( unsigned i = 0; i < numObjects; ++i )
+	{
+		if( m_pathMatcher.match( geoInfoPath( i ) ) != IECore::PathMatcher::ExactMatch )
+		{
+			continue;
+		}
+		auto geoInfo = object( i );
+		if( !geoInfo )
+		{
+			return false;
+		}
+		// we only support Group_Object because they are only one that makes sense to match to IECoreScene Attributes
+		// other type of attributes are more akin to PrimitiveVariables
+		// so we could consider adding support for Group_Primitive/Vertex and Point as such.
+		auto attr = geoInfo->get_group_attribute( GroupType::Group_Object, name.c_str() );
+		return attr && attr->size() > 0;
+	}
 	return false;
 }
 
 void LiveScene::attributeNames( NameList &attrs ) const
 {
+	attrs.clear();
+	const unsigned numObjects = objectNum();
+	for( unsigned i = 0; i < numObjects; ++i )
+	{
+		if( m_pathMatcher.match( geoInfoPath( i ) ) != IECore::PathMatcher::ExactMatch )
+		{
+			continue;
+		}
+		auto geoInfo = object( i );
+		if( !geoInfo )
+		{
+			return;
+		}
+		const int count = geoInfo->get_attribcontext_count();
+		for( int j = 0; j < count; ++j )
+		{
+			auto context = geoInfo->get_attribcontext( j );
+			// we only support Group_Object because they are only one that makes sense to match to IECoreScene Attributes
+			// other type of attributes are more akin to PrimitiveVariables
+			// so we could consider adding support for Group_Primitive/Vertex and Point as such.
+			if( context && !context->empty() && context->group == GroupType::Group_Object && context->name )
+			{
+				attrs.push_back( context->name );
+			}
+		}
+		return;
+	}
 }
 
 ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 {
+	const unsigned numObjects = objectNum( &time );
+	for( unsigned i = 0; i < numObjects; ++i )
+	{
+		if( m_pathMatcher.match( geoInfoPath( i ) ) != IECore::PathMatcher::ExactMatch )
+		{
+			continue;
+		}
+		auto geoInfo = object( i, &time );
+		if( !geoInfo )
+		{
+			return IECore::NullObject::defaultNullObject();
+		}
+		// we only support Group_Object because they are only one that makes sense to match to IECoreScene Attributes
+		// other type of attributes are more akin to PrimitiveVariables
+		// so we could consider adding support for Group_Primitive/Vertex and Point as such.
+		auto attr = geoInfo->get_group_attribute( GroupType::Group_Object, name.c_str() );
+		if( attr && attr->size() > 0 )
+		{
+			if( auto converted = convertAttribute( attr ) )
+			{
+				return converted;
+			}
+		}
+		return IECore::NullObject::defaultNullObject();
+	}
 	return IECore::NullObject::defaultNullObject();
 }
 

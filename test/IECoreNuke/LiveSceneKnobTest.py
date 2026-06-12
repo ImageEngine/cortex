@@ -445,6 +445,72 @@ class LiveSceneKnobTest( IECoreNuke.TestCase ) :
 		obj = child.readObject(0)
 		self.assertIsInstance(obj, IECoreScene.MeshPrimitive)
 
+	def testEmptySceneAttributes( self ) :
+
+		n = nuke.createNode( "ieLiveScene" )
+		liveScene = n.knob( "scene" ).getValue()
+
+		self.assertEqual( liveScene.attributeNames(), [] )
+		self.assertFalse( liveScene.hasAttribute( "ieName" ) )
+		self.assertFalse( liveScene.hasAttribute( "nonExistent" ) )
+		self.assertTrue( isinstance( liveScene.readAttribute( "nonExistent", 0 ), IECore.NullObject ) )
+
+	def testAttributes( self ) :
+		import imath
+		import IECoreScene
+
+		sceneFile = "test/IECoreNuke/scripts/data/liveSceneData.scc"
+		sceneReader = nuke.createNode( "ieSceneCacheReader" )
+		sceneReader.knob( "file" ).setValue( sceneFile )
+
+		sceneReader.forceValidate()
+		widget = sceneReader.knob( "sceneView" )
+		widget.setSelectedItems( ['/root/A/a', '/root/B/b'] )
+
+		n = nuke.createNode( "ieLiveScene" )
+		n.setInput( 0, sceneReader )
+
+		liveScene = n.knob( "scene" ).getValue()
+
+		# Root and parent locations have no matching GeoInfo, so no attributes.
+		self.assertEqual( liveScene.attributeNames(), [] )
+		self.assertFalse( liveScene.hasAttribute( "ieName" ) )
+
+		for subPath in ( ["A"], ["B"] ) :
+			subScene = liveScene.scene( subPath )
+			self.assertEqual( subScene.attributeNames(), [] )
+			self.assertFalse( subScene.hasAttribute( "ieName" ) )
+
+		# Leaf locations have Group_Object attributes set by ToNukeGeometryConverter.
+		leafA = liveScene.scene( ["A", "a"] )
+		self.assertIn( "ieName", leafA.attributeNames() )
+		self.assertTrue( leafA.hasAttribute( "ieName" ) )
+		self.assertFalse( leafA.hasAttribute( "nonExistent" ) )
+		self.assertIsInstance( leafA.readAttribute( "nonExistent", 0 ), IECore.NullObject )
+
+		nameAttr = leafA.readAttribute( "ieName", 0 )
+		self.assertIsInstance( nameAttr, IECore.StringData )
+		self.assertEqual( nameAttr.value, "/A/a" )
+
+		leafB = liveScene.scene( ["B", "b"] )
+		nameAttr = leafB.readAttribute( "ieName", 0 )
+		self.assertIsInstance( nameAttr, IECore.StringData )
+		self.assertEqual( nameAttr.value, "/B/b" )
+
+		# Scene attributes from the SCC round-trip through Nuke as Group_Object attributes.
+		self.assertIn( "user:Mref", leafA.attributeNames() )
+		self.assertTrue( leafA.hasAttribute( "user:Mref" ) )
+
+		# The SCC stores M44dData but Nuke round-trips it as M44fData.
+		expectedScene = IECoreScene.SharedSceneInterfaces.get( sceneFile )
+		expectedLeaf = expectedScene.scene( ["A", "a"] )
+		expectedAttr = expectedLeaf.readAttribute( "user:Mref", 0.5 )
+
+		attr = leafA.readAttribute( "user:Mref", 0 )
+		self.assertIsInstance( attr, IECore.M44fData )
+		self.assertEqual( attr.value, imath.M44f( expectedAttr.value ) )
+
+
 if __name__ == "__main__":
 	unittest.main()
 

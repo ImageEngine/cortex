@@ -128,6 +128,34 @@ Imath::Color4f convert( const DD::Image::Vector4 &from )
 }
 
 template<>
+Imath::M33f convert( const DD::Image::Matrix3 &from )
+{
+	Imath::M33f result;
+	for( unsigned int i=0; i<3; i++ )
+	{
+		for( unsigned int j=0; j<3; j++ )
+		{
+			result[j][i] = from[j][i];
+		}
+	}
+	return result;
+}
+
+template<>
+Imath::M33d convert( const DD::Image::Matrix3 &from )
+{
+	Imath::M33d result;
+	for( unsigned int i=0; i<3; i++ )
+	{
+		for( unsigned int j=0; j<3; j++ )
+		{
+			result[j][i] = from[j][i];
+		}
+	}
+	return result;
+}
+
+template<>
 Imath::M44f convert( const DD::Image::Matrix4 &from )
 {
 	Imath::M44f result;
