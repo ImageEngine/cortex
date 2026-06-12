@@ -4008,6 +4008,59 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertIn( "__lights", root.setNames() )
 		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/meshLight/meshLightMesh" ] ) )
 
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testRoundTripMeshLight( self ) :
+
+		# Write to USD
+
+		fileName = os.path.join( self.temporaryDirectory(), "meshLight.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		lightNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader( "MeshLight", "light", {} ),
+			},
+			output = "output",
+		)
+		surfaceNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader( "UsdPreviewSurface", "surface", {} ),
+				"texture" : IECoreScene.Shader( "UsdUVTexture", "surface", {} ),
+			},
+			output = "output",
+			connections = [ ( ( "texture", "rgb" ), ( "output", "glowColor" ) ) ],
+		)
+
+		meshLightObject = IECoreScene.MeshPrimitive.createPlane(
+			imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) ),
+			imath.V2i( 16, 16 )
+		)
+
+		meshLight = root.createChild( "meshLight" )
+		meshLight.writeObject( meshLightObject, 0 )
+		meshLight.writeAttribute( "light", lightNetwork, 0 )
+		meshLight.writeAttribute( "surface", surfaceNetwork, 0 )
+
+		root.writeSet( "__lights", IECore.PathMatcher( [ "/meshLight" ] ) )
+
+		del meshLight, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		meshLight = root.child( "meshLight" )
+		self.assertIn( "light", meshLight.attributeNames() )
+
+		# The Cortex shader handle is lost when converting to USD because we are only attaching
+		# the `MeshLightAPI` to the prim. Therefore the shader networks will not be equal, but we
+		# can check that the output shaders are equal.
+		self.assertEqual( meshLight.readAttribute( "light", 0 ).outputShader(), lightNetwork.outputShader() )
+
+		# The surface shader networks should be equivalent
+		self.assertEqual( meshLight.readAttribute( "surface", 0 ), surfaceNetwork )
+
+		self.assertIn( "__lights", root.setNames() )
+		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/meshLight" ] ) )
+
 	def testPointInstancerPrimvars( self ) :
 
 		# Use the USD API to author a point instancer with primvars on it.
