@@ -265,6 +265,10 @@ using PrimPredicate = bool (pxr::UsdPrim::*)() const;
 boost::container::flat_map<pxr::TfToken, PrimPredicate> g_schemaTypeSetPredicates = {
 	{ pxr::TfToken( "__cameras" ), &pxr::UsdPrim::IsA<pxr::UsdGeomCamera> },
 	{  pxr::TfToken( "__lights" ), &pxr::UsdPrim::HasAPI<pxr::UsdLuxLightAPI> },
+	/// \todo This was introduced before we had `IECoreScene::PointInstancer`, to allow
+	/// us to tell which `IECoreScene::PointsPrimitives` came from UsdGeomPointInstancer.
+	/// We'll need to keep it for backwards compatibility for a while, but it might make
+	/// sense to remove it at some point.
 	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> }
 };
 

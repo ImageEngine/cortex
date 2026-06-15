@@ -153,17 +153,8 @@ struct VtValueFromExpandedData
 	template<typename T>
 	VtValue operator()( const IECore::TypedData<vector<T>> *data, const IECore::IntVectorData *indices, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr ) const
 	{
-		using USDType = typename CortexTypeTraits<T>::USDType;
-		using ArrayType = VtArray<USDType>;
-		ArrayType array;
-		array.reserve( indices->readable().size() );
-		// Using universal reference (`&&`) for iteration for compatibility with the
-		// non-standard proxy returned by `vector<bool>`.
-		for( auto &&e : PrimitiveVariable::IndexedView<T>( data->readable(), &indices->readable() ) )
-		{
-			array.push_back( DataAlgo::toUSD( static_cast<const T &>( e ) ) );
-		}
-		return VtValue( array );
+		PrimitiveVariable::IndexedView<T> view( data->readable(), &indices->readable() );
+		return IECoreUSD::PrimitiveAlgo::toUSDExpanded( view );
 	}
 
 	VtValue operator()( const IECore::Data *data, const IECore::IntVectorData *indices ) const

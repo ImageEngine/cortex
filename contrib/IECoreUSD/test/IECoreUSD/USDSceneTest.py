@@ -3924,7 +3924,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( points.keys(), ['P', 'myColor', 'prototypeRoots'] )
 
-		self.assertIsInstance( points, IECoreScene.PointsPrimitive )
+		self.assertIsInstance( points, IECoreScene.PointInstancer )
 		self.assertIn( "myColor", points )
 		self.assertEqual(
 			points["myColor"].data,
@@ -3935,7 +3935,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		# Now try deactivating some ids
 
-		pointInstancer.DeactivateIds( [ 0, 2 ] )
+		pointInstancer.DeactivateIds( [ 0, 1, 2 ] )
 		pointInstancer.InvisIds( [ 1, 4 ], 0 )
 
 		stage.GetRootLayer().Save()
@@ -3943,10 +3943,9 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		points = root.child( "points" ).readObject( 0 )
 
-		self.assertEqual( points.keys(), ['P', 'inactiveIds', 'invisibleIds', 'myColor', 'prototypeRoots'] )
+		self.assertEqual( points.keys(), ['P', 'invisibleIds', 'myColor', 'prototypeRoots'] )
 
-		self.assertEqual( points["inactiveIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 0, 2 ] ) ) )
-		self.assertEqual( points["invisibleIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 1, 4 ] ) ) )
+		self.assertEqual( points["invisibleIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 0, 1, 2, 4 ] ) ) )
 
 	def testArnoldArrayInputs( self ) :
 
@@ -4614,7 +4613,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotIn( "\\", xform.readAttribute( "render:testAsset", 0 ).value )
 		self.assertTrue( pathlib.Path( xform.readAttribute( "render:testAsset", 0 ).value ).is_file() )
 
-	def _testPointInstancerRelativePrototypes( self ) :
+	def testPointInstancerRelativePrototypes( self ) :
 
 		root = IECoreScene.SceneInterface.create(
 			os.path.join( os.path.dirname( __file__ ), "data", "pointInstancerWeirdPrototypes.usda" ),
@@ -4623,30 +4622,39 @@ class USDSceneTest( unittest.TestCase ) :
 		pointInstancer = root.child( "inst" )
 		obj = pointInstancer.readObject(0.0)
 
-		if os.environ.get( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", "0" ) != "0" :
-			self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ './Prototypes/sphere', '/cube' ] ) )
-		else :
-			self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ '/inst/Prototypes/sphere', '/cube' ] ) )
+		self.assertEqual( obj["prototypeRoots"].data, IECore.StringVectorData( [ 'Prototypes/sphere', '/cube' ] ) )
 
-	def testPointInstancerRelativePrototypes( self ) :
+	def testPointInstancerRoundTrip( self ) :
 
-		for relative in [ "0", "1", None ] :
+		instancer = IECoreScene.PointInstancer( 4 )
+		instancer.setPrototypes( IECore.StringVectorData( [ "prototypes/p1", "prototypes/p2" ] ) )
+		instancer.setPrototypeIndex( IECore.IntVectorData( [ 0, 1, 0, 1 ] ) )
+		instancer.setPosition( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 4 ) ] ) )
+		instancer.setScale( IECore.V3fVectorData( [ imath.V3f( x + 1 ) for x in range( 4 ) ] ) )
+		instancer.setOrientation( IECore.QuatfVectorData( [ imath.Quatf( x, x, x, x ) for x in range( 4 ) ] ) )
+		instancer.setID( IECore.Int64VectorData( [ 10, 11, 12, 13 ] ) )
+		instancer.setInvisibleIDs( IECore.Int64VectorData( [ 10 ] ) )
+		instancer["test"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.StringData( "test" )
+		)
 
-			with self.subTest( relative = relative ) :
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "test.usda" ),
+			IECore.IndexedIO.OpenMode.Write
+		)
+		root.createChild( "instancer" ).writeObject( instancer, 0 )
+		del root
 
-				env = os.environ.copy()
-				if relative is not None :
-					env["IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES"] = relative
-				else :
-					env.pop( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", None )
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "test.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
 
-				try :
-					subprocess.check_output(
-						[ sys.executable, __file__, "USDSceneTest._testPointInstancerRelativePrototypes" ],
-						env = env, stderr = subprocess.STDOUT
-					)
-				except subprocess.CalledProcessError as e :
-					self.fail( e.output )
+		self.assertEqual(
+			root.child( "instancer").readObject( 0 ),
+			instancer
+		)
 
 	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
 	def testUsdVolVolumeSlashes( self ) :

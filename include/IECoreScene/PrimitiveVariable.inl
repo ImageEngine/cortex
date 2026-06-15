@@ -161,7 +161,7 @@ class PrimitiveVariable::IndexedView<T>::Iterator : public boost::iterator_facad
 };
 
 template<typename T>
-typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedView<T>::begin()
+typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedView<T>::begin() const
 {
 	return Iterator(
 		m_indices ? m_indices->data() : nullptr,
@@ -170,7 +170,7 @@ typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedV
 }
 
 template<typename T>
-typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedView<T>::end()
+typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedView<T>::end() const
 {
 	return Iterator(
 		m_indices ? m_indices->data() + m_indices->size() : nullptr,

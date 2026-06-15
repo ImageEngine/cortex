@@ -1,16 +1,35 @@
 10.7.x.x (relative to 10.7.0.0a10)
 ========
 
+Features
+--------
+
+- PointInstancer : Added class to provide first-class encoding of point instancers.
+
+Improvements
+------------
+
+- PrimitiveVariable : Added Python bindings for `IndexedView` class.
+- USDScene : Added support for writing `IECoreScene::PointInstancer` as `UsdGeomPointInstancer`.
+
 Fixes
 -----
 
 - RunTimeTyped : Fixed unnecessary overhead of `runTimeCast()` and `isInstanceOf()` for subclasses implemented in Python. The GIL is now never needed when the cast is to a C++ type.
+- PrimitiveVariable : Made IndexedView `begin()` and `end()` const.
+- PointsAlgo :
+  - Fixed loss of blind data in `deletePoints()`.
+  - Fixed loss of primitive type in `deletePoints()` (if processing a derived class of PointsPrimitive).
 
 Breaking Changes
 ----------------
 
 - ClassParameter, ClassVectorParameter : Replaced statically allocated TypeIds with ids allocated dynamically by `IECore.registerRunTimeTyped()`. If the id is needed from C++, it can be queried at runtime with `RunTimeTyped::typeIdFromTypeName()`.
 - RunTimeTyped : Removed `typId` argument from `registerRunTimeTyped()` Python function. TypeIds are now always allocated dynamically for Python classes.
+- USD :
+  - Removed support for `IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES` environment variable. Prototype paths are now always specified as relative where possible.
+  - Removed `./` prefix from relative prototype paths.
+  - UsdGeomPointInstancer `inactiveIds` are now merged into the `invisibleIds` primitive variable on loading, instead of being loaded separately.
 
 Build
 -----

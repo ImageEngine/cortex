@@ -185,9 +185,34 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 
 		IECoreScene.testPrimitiveVariableIndexedView()
 
+		primitiveVariable = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.StringVectorData( [ "a", "b", "c" ] ),
+			IECore.IntVectorData( [ 0, 2, 1, 0, 1 ] )
+		)
+
+		indexedView = IECoreScene.PrimitiveVariable.StringIndexedView( primitiveVariable )
+		self.assertEqual( len( indexedView ), 5 )
+		self.assertTrue( indexedView )
+		self.assertTrue( indexedView.isValid() )
+		self.assertEqual( indexedView[1], "c" )
+		self.assertEqual( indexedView[-1], "b" )
+		self.assertEqual( list( indexedView ), [ "a", "c", "b", "a", "b" ] )
+		with self.assertRaises( IndexError ) :
+			indexedView[5]
+
 	def testBoolIndexedView( self ) :
 
 		IECoreScene.testPrimitiveVariableBoolIndexedView()
+
+	def testEmptyIndexedView( self ) :
+
+		indexedView = IECoreScene.PrimitiveVariable.StringIndexedView()
+		self.assertFalse( indexedView )
+		self.assertFalse( indexedView.isValid() )
+		self.assertEqual( indexedView.size(), 0 )
+		with self.assertRaises( IndexError ) :
+			indexedView[0]
 
 if __name__ == "__main__":
 	unittest.main()

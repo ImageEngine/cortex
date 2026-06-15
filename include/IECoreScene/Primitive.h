@@ -72,6 +72,7 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		/// An IndexedView allows access to both indexed & non indexed primitive variables using a common API.
 		/// If the required interpolation & datatype do not match then an empty optional is returned unless throwIfInvalid is true.
 		/// The returned IndexedView lifetime must be bound by the primitive variable data it is viewing.
+		/// \todo Now that IndexedView has `operator bool()`, there is no need to wrap in `std::optional`.
 		template<typename T>
 		std::optional<PrimitiveVariable::IndexedView<typename T::ValueType::value_type>> variableIndexedView(
 			const std::string &name,

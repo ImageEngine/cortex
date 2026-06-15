@@ -36,11 +36,14 @@
 #include "IECoreUSD/ObjectAlgo.h"
 #include "IECoreUSD/PrimitiveAlgo.h"
 
-#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/PointInstancer.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/pointInstancer.h"
 IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/container/flat_set.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -53,19 +56,6 @@ using namespace IECoreUSD;
 namespace
 {
 
-bool checkEnvFlag( const char *envVar, bool def )
-{
-	const char *value = getenv( envVar );
-	if( value )
-	{
-		return std::string( value ) != "0";
-	}
-	else
-	{
-		return def;
-	}
-}
-
 IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	pxr::VtVec3fArray pointsData;
@@ -73,8 +63,8 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	Canceller::check( canceller );
 	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsData );
 
-	positionData->setInterpretation( GeometricData::Point );
-	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
+	IECoreScene::PointInstancerPtr newPoints = new IECoreScene::PointInstancer( positionData->readable().size() );
+	newPoints->setPosition( positionData );
 
 	// Per point attributes
 
@@ -99,29 +89,49 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	Canceller::check( canceller );
 	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetAngularVelocitiesAttr(), time, newPoints.get(), "angularVelocity" );
 
+	// Inactive and invisible IDs. These both do the same thing - prevent specific instances
+	// from rendering. Inactive IDs are metadata-based and therefore can't be animated.
+	// Invisible IDs are attribute-based and therefore can be animated. Since we're converting
+	// to Cortex PrimitiveVariables, the distinction is irrelevant - all PrimitiveVariables can
+	// be animated. Our PointInstancer therefore just has invisible IDs, which we merge both
+	// USD properties into.
+
+	IECore::Int64VectorDataPtr invisibleIds;
 	if( pointInstancer.GetInvisibleIdsAttr().HasAuthoredValue() )
 	{
-		DataPtr cortexInvisIds = DataAlgo::fromUSD( pointInstancer.GetInvisibleIdsAttr(), time, true );
-		if( cortexInvisIds )
-		{
-			newPoints->variables["invisibleIds"] = IECoreScene::PrimitiveVariable(
-				PrimitiveVariable::Constant, cortexInvisIds
-			);
-		}
+		invisibleIds = IECore::runTimeCast<IECore::Int64VectorData>(
+			DataAlgo::fromUSD( pointInstancer.GetInvisibleIdsAttr(), time, true )
+		);
 	}
 
 	pxr::SdfInt64ListOp inactiveIdsListOp;
 	if( pointInstancer.GetPrim().GetMetadata( pxr::UsdGeomTokens->inactiveIds, &inactiveIdsListOp ) )
 	{
-		newPoints->variables["inactiveIds"] = IECoreScene::PrimitiveVariable(
-			PrimitiveVariable::Constant,
-			new IECore::Int64VectorData( inactiveIdsListOp.GetExplicitItems() )
-		);
+		const std::vector<int64_t> &inactiveIds = inactiveIdsListOp.GetExplicitItems();
+		if( inactiveIds.size() )
+		{
+			if( invisibleIds )
+			{
+				invisibleIds->writable().insert(
+					invisibleIds->writable().end(),
+					inactiveIds.begin(), inactiveIds.end()
+				);
+				std::sort( invisibleIds->writable().begin(), invisibleIds->writable().end() );
+				invisibleIds->writable().erase(
+					std::unique( invisibleIds->writable().begin(), invisibleIds->writable().end() ),
+					invisibleIds->writable().end()
+				);
+			}
+			else
+			{
+				invisibleIds = new Int64VectorData( inactiveIds );
+			}
+		}
 	}
 
-	// Prototype paths
+	newPoints->setInvisibleIDs( invisibleIds );
 
-	const static bool g_relativePrototypes = checkEnvFlag( "IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES", false );
+	// Prototype paths
 
 	pxr::SdfPathVector targets;
 	Canceller::check( canceller );
@@ -134,17 +144,13 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	prototypeRoots.reserve( targets.size() );
 	for( const auto &t : targets )
 	{
-		if( !g_relativePrototypes || !t.HasPrefix( primPath ) )
+		if( !t.HasPrefix( primPath ) )
 		{
 			prototypeRoots.push_back( t.GetString() );
 		}
 		else
 		{
-			// The ./ prefix shouldn't be necessary - we want to just use the absence of a leading
-			// slash to indicate relative paths. We can remove the prefix here once we deprecate the
-			// GAFFERSCENE_INSTANCER_EXPLICIT_ABSOLUTE_PATHS env var and have Gaffer always require a leading
-			// slash for absolute paths.
-			prototypeRoots.push_back( "./" + t.MakeRelativePath( primPath ).GetString() );
+			prototypeRoots.push_back( t.MakeRelativePath( primPath ).GetString() );
 		}
 	}
 
@@ -176,5 +182,102 @@ bool pointInstancerMightBeTimeVarying( pxr::UsdGeomPointInstancer &instancer )
 }
 
 ObjectAlgo::ReaderDescription<pxr::UsdGeomPointInstancer> g_pointInstancerReaderDescription( pxr::TfToken( "PointInstancer" ), readPointInstancer, pointInstancerMightBeTimeVarying );
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Writing
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+const boost::container::flat_set<std::string> g_exportedAsAttributes = {
+	"prototypeRoots", "prototypeIndex", "P", "scale", "orientation",
+	"id", "invisibleIds"
+};
+
+bool writePointInstancer( const IECoreScene::PointInstancer *instancer, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+{
+	auto usdInstancer = pxr::UsdGeomPointInstancer::Define( stage, path );
+
+	// Export primitive variables with special meaning to attributes
+	// of the UsdGeomPointInstancer.
+
+	if( auto prototypes = instancer->getPrototypes() )
+	{
+		pxr::SdfPathVector targets;
+		targets.reserve( prototypes.size() );
+		for( const auto &prototype : prototypes )
+		{
+			pxr::SdfPath prototypePath;
+			if( boost::starts_with( prototype, "./" ) )
+			{
+				prototypePath = pxr::SdfPath( prototype.substr( 2 ) );
+			}
+			else
+			{
+				prototypePath = pxr::SdfPath( prototype );
+			}
+			if( !prototypePath.IsAbsolutePath() )
+			{
+				prototypePath = prototypePath.MakeAbsolutePath( path );
+			}
+			targets.push_back( prototypePath );
+		}
+		usdInstancer.CreatePrototypesRel().SetTargets( targets );
+	}
+
+	if( auto prototypeIndex = instancer->getPrototypeIndex() )
+	{
+		usdInstancer.CreateProtoIndicesAttr().Set( PrimitiveAlgo::toUSDExpanded( prototypeIndex ), time );
+	}
+
+	if( auto position = instancer->getPosition() )
+	{
+		usdInstancer.CreatePositionsAttr().Set( PrimitiveAlgo::toUSDExpanded( position ), time );
+	}
+
+	if( auto orientation = instancer->getOrientation() )
+	{
+		// USD uses `half` for orientation, but Cortex only has a data type for
+		// `float` quaternions, so convert.
+		pxr::VtArray<pxr::GfQuath> usdOrientation;
+		usdOrientation.reserve( orientation.size() );
+		for( const auto &o : orientation )
+		{
+			usdOrientation.push_back( pxr::GfQuath( DataAlgo::toUSD( o ) ) );
+		}
+		usdInstancer.CreateOrientationsAttr().Set( usdOrientation, time );
+	}
+
+	if( auto scale = instancer->getScale() )
+	{
+		usdInstancer.CreateScalesAttr().Set( PrimitiveAlgo::toUSDExpanded( scale ), time );
+	}
+
+	if( auto id = instancer->getID() )
+	{
+		usdInstancer.CreateIdsAttr().Set( PrimitiveAlgo::toUSDExpanded( id ), time );
+	}
+
+	if( auto invisibleIds = instancer->getInvisibleIDs() )
+	{
+		usdInstancer.CreateInvisibleIdsAttr().Set( PrimitiveAlgo::toUSDExpanded( invisibleIds ), time );
+	}
+
+	for( const auto &[name, primitiveVariable] : instancer->variables )
+	{
+		if( g_exportedAsAttributes.count( name ) )
+		{
+			continue;
+		}
+		PrimitiveAlgo::writePrimitiveVariable( name, primitiveVariable, pxr::UsdGeomPrimvarsAPI( usdInstancer ), time );
+	}
+
+	return true;
+}
+
+ObjectAlgo::WriterDescription<PointInstancer> g_pointInstancerWriterDescription( writePointInstancer );
 
 } // namespace

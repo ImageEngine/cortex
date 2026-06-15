@@ -108,7 +108,7 @@ struct PointsUniformToVertex
 template<typename T>
 PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreScene::PrimitiveVariable::IndexedView<T>& deleteFlagView, bool invert, const Canceller *canceller )
 {
-	PointsPrimitivePtr outPointsPrimitive = new PointsPrimitive( 0 );
+	PointsPrimitivePtr outPointsPrimitive = pointsPrimitive->copy();
 
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> vertexFunctor( deleteFlagView, invert );
 
@@ -133,13 +133,8 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreS
 				outPointsPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, indexedData.data, indexedData.indices );
 				break;
 			}
-			case PrimitiveVariable::Uniform:
-			case PrimitiveVariable::Constant:
-			case PrimitiveVariable::Invalid:
-			{
-				outPointsPrimitive->variables[it->first] = it->second;
+			default :
 				break;
-			}
 		}
 	}
 
