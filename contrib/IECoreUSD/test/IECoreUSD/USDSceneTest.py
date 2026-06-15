@@ -53,6 +53,7 @@ import IECoreUSD
 
 import pxr.Usd
 import pxr.UsdGeom
+import pxr.UsdLux
 
 if pxr.Usd.GetVersion() < ( 0, 19, 3 ) :
 	pxr.Usd.Attribute.HasAuthoredValue = pxr.Usd.Attribute.HasAuthoredValueOpinion
@@ -3899,6 +3900,166 @@ class USDSceneTest( unittest.TestCase ) :
 		light = pxr.UsdLux.DomeLight( stage.GetPrimAtPath( "/light" ) )
 		self.assertEqual( light.GetTextureFileAttr().Get(), "test.exr" )
 		self.assertEqual( light.GetTextureFormatAttr().Get(), "latlong" )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testWriteMeshLight( self ) :
+
+		# Write to USD
+
+		fileName = os.path.join( self.temporaryDirectory(), "meshLight.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		lightNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader(
+					"MeshLight",
+					"light",
+					{
+						"intensity" : IECore.FloatData( 2.0 ),
+						"color" : IECore.Color3fData( imath.Color3f( 1, 2, 3 ) ),
+						"enableColorTemperature" : IECore.BoolData( True )
+					}
+				),
+			},
+			output = "output",
+		)
+
+		meshLightObject = IECoreScene.MeshPrimitive.createPlane(
+			imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) ),
+			imath.V2i( 16, 16 )
+		)
+
+		meshLight = root.createChild( "meshLight" )
+		meshLight.writeObject( meshLightObject, 0 )
+		meshLight.writeAttribute( "light", lightNetwork, 0 )
+
+		del meshLight, root
+
+		# Verify via USD API.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		prim = stage.GetPrimAtPath( "/meshLight" )
+
+		self.assertTrue( prim.IsValid() )
+		self.assertTrue( prim.IsA( pxr.UsdGeom.Mesh ) )
+		self.assertTrue( prim.HasAPI( pxr.UsdLux.MeshLightAPI ) )
+		self.assertEqual( prim.GetAttribute( "inputs:intensity" ).Get( 0 ), 2.0 )
+		self.assertEqual( prim.GetAttribute( "inputs:color" ).Get( 0 ), pxr.Gf.Vec3f( 1, 2, 3 ) )
+		self.assertEqual( prim.GetAttribute( "inputs:enableColorTemperature" ).Get( 0 ), True )
+		self.assertFalse( pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ prim ] )[0][0] )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testReadMeshLight( self ) :
+
+		fileName = os.path.dirname( __file__ ) + "/data/meshLight.usda"
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		meshLightXForm = root.child( "meshLight" )
+
+		self.assertEqual( meshLightXForm.attributeNames(), [] )
+		self.assertEqual( meshLightXForm.childNames(), ["meshLightMesh"] )
+
+		meshLight = meshLightXForm.child( "meshLightMesh" )
+
+		meshLightObject = meshLight.readObject( 0 )
+		self.assertIsInstance( meshLightObject, IECoreScene.MeshPrimitive )
+		self.assertTrue( meshLightObject.arePrimitiveVariablesValid() )
+		self.assertEqual( len( meshLightObject["P"].data ), 8 )
+
+		self.assertTrue( meshLight.hasAttribute( "light" ) )
+		network = meshLight.readAttribute( "light", 0 )
+
+		self.assertEqual(
+			network,
+			IECoreScene.ShaderNetwork(
+				shaders = {
+					"meshLightMesh" : IECoreScene.Shader(
+						"MeshLight",
+						"light",
+						{
+							"color" : IECore.Color3fData( imath.Color3f( 0, 1, 0 ) ),
+							"intensity" : IECore.FloatData( 2.0 ),
+						}
+					),
+				},
+				output = "meshLightMesh"
+			)
+		)
+
+		self.assertTrue( meshLight.hasAttribute( "surface" ) )
+		network = meshLight.readAttribute( "surface", 0 )
+
+		self.assertEqual(
+			network,
+			IECoreScene.ShaderNetwork(
+				shaders = {
+					"previewSurface" : IECoreScene.Shader(
+						"UsdPreviewSurface",
+						"surface",
+						{
+							"diffuseColor" : IECore.Color3fData( imath.Color3f( 0, 1, 0 ) ),
+							"roughness" : IECore.FloatData( 0.5 ),
+						}
+					),
+				},
+				output = ( "previewSurface", "surface" ),
+			)
+		)
+
+		self.assertIn( "__lights", root.setNames() )
+		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/meshLight/meshLightMesh" ] ) )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testRoundTripMeshLight( self ) :
+
+		# Write to USD
+
+		fileName = os.path.join( self.temporaryDirectory(), "meshLight.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		lightNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader( "MeshLight", "light", {} ),
+			},
+			output = "output",
+		)
+		surfaceNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader( "UsdPreviewSurface", "surface", {} ),
+				"texture" : IECoreScene.Shader( "UsdUVTexture", "surface", {} ),
+			},
+			output = "output",
+			connections = [ ( ( "texture", "rgb" ), ( "output", "glowColor" ) ) ],
+		)
+
+		meshLightObject = IECoreScene.MeshPrimitive.createPlane(
+			imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) ),
+			imath.V2i( 16, 16 )
+		)
+
+		meshLight = root.createChild( "meshLight" )
+		meshLight.writeObject( meshLightObject, 0 )
+		meshLight.writeAttribute( "light", lightNetwork, 0 )
+		meshLight.writeAttribute( "surface", surfaceNetwork, 0 )
+
+		root.writeSet( "__lights", IECore.PathMatcher( [ "/meshLight" ] ) )
+
+		del meshLight, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		meshLight = root.child( "meshLight" )
+		self.assertIn( "light", meshLight.attributeNames() )
+
+		# The Cortex shader handle is lost when converting to USD because we are only attaching
+		# the `MeshLightAPI` to the prim. Therefore the shader networks will not be equal, but we
+		# can check that the output shaders are equal.
+		self.assertEqual( meshLight.readAttribute( "light", 0 ).outputShader(), lightNetwork.outputShader() )
+
+		# The surface shader networks should be equivalent
+		self.assertEqual( meshLight.readAttribute( "surface", 0 ), surfaceNetwork )
+
+		self.assertIn( "__lights", root.setNames() )
+		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/meshLight" ] ) )
 
 	def testPointInstancerPrimvars( self ) :
 
