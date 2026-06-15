@@ -22,6 +22,7 @@ Fixes
 - PointsAlgo :
   - Fixed loss of blind data in `deletePoints()`.
   - Fixed loss of primitive type in `deletePoints()` (if processing a derived class of PointsPrimitive).
+- IECoreGL::Shader : Restored compatibility with OpenGL 2.1 in order to preserve macOS support [^1].
 
 Breaking Changes
 ----------------
@@ -37,6 +38,8 @@ Build
 -----
 
 - CI : Updated to GafferHQ/dependencies 11.0.0a8.
+
+[^1]: To be omitted from the notes for the final 10.7.0.0 release.
 
 10.7.0.0a10 (relative to 10.7.0.0a9)
 ===========
