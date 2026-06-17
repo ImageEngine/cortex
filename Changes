@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.5.0)
 ========
 
+Improvements
+------------
 
+- USDScene : Added `IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS` environment variable. If set to a value of `1`, this causes OSL shaders to be written in the format expected by RenderMan. Set the `RMAN_SHADERPATH` environment variable appropriately to ensure RenderMan can find the shaders.
 
 10.6.5.0 (relative to 10.6.4.0)
 ========
