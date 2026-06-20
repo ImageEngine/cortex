@@ -497,7 +497,6 @@ void populateMaterial( pxr::UsdShadeMaterial &mat, const boost::container::flat_
 	for( const auto &[output, shaderNetwork] : shaders )
 	{
 		pxr::UsdShadeOutput matOutput = mat.CreateOutput( output, pxr::SdfValueTypeNames->Token );
-
 		std::string shaderContainerName = boost::replace_all_copy( output.GetString(), ":", "_" ) + "_shaders";
 		pxr::UsdGeomScope shaderContainer = pxr::UsdGeomScope::Define( mat.GetPrim().GetStage(), mat.GetPath().AppendChild( pxr::TfToken( shaderContainerName ) ) );
 		pxr::UsdShadeOutput networkOut = ShaderAlgo::writeShaderNetwork( shaderNetwork.get(), shaderContainer.GetPrim() );
