@@ -55,12 +55,15 @@
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/pointer_cast.hpp"
 
+#include <filesystem>
 #include <regex>
 
 namespace
 {
 
 const pxr::TfToken g_blindDataToken( "cortex:blindData" );
+const pxr::TfToken g_shaderNameToken( "cortex:shaderName" );
+const pxr::TfToken g_shaderTypeToken( "cortex:shaderType" );
 
 // Hardcoded to match an old name used by Cortex when writing USD with OSL version earlier than 1.10 (
 // ie. a pre-2021 version of gafferDependencies ). We no longer expose this in the API, but I'm not sure
@@ -68,22 +71,62 @@ const pxr::TfToken g_blindDataToken( "cortex:blindData" );
 IECore::InternedString g_legacyAdapterLabelString( "cortex_autoAdapter" );
 pxr::TfToken g_legacyAdapterLabelToken( g_legacyAdapterLabelString.string() );
 
-std::pair<pxr::TfToken, std::string> shaderIdAndType( const pxr::UsdShadeConnectableAPI &connectable )
+bool writeConformantOSLShaders()
 {
-	pxr::TfToken id;
-	std::string type;
+	if( const char *e = getenv( "IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS" ) )
+	{
+		return strcmp( e, "0" );
+	}
+	return false;
+}
+
+// Recover a Cortex-style shader name and type, essentially reversing the
+// transformation done by `createShaderPrim()`.
+std::pair<std::string, std::string> shaderNameAndType( const pxr::UsdShadeConnectableAPI &connectable )
+{
 	if( auto shader = pxr::UsdShadeShader( connectable ) )
 	{
-		shader.GetShaderId( &id );
-		type = "surface";
+		std::string name;
+		std::string type;
+
+		pxr::VtValue nameVtValue = shader.GetPrim().GetCustomDataByKey( g_shaderNameToken );
+		if( !nameVtValue.IsEmpty()  )
+		{
+			name = nameVtValue.Get<std::string>();
+		}
+		else
+		{
+			pxr::TfToken id;
+			shader.GetShaderId( &id );
+			name = id.GetString();
+			type = "surface";
+			const size_t colonPos = name.find( ":" );
+			if( colonPos != std::string::npos )
+			{
+				std::string prefix = name.substr( 0, colonPos );
+				name = name.substr( colonPos + 1 );
+				if( prefix == "arnold" )
+				{
+					prefix = "ai";
+				}
+				type = prefix + ":shader";
+			}
+		}
+
+		pxr::VtValue typeVtValue = shader.GetPrim().GetCustomDataByKey( g_shaderTypeToken );
+		if( !typeVtValue.IsEmpty() )
+		{
+			type = typeVtValue.Get<std::string>();
+		}
+
+		return { name, type };
 	}
 	else if( auto light = pxr::UsdLuxLightAPI( connectable ) )
 	{
-		light.GetShaderIdAttr().Get( &id );
-		type = "light";
+		return { light.GetShaderId( {} ).GetString(), "light" };
 	}
 
-	return std::make_pair( id, type );
+	return { "", "" };
 }
 
 bool writeNonStandardLightParameter( const std::string &name, const IECore::Data *value, pxr::UsdShadeConnectableAPI usdShader )
@@ -225,24 +268,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 		return handle;
 	}
 
-	auto [id, shaderType] = shaderIdAndType( usdShader );
-	std::string shaderName = "defaultsurface";
-	if( id.size() )
-	{
-		std::string name = id.GetString();
-		size_t colonPos = name.find( ":" );
-		if( colonPos != std::string::npos )
-		{
-			std::string prefix = name.substr( 0, colonPos );
-			name = name.substr( colonPos + 1 );
-			if( prefix == "arnold" )
-			{
-				prefix = "ai";
-			}
-			shaderType = prefix + ":shader";
-		}
-		shaderName = name;
-	}
+	// Read parameter values and connections.
 
 	IECore::CompoundDataPtr parametersData = new IECore::CompoundData();
 	IECore::CompoundDataMap &parameters = parametersData->writable();
@@ -288,6 +314,9 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 
 	readNonStandardLightParameters( usdShader.GetPrim(), parameters );
 
+	// Create shader.
+
+	auto [shaderName, shaderType] = shaderNameAndType( usdShader );
 	IECoreScene::ShaderPtr newShader = new IECoreScene::Shader( shaderName, shaderType, parametersData );
 
 	// General purpose support for any Cortex blind data.
@@ -388,35 +417,73 @@ pxr::UsdShadeConnectableAPI createShaderPrim( const IECoreScene::Shader *shader,
 		throw IECore::Exception( "Could not create shader at " + path.GetAsString() );
 	}
 
-	const std::string type = shader->getType();
+	// We need to declare the shader in a form corresponding to entries in USD's
+	// Sdr registry, so that if rendered in `usdview` or another Hydra-based
+	// app, the render delegates can find the shaders. We could potentially do
+	// that done by finding a shader in the Sdr registry by name and then using
+	// `SdrShaderNode.GetIdentifier()` or
+	// `SdrShaderNode.GetResolvedImplementationURI()`, although it's not clear
+	// how you'd decide which to use. Anyway, for now at least, we want to be
+	// able to operate in environments without renderer-specific USD plugins
+	// installed. So instead of querying the registry we use some heuristics of
+	// our own.
 
-	std::string typePrefix;
 	if( boost::starts_with( shader->getName(), "Pxr" ) || boost::starts_with( shader->getName(), "Lama" ) )
 	{
-		// Leave the type prefix empty. This should be the default, but we are currently only doing this
-		// for a small number of shaders that we can be completely confident require it, in order to
-		// preserve backwards compatibility.
+		// Could be either an OSL or a C++ shader, but either way, RenderMan
+		// registers it in the SdrRegistry by name.
+		usdShader.SetShaderId( pxr::TfToken( shader->getName() ) );
+	}
+	else if( boost::starts_with( shader->getType(), "ai:" ) )
+	{
+		// Arnold registers all plugins at startup, so also only needs the name
+		// to be able to create a shader. It uses an `arnold:` prefix to avoid
+		// clashes with the names of other shaders.
+		usdShader.SetShaderId( pxr::TfToken( "arnold:" + shader->getName() ) );
+	}
+	else if(
+		boost::starts_with( shader->getType(), "osl:" ) &&
+		writeConformantOSLShaders()
+	)
+	{
+		// Arbitrary OSL shader. Arnold would want that written as an
+		// `arnold:osl` shader with `input:shadername` pointing to the shader.
+		// But that will never work in another renderer. RenderMan takes a
+		// slightly more generic approach by registering each OSL shader from
+		// `RMAN_SHADERPATH` into the Sdr registry, so we follow that in the hope
+		// that Arnold and other renderers might fall in line in future.
+		if( shader->getName().find( '/' ) != std::string::npos )
+		{
+			// Unfortunately, RenderMan's SdrDiscoveryPlugin uses only the leaf
+			// name, even though the Riley API will accept `{directory}/{file}`.
+			// So we write the leaf name, and accept that we can no longer
+			// round-trip exactly (we are also losing the shader type).
+			//
+			// Our plan is that in future we'll flatten our shader libraries
+			// into a single directory, and remove the few remaining spots in
+			// the codebase that rely on `Shader::getType()`.
+			usdShader.SetShaderId( pxr::TfToken( std::filesystem::path( shader->getName() ).stem().string() ) );
+		}
+		else
+		{
+			usdShader.SetShaderId( pxr::TfToken( shader->getName() ) );
+		}
 	}
 	else
 	{
-		size_t typeColonPos = type.find( ":" );
+		const std::string &type = shader->getType();
+		const size_t typeColonPos = type.find( ":" );
 		if( typeColonPos != std::string::npos )
 		{
-			// According to our current understanding, this is almost completely wrong. Renderer's like
-			// PRMan won't accept shaders with type prefixes, and Arnold apparently requires all shaders
-			// to be prefixed with "arnold:", including OSL. This code prefixes OSL shaders with "osl:",
-			// which fails in all renderers we're aware of - we're keeping this behaviour for now for
-			// backwards compatibility reasons.
-			typePrefix = type.substr( 0, typeColonPos ) + ":";
-
-			// This is the one case that actually works
-			if( typePrefix == "ai:" )
-			{
-				typePrefix = "arnold:";
-			}
+			// We don't currently know of any renderers where this is right, but
+			// it is our historic behaviour, which we are keeping until we know better.
+			usdShader.SetShaderId( pxr::TfToken( type.substr( 0, typeColonPos ) + ":" + shader->getName() ) );
+		}
+		else
+		{
+			usdShader.SetShaderId( pxr::TfToken( shader->getName() ) );
 		}
 	}
-	usdShader.SetShaderId( pxr::TfToken( typePrefix + shader->getName() ) );
 
 	return usdShader.ConnectableAPI();
 }

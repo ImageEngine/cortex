@@ -4967,5 +4967,78 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( shaderNetwork.outputShader().name, "LamaSurface" )
 
+	def testOSLShaderForHDPrman( self ) :
+
+		self.addCleanup( os.environ.__delitem__, "IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS" )
+
+		for conformant in True, False :
+
+			with self.subTest( conformant = conformant ) :
+
+				os.environ["IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS"] = str( int( conformant ) )
+
+				fileName = os.path.join( self.temporaryDirectory(), f"testConformance{conformant}.usda" )
+
+				shaderNetwork = IECoreScene.ShaderNetwork(
+					shaders = {
+						"output" : IECoreScene.Shader( "PxrDiffuse", "ri:surface" ),
+						"texture" : IECoreScene.Shader( "Pattern/Noise", "osl:shader" ),
+						"scale" : IECoreScene.Shader( "floatAttribute", "osl:shader" ),
+					},
+					connections = [
+						( ( "scale", "out" ), ( "texture", "scale" ) ),
+						( ( "texture", "out" ), ( "output", "diffuseColor" ) ),
+					],
+					output = ( "output", "bxdf_out" ),
+				)
+
+				# Test writing to USD.
+
+				scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+				scene.createChild( "test" ).writeAttribute( "ri:surface", shaderNetwork, 0 )
+				del scene
+
+				stage = pxr.Usd.Stage.Open( fileName )
+
+				outputShader = pxr.UsdShade.Shader(
+					next( p for p in stage.Traverse() if p.IsA( pxr.UsdShade.Shader ) and p.GetName() == "output" )
+				)
+				self.assertEqual( outputShader.GetShaderId(), "PxrDiffuse" )
+
+				textureShader = pxr.UsdShade.Shader(
+					next( p for p in stage.Traverse() if p.IsA( pxr.UsdShade.Shader ) and p.GetName() == "texture" )
+				)
+				if conformant :
+					self.assertEqual( textureShader.GetShaderId(), "Noise" )
+				else :
+					self.assertEqual( textureShader.GetShaderId(), "osl:Pattern/Noise" )
+
+				scaleShader = pxr.UsdShade.Shader(
+					next( p for p in stage.Traverse() if p.IsA( pxr.UsdShade.Shader ) and p.GetName() == "scale" )
+				)
+				if conformant :
+					self.assertEqual( scaleShader.GetShaderId(), "floatAttribute" )
+				else :
+					self.assertEqual( scaleShader.GetShaderId(), "osl:floatAttribute" )
+
+				# Test loading back to Cortex.
+
+				scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+				loadedShaderNetwork = scene.child( "test" ).readAttribute( "ri:surface", 0 )
+
+				if conformant :
+					# Can't round trip. We will need to adjust our usage to avoid shaders
+					# nested in directories.
+					self.assertEqual( loadedShaderNetwork.getShader( "texture" ).name, "Noise" )
+					self.assertEqual( loadedShaderNetwork.getShader( "texture" ).type, "surface" )
+					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).name, "floatAttribute" )
+					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).type, "surface" )
+				else :
+					# Round tripped exactly.
+					self.assertEqual( loadedShaderNetwork.getShader( "texture" ).name, "Pattern/Noise" )
+					self.assertEqual( loadedShaderNetwork.getShader( "texture" ).type, "osl:shader" )
+					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).name, "floatAttribute" )
+					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).type, "osl:shader" )
+
 if __name__ == "__main__":
 	unittest.main()
