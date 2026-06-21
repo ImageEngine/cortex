@@ -48,14 +48,22 @@ IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box3i )
 IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box3f )
 IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( Box3d )
 
+#define BIND_BOX_VECTOR_TYPEDDATA(T, Tname)		\
+		{										\
+			BASIC_VECTOR_BINDING(IECore::TypedData< std::vector< T > >, Tname)																	\
+				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")	\
+				BIND_BUFFER_PROTOCOL_METHODS	\
+			;	\
+		}
+
 void bindImathBoxVectorTypedData()
 {
-	BIND_VECTOR_TYPEDDATA ( Box< V2i >, "Box2i")
-	BIND_VECTOR_TYPEDDATA ( Box< V2f >, "Box2f")
-	BIND_VECTOR_TYPEDDATA ( Box< V2d >, "Box2d")
-	BIND_VECTOR_TYPEDDATA ( Box< V3i >, "Box3i")
-	BIND_VECTOR_TYPEDDATA ( Box< V3f >, "Box3f")
-	BIND_VECTOR_TYPEDDATA ( Box< V3d >, "Box3d")
+	BIND_BOX_VECTOR_TYPEDDATA ( Box< V2i >, "Box2i")
+	BIND_BOX_VECTOR_TYPEDDATA ( Box< V2f >, "Box2f")
+	BIND_BOX_VECTOR_TYPEDDATA ( Box< V2d >, "Box2d")
+	BIND_BOX_VECTOR_TYPEDDATA ( Box< V3i >, "Box3i")
+	BIND_BOX_VECTOR_TYPEDDATA ( Box< V3f >, "Box3f")
+	BIND_BOX_VECTOR_TYPEDDATA ( Box< V3d >, "Box3d")
 }
 
 } // namespace IECorePython

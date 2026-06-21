@@ -36,8 +36,7 @@
 #define IECORE_SPLINE_INL
 
 #include "IECore/Exception.h"
-
-#include "Imath/half.h"
+#include "IECore/Half.h"
 
 #include "boost/format.hpp"
 

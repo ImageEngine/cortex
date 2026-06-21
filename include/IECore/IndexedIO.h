@@ -36,12 +36,9 @@
 #define IE_CORE_INDEXEDIO_H
 
 #include "IECore/Export.h"
+#include "IECore/Half.h"
 #include "IECore/InternedString.h"
 #include "IECore/RunTimeTyped.h"
-
-IECORE_PUSH_DEFAULT_VISIBILITY
-#include "Imath/half.h"
-IECORE_POP_DEFAULT_VISIBILITY
 
 #include <map>
 #include <string>
