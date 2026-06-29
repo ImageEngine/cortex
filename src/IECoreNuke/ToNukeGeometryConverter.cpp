@@ -63,6 +63,13 @@ void writeAttribute( DD::Image::GeometryList &geoList, int objIndex, const char 
 			attr->flt() = static_cast<const IECore::FloatData *>( value )->readable();
 			break;
 		}
+		case IECore::DoubleDataTypeId :
+		{
+			// Nuke only supports float attributes, so we narrow double to float.
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::FLOAT_ATTRIB );
+			attr->flt() = static_cast<float>( static_cast<const IECore::DoubleData *>( value )->readable() );
+			break;
+		}
 		case IECore::IntDataTypeId :
 		{
 			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::INT_ATTRIB );
@@ -92,6 +99,13 @@ void writeAttribute( DD::Image::GeometryList &geoList, int objIndex, const char 
 		{
 			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::VECTOR3_ATTRIB );
 			attr->vector3() = IECore::convert<DD::Image::Vector3>( static_cast<const IECore::V3fData *>( value )->readable() );
+			break;
+		}
+		case IECore::Color3fDataTypeId :
+		{
+			auto attr = geoList.writable_attribute( objIndex, GroupType::Group_Object, name, AttribType::VECTOR3_ATTRIB );
+			const auto &c = static_cast<const IECore::Color3fData *>( value )->readable();
+			attr->vector3() = DD::Image::Vector3( c[0], c[1], c[2] );
 			break;
 		}
 		case IECore::Color4fDataTypeId :
@@ -143,6 +157,13 @@ void writeAttribute( DD::Image::GeometryList &geoList, int objIndex, const char 
 			attr->matrix3() = result;
 			break;
 		}
+		// Nuke has no equivalent for InternedString types, so we silently skip them.
+		// We could convert InternedStringVectorData to a delimited string, but
+		// round-tripping wouldn't be transparent — LiveScene would need special
+		// handling to split the string back into a vector.
+		case IECore::InternedStringDataTypeId :
+		case IECore::InternedStringVectorDataTypeId :
+			break;
 		default :
 			IECore::msg( IECore::Msg::Warning, "ToNukeGeometryConverter", boost::format( "Unsupported attribute type \"%s\" for \"%s\"" ) % value->typeName() % name );
 			break;
