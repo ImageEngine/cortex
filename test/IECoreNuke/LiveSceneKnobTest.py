@@ -511,6 +511,88 @@ class LiveSceneKnobTest( IECoreNuke.TestCase ) :
 		self.assertEqual( attr.value, imath.M44f( expectedAttr.value ) )
 
 
+	def testAttributeTypeRoundTrip( self ) :
+		import imath
+		import IECoreScene
+		import tempfile
+		import os
+
+		# Create a temporary SCC with various attribute types on a leaf location.
+		tmpDir = tempfile.mkdtemp()
+		sceneFile = os.path.join( tmpDir, "attrTypes.scc" )
+
+		scene = IECoreScene.SceneCache( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		child = scene.createChild( "obj" )
+		child.writeObject( IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) ), 0.0 )
+		child.writeTransform( IECore.M44dData( imath.M44d() ), 0.0 )
+
+		child.writeAttribute( "user:testFloat", IECore.FloatData( 1.5 ), 0.0 )
+		child.writeAttribute( "user:testDouble", IECore.DoubleData( 2.5 ), 0.0 )
+		child.writeAttribute( "user:testInt", IECore.IntData( 42 ), 0.0 )
+		child.writeAttribute( "user:testBool", IECore.BoolData( True ), 0.0 )
+		child.writeAttribute( "user:testString", IECore.StringData( "hello" ), 0.0 )
+		child.writeAttribute( "user:testInternedString", IECore.InternedStringData( "skipped" ), 0.0 )
+		child.writeAttribute( "user:testV2f", IECore.V2fData( imath.V2f( 1, 2 ) ), 0.0 )
+		child.writeAttribute( "user:testV3f", IECore.V3fData( imath.V3f( 1, 2, 3 ) ), 0.0 )
+		child.writeAttribute( "user:testColor3f", IECore.Color3fData( imath.Color3f( 0.1, 0.2, 0.3 ) ), 0.0 )
+		child.writeAttribute( "user:testColor4f", IECore.Color4fData( imath.Color4f( 0.1, 0.2, 0.3, 0.4 ) ), 0.0 )
+		child.writeAttribute( "user:testM33f", IECore.M33fData( imath.M33f() ), 0.0 )
+		child.writeAttribute( "user:testM44f", IECore.M44fData( imath.M44f() ), 0.0 )
+		child.writeAttribute( "user:testM44d", IECore.M44dData( imath.M44d() ), 0.0 )
+
+		del child, scene
+
+		mh = IECore.CapturingMessageHandler()
+		with mh :
+			sceneReader = nuke.createNode( "ieSceneCacheReader" )
+			sceneReader.knob( "file" ).setValue( sceneFile )
+			sceneReader.forceValidate()
+			widget = sceneReader.knob( "sceneView" )
+			widget.setSelectedItems( ["/root/obj"] )
+
+			n = nuke.createNode( "ieLiveScene" )
+			n.setInput( 0, sceneReader )
+
+			liveScene = n.knob( "scene" ).getValue()
+			leaf = liveScene.scene( ["obj"] )
+
+		# Each attribute type round-trips through Nuke. Some types change
+		# (e.g. DoubleData -> FloatData, Color3fData -> V3fData) because
+		# Nuke only has float-precision attribute types.
+		cases = [
+			( "user:testFloat", IECore.FloatData, 1.5 ),
+			( "user:testDouble", IECore.FloatData, 2.5 ),
+			( "user:testInt", IECore.IntData, 42 ),
+			( "user:testBool", IECore.IntData, 1 ),
+			( "user:testString", IECore.StringData, "hello" ),
+			( "user:testV2f", IECore.V2fData, imath.V2f( 1, 2 ) ),
+			( "user:testV3f", IECore.V3fData, imath.V3f( 1, 2, 3 ) ),
+			( "user:testColor3f", IECore.V3fData, imath.V3f( 0.1, 0.2, 0.3 ) ),
+			( "user:testColor4f", IECore.Color4fData, imath.Color4f( 0.1, 0.2, 0.3, 0.4 ) ),
+			( "user:testM33f", IECore.M33fData, imath.M33f() ),
+			( "user:testM44f", IECore.M44fData, imath.M44f() ),
+			( "user:testM44d", IECore.M44fData, imath.M44f() ),
+		]
+
+		for name, expectedType, expectedValue in cases :
+			self.assertIn( name, leaf.attributeNames() )
+			self.assertTrue( leaf.hasAttribute( name ) )
+			attr = leaf.readAttribute( name, 0 )
+			self.assertIsInstance( attr, expectedType, f"Wrong type for {name}: {type( attr )}" )
+			self.assertEqual( attr.value, expectedValue, f"Wrong value for {name}" )
+
+		# InternedStringData has no Nuke equivalent and should be silently skipped.
+		self.assertNotIn( "user:testInternedString", leaf.attributeNames() )
+		self.assertFalse( leaf.hasAttribute( "user:testInternedString" ) )
+
+		# No warnings should have been emitted for the skipped type.
+		warnings = [m for m in mh.messages if m.level == IECore.Msg.Level.Warning]
+		self.assertEqual( warnings, [] )
+
+		os.remove( sceneFile )
+		os.rmdir( tmpDir )
+
+
 if __name__ == "__main__":
 	unittest.main()
 
