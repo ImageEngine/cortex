@@ -1,5 +1,16 @@
-10.5.x.x (relative to 10.5.17.0)
+10.5.x.x (relative to 10.5.18.0)
 ========
+
+10.5.18.0 (relative to 10.5.17.0)
+========
+
+Improvements
+----
+
+- ToNukeGeometryConverter :
+  - Add support for `Color3fData`
+  - Add support for `DoubleData` via `float` casting
+  - Silence `InternedStringVectorData` as unsupported
 
 10.5.17.0 (relative to 10.5.16.1)
 ========
