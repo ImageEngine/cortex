@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.0.0a12)
 ========
 
+Fixes
+-----
 
+- PointInstancer : Fixed signature for `setPrototypes()` function.
 
 10.7.0.0a12 (relative to 10.7.0.0a11)
 ===========

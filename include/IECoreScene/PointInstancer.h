@@ -83,7 +83,7 @@ class IECORESCENE_API PointInstancer : public IECoreScene::PointsPrimitive
 		/// Sets the prototypes to be instanced. Interpretation is left to
 		/// the consuming rendering system, but in practice these are locations
 		/// in a SceneInterface or Gaffer scene.
-		void setPrototypes( IECore::StringVectorDataPtr &prototypes );
+		void setPrototypes( const IECore::StringVectorDataPtr &prototypes );
 		/// Returns an invalid view if the variable doesn't exist, or if it
 		/// exists but has the wrong type or interpolation.
 		PrimitiveVariable::IndexedView<std::string> getPrototypes() const;
