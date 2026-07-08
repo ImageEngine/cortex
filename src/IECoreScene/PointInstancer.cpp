@@ -83,7 +83,7 @@ void PointInstancer::hash( MurmurHash &h ) const
 	PointsPrimitive::hash( h );
 }
 
-void PointInstancer::setPrototypes( IECore::StringVectorDataPtr &prototypes )
+void PointInstancer::setPrototypes( const IECore::StringVectorDataPtr &prototypes )
 {
 	if( prototypes )
 	{
