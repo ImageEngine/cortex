@@ -77,6 +77,7 @@ struct MergeDriverInfo
 {
 	DisplayDriverPtr mergeDriver = nullptr;
 	int mergeCount = 0;
+	int usageCount = 0;
 };
 
 using MergeMap = std::map<int, MergeDriverInfo>;
@@ -456,14 +457,14 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 		}
 		else
 		{
-			m_mergeId = parameters->member<IntData>( "displayDriverServer:mergeId", false /* throw if missing */ )->readable();
+			m_mergeId = parameters->member<IntData>( "displayDriverServer:mergeId", true /* throw if missing */ )->readable();
+			const IntData *sessionClientsData = parameters->member<IntData>( "displayDriverServer:mergeClients", true /* throw if missing */ );
 
 			// Check if merge ID in map, if not then create display driver and session count pair with merge ID.
 			auto &m = m_mergeMap[m_mergeId.value()];
 			if ( !m.mergeDriver )
 			{
-				const IntData *sessionClientsData = parameters->member<IntData>( "displayDriverServer:mergeClients", true /* throw if missing */ );
-				m.mergeDriver= DisplayDriver::create(
+				m.mergeDriver = DisplayDriver::create(
 						displayType->readable(),
 						displayWindow->readable(),
 						displayWindow->readable(), // For merge we want dataWindow = displayWindow
@@ -472,6 +473,20 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 						);
 				m.mergeCount = sessionClientsData->readable();
 			}
+			if ( channelNames->readable() != m.mergeDriver->channelNames() )
+			{
+				throw IECore::InvalidArgumentException( "Merge driver has incompatible channel names." );
+			}
+			if ( displayWindow->readable() != m.mergeDriver->displayWindow() )
+			{
+				throw IECore::InvalidArgumentException( "Merge driver has incompatible display window." );
+			}
+			if ( ++m.usageCount > sessionClientsData->readable() )
+			{
+				throw IECore::InvalidArgumentException( "Number of merge clients (" + std::to_string( m.usageCount )
+						+ ") is more than expected amount (" + std::to_string( m.mergeCount ) + ")." );
+			}
+
 			// Merge ID is now in map, so load the display driver.
 			m_displayDriver = m.mergeDriver;
 		}
