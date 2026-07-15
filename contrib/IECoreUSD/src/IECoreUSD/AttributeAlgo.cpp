@@ -55,7 +55,18 @@ static const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IEC
 static const std::string g_primVarPrefix = "primvars:";
 static const std::string g_primVarUserPrefix = "primvars:user:";
 static const std::string g_renderPrefix = "render:";
+static const std::string g_riPrefix = "ri:";
+static const std::string g_riAttributesPrefix = "ri:attributes:";
 static const std::string g_userPrefix = "user:";
+
+bool writeConformantRenderManAttributes()
+{
+	if( const char *e = getenv( "IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES" ) )
+	{
+		return strcmp( e, "0" );
+	}
+	return false;
+}
 
 }
 
@@ -122,12 +133,19 @@ pxr::TfToken IECoreUSD::AttributeAlgo::cortexPrimitiveVariableMetadataTokenDepre
 
 IECoreUSD::AttributeAlgo::Name IECoreUSD::AttributeAlgo::nameToUSD( std::string name )
 {
+	if( boost::starts_with( name, g_riPrefix ) && writeConformantRenderManAttributes() )
+	{
+		return { pxr::TfToken( g_riAttributesPrefix + name.substr( g_riPrefix.size() ) ), true };
+	}
+
 	bool isPrimvar = false;
 
 	// The long term plan is to convert only "render:" prefixed attributes to primvars, and it will
 	// be the client's responsibility to ensure everything important gets prefixed with "render:".
 	// But for the moment, Gaffer doesn't do this yet, so we support the two most important prefixes
-	// for Gaffer currently:  "user:" and "ai:"
+	// for Gaffer currently:  "user:" and "ai:".
+	/// \todo I don't think the `render:` plan is working out - it may well be better to just map
+	/// all Cortex attributes to primvars.
 	if( boost::starts_with( name, "render:" ) || boost::starts_with( name, "user:" ) || boost::starts_with( name, "ai:" ) )
 	{
 		isPrimvar = true;
@@ -170,7 +188,12 @@ IECoreUSD::AttributeAlgo::Name IECoreUSD::AttributeAlgo::nameToUSD( std::string 
 IECore::InternedString IECoreUSD::AttributeAlgo::nameFromUSD( IECoreUSD::AttributeAlgo::Name name )
 {
 	std::string nameStr = name.name;
-	if( nameStr == "arnold:displacement" )
+
+	if( boost::starts_with( nameStr, g_riAttributesPrefix ) )
+	{
+		return g_riPrefix + nameStr.substr( g_riAttributesPrefix.size() );
+	}
+	else if( nameStr == "arnold:displacement" )
 	{
 		// Special case where the whole name is different, not just prefix
 		nameStr = "ai:disp_map";
@@ -198,7 +221,9 @@ IECore::InternedString IECoreUSD::AttributeAlgo::nameFromUSD( IECoreUSD::Attribu
 
 	// The long term plan is to always prefix primitive variables converted to attributes with "render:".
 	// But for the moment, Gaffer doesn't support this, so we skip the prefix for the two most important prefixes
-	// for Gaffer currently:  "user:" and "ai:"
+	// for Gaffer currently:  "user:" and "ai:".
+	/// \todo I don't think the `render:` plan is working out - it may well be better to just map
+	/// all Cortex attributes to primvars.
 	if ( !boost::starts_with( nameStr, g_userPrefix ) && !boost::starts_with( nameStr, "ai:" ) && name.isPrimvar )
 	{
 		nameStr = "render:" + nameStr;

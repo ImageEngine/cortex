@@ -4868,5 +4868,44 @@ class USDSceneTest( unittest.TestCase ) :
 					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).name, "floatAttribute" )
 					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).type, "osl:shader" )
 
+	def testRenderManAttributeRoundTrip( self ) :
+
+		self.addCleanup( os.environ.__delitem__, "IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES" )
+
+		for conformant in True, False :
+
+			with self.subTest( conformant = conformant ) :
+
+				os.environ["IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES"] = str( int( conformant ) )
+
+				fileName = os.path.join( self.temporaryDirectory(), f"renderManAttributes{conformant}.usda" )
+
+				# Test writing to USD.
+
+				scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+				child = scene.createChild( "test" )
+				child.writeAttribute( "ri:trace:maxdiffusedepth", IECore.IntData( 2 ), 0 )
+				del scene, child
+
+				stage = pxr.Usd.Stage.Open( fileName )
+
+				if conformant :
+					primVars = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+					diffuseDepth = primVars.GetPrimvar( "ri:attributes:trace:maxdiffusedepth" )
+					self.assertTrue( diffuseDepth.IsDefined() )
+					self.assertEqual( diffuseDepth.GetInterpolation(), "constant" )
+					self.assertTrue( diffuseDepth.HasAuthoredValue() )
+					self.assertTrue( diffuseDepth.Get( 0 ), 2 )
+				else :
+					diffuseDepth = stage.GetPrimAtPath( "/test" ).GetAttribute( "ri:trace:maxdiffusedepth" )
+					self.assertEqual( diffuseDepth.Get( 0 ), 2 )
+
+				# Test loading back to Cortex.
+
+				scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+				child = scene.child( "test" )
+				self.assertEqual( child.attributeNames(), [ "ri:trace:maxdiffusedepth" ] )
+				self.assertEqual( child.readAttribute( "ri:trace:maxdiffusedepth", 0 ), IECore.IntData( 2 ) )
+
 if __name__ == "__main__":
 	unittest.main()

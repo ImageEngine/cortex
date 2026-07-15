@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.6.0)
 ========
 
+Improvements
+------------
 
+- USDScene : Added `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES` environment variable. If set to a value of `1`, this causes "ri:" prefixed attributes to be written as expected by `usdRiPxr`.
 
 10.6.6.0 (relative to 10.6.5.0)
 ========
