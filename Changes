@@ -1,7 +1,10 @@
 10.6.x.x (relative to 10.6.7.0)
 ========
 
+Fixes
+-----
 
+- USDScene : Fixed bug writing shader assignments with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1`.
 
 10.6.7.0 (relative to 10.6.6.0)
 ========

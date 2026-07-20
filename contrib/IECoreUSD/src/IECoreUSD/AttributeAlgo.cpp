@@ -36,6 +36,7 @@
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/algorithm/string/predicate.hpp"
+#include "boost/container/flat_set.hpp"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/primvar.h"
@@ -58,6 +59,7 @@ const std::string g_renderPrefix = "render:";
 const std::string g_riPrefix = "ri:";
 const std::string g_riAttributesPrefix = "ri:attributes:";
 const std::string g_userPrefix = "user:";
+const boost::container::flat_set<std::string> g_shaderTypes = { "surface", "displacement", "light", "volume" };
 
 bool writeConformantRenderManAttributes()
 {
@@ -135,6 +137,11 @@ IECoreUSD::AttributeAlgo::Name IECoreUSD::AttributeAlgo::nameToUSD( std::string 
 {
 	if( boost::starts_with( name, g_riPrefix ) && writeConformantRenderManAttributes() )
 	{
+		const std::string potentialShaderType = name.substr( g_riPrefix.size() );
+		if( g_shaderTypes.count( potentialShaderType ) )
+		{
+			return { pxr::TfToken( name ), true };
+		}
 		return { pxr::TfToken( g_riAttributesPrefix + name.substr( g_riPrefix.size() ) ), true };
 	}
 
