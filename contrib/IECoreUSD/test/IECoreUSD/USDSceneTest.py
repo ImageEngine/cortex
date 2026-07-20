@@ -5040,28 +5040,42 @@ class USDSceneTest( unittest.TestCase ) :
 					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).name, "floatAttribute" )
 					self.assertEqual( loadedShaderNetwork.getShader( "scale" ).type, "osl:shader" )
 
-	def testRenderManAttributeRoundTrip( self ) :
+	def testWriteConformantRenderManAttributes( self ) :
 
 		self.addCleanup( os.environ.__delitem__, "IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES" )
 
-		for conformant in True, False :
+		for writeConformant in ( True, False ) :
 
-			with self.subTest( conformant = conformant ) :
-
-				os.environ["IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES"] = str( int( conformant ) )
-
-				fileName = os.path.join( self.temporaryDirectory(), f"renderManAttributes{conformant}.usda" )
+			with self.subTest( writeConformant = writeConformant ) :
 
 				# Test writing to USD.
 
+				os.environ["IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES"] = str( int( writeConformant ) )
+
+				fileName = os.path.join( self.temporaryDirectory(), f"renderManAttributes{writeConformant}.usda" )
 				scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 				child = scene.createChild( "test" )
 				child.writeAttribute( "ri:trace:maxdiffusedepth", IECore.IntData( 2 ), 0 )
+
+				surface = IECoreScene.ShaderNetwork(
+					shaders = { "constant" : IECoreScene.Shader( "PxrDiffuse" ) },
+					output = ( "constant", "out_bxdf" )
+				)
+				child.writeAttribute( "ri:surface", surface, 0.0 )
+
+				surfaceFull = IECoreScene.ShaderNetwork(
+					shaders = { "constant" : IECoreScene.Shader( "PxrSurface" ) },
+					output = ( "constant", "out_bxdf" )
+				)
+				child.writeAttribute( "ri:surface:full", surfaceFull, 0.0 )
+
 				del scene, child
 
 				stage = pxr.Usd.Stage.Open( fileName )
 
-				if conformant :
+				# The attribute is written differently depending on IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES.
+
+				if writeConformant :
 					primVars = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
 					diffuseDepth = primVars.GetPrimvar( "ri:attributes:trace:maxdiffusedepth" )
 					self.assertTrue( diffuseDepth.IsDefined() )
@@ -5072,12 +5086,30 @@ class USDSceneTest( unittest.TestCase ) :
 					diffuseDepth = stage.GetPrimAtPath( "/test" ).GetAttribute( "ri:trace:maxdiffusedepth" )
 					self.assertEqual( diffuseDepth.Get( 0 ), 2 )
 
+				# But the materials should be the same either way, with an `ri:surface` terminal.
+
+				for purpose in [ "", "full" ] :
+					material = pxr.UsdShade.MaterialBindingAPI( stage.GetPrimAtPath( "/test" ) ).ComputeBoundMaterial( purpose )[0]
+					output = material.GetOutput( "ri:surface" )
+					self.assertTrue( output )
+					self.assertEqual( output.GetConnectedSource()[1], "out_bxdf" )
+
 				# Test loading back to Cortex.
 
-				scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
-				child = scene.child( "test" )
-				self.assertEqual( child.attributeNames(), [ "ri:trace:maxdiffusedepth" ] )
-				self.assertEqual( child.readAttribute( "ri:trace:maxdiffusedepth", 0 ), IECore.IntData( 2 ) )
+				for readConformant in ( True, False ) :
+
+					with self.subTest( readConformant = readConformant ) :
+
+						os.environ["IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES"] = str( int( readConformant ) )
+
+						fileName = os.path.join( self.temporaryDirectory(), f"renderManAttributes{writeConformant}.usda" )
+
+						scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+						child = scene.child( "test" )
+						self.assertEqual( set( child.attributeNames() ), { "ri:trace:maxdiffusedepth", "ri:surface", "ri:surface:full" } )
+						self.assertEqual( child.readAttribute( "ri:trace:maxdiffusedepth", 0 ), IECore.IntData( 2 ) )
+						self.assertEqual( child.readAttribute( "ri:surface", 0 ), surface )
+						self.assertEqual( child.readAttribute( "ri:surface:full", 0 ), surfaceFull )
 
 if __name__ == "__main__":
 	unittest.main()

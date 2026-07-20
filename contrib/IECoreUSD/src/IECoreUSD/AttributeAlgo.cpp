@@ -36,6 +36,8 @@
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/algorithm/string/predicate.hpp"
+#include "boost/container/flat_set.hpp"
+#include "boost/container/small_vector.hpp"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/primvar.h"
@@ -50,14 +52,15 @@ using namespace pxr;
 namespace
 {
 
-static const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "cortex_isConstantPrimitiveVariable" );
-static const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
-static const std::string g_primVarPrefix = "primvars:";
-static const std::string g_primVarUserPrefix = "primvars:user:";
-static const std::string g_renderPrefix = "render:";
-static const std::string g_riPrefix = "ri:";
-static const std::string g_riAttributesPrefix = "ri:attributes:";
-static const std::string g_userPrefix = "user:";
+const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "cortex_isConstantPrimitiveVariable" );
+const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
+const std::string g_primVarPrefix = "primvars:";
+const std::string g_primVarUserPrefix = "primvars:user:";
+const std::string g_renderPrefix = "render:";
+const std::string g_riPrefix = "ri:";
+const std::string g_riAttributesPrefix = "ri:attributes:";
+const std::string g_userPrefix = "user:";
+const boost::container::flat_set<std::string> g_shaderTypes = { "surface", "displacement", "light", "volume" };
 
 bool writeConformantRenderManAttributes()
 {
@@ -68,7 +71,92 @@ bool writeConformantRenderManAttributes()
 	return false;
 }
 
+using Names = boost::container::small_vector<AttributeAlgo::Name, 2>;
+
+// Given a Cortex attribute name, return the ways it might be represented in
+// USD. This is a one-to-many mapping, to account for legacy representations
+// in old files. The first name returned should be used for writing new files,
+// and the other names are used as fallbacks when reading.
+Names usdNames( std::string name )
+{
+	if( boost::starts_with( name, g_riPrefix ) )
+	{
+		const std::string potentialShaderType = name.substr( g_riPrefix.size() );
+		if( g_shaderTypes.count( potentialShaderType ) )
+		{
+			return { { pxr::TfToken( name ), true } };
+		}
+		const AttributeAlgo::Name conformantName = { pxr::TfToken( g_riAttributesPrefix + name.substr( g_riPrefix.size() ) ), true };
+		const AttributeAlgo::Name legacyName = { pxr::TfToken( name ), false };
+		if( writeConformantRenderManAttributes() )
+		{
+			return { conformantName, legacyName };
+		}
+		else
+		{
+			return { legacyName, conformantName };
+		}
+	}
+
+	bool isPrimvar = false;
+
+	// The long term plan is to convert only "render:" prefixed attributes to primvars, and it will
+	// be the client's responsibility to ensure everything important gets prefixed with "render:".
+	// But for the moment, Gaffer doesn't do this yet, so we support the two most important prefixes
+	// for Gaffer currently:  "user:" and "ai:".
+	/// \todo I don't think the `render:` plan is working out - it may well be better to just map
+	/// all Cortex attributes to primvars.
+	if( boost::starts_with( name, "render:" ) || boost::starts_with( name, "user:" ) || boost::starts_with( name, "ai:" ) )
+	{
+		isPrimvar = true;
+
+		// Strip the "render:" prefix from when writing attributes as primitive variables
+		if( boost::starts_with( name, g_renderPrefix ) )
+		{
+			name = name.substr( 7 );
+		}
+	}
+
+	if( name == "ai:disp_map" )
+	{
+		// Special case where the whole name is different, not just prefix
+		name = "arnold:displacement";
+	}
+	else
+	{
+		size_t colonPos = name.find( ":" );
+		if( colonPos != std::string::npos )
+		{
+			std::string prefix = name.substr( 0, colonPos );
+			std::string newPrefix;
+			// Translate prefixes.  Currently ai -> arnold is the only mapping supported
+			if( prefix == "ai" )
+			{
+				newPrefix = "arnold";
+			}
+
+			if( newPrefix.size() )
+			{
+				name = newPrefix + name.substr( colonPos );
+			}
+		}
+	}
+
+	Names result;
+	if( isPrimvar )
+	{
+		result.push_back( { TfToken( name ), true } );
+	}
+	if( name.find( ':' ) != std::string::npos )
+	{
+		// We add this one even when the primary version is a primvar, as a
+		// fallback to legacy files from a time when we wrote attributes.
+		result.push_back( { TfToken( name ), false } );
+	}
+	return result;
 }
+
+} // namespace
 
 bool IECoreUSD::AttributeAlgo::isCortexAttribute( const pxr::UsdGeomPrimvar &primVar )
 {
@@ -133,56 +221,16 @@ pxr::TfToken IECoreUSD::AttributeAlgo::cortexPrimitiveVariableMetadataTokenDepre
 
 IECoreUSD::AttributeAlgo::Name IECoreUSD::AttributeAlgo::nameToUSD( std::string name )
 {
-	if( boost::starts_with( name, g_riPrefix ) && writeConformantRenderManAttributes() )
+	const Names names = usdNames( name );
+	if( names.size() )
 	{
-		return { pxr::TfToken( g_riAttributesPrefix + name.substr( g_riPrefix.size() ) ), true };
+		return names.front();
 	}
-
-	bool isPrimvar = false;
-
-	// The long term plan is to convert only "render:" prefixed attributes to primvars, and it will
-	// be the client's responsibility to ensure everything important gets prefixed with "render:".
-	// But for the moment, Gaffer doesn't do this yet, so we support the two most important prefixes
-	// for Gaffer currently:  "user:" and "ai:".
-	/// \todo I don't think the `render:` plan is working out - it may well be better to just map
-	/// all Cortex attributes to primvars.
-	if( boost::starts_with( name, "render:" ) || boost::starts_with( name, "user:" ) || boost::starts_with( name, "ai:" ) )
-	{
-		isPrimvar = true;
-
-		// Strip the "render:" prefix from when writing attributes as primitive variables
-		if( boost::starts_with( name, g_renderPrefix ) )
-		{
-			name = name.substr( 7 );
-		}
-	}
-
-	if( name == "ai:disp_map" )
-	{
-		// Special case where the whole name is different, not just prefix
-		name = "arnold:displacement";
-	}
-	else
-	{
-		size_t colonPos = name.find( ":" );
-		if( colonPos != std::string::npos )
-		{
-			std::string prefix = name.substr( 0, colonPos );
-			std::string newPrefix;
-			// Translate prefixes.  Currently ai -> arnold is the only mapping supported
-			if( prefix == "ai" )
-			{
-				newPrefix = "arnold";
-			}
-
-			if( newPrefix.size() )
-			{
-				name = newPrefix + name.substr( colonPos );
-			}
-		}
-	}
-
-	return { TfToken( name ), isPrimvar };
+	// This is necessary because `USDScene` calls `nameToUSD()` when writing
+	// materials, and `surface` etc aren't handled by the above.
+	/// \todo It would likely be better if the material-writing code wasn't
+	/// mixed up with this.
+	return { pxr::TfToken( name ), false };
 }
 
 IECore::InternedString IECoreUSD::AttributeAlgo::nameFromUSD( IECoreUSD::AttributeAlgo::Name name )
@@ -234,27 +282,27 @@ IECore::InternedString IECoreUSD::AttributeAlgo::nameFromUSD( IECoreUSD::Attribu
 
 UsdAttribute IECoreUSD::AttributeAlgo::findUSDAttribute( const pxr::UsdPrim &prim, std::string cortexName )
 {
-	AttributeAlgo::Name n = AttributeAlgo::nameToUSD( cortexName );
-	if( n.isPrimvar )
+	for( const auto &n : usdNames( cortexName ) )
 	{
-		if( pxr::UsdGeomPrimvar primvar = pxr::UsdGeomPrimvarsAPI( prim ).GetPrimvar( n.name ) )
+		if( n.isPrimvar )
 		{
-			if( isCortexAttribute( primvar ) )
+			if( pxr::UsdGeomPrimvar primvar = pxr::UsdGeomPrimvarsAPI( prim ).GetPrimvar( n.name ) )
 			{
-				return primvar.GetAttr();
+				if( isCortexAttribute( primvar ) )
+				{
+					return primvar.GetAttr();
+				}
 			}
 		}
-	}
-
-	// In theory, this should be able to be an else.  But for the moment, for attributes that should be written
-	// to a primvar, we try reading them from an attribute if we can't find them in a primvar.  This provides
-	// some backwards compatibility with files from before we started writing to primvars, and might provide
-	// compatibility with other USD authors, maybe?
-	if( pxr::UsdAttribute attribute = prim.GetAttribute( n.name ) )
-	{
-		if ( attribute.GetName().GetString().find( ":" ) != std::string::npos && attribute.IsCustom() )
+		else
 		{
-			return attribute;
+			if( pxr::UsdAttribute attribute = prim.GetAttribute( n.name ) )
+			{
+				if( attribute.IsCustom() )
+				{
+					return attribute;
+				}
+			}
 		}
 	}
 
