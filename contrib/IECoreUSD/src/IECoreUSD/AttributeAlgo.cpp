@@ -50,14 +50,14 @@ using namespace pxr;
 namespace
 {
 
-static const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "cortex_isConstantPrimitiveVariable" );
-static const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
-static const std::string g_primVarPrefix = "primvars:";
-static const std::string g_primVarUserPrefix = "primvars:user:";
-static const std::string g_renderPrefix = "render:";
-static const std::string g_riPrefix = "ri:";
-static const std::string g_riAttributesPrefix = "ri:attributes:";
-static const std::string g_userPrefix = "user:";
+const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "cortex_isConstantPrimitiveVariable" );
+const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
+const std::string g_primVarPrefix = "primvars:";
+const std::string g_primVarUserPrefix = "primvars:user:";
+const std::string g_renderPrefix = "render:";
+const std::string g_riPrefix = "ri:";
+const std::string g_riAttributesPrefix = "ri:attributes:";
+const std::string g_userPrefix = "user:";
 
 bool writeConformantRenderManAttributes()
 {
@@ -68,7 +68,7 @@ bool writeConformantRenderManAttributes()
 	return false;
 }
 
-}
+} // namespace
 
 bool IECoreUSD::AttributeAlgo::isCortexAttribute( const pxr::UsdGeomPrimvar &primVar )
 {
