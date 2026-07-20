@@ -4,7 +4,10 @@
 Fixes
 -----
 
-- USDScene : Fixed bug writing shader assignments with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1`.
+- USDScene :
+  - Fixed bug writing shader assignments with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1`.
+  - Fixed bug reading shader assignments with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1`.
+  - Fixed bug reading legacy attributes with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1`.
 
 10.6.7.0 (relative to 10.6.6.0)
 ========
