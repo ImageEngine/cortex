@@ -98,5 +98,24 @@ class PointInstancerTest( unittest.TestCase ) :
 		for i in range( 4 ) :
 			self.assertEqual( query.transform( i ), imath.M44f().translate( imath.V3f( i, 0, 0 ) ) )
 
+	def testInstanceAttributes( self ) :
+
+		instancer = IECoreScene.PointInstancer( 1 )
+
+		instancer.setPrototypes( IECore.StringVectorData( [ "prototypes/proto1" ] ) )
+		instancer.setPrototypeIndex( IECore.IntVectorData( [ 0 ] ) )
+		instancer.setPosition( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
+		instancer.setScale( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
+		instancer.setOrientation( IECore.QuatfVectorData( [ imath.Quatf() ] ) )
+		instancer.setID( IECore.Int64VectorData( [ 0 ] ) )
+
+		instancer["constant"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "test" ) )
+		instancer["vertex"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( [ "test" ] ) )
+
+		self.assertEqual(
+			instancer.instanceAttributes(),
+			{ "vertex" : instancer["vertex"] }
+		)
+
 if __name__ == "__main__":
     unittest.main()

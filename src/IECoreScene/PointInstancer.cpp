@@ -210,6 +210,12 @@ PrimitiveVariable::IndexedView<int64_t> PointInstancer::getInvisibleIDs() const
 	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<int64_t>();
 }
 
+PointInstancer::InstanceAttributeRange PointInstancer::instanceAttributes() const
+{
+	ConstPrimitiveVariableRange range( variables );
+	return boost::adaptors::filter( range, InstanceAttributePredicate() );
+}
+
 // Query
 // =====
 
