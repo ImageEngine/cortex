@@ -38,6 +38,9 @@
 
 #include "IECoreScene/PointsPrimitive.h"
 
+#include "boost/range/adaptor/filtered.hpp"
+#include "boost/range/iterator_range.hpp"
+
 #include <unordered_set>
 
 namespace IECoreScene
@@ -112,6 +115,20 @@ class IECORESCENE_API PointInstancer : public IECoreScene::PointsPrimitive
 		void setInvisibleIDs( const IECore::Int64VectorDataPtr &invisibleIds );
 		PrimitiveVariable::IndexedView<int64_t> getInvisibleIDs() const;
 
+		/// Instance Attributes
+		/// ===================
+
+		struct InstanceAttributePredicate;
+		/// \todo Use `std::ranges` when we have access to C++20.
+		using ConstPrimitiveVariableRange = boost::iterator_range<PrimitiveVariableMap::const_iterator>;
+		using InstanceAttributeRange = boost::filtered_range<InstanceAttributePredicate, ConstPrimitiveVariableRange>;
+
+		/// Returns the range of PrimitiveVariables that should be converted
+		/// to per-instance attributes for rendering. All vertex or varying
+		/// primitive variables not included in the accessors above are
+		/// interpreted as shading attributes.
+		InstanceAttributeRange instanceAttributes() const;
+
 		/// Queries
 		/// =======
 		///
@@ -163,3 +180,5 @@ class IECORESCENE_API PointInstancer : public IECoreScene::PointsPrimitive
 IE_CORE_DECLAREPTR( PointInstancer )
 
 } // namespace IECoreScene
+
+#include "IECoreScene/PointInstancer.inl"

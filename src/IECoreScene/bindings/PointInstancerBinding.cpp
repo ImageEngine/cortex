@@ -48,6 +48,16 @@ using namespace IECoreScene;
 namespace
 {
 
+dict instanceAttributesWrapper( const PointInstancer &instancer )
+{
+	dict result;
+	for( const auto &[name, primitiveVariable] : instancer.instanceAttributes() )
+	{
+		result[name] = primitiveVariable;
+	}
+	return result;
+}
+
 } // namespace
 
 void IECoreSceneModule::bindPointInstancer()
@@ -68,6 +78,7 @@ void IECoreSceneModule::bindPointInstancer()
 		.def( "getID", &PointInstancer::getID )
 		.def( "setInvisibleIDs", &PointInstancer::setInvisibleIDs )
 		.def( "getInvisibleIDs", &PointInstancer::getInvisibleIDs )
+		.def( "instanceAttributes", &instanceAttributesWrapper )
 	;
 
 	class_<PointInstancer::VisibilityQuery>( "VisibilityQuery", no_init )
