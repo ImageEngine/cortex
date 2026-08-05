@@ -1,58 +1,16 @@
-10.7.x.x (relative to 10.7.0.0a14)
+10.7.x.x (relative to 10.7.0.0)
 ========
 
-Improvements
-------------
 
-- PointInstancer : Added `instanceAttributes()` method [^1].
 
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a14 (relative to 10.7.0.0a13)
-===========
-
-Fixes
------
-
-- USDScene :
-  - Fixed bug writing shader assignments with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1` [^1].
-  - Fixed bug reading shader assignments with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1` [^1].
-  - Fixed bug reading legacy attributes with `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES=1` [^1].
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a13 (relative to 10.7.0.0a12)
-===========
-
-Improvements
-------------
-
-- USDScene : Added `IECOREUSD_WRITE_CONFORMANT_RENDERMAN_ATTRIBUTES` environment variable. If set to a value of `1`, this causes "ri:" prefixed attributes to be written as expected by `usdRiPxr` [^1].
-
-Fixes
------
-
-- PointInstancer : Fixed signature for `setPrototypes()` function.
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a12 (relative to 10.7.0.0a11)
-===========
-
-Improvements
-------------
-
-- USDScene : Added `IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS` environment variable. If set to a value of `1`, this causes OSL shaders to be written in the format expected by RenderMan. Set the `RMAN_SHADERPATH` environment variable appropriately to ensure RenderMan can find the shaders [^1].
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a11 (relative to 10.7.0.0a10)
-===========
+10.7.0.0
+========
 
 Features
 --------
 
 - PointInstancer : Added class to provide first-class encoding of point instancers.
+- NanobindConverter : Added new class providing interoperability between Boost Python bindings and Nanobind bindings.
 
 Improvements
 ------------
@@ -61,6 +19,19 @@ Improvements
 - USDScene :
   - Added support for writing `IECoreScene::PointInstancer` as `UsdGeomPointInstancer`.
   - Added support for reading and writing mesh lights.
+  - Added support for pinned curves.
+- CurvesPrimitive :
+  - Added `Wrap` enum, with `Periodic`, `NonPeriodic` and `Pinned`. This generalises the previous `periodic` boolean property.
+  - Added argument names to `variableSize()` and `numSegments()` Python bindings, so they can be passed as keywords.
+- CurvesAlgo : Added `isPinned()` and `convertPinnedToNonPeriodic()` utilities.
+- Primitive : Added default type to `variableData()` template method.
+- Canceller :
+  - Derived from RefCounted, to allow Cancellers to be shared between multiple clients.
+  - Enabled chaining of Cancellers, via `addChild()` and `removeChild()` methods and a `ScopedChild` utility class.
+- MessageHandler : Added `msg()` overload that accepts a `fmt::format_string` and arguments.
+- InternedString : Added specialisation for `fmt::formatter<InternedString>`.
+- TBB : Improved compatibility with oneTBB 2021.
+- Ramp : Added Rampff, RampfColor3f, RampfColor4f and corresponding Ramp*Data classes, for representing user facing shader ramp parameters.
 
 Fixes
 -----
@@ -70,7 +41,10 @@ Fixes
 - PointsAlgo :
   - Fixed loss of blind data in `deletePoints()`.
   - Fixed loss of primitive type in `deletePoints()` (if processing a derived class of PointsPrimitive).
-- IECoreGL::Shader : Restored compatibility with OpenGL 2.1 in order to preserve macOS support [^1].
+- CurvesAlgo :
+  - Fixed handling of periodic curves in `deleteCurves()`.
+  - Fixed `resamplePrimitiveVariable()` to handle Vertex<->Varying conversion for linear curves correctly.
+- VDBObject : Fixed Python bindings for OpenVDB 12.
 
 Breaking Changes
 ----------------
@@ -81,190 +55,28 @@ Breaking Changes
   - Removed support for `IECOREUSD_POINTINSTANCER_RELATIVE_PROTOTYPES` environment variable. Prototype paths are now always specified as relative where possible.
   - Removed `./` prefix from relative prototype paths.
   - UsdGeomPointInstancer `inactiveIds` are now merged into the `invisibleIds` primitive variable on loading, instead of being loaded separately.
-
-Build
------
-
-- CI : Updated to GafferHQ/dependencies 11.0.0a8.
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a10 (relative to 10.7.0.0a9)
-===========
-
-Features
---------
-
-- NanobindConverter : Added new class providing interoperability between Boost Python bindings and Nanobind bindings.
-
-Fixes
------
-
-- VDBObject : Fixed Python bindings for OpenVDB 12.
-
-Breaking Changes
-----------------
-
 - VDBObject : Removed support for OpenVDB 10.0 and earlier.
-
-10.7.0.0a9 (relative to 10.7.0.0a8)
-==========
-
-Improvements
-------------
-
-- USDScene : Added loading of ArnoldProcedural prims as Cortex ExternalProcedural objects [^1].
-
-Fixes
------
-
-- USDScene : Fixed writing of animated camera parameters [^1].
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a8 (relative to 10.7.0.0a7)
-==========
-
-Improvements
-------------
-
-- CurvesPrimitive :
-  - Added `Wrap` enum, with `Periodic`, `NonPeriodic` and `Pinned`. This generalises the previous `periodic` boolean property.
-  - Added argument names to `variableSize()` and `numSegments()` Python bindings, so they can be passed as keywords.
-- USDScene : Added support for pinned curves.
-- CurvesAlgo : Added `isPinned()` and `convertPinnedToNonPeriodic()` utilities.
-
-Fixes
------
-
-- CurvesAlgo : Fixed handling of periodic curves in `deleteCurves()`.
-- CurvesAlgo : Fixed `resamplePrimitiveVariable()` to handle Vertex<->Varying conversion for linear curves correctly.
-
-Breaking Changes
-----------------
-
 - CurvesPrimitive : Made protected members private.
-
-10.7.0.0a7 (relative to 10.7.0.0a6)
-==========
-
-Breaking Changes
-----------------
-
 - HenyeyGreenstein.h : Removed.
 - SweepAndPrune.h : Removed.
 - RadixSort.h : Removed.
-
-Build
------
-
-- Added compatibility with USD 25.11 and 26.03.
-- CI : Updated to GafferHQ/dependencies 11.0.0a3.
-
-API
----
-
-- Primitive : Added default type to templated function variableData.
-
-10.7.0.0a6 (relative to 10.7.0.0a5)
-==========
-
-Fixes
------
-
-- CompoundData : Fixed bad formatting of exception messages [^1].
-
-Breaking Changes
-----------------
-
 - MessageHandler : Removed support for passing `boost::format` objects to `msg()`. Use `fmt::format()` instead.
 - FileSequence : Removed `fileNameTemplate()` protected method. Use `fileNameForFrame()` instead.
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a5 (relative to 10.7.0.0a4)
-==========
-
-Improvements
-------------
-
-- Canceller :
-  - Derived from RefCounted, to allow Cancellers to be shared between multiple clients.
-  - Enabled chaining of Cancellers, via `addChild()` and `removeChild()` methods and a `ScopedChild` utility class.
-- MessageHandler : Added `msg()` overload that accepts a `fmt::format_string` and arguments.
-- InternedString : Added specialisation for `fmt::formatter<InternedString>`.
-
-Breaking Changes
-----------------
-
 - Canceller : Changed base class.
-
-Build
------
-
-- Requires `fmt` 9.1.0.
-- Removed unnecessary linking of `boost_chrono`.
-
-10.7.0.0a4 (relative to 10.7.0.0a3)
-==========
-
-Fixes
------
-
-- USDScene : Fixed handling of connections involving UsdShadeNodeGraph interface parameters [^1].
-
-Build
------
-
-- CI :
-  - Updated to GafferHQ/dependencies 11.0.0a2.
-  - Build artifacts and releases now include a "-platform##" suffix denoting their target VFX Reference Platform year. This replaces the "gcc" suffix previously used on Linux builds.
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a3 (relative to 10.7.0.0a2)
-==========
-
-Improvements
-------------
-
-- ShaderNetworkAlgo : Added render adaptor API, allowing just-in-time modifications to
-  ShaderNetworks during translation for rendering [^1].
-
-Fixes
------
-
-- CoordinateSystem : Added backwards compatibility for legacy transform [^1].
-
-[^1]: To be omitted from the notes for the final 10.7.0.0 release.
-
-10.7.0.0a2 (relative to 10.7.0.0a1)
-==========
-
-Improvements
-------------
-
-- TBB : Improved compatibility with oneTBB 2021.
-
-Breaking Changes
-----------------
-
 - IECore : Removed `tbb_task_scheduler_init()` Python Context Manager. Use `tbb_global_control()` instead.
+- ShaderNetworkAlgo :
+  - Removed deprecated `componentConnectionAdapterLabel()`, `convertOSLComponentConnections()`, `collapseSplineParameters()`, `expandSplineParameters()` methods.
+  - Switched support for Spline parameters to support for Ramp parameters.
 
-10.7.0.0a1 (relative to 10.6.2.1)
-==========
+Build
+-----
 
-Features
---------
-
-- IECore : Added Rampff, RampfColor3f, RampfColor4f and corresponding Ramp*Data classes, for representing user facing shader ramp parameters.
-
-Breaking Changes
-----------------
-
-- IECoreScene::ShaderNetworkAlgo :
-  - Removed deprecated functions componentConnectionAdapterLabel, convertOSLComponentConnections, collapseSplineParameters, expandSplineParameters.
-  - Switch support for Spline parameters to support for Ramp parameters.
+- LibFormat : Added new dependency on `fmt` 9.1.0.
+- CI :
+  - Updated to GafferHQ/dependencies 11.0.0a8.
+  - Build artifacts and releases now include a "-platform##" suffix denoting their target VFX Reference Platform year. This replaces the "gcc" suffix previously used on Linux builds.
+- USD : Added compatibility with USD 25.11 and 26.03.
+- Boost : Removed unnecessary linking of `boost_chrono`.
 
 10.6.x.x (relative to 10.6.7.1)
 ========
