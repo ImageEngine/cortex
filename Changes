@@ -9,7 +9,9 @@ Improvements
 Fixes
 -----
 
-- USD : Fixed loading when a `primvars:*` attribute conflicts with a primitive variable loaded from a schema attribute, for instance `PointBased.points`. The schema attribute now takes precedence and a warning is emitted.
+- USD :
+  - Fixed loading when a `primvars:*` attribute conflicts with a primitive variable loaded from a schema attribute, for instance `PointBased.points`. The schema attribute now takes precedence and a warning is emitted.
+  - Fixed loading of non-standard component connections in Arnold materials exported from Solaris.
 
 Breaking Changes
 ----------------
