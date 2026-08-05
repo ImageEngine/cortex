@@ -89,7 +89,7 @@ jobs:
             jobs: 4
 
           - name: macos-arm64-platform25
-            os: macos-14
+            os: macos-15
             buildType: RELEASE
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a8/gafferDependencies-11.0.0a8-macos-platform25.tar.gz
