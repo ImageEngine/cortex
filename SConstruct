@@ -872,6 +872,13 @@ if env["PLATFORM"] != "win32" :
 		# Work around Boost issues with Xcode 15 where `std::unary_function` has been removed.
 		if clangVersion >= [ 15, 0, 0 ] :
 			env.Append( CXXFLAGS = [ "-DBOOST_NO_CXX98_FUNCTION_BASE", "-D_HAS_AUTO_PTR_ETC=0" ] )
+		if clangVersion >= [ 16, 0, 0 ] :
+			# XCode 16 warns about deprecations in fmtlib. Overriding `FMT_DEPRECATED`
+			# allows us to remove the [[deprecated]] attributes and still build with
+			# `-Werror,-Wdeprecated-declarations`.
+			env.Append( CPPDEFINES = [ ( "FMT_DEPRECATED", "" ), ] )
+			# Disable new warnings about ObjectInterpolator::InterpolatorDescription's reinterpret_cast.
+			env.Append( CXXFLAGS = [ "-Wno-cast-function-type-mismatch" ] )
 		# Disable FMA on arm64 builds to limit floating point discrepancies with x86_64 builds.
 		if platform.machine() == "arm64" :
 			env.Append( CXXFLAGS = [ "-ffp-contract=off" ] )
