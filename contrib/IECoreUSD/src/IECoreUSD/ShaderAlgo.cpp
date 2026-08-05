@@ -240,12 +240,24 @@ bool nonStandardLightParametersMightBeTimeVarying( const pxr::UsdPrim &prim )
 
 const std::regex g_arrayIndexFromUSDRegex( ":i([0-9]+)$" );
 const std::string g_arrayIndexFromUSDFormat( "[$1]" );
+const std::regex g_componentFromUSDRegex( ":([rgbaxyz])$" );
+const std::string g_componentFromUSDFormat( ".$1" );
+
 IECore::InternedString fromUSDParameterName( const pxr::TfToken &usdName )
 {
 	// USD doesn't support connections to array indices. So Arnold-USD emulates
 	// them using its own `parameter:i<N>`syntax - see https://github.com/Autodesk/arnold-usd/pull/381.
 	// We convert these to the regular `parameter[N]` syntax during loading.
-	return std::regex_replace( usdName.GetString(), g_arrayIndexFromUSDRegex, g_arrayIndexFromUSDFormat );
+	std::string result = std::regex_replace( usdName.GetString(), g_arrayIndexFromUSDRegex, g_arrayIndexFromUSDFormat );
+	// Likewise, USD doesn't support connections to or from individual components of a vector
+	// or colour. But we've received files out of Solaris where component outputs for Arnold
+	// shaders have been emulated as `<parameter>:[rgbaxyz]`. Convert to our usual
+	// `<parameter>.[rgbaxyz]` syntax.
+	/// \todo Determine just how off-spec these files are. It would certainly be nice if this
+	/// became an official standard - it's much simpler than all the hoops we're jumping through
+	/// to insert and remove split/join adaptors.
+	result = std::regex_replace( result, g_componentFromUSDRegex, g_componentFromUSDFormat );
+	return IECore::InternedString( result );
 }
 
 const std::regex g_arrayIndexFromCortexRegex( "\\[([0-9]+)\\]$" );
@@ -354,7 +366,7 @@ IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath 
 	IECore::InternedString shaderHandle = readShaderNetworkWalk( anchorPath, pxr::UsdShadeConnectableAPI( output.GetPrim() ), timeCode, shaderNetwork );
 	if( output.GetBaseName() != "DEFAULT_OUTPUT" )
 	{
-		return IECoreScene::ShaderNetwork::Parameter( shaderHandle, output.GetBaseName().GetString() );
+		return IECoreScene::ShaderNetwork::Parameter( shaderHandle, fromUSDParameterName( output.GetBaseName() ) );
 	}
 	else
 	{

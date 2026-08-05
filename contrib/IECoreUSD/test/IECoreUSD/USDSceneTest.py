@@ -4137,6 +4137,34 @@ class USDSceneTest( unittest.TestCase ) :
 		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		assertExpectedArrayInputs( scene.child( "sphere" ).readAttribute( "ai:surface", 0 ) )
 
+	def testArnoldComponentInputs( self ) :
+
+		def assertExpectedInputs( network ) :
+
+			inputs = network.inputConnections( "standardSurface" )
+			self.assertEqual( len( inputs ), 1 )
+			self.assertEqual( inputs[0], ( ( "state_vector", "out_variable.y" ), ( "standardSurface", "indirect_specular" ) ) )
+
+		# Load original USD.
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "arnoldComponentConnections.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		network = scene.child( "sphere" ).readAttribute( "ai:surface", 0 )
+
+		assertExpectedInputs( network )
+
+		# Write our own USD from that data, to check we can round-trip it.
+
+		fileName = os.path.join( self.temporaryDirectory(), "arnoldComponentConnectionsRewritten.usda" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		scene.createChild( "sphere" ).writeAttribute( "ai:surface", network, 0 )
+
+		del scene
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		assertExpectedInputs( scene.child( "sphere" ).readAttribute( "ai:surface", 0 ) )
+
 	def testInvalidPrimitiveVariables( self ) :
 
 		goodRoot = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )

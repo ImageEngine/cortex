@@ -6,6 +6,11 @@ Improvements
 
 - PointInstancer : Added `instanceAttributes()` method [^1].
 
+Fixes
+-----
+
+- USDScene : Fixed loading of non-standard component connections in Arnold materials exported from Solaris.
+
 [^1]: To be omitted from the notes for the final 10.7.0.0 release.
 
 10.7.0.0a14 (relative to 10.7.0.0a13)
