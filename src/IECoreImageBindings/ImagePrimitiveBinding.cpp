@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "Imath/half.h"
+#include "IECore/Half.h"
 
 #include "IECoreImage/ImagePrimitive.h"
 

@@ -174,6 +174,14 @@ typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&fu
 			return functor( static_cast<V3fVectorData *>( data ), std::forward<Args>( args )... );
 		case V3dVectorDataTypeId :
 			return functor( static_cast<V3dVectorData *>( data ), std::forward<Args>( args )... );
+		case Box2iVectorDataTypeId :
+			return functor( static_cast<Box2iVectorData *>( data ), std::forward<Args>( args )... );
+		case Box2fVectorDataTypeId :
+			return functor( static_cast<Box2fVectorData *>( data ), std::forward<Args>( args )... );
+		case Box2dVectorDataTypeId :
+			return functor( static_cast<Box2dVectorData *>( data ), std::forward<Args>( args )... );
+		case Box3iVectorDataTypeId :
+			return functor( static_cast<Box3iVectorData *>( data ), std::forward<Args>( args )... );
 		case Box3fVectorDataTypeId :
 			return functor( static_cast<Box3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Box3dVectorDataTypeId :
@@ -328,6 +336,14 @@ typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *
 			return functor( static_cast<const V3fVectorData *>( data ), std::forward<Args>( args )... );
 		case V3dVectorDataTypeId :
 			return functor( static_cast<const V3dVectorData *>( data ), std::forward<Args>( args )... );
+		case Box2iVectorDataTypeId :
+			return functor( static_cast<const Box2iVectorData *>( data ), std::forward<Args>( args )... );
+		case Box2fVectorDataTypeId :
+			return functor( static_cast<const Box2fVectorData *>( data ), std::forward<Args>( args )... );
+		case Box2dVectorDataTypeId :
+			return functor( static_cast<const Box2dVectorData *>( data ), std::forward<Args>( args )... );
+		case Box3iVectorDataTypeId :
+			return functor( static_cast<const Box3iVectorData *>( data ), std::forward<Args>( args )... );
 		case Box3fVectorDataTypeId :
 			return functor( static_cast<const Box3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Box3dVectorDataTypeId :

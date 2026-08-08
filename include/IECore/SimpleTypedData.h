@@ -37,6 +37,7 @@
 
 #include "IECore/Export.h"
 #include "IECore/GeometricTypedData.h"
+#include "IECore/Half.h"
 #include "IECore/InternedString.h"
 #include "IECore/LineSegment.h"
 #include "IECore/TypedData.h"
@@ -47,7 +48,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "Imath/ImathMatrix.h"
 #include "Imath/ImathQuat.h"
 #include "Imath/ImathVec.h"
-#include "Imath/half.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include <string>
