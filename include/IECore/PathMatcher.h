@@ -100,6 +100,12 @@ class IECORE_API PathMatcher
 
 		/// Returns a PathMatcher for objects matching both this and the given PathMatcher
 		PathMatcher intersection( const PathMatcher &paths ) const;
+		/// Returns a PathMatcher with only the paths in this PathMatcher that match or are
+		/// descendants of paths in the given PathMatcher.
+		PathMatcher in( const PathMatcher &paths ) const;
+		/// Returns a PathMatcher with only the paths in this PathMatcher that match or are
+		/// ancestors of paths in the given PathMatcher.
+		PathMatcher containing( const PathMatcher &paths ) const;
 
 		/// Removes the specified path and all descendant paths.
 		/// Returns true if something was removed, false otherwise.

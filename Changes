@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.0.0)
 ========
 
+Improvements
+------------
 
+- PathMatcher : Added `in()` and `containing()` methods.
 
 10.7.0.0
 ========
