@@ -959,6 +959,52 @@ class PathMatcherTest( unittest.TestCase ) :
 
 		self.assertEqual( m3.paths(), [ "/a/b/c/d/myTest" ] )
 
+	def testIn( self ) :
+
+		m1 = IECore.PathMatcher( [ "/a/b/c/d/myTest", "/a/b/c/myTest", "/a/b/c", "/a/b/c/d", "/a/b/d" ] )
+		m2 = IECore.PathMatcher( [ "/a/b/c/d" ] )
+
+		self.assertEqual( m1.in_( m2 ), IECore.PathMatcher( [ "/a/b/c/d/myTest", "/a/b/c/d" ] ) )
+
+		m2 = IECore.PathMatcher( [ "/a/b/c" ] )
+		self.assertEqual( m1.in_( m2 ), IECore.PathMatcher( [ "/a/b/c/d/myTest", "/a/b/c/myTest", "/a/b/c", "/a/b/c/d" ] ) )
+
+		m2 = IECore.PathMatcher( [ "/a/b/d" ] )
+		self.assertEqual( m1.in_( m2 ), IECore.PathMatcher( [ "/a/b/d" ] ) )
+
+		m2 = IECore.PathMatcher( [ "/a/b/e" ] )
+		self.assertEqual( m1.in_( m2 ), IECore.PathMatcher() )
+
+		m2 = IECore.PathMatcher( [ "/a" ] )
+		self.assertEqual( m1.in_( m2 ), m1 )
+
+		self.assertEqual( m1.in_( m1 ), m1 )
+
+		self.assertEqual( m1.in_( IECore.PathMatcher() ), IECore.PathMatcher() )
+
+	def testContaining( self ) :
+
+		m1 = IECore.PathMatcher( [ "/a/b/c/d/myTest", "/a/b/c/myTest", "/a/b/c", "/a/b/d" ] )
+		m2 = IECore.PathMatcher( [ "/a/b/c/d/myTest" ] )
+
+		self.assertEqual( m1.containing( m2 ), IECore.PathMatcher( [ "/a/b/c", "/a/b/c/d/myTest" ] ) )
+
+		m2 = IECore.PathMatcher( [ "/a/b/c/d" ] )
+		self.assertEqual( m1.containing( m2 ), IECore.PathMatcher( [ "/a/b/c" ] ) )
+
+		m2 = IECore.PathMatcher( [ "/a/b/d" ] )
+		self.assertEqual( m1.containing( m2 ), IECore.PathMatcher( [ "/a/b/d" ] ) )
+
+		m2 = IECore.PathMatcher( [ "/a/b/e" ] )
+		self.assertEqual( m1.containing( m2 ), IECore.PathMatcher() )
+
+		m2 = IECore.PathMatcher( [ "/a" ] )
+		self.assertEqual( m1.containing( m2 ), IECore.PathMatcher() )
+
+		self.assertEqual( m1.containing( m1 ), m1 )
+
+		self.assertEqual( m1.containing( IECore.PathMatcher() ), IECore.PathMatcher() )
+
 	def testSize( self ) :
 
 		m = IECore.PathMatcher()

@@ -451,6 +451,35 @@ PathMatcher PathMatcher::intersection( const PathMatcher &paths ) const
 	return result;
 }
 
+PathMatcher PathMatcher::in( const PathMatcher &paths ) const
+{
+	PathMatcher result = PathMatcher();
+	for( Iterator it = paths.begin(); it != paths.end(); ++it )
+	{
+		result.addPaths( (*this).subTree( *it ), *it );
+		it.prune();
+	}
+	return result;
+}
+
+PathMatcher PathMatcher::containing( const PathMatcher &paths ) const
+{
+	PathMatcher result = PathMatcher();
+	for( Iterator it = (*this).begin(); it != (*this).end(); ++it )
+	{
+		RawIterator rit = paths.find( *it );
+		if( rit == paths.end() )
+		{
+			it.prune();
+		}
+		else
+		{
+			result.addPath( *it );
+		}
+	}
+	return result;
+}
+
 bool PathMatcher::prune( const std::string &path )
 {
 	if( path.empty() )
