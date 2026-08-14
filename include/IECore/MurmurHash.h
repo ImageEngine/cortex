@@ -37,6 +37,7 @@
 
 #include "IECore/Export.h"
 
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <type_traits>
