@@ -1222,6 +1222,11 @@ if env["PLATFORM"] != "win32" :
 		# fully work. Reenable when we encounter versions that work correctly.
 		basePythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
 
+		if "g++" in os.path.basename( env["CXX"] ) and not "clang++" in os.path.basename( env["CXX"] ) :
+			## GCC 14 reports -Wmaybe-uninitialized warnings from Boost.Python's extract<>.
+			# Keep the warning enabled, but don't fail the build.
+			basePythonEnv.Append( CXXFLAGS = [ "-Wno-error=maybe-uninitialized" ] )
+
 	# get the python link flags
 	if basePythonEnv["PYTHON_LINK_FLAGS"]=="" :
 		basePythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( basePythonEnv, "--ldflags" )
