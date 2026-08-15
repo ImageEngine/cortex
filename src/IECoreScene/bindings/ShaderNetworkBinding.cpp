@@ -57,7 +57,8 @@ ShaderNetworkPtr constructor( dict shaders, list connections, object output )
 	for( size_t i = 0, e = len( items ); i < e; ++i )
 	{
 		InternedString handle = extract<const char *>( items[i][0] )();
-		const Shader &shader = extract<const Shader &>( items[i][1] )();
+		extract<const Shader &> shaderExtractor( items[i][1] );
+		const Shader &shader = shaderExtractor();
 		result->addShader( handle, &shader );
 	}
 
