@@ -181,6 +181,12 @@ typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedV
 /// A simple type to hold named PrimitiveVariables.
 typedef std::map<std::string, PrimitiveVariable> PrimitiveVariableMap;
 
+/// Enable fmtlib formatting of Interpolation as its numeric value.
+inline int format_as( PrimitiveVariable::Interpolation interpolation )
+{
+	return static_cast<int>( interpolation );
+}
+
 } // namespace IECoreScene
 
 #endif // IECORESCENE_PRIMITIVEVARIABLE_INL

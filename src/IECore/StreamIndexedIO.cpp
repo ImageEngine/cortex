@@ -579,6 +579,12 @@ protected :
 
 };
 
+/// Enable fmtlib formatting of NodeType as its numeric value.
+inline int format_as( NodeBase::NodeType nodeType )
+{
+	return static_cast<int>( nodeType );
+}
+
 /// Class that represents small data nodes
 class SmallDataNode : public NodeBase
 {

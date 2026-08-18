@@ -836,7 +836,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			IECore::msg(
 				IECore::Msg::Warning,
 				"AlembicScene::readAttributeAtSample",
-				"Unsupported attribute type datatype: \"{}\" extent:{} interpretation:\"{}\"", pod, extent, getInterpretation()
+				"Unsupported attribute type datatype: \"{}\" extent:{} interpretation:\"{}\"", fmt::underlying( pod ), extent, getInterpretation()
 			);
 
 			return nullptr;

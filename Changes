@@ -5,6 +5,13 @@ Improvements
 ------------
 
 - PathMatcher : Added `in()` and `containing()` methods.
+- TypeId : Added `format_as` overload, so that TypeIds can be passed to `fmt::format()`.
+- PrimitiveVariable : Added `format_as` overload for `Interpolation`, so that it can be passed to `fmt::format()`.
+
+Build
+-----
+
+- LibFormat : Added compatibility with `fmt` 12.2.0.
 
 Build
 -----

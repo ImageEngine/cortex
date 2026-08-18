@@ -326,6 +326,12 @@ enum TypeId
 
 };
 
+/// Enable fmtlib formatting of TypeId as its numeric value.
+inline int format_as( TypeId typeId )
+{
+	return static_cast<int>( typeId );
+}
+
 } // namespace IECore
 
 #endif // IE_CORE_TYPEIDS_H
