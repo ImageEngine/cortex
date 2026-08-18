@@ -36,6 +36,7 @@
 
 #include "IECore/MessageHandler.h"
 
+#include <algorithm>
 #include <cassert>
 #include <mutex>
 

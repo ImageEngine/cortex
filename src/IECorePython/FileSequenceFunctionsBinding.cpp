@@ -101,7 +101,7 @@ struct FileSequenceFunctionsHelper
 				result.append( *it );
 			}
 
-			return std::move( result );
+			return result;
 		}
 
 		return object();
