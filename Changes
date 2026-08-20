@@ -14,6 +14,11 @@ Improvements
 - PrimitiveVariable : Added `format_as` overload for `Interpolation`, so that it can be passed to `fmt::format()`.
 - AlembicScene : Added support for reading `P3d` and `N3d` GeomParams.
 
+Fixes
+-----
+
+- ImageReader, TextureLoader : Removed special case for colorspaces when opening pngs.
+
 Build
 -----
 
