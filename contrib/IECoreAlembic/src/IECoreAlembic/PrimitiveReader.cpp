@@ -67,11 +67,6 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 			IDoubleGeomParam p( params, header.getName() );
 			readGeomParam( p, sampleSelector, primitive );
 		}
-		else if( IV3dGeomParam::matches( header ) )
-		{
-			IV3dGeomParam p( params, header.getName() );
-			readGeomParam( p, sampleSelector, primitive );
-		}
 		else if( IUcharGeomParam::matches( header ) )
 		{
 			IUcharGeomParam p( params, header.getName() );
@@ -107,11 +102,6 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 			IV2fGeomParam p( params, header.getName() );
 			readGeomParam( p, sampleSelector, primitive );
 		}
-		else if( IV3fGeomParam::matches( header ) )
-		{
-			IV3fGeomParam p( params, header.getName() );
-			readGeomParam( p, sampleSelector, primitive );
-		}
 		else if( IC3fGeomParam::matches( header ) )
 		{
 			IC3fGeomParam p( params, header.getName() );
@@ -122,14 +112,34 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 			IC4fGeomParam p( params, header.getName() );
 			readGeomParam( p, sampleSelector, primitive );
 		}
+		else if( IP3fGeomParam::matches( header ) )
+		{
+			IP3fGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IV3fGeomParam::matches( header ) )
+		{
+			IV3fGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
 		else if( IN3fGeomParam::matches( header ) )
 		{
 			IN3fGeomParam p( params, header.getName() );
 			readGeomParam( p, sampleSelector, primitive );
 		}
-		else if( IP3fGeomParam::matches( header ) )
+		else if( IP3dGeomParam::matches( header ) )
 		{
-			IP3fGeomParam p( params, header.getName() );
+			IP3dGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IV3dGeomParam::matches( header ) )
+		{
+			IV3dGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IN3dGeomParam::matches( header ) )
+		{
+			IN3dGeomParam p( params, header.getName() );
 			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IM44fGeomParam::matches( header ) )
