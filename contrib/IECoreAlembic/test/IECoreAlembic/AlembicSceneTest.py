@@ -2039,5 +2039,42 @@ class AlembicSceneTest( unittest.TestCase ) :
 		for name in points.keys() :
 			self.assertEqual( points2[name], points[name] )
 
+	def testV3dVectorDataPrimitiveVariable( self ) :
+
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 2 ) ] ) )
+
+		points["point"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3dVectorData(
+				[ imath.V3d( i, i + 1, i + 2 ) for i in range( 0, 2 ) ],
+				IECore.GeometricData.Interpretation.Point
+			)
+		)
+		points["vector"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3dVectorData(
+				[ imath.V3d( i, i * 2, i * 3 ) for i in range( 0, 2 ) ],
+				IECore.GeometricData.Interpretation.Vector
+			)
+		)
+		points["normal"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3dVectorData(
+				[ imath.V3d( i, i - 1, i - 2 ) for i in range( 0, 2 ) ],
+				IECore.GeometricData.Interpretation.Normal
+			)
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "doubleVector.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "object" ).writeObject( points, 0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points2 = root.child( "object" ).readObject( 0 )
+		self.assertEqual( points2["point"], points["point"] )
+		self.assertEqual( points2["vector"], points["vector"] )
+		self.assertEqual( points2["normal"], points["normal"] )
+
 if __name__ == "__main__":
     unittest.main()
