@@ -1,7 +1,13 @@
-10.7.x.x (relative to 10.7.1.0)
+10.7.x.x (relative to 10.7.1.1)
 ========
 
+10.7.1.1 (relative to 10.7.1.0)
+========
 
+Fixes
+-----
+
+- ImageReader, TextureLoader : Removed special case for colorspaces when opening pngs.
 
 10.7.1.0 (relative to 10.7.0.0)
 ========
