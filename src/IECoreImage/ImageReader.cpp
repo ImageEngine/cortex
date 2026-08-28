@@ -479,24 +479,8 @@ class ImageReader::Implementation
 					OIIO::TypeString, &fileFormat
 				);
 
-				if( strcmp( fileFormat, "png" ) == 0 )
-				{
-					// The most common use for loading PNGs via Cortex is for icons in Gaffer.
-					// If we were to use the OCIO config to guess the colorspaces as below, we
-					// would get it spectacularly wrong. For instance, with an ACES config the
-					// resulting icons are so washed out as to be illegible. Instead, we hardcode
-					// the rudimentary colour spaces much more likely to be associated with a PNG.
-					// These are supported by OIIO regardless of what OCIO config is in use.
-					/// \todo Should this apply to other formats too? Can we somehow fix
-					/// `OpenImageIOAlgo::colorSpace` instead?
-					m_linearColorSpace = "linear";
-					m_currentColorSpace = "sRGB";
-				}
-				else
-				{
-					m_linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
-					m_currentColorSpace = OpenImageIOAlgo::colorSpace( fileFormat, *spec );
-				}
+				m_linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
+				m_currentColorSpace = OpenImageIOAlgo::colorSpace( fileFormat, *spec );
 
 				return true;
 			}

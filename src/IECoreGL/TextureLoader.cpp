@@ -145,30 +145,14 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	}
 
 	// This logic feels pretty broken - why do we ask the current color config's
-	// display transform to decide what colorspace a file is stored in?  Why special
-	// case just png.  But I've currently copied this logic from ImageReader in the
+	// display transform to decide what colorspace a file is stored in?
+	// But I've currently copied this logic from ImageReader in the
 	// name of backwards compatibility
 	std::string linearColorSpace;
 	std::string currentColorSpace;
 	OIIO::string_view fileFormat = imageBuf.file_format_name();
-	if( fileFormat == "png" )
-	{
-		// The most common use for loading PNGs via Cortex is for icons in Gaffer.
-		// If we were to use the OCIO config to guess the colorspaces as below, we
-		// would get it spectacularly wrong. For instance, with an ACES config the
-		// resulting icons are so washed out as to be illegible. Instead, we hardcode
-		// the rudimentary colour spaces much more likely to be associated with a PNG.
-		// These are supported by OIIO regardless of what OCIO config is in use.
-		/// \todo Should this apply to other formats too? Can we somehow fix
-		/// `OpenImageIOAlgo::colorSpace` instead?
-		linearColorSpace = "linear";
-		currentColorSpace = "sRGB";
-	}
-	else
-	{
-		linearColorSpace = IECoreImage::OpenImageIOAlgo::colorSpace( "", imageBuf.spec() );
-		currentColorSpace = IECoreImage::OpenImageIOAlgo::colorSpace( fileFormat, imageBuf.spec() );
-	}
+	linearColorSpace = IECoreImage::OpenImageIOAlgo::colorSpace( "", imageBuf.spec() );
+	currentColorSpace = IECoreImage::OpenImageIOAlgo::colorSpace( fileFormat, imageBuf.spec() );
 
 	if( !OIIO::ImageBufAlgo::colorconvert( imageBuf, imageBuf, currentColorSpace, linearColorSpace ) )
 	{
