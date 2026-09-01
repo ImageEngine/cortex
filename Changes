@@ -104,7 +104,10 @@ Build
 10.6.x.x (relative to 10.6.7.1)
 ========
 
+Fixes
+-----
 
+- IECore.ls() : Fixed error when sequence started with `#`.
 
 10.6.7.1 (relative to 10.6.7.0)
 ========
