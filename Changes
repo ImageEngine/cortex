@@ -1,6 +1,11 @@
 10.5.x.x (relative to 10.5.18.0)
 ========
 
+Fixes
+-----
+
+- IECore.ls() : Fixed error when sequence started with `#`.
+
 10.5.18.0 (relative to 10.5.17.0)
 ========
 
