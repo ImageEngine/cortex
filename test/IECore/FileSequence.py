@@ -465,6 +465,28 @@ class testLs( unittest.TestCase ) :
 		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.###.tif" ) )
 		self.assertFalse( l )
 
+	def testShortFileInDirectory( self ) :
+
+		"""A directory entry shorter than the sequence's suffix must not cause a
+		crash (unsigned underflow in substr) when ls() scans the directory."""
+
+		self.tearDown()
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
+
+		# A sequence with an empty prefix (section before #) and a long suffix (section after)
+		s = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "#_a_very_long_filename.ext" ), IECore.FrameRange( 1, 1 ) )
+		for f in s.fileNames() :
+			self.touch( f )
+
+		# A file whose name is shorter than the sequence's suffix in the same directory.
+		# Previously this triggered:
+		# IndexError: basic_string::substr: __pos (which is 18446744073709551582) > this->size() (which is 4)
+		self.touch( os.path.join( "test", "sequences", "lsTest", "a.b" ) )
+
+		l = IECore.ls( s.fileName, minSequenceSize=1 )
+		self.assertTrue( l )
+		self.assertEqual( l.frameList.asList(), [ 1 ] )
+
 	def tearDown( self ) :
 
 		if os.path.exists( os.path.join( "test", "sequences" ) ) :
