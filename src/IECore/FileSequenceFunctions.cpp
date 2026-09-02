@@ -243,7 +243,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 	{
 		const std::string fileName = it->path().PATH_TO_STRING;
 
-		if ( fileName.size() >= std::min( prefix.size(), suffix.size() ) && fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
+		if ( fileName.size() >= prefix.size() + suffix.size() && fileName.substr( 0, prefix.size() ) == prefix && fileName.substr( fileName.size() - suffix.size(), suffix.size() ) == suffix )
 		{
 			files.push_back( ( dir / boost::filesystem::path( fileName ) ).string() );
 		}
