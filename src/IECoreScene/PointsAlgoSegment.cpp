@@ -54,7 +54,7 @@ std::vector<PointsPrimitivePtr> IECoreScene::PointsAlgo::segment(
 	DataPtr data;
 	if( !segmentValues )
 	{
-		data = IECore::uniqueValues( primitiveVariable.data.get() );
+		data = IECore::DataAlgo::uniqueValues( primitiveVariable.data.get() );
 		segmentValues = data.get();
 	}
 
@@ -75,5 +75,5 @@ std::vector<PointsPrimitivePtr> IECoreScene::PointsAlgo::segment(
 	auto f = PointsAlgo::deletePoints;
 	IECoreScene::Detail::TaskSegmenter<IECoreScene::PointsPrimitive, decltype(f) > segmenter( points, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f, canceller );
 
-	return dispatch( primitiveVariable.data.get(), segmenter );
+	return DataAlgo::dispatch( primitiveVariable.data.get(), segmenter );
 }

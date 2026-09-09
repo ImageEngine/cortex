@@ -84,7 +84,7 @@ IECore::RunTimeTypedPtr ToGLBufferConverter::doConversion( IECore::ConstObjectPt
 	const Data *data = static_cast<const IECore::Data *>( src.get() ); // safe because the parameter validated it for us
 
 	return new Buffer(
-		address( data ),
-		dispatch( data, Bytes() )
+		DataAlgo::address( data ),
+		DataAlgo::dispatch( data, Bytes() )
 	);
 }

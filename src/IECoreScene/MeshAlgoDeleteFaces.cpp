@@ -160,13 +160,13 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 	// filter verticesPerFace using DeleteFlaggedUniformFunctor
 	const IECore::Data *inputVerticesPerFace = IECore::runTimeCast<const IECore::Data>( meshPrimitive->verticesPerFace() );
 	uniformFunctor.setIndices( nullptr );
-	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVerticesPerFace = dispatch( inputVerticesPerFace, uniformFunctor );
+	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVerticesPerFace = DataAlgo::dispatch( inputVerticesPerFace, uniformFunctor );
 	IntVectorDataPtr verticesPerFace = IECore::runTimeCast<IECore::IntVectorData>( outputVerticesPerFace.data );
 
 	// filter VertexIds using DeleteFlaggedFaceVaryingFunctor
 	const IECore::Data *inputVertexIds = IECore::runTimeCast<const IECore::Data>( meshPrimitive->vertexIds() );
 	faceVaryingFunctor.setIndices( nullptr );
-	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVertexIds = dispatch( inputVertexIds, faceVaryingFunctor );
+	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVertexIds = DataAlgo::dispatch( inputVertexIds, faceVaryingFunctor );
 
 	// remap the indices also
 	ConstIntVectorDataPtr remappingData = vertexFunctor.getRemapping();
@@ -205,7 +205,7 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 			{
 				const IECore::Data *inputData = it->second.data.get();
 				uniformFunctor.setIndices( it->second.indices.get() );
-				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, uniformFunctor );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = DataAlgo::dispatch( inputData, uniformFunctor );
 				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
@@ -214,7 +214,7 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 			{
 				const IECore::Data *inputData = it->second.data.get();
 				vertexFunctor.setIndices( it->second.indices.get() );
-				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, vertexFunctor );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = DataAlgo::dispatch( inputData, vertexFunctor );
 				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
@@ -223,7 +223,7 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 			{
 				const IECore::Data *inputData = it->second.data.get();
 				faceVaryingFunctor.setIndices( it->second.indices.get() );
-				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch(inputData, faceVaryingFunctor );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = DataAlgo::dispatch(inputData, faceVaryingFunctor );
 				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}

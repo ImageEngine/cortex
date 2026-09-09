@@ -129,7 +129,7 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreS
 				}
 				const IECore::Data *inputData = it->second.data.get();
 				vertexFunctor.setIndices( it->second.indices.get() );
-				IECoreScene::PrimitiveVariableAlgos::IndexedData indexedData = dispatch( inputData, vertexFunctor );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData indexedData = DataAlgo::dispatch( inputData, vertexFunctor );
 				outPointsPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, indexedData.data, indexedData.indices );
 				break;
 			}
@@ -244,7 +244,7 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::AverageValueFromVector fn;
-		dstData = dispatch( srcData.get(), fn );
+		dstData = DataAlgo::dispatch( srcData.get(), fn );
 		primitiveVariable = PrimitiveVariable(PrimitiveVariable::Constant, dstData );
 		return;
 	}
@@ -252,7 +252,7 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::FillVectorFromValue fn( points->variableSize( interpolation ) );
-		DataPtr arrayData = dispatch( srcData.get(), fn );
+		DataPtr arrayData = DataAlgo::dispatch( srcData.get(), fn );
 		if (arrayData)
 		{
 			primitiveVariable = PrimitiveVariable(interpolation, arrayData);

@@ -541,7 +541,7 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 		else
 		{
 			PrimitiveVariable::Interpolation sourceInterpolation = i.second.interpolation;
-			dispatch( i.second.data.get(),
+			DataAlgo::dispatch( i.second.data.get(),
 				[ &i, numPoints, sourceInterpolation, &result, &toResample]( const auto *sourceData )
 				{
 					using DataType = typename std::remove_const_t< std::remove_pointer_t< decltype( sourceData ) > >;
@@ -596,7 +596,7 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 		{
 			for( auto &var : toResample )
 			{
-				dispatch( var.target,
+				DataAlgo::dispatch( var.target,
 					[ &var, &vertexIds, &chunkResults, &chunkOffsets, &range, canceller ]( auto *targetData )
 					{
 						using DataType = typename std::remove_const_t< std::remove_pointer_t< decltype( targetData ) > >;

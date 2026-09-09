@@ -398,7 +398,7 @@ CurvesPrimitivePtr deleteCurves(
 
 	const IECore::Data *inputVertsPerCurve = IECore::runTimeCast<const IECore::Data>( curvesPrimitive->verticesPerCurve() );
 
-	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVertsPerCurve = dispatch( inputVertsPerCurve, deleteUniformFn );
+	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVertsPerCurve = DataAlgo::dispatch( inputVertsPerCurve, deleteUniformFn );
 
 	IntVectorDataPtr verticesPerCurve = IECore::runTimeCast<IECore::IntVectorData>( outputVertsPerCurve.data );
 
@@ -426,7 +426,7 @@ CurvesPrimitivePtr deleteCurves(
 			{
 				const IECore::Data *inputData = it->second.data.get();
 				deleteUniformFn.setIndices( it->second.indices.get() );
-				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteUniformFn );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = DataAlgo::dispatch( inputData, deleteUniformFn );
 				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 
 				break;
@@ -436,7 +436,7 @@ CurvesPrimitivePtr deleteCurves(
 			{
 				const IECore::Data *inputData = it->second.data.get();
 				deleteVaryingFn.setIndices( it->second.indices.get() );
-				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteVaryingFn );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = DataAlgo::dispatch( inputData, deleteVaryingFn );
 				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 
 				break;
@@ -445,7 +445,7 @@ CurvesPrimitivePtr deleteCurves(
 			{
 				const IECore::Data *inputData = it->second.data.get();
 				deleteVertexFn.setIndices( it->second.indices.get() );
-				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteVertexFn );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = DataAlgo::dispatch( inputData, deleteVertexFn );
 				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
@@ -524,12 +524,12 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::AverageValueFromVector fn;
-		dstData = dispatch( srcData.get(), fn );
+		dstData = DataAlgo::dispatch( srcData.get(), fn );
 	}
 	else if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::FillVectorFromValue fn( curves->variableSize( interpolation ) );
-		dstData = dispatch( srcData.get(), fn );
+		dstData = DataAlgo::dispatch( srcData.get(), fn );
 	}
 	else if ( interpolation == PrimitiveVariable::Uniform )
 	{
