@@ -1,5 +1,14 @@
-10.7.x.x (relative to 10.7.1.1)
+10.7.x.x (relative to 10.7.1.2)
 ========
+
+
+10.7.1.2 (relative to 10.7.1.1)
+========
+
+Fixes
+-----
+
+- IECore.ls() : Fixed error when sequence started with `#`.
 
 10.7.1.1 (relative to 10.7.1.0)
 ========
