@@ -85,7 +85,9 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetIdsAttr(), time, newPoints.get(), "instanceId" );
 
 	Canceller::check( canceller );
-	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetOrientationsAttr(), time, newPoints.get(), "orientation" );
+	pxr::UsdAttribute orientationsAttr;
+	pointInstancer.UsesOrientationsf( &orientationsAttr );
+	PrimitiveAlgo::readPrimitiveVariable( orientationsAttr, time, newPoints.get(), "orientation" );
 
 	Canceller::check( canceller );
 	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetScalesAttr(), time, newPoints.get(), "scale" );
@@ -164,6 +166,7 @@ bool pointInstancerMightBeTimeVarying( pxr::UsdGeomPointInstancer &instancer )
 		instancer.GetProtoIndicesAttr().ValueMightBeTimeVarying() ||
 		instancer.GetIdsAttr().ValueMightBeTimeVarying() ||
 		instancer.GetOrientationsAttr().ValueMightBeTimeVarying() ||
+		instancer.GetOrientationsfAttr().ValueMightBeTimeVarying() ||
 		instancer.GetScalesAttr().ValueMightBeTimeVarying() ||
 		instancer.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
 		instancer.GetAccelerationsAttr().ValueMightBeTimeVarying() ||

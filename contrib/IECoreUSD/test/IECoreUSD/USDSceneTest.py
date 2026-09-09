@@ -3945,6 +3945,53 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( points["inactiveIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 0, 2 ] ) ) )
 		self.assertEqual( points["invisibleIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 1, 4 ] ) ) )
 
+	def testPointInstancerOrientationTypes( self ) :
+
+		# Use the USD API to author point instancers with different
+		# flavours of orientation.
+
+		fileName = os.path.join( self.temporaryDirectory(), "pointInstancerOrientations.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+
+		# Different test values, so we can easily discern which we are loading.
+		floatOrientation = pxr.Gf.Quatf( pxr.Gf.Rotation( pxr.Gf.Vec3d( 1, 0, 0 ), math.pi ).GetQuat() )
+		halfOrientation = pxr.Gf.Quath( pxr.Gf.Rotation( pxr.Gf.Vec3d( 0, 1, 0 ), math.pi ).GetQuat() )
+
+		for name in [ "none", "float", "half", "both" ] :
+
+			pointInstancer = pxr.UsdGeom.PointInstancer.Define( stage, f"/{name}" )
+			pointInstancer.CreatePositionsAttr( [ ( v, v, v ) for v in range( 0, 5 ) ] )
+
+			if name in [ "float", "both" ] :
+				pointInstancer.CreateOrientationsfAttr( [ floatOrientation ] * 5 )
+			if name in [ "half", "both" ] :
+				pointInstancer.CreateOrientationsAttr( [ halfOrientation ] * 5 )
+
+		stage.GetRootLayer().Save()
+
+		# Check we can load the right orientation via a SceneInterface.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		for name in [ "none", "float", "half", "both" ] :
+
+			with self.subTest( name = name ) :
+
+				pointInstancer = root.child( name ).readObject( 0 )
+
+				if name == "none" :
+					self.assertNotIn( "orientation", pointInstancer )
+				else :
+					self.assertIn( "orientation", pointInstancer )
+					self.assertEqual( pointInstancer["orientation"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+					data = pointInstancer["orientation"].data
+					# We don't have a Quath type, so always load as Quatf.
+					self.assertIsInstance( data, IECore.QuatfVectorData )
+					if name in [ "float", "both" ] :
+						self.assertEqual( data[0], imath.Quatf( floatOrientation.GetReal(), *floatOrientation.GetImaginary() ) )
+					else :
+						self.assertEqual( data[0], imath.Quatf( halfOrientation.GetReal(), *halfOrientation.GetImaginary() ) )
+
 	def testArnoldArrayInputs( self ) :
 
 		def assertExpectedArrayInputs( network ) :

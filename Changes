@@ -4,6 +4,7 @@
 Fixes
 -----
 
+- USDScene : Fixed loading of float-precision orientations from the `PointInstancer.orientationsf` attribute. Previously only the half-precision `orientations` attribute was supported.
 - IECore.ls() : Fixed error when sequence started with `#`.
 
 10.6.7.1 (relative to 10.6.7.0)
