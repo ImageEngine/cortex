@@ -50,6 +50,31 @@
 namespace IECore
 {
 
+namespace Detail
+{
+
+template<template<typename> class Trait>
+struct TestTrait
+{
+
+	template<typename T>
+	bool operator()( const T *data, typename std::enable_if<Trait<T>::value>::type *enabler = nullptr )
+	{
+		return true;
+	}
+
+	bool operator()( const Data *data )
+	{
+		return false;
+	}
+
+};
+
+} // namespace Detail
+
+namespace DataAlgo
+{
+
 template<class F, typename... Args>
 typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&functor, Args&&... args )
 {
@@ -370,33 +395,13 @@ typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *
 	}
 }
 
-namespace Detail
-{
-
-template<template<typename> class Trait>
-struct TestTrait
-{
-
-	template<typename T>
-	bool operator()( const T *data, typename std::enable_if<Trait<T>::value>::type *enabler = nullptr )
-	{
-		return true;
-	}
-
-	bool operator()( const Data *data )
-	{
-		return false;
-	}
-
-};
-
-} // namespace Detail
-
 template<template<typename> class Trait>
 bool trait( const IECore::Data *data )
 {
 	return dispatch( data, Detail::TestTrait<Trait>() );
 }
+
+} // namespace DataAlgo
 
 } // namespace IECore
 

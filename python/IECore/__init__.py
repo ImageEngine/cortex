@@ -107,4 +107,8 @@ from .ConfigLoader import loadConfig
 from .Preset import Preset
 from .BasicPreset import BasicPreset
 
+# Promote DataAlgo members to main namespace for backwards compatibility.
+## \todo Remove
+from .DataAlgo import *
+
 loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECore" )

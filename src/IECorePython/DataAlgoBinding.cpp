@@ -56,6 +56,10 @@ namespace IECorePython
 
 void bindDataAlgo()
 {
+	object dataAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECore.DataAlgo" ) ) ) );
+	scope().attr( "DataAlgo" ) = dataAlgoModule;
+	scope dataAlgoModuleScope( dataAlgoModule );
+
 	def( "getGeometricInterpretation", &getGeometricInterpretation );
 	def( "setGeometricInterpretation", &setGeometricInterpretation );
 
@@ -63,7 +67,6 @@ void bindDataAlgo()
 
 	def( "size", &IECore::size );
 	def( "address", &addressWrapper );
-
 }
 
 } // namespace IECorePython

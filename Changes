@@ -5,6 +5,7 @@ Improvements
 ------------
 
 - MeshAlgo : Changed `reverseWinding()` so that the first vertex of each face remains unchanged. This matches the algorithm used in other DCCs.
+- DataAlgo : Moved all functionality into an `IECore::DataAlgo` namespace. The non-namespaced versions remain, but are deprecated and will be removed in a future version.
 
 Fixes
 -----
