@@ -530,7 +530,7 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2, 
 			}
 			else
 			{
-				it->second.data = dispatch( it->second.data.get(), faceVaryingFn, it->first );
+				it->second.data = DataAlgo::dispatch( it->second.data.get(), faceVaryingFn, it->first );
 			}
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Vertex || it->second.interpolation == PrimitiveVariable::Varying )
@@ -542,7 +542,7 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2, 
 			}
 			else
 			{
-				it->second.data = dispatch( it->second.data.get(), vertexFn, it->first );
+				it->second.data = DataAlgo::dispatch( it->second.data.get(), vertexFn, it->first );
 			}
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Uniform )
@@ -554,7 +554,7 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2, 
 			}
 			else
 			{
-				it->second.data = dispatch( it->second.data.get(), uniformFn, it->first );
+				it->second.data = DataAlgo::dispatch( it->second.data.get(), uniformFn, it->first );
 			}
 		}
 	}

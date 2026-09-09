@@ -115,7 +115,7 @@ struct DataInterpolator
 
 DataPtr interpolateData( const Data *y0, const Data *y1, double x )
 {
-	return dispatch( y0, DataInterpolator( y1, x ) );
+	return DataAlgo::dispatch( y0, DataInterpolator( y1, x ) );
 }
 
 CompoundDataPtr interpolateCompoundData( const CompoundData *y0, const CompoundData *y1, double x )

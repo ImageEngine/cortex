@@ -81,7 +81,7 @@ void adjustEndPoints( const std::vector<T> &in, std::vector<T> &out, const Curve
 				out.push_back( in[curveOffset + j] );
 			}
 
-			// duplicate the end point 
+			// duplicate the end point
 			for( size_t j = 0; j < (size_t)adjustment; ++j )
 			{
 				out.push_back( in[curveOffset + size - 1] );
@@ -137,7 +137,7 @@ struct DuplicateEndPoints
 
 		adjustEndPoints( in, newOut->writable(), curves, primVar.interpolation, adjustment );
 
-		setGeometricInterpretation( newOut.get(), getGeometricInterpretation( data ) );
+		DataAlgo::setGeometricInterpretation( newOut.get(), DataAlgo::getGeometricInterpretation( data ) );
 
 		return newOut;
 	}
@@ -199,12 +199,12 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 				Canceller::check( canceller );
 				if( it.second.indices )
 				{
-					auto newIndices = IECore::runTimeCast<IECore::IntVectorData>( IECore::dispatch( it.second.indices.get(), endPointDuplicator, curves, it.second ) );
+					auto newIndices = IECore::runTimeCast<IECore::IntVectorData>( IECore::DataAlgo::dispatch( it.second.indices.get(), endPointDuplicator, curves, it.second ) );
 					newPrimVars[it.first] = IECoreScene::PrimitiveVariable( it.second.interpolation, it.second.data, newIndices );
 				}
 				else
 				{
-					auto newVertexData = IECore::dispatch( it.second.data.get(), endPointDuplicator, curves, it.second );
+					auto newVertexData = IECore::DataAlgo::dispatch( it.second.data.get(), endPointDuplicator, curves, it.second );
 					newPrimVars[it.first] = IECoreScene::PrimitiveVariable( it.second.interpolation, newVertexData );
 				}
 			};

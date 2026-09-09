@@ -153,7 +153,7 @@ class CurvesReader : public PrimitiveReader
 				auto it = result->variables.find( "uv" );
 				if( it != result->variables.end() )
 				{
-					setGeometricInterpretation( it->second.data.get(), GeometricData::UV );
+					DataAlgo::setGeometricInterpretation( it->second.data.get(), GeometricData::UV );
 				}
 			}
 

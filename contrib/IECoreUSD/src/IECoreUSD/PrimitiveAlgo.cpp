@@ -174,7 +174,7 @@ pxr::VtValue IECoreUSD::PrimitiveAlgo::toUSDExpanded( const IECoreScene::Primiti
 	}
 	else
 	{
-		return IECore::dispatch( primitiveVariable.data.get(), VtValueFromExpandedData(), primitiveVariable.indices.get() );
+		return IECore::DataAlgo::dispatch( primitiveVariable.data.get(), VtValueFromExpandedData(), primitiveVariable.indices.get() );
 	}
 }
 
@@ -230,7 +230,7 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 		return;
 	}
 
-	IECore::DataPtr data = DataAlgo::fromUSD(
+	IECore::DataPtr data = IECoreUSD::DataAlgo::fromUSD(
 		value, primVar.GetTypeName(),
 		/* arrayAccepted = */ interpolation != IECoreScene::PrimitiveVariable::Constant || constantAcceptsArray
 	);
@@ -245,7 +245,7 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 	IECore::IntVectorDataPtr indices;
 	if( !srcIndices.empty() )
 	{
-		indices = DataAlgo::fromUSD( srcIndices );
+		indices = IECoreUSD::DataAlgo::fromUSD( srcIndices );
 	}
 
 	addPrimitiveVariableIfValid(
@@ -419,7 +419,7 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	}
 
 	Canceller::check( canceller );
-	auto p = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( points ) );
+	auto p = boost::static_pointer_cast<V3fVectorData>( IECoreUSD::DataAlgo::fromUSD( points ) );
 	if( !p )
 	{
 		return false;
@@ -461,7 +461,7 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 
 	if( normalsValid )
 	{
-		auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( normals ) );
+		auto n = boost::static_pointer_cast<V3fVectorData>( IECoreUSD::DataAlgo::fromUSD( normals ) );
 		n->setInterpretation( GeometricData::Normal );
 		addPrimitiveVariableIfValid(
 			primitive, "N", IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( normalsInterpolation ), n ),

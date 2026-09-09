@@ -110,15 +110,15 @@ void testMurmurHashDispatch()
 	HashDispatchFunctor hashFunctor;
 	IECore::MurmurHash h;
 	h.append( 42.37f );
-	IECORETEST_ASSERT( h == IECore::dispatch( IECore::FloatDataPtr( new IECore::FloatData( 42.37 ) ).get(), hashFunctor ) );
+	IECORETEST_ASSERT( h == IECore::DataAlgo::dispatch( IECore::FloatDataPtr( new IECore::FloatData( 42.37 ) ).get(), hashFunctor ) );
 
 	h = IECore::MurmurHash();
 	h.append( std::string("foo") );
-	IECORETEST_ASSERT( h == IECore::dispatch( IECore::StringDataPtr( new IECore::StringData( "foo" ) ).get(), hashFunctor ) );
+	IECORETEST_ASSERT( h == IECore::DataAlgo::dispatch( IECore::StringDataPtr( new IECore::StringData( "foo" ) ).get(), hashFunctor ) );
 
 	h = IECore::MurmurHash();
 	h.append( std::vector<float>{ 1, 3, 37.03 } );
-	IECORETEST_ASSERT( h == IECore::dispatch( IECore::FloatVectorDataPtr( new IECore::FloatVectorData( std::vector<float>{ 1, 3, 37.03 } ) ).get(), hashFunctor ) );
+	IECORETEST_ASSERT( h == IECore::DataAlgo::dispatch( IECore::FloatVectorDataPtr( new IECore::FloatVectorData( std::vector<float>{ 1, 3, 37.03 } ) ).get(), hashFunctor ) );
 }
 
 } // namespace
