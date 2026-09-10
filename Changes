@@ -114,7 +114,12 @@ Build
 - USD : Added compatibility with USD 25.11 and 26.03.
 - Boost : Removed unnecessary linking of `boost_chrono`.
 
-10.6.x.x (relative to 10.6.7.1)
+10.6.7.x (relative to 10.6.7.2)
+========
+
+
+
+10.6.7.2 (relative to 10.6.7.1)
 ========
 
 Fixes
