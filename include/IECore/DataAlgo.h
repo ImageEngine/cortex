@@ -41,6 +41,9 @@
 namespace IECore
 {
 
+namespace DataAlgo
+{
+
 /// Try to get the geometric interpretation of the given data.  Returns None if the data is not geometric.
 IECORE_API GeometricData::Interpretation getGeometricInterpretation( const IECore::Data *data );
 
@@ -103,6 +106,12 @@ template<typename F, typename... Args>
 typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&functor, Args&&... args );
 template<typename F, typename... Args>
 typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *data, F &&functor, Args&&... args );
+
+} // namespace DataAlgo
+
+// Temporary backwards-compatibility with earlier non-namespaced version.
+/// \todo Remove
+using namespace DataAlgo;
 
 } // namespace IECore
 

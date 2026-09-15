@@ -59,7 +59,7 @@ std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitiv
 	}
 	else
 	{
-		IECore::dispatch( segmentValues,
+		IECore::DataAlgo::dispatch( segmentValues,
 			[ ms, numMeshes, &ret, canceller ]( auto *typedSegmentValues )
 			{
 				using DataType = typename std::remove_pointer_t< decltype( typedSegmentValues ) >;

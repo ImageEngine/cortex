@@ -150,7 +150,7 @@ void CurvesAlgo::convertPinnedToNonPeriodic( CurvesPrimitive *curves, const IECo
 			}
 			else
 			{
-				dispatch(
+				DataAlgo::dispatch(
 					primitiveVariable.data.get(),
 					/// \todo Capture can just be `[&]` when we get C++20.
 					[&, &primitiveVariable=primitiveVariable] ( auto data ) {

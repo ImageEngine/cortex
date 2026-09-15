@@ -144,7 +144,7 @@ void triangulateMeshIndices(
 
 DataPtr newMatchingData( const Data *source )
 {
-	return dispatch( source,
+	return DataAlgo::dispatch( source,
 		[]( const auto *typedSource ) -> DataPtr
 		{
 			using DataType = typename std::remove_const_t< std::remove_pointer_t< decltype( typedSource ) > >;

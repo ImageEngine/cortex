@@ -647,13 +647,13 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 					timeSamplesIO->read( g_interpretation, interpretationValue );
 					try
 					{
-						setGeometricInterpretation( data, static_cast<GeometricData::Interpretation>( interpretationValue ) );
+						IECore::DataAlgo::setGeometricInterpretation( data, static_cast<GeometricData::Interpretation>( interpretationValue ) );
 					}
 					catch( ... )
 					{
 					}
 				}
-				usdType = DataAlgo::valueTypeName( data );
+				usdType = IECoreUSD::DataAlgo::valueTypeName( data );
 			}
 			else
 			{
@@ -815,13 +815,13 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 					{
 						try
 						{
-							setGeometricInterpretation( data, static_cast<GeometricData::Interpretation>( interpretationValue->readable() ) );
+							IECore::DataAlgo::setGeometricInterpretation( data, static_cast<GeometricData::Interpretation>( interpretationValue->readable() ) );
 						}
 						catch( ... )
 						{
 						}
 					}
-					usdType = DataAlgo::valueTypeName( data );
+					usdType = IECoreUSD::DataAlgo::valueTypeName( data );
 				}
 				else
 				{
@@ -1643,14 +1643,14 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 	if ( attributeName == g_xformTransform )
 	{
 		auto transform = currentScene->readTransformAsMatrix( frameToTime( time ) );
-		return VtValue( DataAlgo::toUSD( transform ) );
+		return VtValue( IECoreUSD::DataAlgo::toUSD( transform ) );
 	}
 	else if ( attributeName == UsdGeomTokens->extent )
 	{
 		auto bound = currentScene->readBound( frameToTime( time ) );
 		VtArray<GfVec3f> extent;
-		extent.push_back( DataAlgo::toUSD( V3f( bound.min ) ) );
-		extent.push_back( DataAlgo::toUSD( V3f( bound.max ) ) );
+		extent.push_back( IECoreUSD::DataAlgo::toUSD( V3f( bound.min ) ) );
+		extent.push_back( IECoreUSD::DataAlgo::toUSD( V3f( bound.max ) ) );
 		return VtValue( extent );
 	}
 	else if ( attributeName == UsdGeomTokens->visibility )
@@ -1675,7 +1675,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 	{
 		if ( auto attributeValue = currentScene->readAttribute( cortexAttributeName, frameToTime( time ) ) )
 		{
-			auto usdAttribute = DataAlgo::toUSD( runTimeCast<const Data>( attributeValue.get() ) );
+			auto usdAttribute = IECoreUSD::DataAlgo::toUSD( runTimeCast<const Data>( attributeValue.get() ) );
 			return VtValue( usdAttribute );
 		}
 	}
@@ -1709,7 +1709,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 				PrimitiveVariableMap::const_iterator csPrimVarIt = primitive->variables.find( g_csPrimVar );
 				if( csPrimVarIt != primitive->variables.end() )
 				{
-					auto usdCs = DataAlgo::toUSD( csPrimVarIt->second.data.get() );
+					auto usdCs = IECoreUSD::DataAlgo::toUSD( csPrimVarIt->second.data.get() );
 					return VtValue( usdCs );
 				}
 			}
@@ -1721,7 +1721,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 				PrimitiveVariableMap::const_iterator uvPrimVarIt = primitive->variables.find( g_uvPrimVar );
 				if( uvPrimVarIt != primitive->variables.end() )
 				{
-					auto usdST = DataAlgo::toUSD( uvPrimVarIt->second.data.get() );
+					auto usdST = IECoreUSD::DataAlgo::toUSD( uvPrimVarIt->second.data.get() );
 					return VtValue( usdST );
 				}
 			}
@@ -1735,7 +1735,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 				{
 					if ( auto uvIndices = uvPrimVarIt->second.indices )
 					{
-						auto usdStIndices = DataAlgo::toUSD( uvIndices.get() );
+						auto usdStIndices = IECoreUSD::DataAlgo::toUSD( uvIndices.get() );
 						return VtValue( usdStIndices );
 					}
 					else
@@ -1746,7 +1746,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 						{
 							identityUvIndices.push_back( i );
 						}
-						return VtValue( DataAlgo::toUSD( identityUvIndicesData.get() ) );
+						return VtValue( IECoreUSD::DataAlgo::toUSD( identityUvIndicesData.get() ) );
 					}
 				}
 			}
@@ -1772,7 +1772,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 				{
 					if ( auto normalsIndices = normalsPrimVarIt->second.indices )
 					{
-						auto usdStIndices = DataAlgo::toUSD( normalsIndices.get() );
+						auto usdStIndices = IECoreUSD::DataAlgo::toUSD( normalsIndices.get() );
 						return VtValue( usdStIndices );
 					}
 					else
@@ -1783,7 +1783,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 						{
 							identityNormalsIndices.push_back( i );
 						}
-						return VtValue( DataAlgo::toUSD( identityNormalsIndicesData.get() ) );
+						return VtValue( IECoreUSD::DataAlgo::toUSD( identityNormalsIndicesData.get() ) );
 					}
 				}
 			}
@@ -1792,7 +1792,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 			{
-				auto usdFaceVertexCounts = DataAlgo::toUSD( mesh->verticesPerFace() );
+				auto usdFaceVertexCounts = IECoreUSD::DataAlgo::toUSD( mesh->verticesPerFace() );
 				return VtValue( usdFaceVertexCounts );
 			}
 		}
@@ -1800,7 +1800,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
 			{
-				auto usdCurveVertexCounts = DataAlgo::toUSD( curves->verticesPerCurve() );
+				auto usdCurveVertexCounts = IECoreUSD::DataAlgo::toUSD( curves->verticesPerCurve() );
 				return VtValue( usdCurveVertexCounts );
 			}
 		}
@@ -1863,7 +1863,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
 			{
 				float scale = 10.0f * camera->getFocalLengthWorldScale();
-				auto usdFocal = DataAlgo::toUSD( camera->getFocalLength() * scale );
+				auto usdFocal = IECoreUSD::DataAlgo::toUSD( camera->getFocalLength() * scale );
 				return VtValue( usdFocal );
 			}
 		}
@@ -1872,7 +1872,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
 			{
 				float scale = 10.0f * camera->getFocalLengthWorldScale();
-				auto usdHorizontalAperture = DataAlgo::toUSD( camera->getAperture()[0] * scale );
+				auto usdHorizontalAperture = IECoreUSD::DataAlgo::toUSD( camera->getAperture()[0] * scale );
 				return VtValue( usdHorizontalAperture );
 			}
 		}
@@ -1881,7 +1881,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
 			{
 				float scale = 10.0f * camera->getFocalLengthWorldScale();
-				auto usdverticalAperture = DataAlgo::toUSD( camera->getAperture()[1] * scale );
+				auto usdverticalAperture = IECoreUSD::DataAlgo::toUSD( camera->getAperture()[1] * scale );
 				return VtValue( usdverticalAperture );
 			}
 		}
@@ -1890,7 +1890,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
 			{
 				float scale = 10.0f * camera->getFocalLengthWorldScale();
-				auto usdHorizontalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[0] * scale );
+				auto usdHorizontalApertureOffset = IECoreUSD::DataAlgo::toUSD( camera->getApertureOffset()[0] * scale );
 				return VtValue( usdHorizontalApertureOffset );
 			}
 		}
@@ -1899,7 +1899,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
 			{
 				float scale = 10.0f * camera->getFocalLengthWorldScale();
-				auto usdverticalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[1] * scale );
+				auto usdverticalApertureOffset = IECoreUSD::DataAlgo::toUSD( camera->getApertureOffset()[1] * scale );
 				return VtValue( usdverticalApertureOffset );
 			}
 		}
@@ -1907,7 +1907,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 			{
-				auto usdVerticesPerFace = DataAlgo::toUSD( mesh->vertexIds() );
+				auto usdVerticesPerFace = IECoreUSD::DataAlgo::toUSD( mesh->vertexIds() );
 				return VtValue( usdVerticesPerFace );
 			}
 		}
@@ -1915,7 +1915,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 			{
-				auto usdCornerIndices = DataAlgo::toUSD( mesh->cornerIds() );
+				auto usdCornerIndices = IECoreUSD::DataAlgo::toUSD( mesh->cornerIds() );
 				return VtValue( usdCornerIndices );
 			}
 		}
@@ -1923,7 +1923,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 			{
-				auto usdCornerSharpnesses = DataAlgo::toUSD( mesh->cornerSharpnesses() );
+				auto usdCornerSharpnesses = IECoreUSD::DataAlgo::toUSD( mesh->cornerSharpnesses() );
 				return VtValue( usdCornerSharpnesses );
 			}
 		}
@@ -1931,7 +1931,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 			{
-				auto usdCreaseIndices = DataAlgo::toUSD( mesh->creaseIds() );
+				auto usdCreaseIndices = IECoreUSD::DataAlgo::toUSD( mesh->creaseIds() );
 				return VtValue( usdCreaseIndices );
 			}
 		}
@@ -1939,7 +1939,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 			{
-				auto usdCreaseLength = DataAlgo::toUSD( mesh->creaseLengths() );
+				auto usdCreaseLength = IECoreUSD::DataAlgo::toUSD( mesh->creaseLengths() );
 				return VtValue( usdCreaseLength );
 			}
 		}
@@ -1947,7 +1947,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		{
 			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 			{
-				auto usdCreaseSharpnesses = DataAlgo::toUSD( mesh->creaseSharpnesses() );
+				auto usdCreaseSharpnesses = IECoreUSD::DataAlgo::toUSD( mesh->creaseSharpnesses() );
 				return VtValue( usdCreaseSharpnesses );
 			}
 		}
@@ -1973,7 +1973,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 				{
 					if ( auto customIndices = customPrimVarIt->second.indices )
 					{
-						auto usdStIndices = DataAlgo::toUSD( customIndices.get() );
+						auto usdStIndices = IECoreUSD::DataAlgo::toUSD( customIndices.get() );
 						return VtValue( usdStIndices );
 					}
 					else
@@ -1984,7 +1984,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 						{
 							identityCustomIndices.push_back( i );
 						}
-						return VtValue( DataAlgo::toUSD( identityCustomIndicesData.get() ) );
+						return VtValue( IECoreUSD::DataAlgo::toUSD( identityCustomIndicesData.get() ) );
 					}
 				}
 				else

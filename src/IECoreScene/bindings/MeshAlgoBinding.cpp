@@ -227,7 +227,7 @@ std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> correspondingFaceV
 // type
 IECore::DataPtr meshSplitterValueWrapper( const IECoreScene::MeshAlgo::MeshSplitter &meshSplitter, int segmentId )
 {
-	return IECore::dispatch( meshSplitter.segmentPrimitiveVariable().data.get(), [ meshSplitter, segmentId ]( const auto *primVarData ) -> IECore::DataPtr
+	return IECore::DataAlgo::dispatch( meshSplitter.segmentPrimitiveVariable().data.get(), [ meshSplitter, segmentId ]( const auto *primVarData ) -> IECore::DataPtr
 		{
 			using DataType = typename std::remove_pointer_t< decltype( primVarData ) >;
 			if constexpr ( !IECore::TypeTraits::IsVectorTypedData<DataType>::value )

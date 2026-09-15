@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.1.3)
 ========
 
+Improvements
+------------
 
+- DataAlgo : Moved all functionality into an `IECore::DataAlgo` namespace.
 
 10.7.1.3 (relative to 10.7.1.2)
 ========

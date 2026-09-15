@@ -78,8 +78,8 @@ PrimitivePtr interpolatePrimitive( const Primitive *y0, const Primitive *y1, dou
 			const Data *y0Sample = y0PrimVar.data.get();
 			const Data *y1Sample = y1PrimVar.data.get();
 
-			size_t y0Size = IECore::size( y0Sample );
-			size_t y1Size = IECore::size( y1Sample );
+			size_t y0Size = IECore::DataAlgo::size( y0Sample );
+			size_t y1Size = IECore::DataAlgo::size( y1Sample );
 
 			if( y0Size != y1Size )
 			{

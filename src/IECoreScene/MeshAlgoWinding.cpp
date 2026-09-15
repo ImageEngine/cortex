@@ -113,7 +113,7 @@ void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh, const Canceller
 			}
 			else if( visited.insert( it.second.data.get() ).second )
 			{
-				dispatch( it.second.data.get(), reverseWindingFunctor );
+				DataAlgo::dispatch( it.second.data.get(), reverseWindingFunctor );
 			}
 		}
 	}

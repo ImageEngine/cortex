@@ -46,7 +46,7 @@ namespace
 
 PyObject *addressWrapper( Data *data )
 {
-	return PyLong_FromVoidPtr( address( data ) );
+	return PyLong_FromVoidPtr( DataAlgo::address( data ) );
 }
 
 } // namespace
@@ -56,12 +56,12 @@ namespace IECorePython
 
 void bindDataAlgo()
 {
-	def( "getGeometricInterpretation", &getGeometricInterpretation );
-	def( "setGeometricInterpretation", &setGeometricInterpretation );
+	def( "getGeometricInterpretation", &IECore::DataAlgo::getGeometricInterpretation );
+	def( "setGeometricInterpretation", &IECore::DataAlgo::setGeometricInterpretation );
 
-	def( "uniqueValues", &uniqueValues );
+	def( "uniqueValues", &IECore::DataAlgo::uniqueValues );
 
-	def( "size", &IECore::size );
+	def( "size", &IECore::DataAlgo::size );
 	def( "address", &addressWrapper );
 
 }

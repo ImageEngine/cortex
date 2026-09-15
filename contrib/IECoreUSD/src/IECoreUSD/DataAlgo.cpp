@@ -134,7 +134,7 @@ template<typename T>
 IECore::DataPtr dataFromValue( const pxr::VtValue &value, GeometricData::Interpretation interpretation, bool arrayAccepted )
 {
 	using CortexDataType = typename USDTypeTraits<T>::CortexDataType;
-	typename CortexDataType::Ptr d = new CortexDataType( DataAlgo::fromUSD( value.Get<T>() ) );
+	typename CortexDataType::Ptr d = new CortexDataType( IECoreUSD::DataAlgo::fromUSD( value.Get<T>() ) );
 	setInterpretation( d.get(), interpretation );
 	return d;
 }
@@ -153,7 +153,7 @@ IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpr
 		return dataFromValue<T>( VtValue( a[0] ), interpretation, arrayAccepted );
 	}
 
-	auto d = DataAlgo::fromUSD( a );
+	auto d = IECoreUSD::DataAlgo::fromUSD( a );
 	setInterpretation( d.get(), interpretation );
 	return d;
 }
@@ -318,7 +318,7 @@ IECore::DataPtr colorDataFromArray( const pxr::VtValue &value, bool arrayAccepte
 			IECore::msg( IECore::Msg::Warning, "IECoreUSD::DataAlgo::fromUSD", "Array not accepted but array length is not 1" );
 			return nullptr;
 		}
-		return new TypedData<CortexType>( DataAlgo::fromUSD( array[0] ) );
+		return new TypedData<CortexType>( IECoreUSD::DataAlgo::fromUSD( array[0] ) );
 	}
 
 	return new TypedData<vector<CortexType>>(
@@ -425,7 +425,7 @@ struct VtValueFromData
 		array.reserve( data->readable().size() );
 		for( const auto &e : data->readable() )
 		{
-			array.push_back( DataAlgo::toUSD( e ) );
+			array.push_back( IECoreUSD::DataAlgo::toUSD( e ) );
 		}
 		return VtValue( array );
 	}
@@ -445,9 +445,9 @@ struct VtValueFromData
 		{
 			using USDType = typename CortexTypeTraits<T>::USDType;
 			using ArrayType = VtArray<USDType>;
-			return VtValue( ArrayType( 1, DataAlgo::toUSD( data->readable() ) ) );
+			return VtValue( ArrayType( 1, IECoreUSD::DataAlgo::toUSD( data->readable() ) ) );
 		}
-		return VtValue( DataAlgo::toUSD( data->readable() ) );
+		return VtValue( IECoreUSD::DataAlgo::toUSD( data->readable() ) );
 	}
 
 	VtValue operator()( const IECore::CompoundData *data, bool arrayRequired )
@@ -460,7 +460,7 @@ struct VtValueFromData
 		VtDictionary result;
 		for( const auto &[name, value] : data->readable() )
 		{
-			VtValue v = DataAlgo::toUSD( value.get() );
+			VtValue v = IECoreUSD::DataAlgo::toUSD( value.get() );
 			if( !v.IsEmpty() )
 			{
 				result[name] = v;
@@ -489,7 +489,7 @@ pxr::VtValue IECoreUSD::DataAlgo::toUSD( const IECore::Data *data, bool arrayReq
 			// Manual dispatch since CompoundData not handled by `dispatch()`.
 			return valueFromData( cd, arrayRequired );
 		}
-		return IECore::dispatch( data, valueFromData, arrayRequired );
+		return IECore::DataAlgo::dispatch( data, valueFromData, arrayRequired );
 	}
 	catch( const IECore::Exception & )
 	{
@@ -528,14 +528,14 @@ struct VtValueTypeNameFromData
 	{
 		using ArrayType = VtArray<typename CortexTypeTraits<T>::USDType>;
 		const auto &s = SdfSchema::GetInstance();
-		return s.FindType( TfType::Find<ArrayType>(), DataAlgo::role( data->getInterpretation() ) );
+		return s.FindType( TfType::Find<ArrayType>(), IECoreUSD::DataAlgo::role( data->getInterpretation() ) );
 	}
 
 	template<typename T>
 	SdfValueTypeName operator()( const IECore::GeometricTypedData<T> *data ) const
 	{
 		const auto &s = SdfSchema::GetInstance();
-		return s.FindType( TfType::Find<typename CortexTypeTraits<T>::USDType>(), DataAlgo::role( data->getInterpretation() ) );
+		return s.FindType( TfType::Find<typename CortexTypeTraits<T>::USDType>(), IECoreUSD::DataAlgo::role( data->getInterpretation() ) );
 	}
 
 	// Colors
@@ -600,7 +600,7 @@ pxr::SdfValueTypeName IECoreUSD::DataAlgo::valueTypeName( const IECore::Data *da
 {
 	try
 	{
-		return IECore::dispatch( data, VtValueTypeNameFromData() );
+		return IECore::DataAlgo::dispatch( data, VtValueTypeNameFromData() );
 	}
 	catch( const IECore::Exception & )
 	{
