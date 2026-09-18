@@ -262,6 +262,18 @@ inline T vecCross( const T &v1, const T &v2 )
 
 }
 
+template<typename T>
+inline typename VectorTraits<T>::BaseType vecSumElements( const T &v )
+{
+	typename VectorTraits<T>::BaseType result = 0;
+	for( unsigned int i=0; i<VectorTraits<T>::dimensions(); i++ )
+	{
+		result += VectorTraits<T>::get( v, i );
+	}
+
+	return result;
+}
+
 } // namespace IECore
 
 

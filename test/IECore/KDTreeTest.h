@@ -65,6 +65,7 @@ class KDTreeTest
 		void testNearestNeighbour();
 		void testNearestNeighbours();
 		void testNearestNNeighbours();
+		void testEnclosedPointsHalfSpaces();
 
 	private:
 
@@ -96,7 +97,7 @@ struct TestVecType
 	float &operator[]( int i ){ return v[i]; };
 	const float &operator[]( int i ) const { return v[i]; };
 
-	TestVecType operator-( const TestVecType &a ) { return { v[0] - a.v[0], v[1] - a.v[1], v[2] - a.v[2] }; };
+	TestVecType operator-( const TestVecType &a ) const { return { v[0] - a.v[0], v[1] - a.v[1], v[2] - a.v[2] }; };
 };
 
 template<>
@@ -135,6 +136,10 @@ struct KDTreeTestSuite : public boost::unit_test::test_suite
 		add( test );
 
 		test = BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNNeighbours, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testEnclosedPointsHalfSpaces, instance );
 		test->p_name.set( test->p_name.get() + nameSuffix );
 		add( test );
 	}

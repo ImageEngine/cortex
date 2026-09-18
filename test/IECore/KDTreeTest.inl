@@ -112,6 +112,36 @@ void KDTreeTest<T>::testNearestNeighbours()
 }
 
 template<typename T>
+void KDTreeTest<T>::testEnclosedPointsHalfSpaces()
+{
+	T origin;
+	T normal;
+
+	for ( unsigned int i = 0; i < VectorTraits< T >::dimensions(); i++)
+	{
+		origin[ i ] = m_randGen.nextf() * 0.1f;
+		normal[ i ] = 2.0f * m_randGen.nextf() - 1.0f;
+	}
+
+	std::vector<size_t> result;
+	m_tree->enclosedPoints( { normal }, { origin }, [&result, this]( auto &it ){ result.push_back( it - m_points.begin() ); } );
+
+	std::vector<size_t> expectedResult;
+
+	for( size_t i = 0; i < m_points.size(); i++ )
+	{
+		if( vecDot( vecSub( m_points[i], origin ), normal ) > 0.0f )
+		{
+			expectedResult.push_back( i );
+		}
+	}
+
+	std::sort( result.begin(), result.end() );
+
+	BOOST_CHECK( result == expectedResult );
+}
+
+template<typename T>
 void KDTreeTest<T>::testNearestNNeighbours()
 {
 	unsigned int neighboursRequested = 4;

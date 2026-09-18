@@ -75,10 +75,10 @@ struct KDTreeWrapper
 
 	PointDataPtr m_points;
 
-	KDTreeWrapper(PointDataPtr points)
+	KDTreeWrapper(PointDataPtr points, int maxLeafSize = 4)
 	{
 		m_points = points->copy();
-		m_tree = new T(m_points->readable().begin(), m_points->readable().end());
+		m_tree = new T(m_points->readable().begin(), m_points->readable().end(), maxLeafSize);
 	}
 
 	virtual ~KDTreeWrapper()
@@ -162,6 +162,22 @@ struct KDTreeWrapper
 		return indices;
 	}
 
+	IntVectorDataPtr enclosedPointsWithHalfSpaces(
+		const typename TypedData< std::vector<typename T::Point> >::ConstPtr &normals,
+		const typename TypedData< std::vector<typename T::Point> >::ConstPtr &origins
+	)
+	{
+		IntVectorDataPtr indicesData = new IntVectorData();
+
+		auto &indices = indicesData->writable();
+		m_tree->enclosedPoints(
+			normals->readable(), origins->readable(),
+			[&indices, this]( const typename T::Iterator i ){ indices.push_back( std::distance( m_points->readable().begin(), i ) ); }
+		);
+
+		return indicesData;
+	}
+
 };
 
 
@@ -170,10 +186,12 @@ void bindKDTree(const char *bindName)
 {
 	class_<KDTreeWrapper<T>, boost::noncopyable>(bindName, no_init)
 		.def(init< typename KDTreeWrapper<T>::PointDataPtr >() )
+		.def(init< typename KDTreeWrapper<T>::PointDataPtr, int >() )
 		.def("nearestNeighbour", &KDTreeWrapper<T>::nearestNeighbour )
 		.def("nearestNeighbours", &KDTreeWrapper<T>::nearestNeighbours )
 		.def("nearestNNeighbours", &KDTreeWrapper<T>::nearestNNeighbours )
 		.def("enclosedPoints", &KDTreeWrapper<T>::enclosedPoints )
+		.def("enclosedPoints", &KDTreeWrapper<T>::enclosedPointsWithHalfSpaces )
 		;
 }
 
