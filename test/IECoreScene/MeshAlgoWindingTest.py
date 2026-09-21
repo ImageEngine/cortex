@@ -78,8 +78,8 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 
 		# Except for vertex ids, and facevarying data
 
-		self.assertEqual( list( meshReversed.vertexIds ), list( reversed( mesh.vertexIds ) ) )
-		self.assertEqual( list( meshReversed["uv"].data ), list( reversed( mesh["uv"].data ) ) )
+		self.assertEqual( list( meshReversed.vertexIds ), list( mesh.vertexIds[:1] ) + list( reversed( mesh.vertexIds[1:] ) ) )
+		self.assertEqual( list( meshReversed["uv"].data ), list( mesh["uv"].data[:1] ) + list( reversed( mesh["uv"].data[1:] ) ) )
 
 	def testPlane( self ) :
 
@@ -142,7 +142,7 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 		# UV indices should change, but UV data doesn't need to
 
 		self.assertEqual( meshReversed["uv"].data, mesh["uv"].data )
-		self.assertEqual( list( meshReversed["uv"].indices ), list( reversed( mesh["uv"].indices ) ) )
+		self.assertEqual( list( meshReversed["uv"].indices ), list( mesh["uv"].indices[:1] ) + list( reversed( mesh["uv"].indices[1:] ) ) )
 
 	def testReferencedData( self ) :
 

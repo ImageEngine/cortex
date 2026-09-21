@@ -56,7 +56,14 @@ void reverseWinding( MeshPrimitive *mesh, T &values, const Canceller *canceller 
 	for( PolygonIterator it = mesh->faceBegin(), eIt = mesh->faceEnd(); it != eIt; ++it )
 	{
 		Canceller::check( canceller );
-		std::reverse( it.faceVaryingBegin( values.begin() ), it.faceVaryingEnd( values.begin() ) );
+		auto b = it.faceVaryingBegin( values.begin() );
+		auto e = it.faceVaryingEnd( values.begin() );
+		if( b == e )
+		{
+			continue;
+		}
+		++b;
+		std::reverse( b, e );
 	}
 }
 
