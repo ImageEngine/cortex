@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.1.3)
 ========
 
+Fixes
+-----
 
+- AlembicScene : Added automatic reading of a `__cameras` set, containing the locations of all cameras.
 
 10.7.1.3 (relative to 10.7.1.2)
 ========
