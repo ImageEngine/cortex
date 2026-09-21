@@ -1,7 +1,15 @@
 10.7.x.x (relative to 10.7.1.3)
 ========
 
+Improvements
+------------
 
+- MeshAlgo : Changed `reverseWinding()` so that the first vertex of each face remains unchanged. This matches the algorithm used in other DCCs.
+
+Breaking Changes
+----------------
+
+- MeshAlgo : Changed the output of `reverseWinding()`.
 
 10.7.1.3 (relative to 10.7.1.2)
 ========

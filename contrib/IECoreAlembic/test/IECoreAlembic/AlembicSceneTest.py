@@ -294,10 +294,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual(
 			m["colorSet1"].expandedData(),
 			IECore.Color4fVectorData( [
+				imath.Color4f( 0, 1, 0, 1 ),
 				imath.Color4f( 1, 0, 0, 1 ),
 				imath.Color4f( 0, 0, 0, 1 ),
 				imath.Color4f( 0, 0, 1, 1 ),
-				imath.Color4f( 0, 1, 0, 1 ),
 			] )
 		)
 
