@@ -539,6 +539,15 @@ class AlembicSceneTest( unittest.TestCase ) :
 		c = a.child( "persp" ).readObject( 0 )
 		self.assertTrue( isinstance( c, IECoreScene.Camera ) )
 
+	def testCamerasSet( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.setNames(), [ "__cameras" ] )
+		self.assertEqual( root.readSet( "__cameras" ), IECore.PathMatcher( [ "/front", "/persp", "/side", "/top" ] ) )
+
+		child = root.child( "pCube1" )
+		self.assertNotIn( "__cameras", child.setNames() )
+
 	def testLinearCurves( self ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "curves.abc" ), IECore.IndexedIO.OpenMode.Read )

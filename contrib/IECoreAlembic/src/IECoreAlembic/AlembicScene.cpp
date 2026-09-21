@@ -61,6 +61,8 @@
 
 #include "boost/tokenizer.hpp"
 
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_for.h"
 #include "tbb/spin_mutex.h"
 
 #include "fmt/format.h"
@@ -1064,6 +1066,21 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 			if( !m_xform )
 			{
+				// Root.
+				setNames.push_back( "__cameras" );
+				// Note :  We should not be returning early when
+				// `includeDescendantSets == true`. But in practice this is
+				// irrelevant for two reasons :
+				//
+				// 1. We've never received an Alembic file containing
+				//    collections - do any DCCs support them?
+				// 2. We don't implement `writeSet()` at the root
+				//    location, which is the only location where Gaffer tries
+				//    to write sets (this is also the only location Gaffer
+				//    tries to read sets from). Nobody has complained so far.
+				//
+				// Since recursing would be fairly expensive and has no current
+				// use, we don't bother.
 				return setNames;
 			}
 
@@ -1096,13 +1113,26 @@ class AlembicScene::AlembicReader : public AlembicIO
 			// ensure our set names are unique
 			std::sort( setNames.begin(), setNames.end() );
 			return NameList( setNames.begin(), std::unique( setNames.begin(), setNames.end() ) );
-
 		}
 
 		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const
 		{
+			IECore::PathMatcher pathMatcher;
+			if( !m_xform )
+			{
+				if( name == "__cameras" )
+				{
+					tbb::this_task_arena::isolate(
+						[&] {
+							tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+							pathMatcher = recurseReadCamerasSet( taskGroupContext, canceller );
+						}
+					);
+				}
+				return pathMatcher;
+			}
+
 			SceneInterface::Path prefix;
-			PathMatcher pathMatcher;
 			recurseReadSet( prefix, name, pathMatcher, includeDescendantSets, canceller );
 
 			return pathMatcher;
@@ -1264,6 +1294,46 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 				dynamic_cast<const AlembicReader*>( c.get() )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets, canceller );
 			}
+		}
+
+		IECore::PathMatcher recurseReadCamerasSet( tbb::task_group_context &taskGroupContext, const Canceller *canceller ) const
+		{
+			Canceller::check( canceller );
+
+			PathMatcher result;
+			tbb::spin_mutex m;
+
+			if( m_objectReader && Alembic::AbcGeom::ICamera::matches( m_objectReader->object().getMetaData() ) )
+			{
+				result.addPath( std::vector<IECore::InternedString>() );
+			}
+
+			NameList children;
+			childNames( children );
+
+			tbb::parallel_for(
+
+				tbb::blocked_range<size_t>( 0, children.size() ),
+
+				[&]( const tbb::blocked_range<size_t> &r )
+				{
+					for( size_t i = r.begin(); i != r.end(); ++i )
+					{
+						auto &childName = children[i];
+						ConstAlembicIOPtr c = child( childName, SceneInterface::ThrowIfMissing );
+						PathMatcher childSet = static_cast<const AlembicReader *>( c.get() )->recurseReadCamerasSet( taskGroupContext, canceller );
+						if( !childSet.isEmpty() )
+						{
+							tbb::spin_mutex::scoped_lock lock( m );
+							result.addPaths( childSet, { childName } );
+						}
+					}
+				},
+				taskGroupContext
+
+			);
+
+			return result;
 		}
 
 		IECore::PathMatcherDataPtr readLocalSet( const Name &name ) const
