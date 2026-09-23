@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.1.3)
 ========
 
+Fixes
+-----
 
+- SceneCacheFileFormat : Fixed `Unsupported Spec Type for </>` error when a scene cache is added as a sublayer of a live stage.
 
 10.7.1.3 (relative to 10.7.1.2)
 ========
