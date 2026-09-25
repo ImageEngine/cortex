@@ -63,7 +63,8 @@ template<typename T>
 void TypedDataFromType<T>::construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
 {
 	void *storage = ((boost::python::converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
-	new (storage) typename T::Ptr( new T( boost::python::extract<typename T::ValueType>( obj ) ) );
+	typename T::ValueType v = boost::python::extract<typename T::ValueType>( obj );
+	new (storage) typename T::Ptr( new T( v ) );
 	data->convertible = storage;
 }
 

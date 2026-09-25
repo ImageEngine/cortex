@@ -47,7 +47,9 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/VectorTypedDataBinding.inl"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/Export.h"
+#include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
@@ -67,6 +69,52 @@ using namespace boost;
 using namespace boost::python;
 using namespace Imath;
 using namespace IECore;
+
+namespace
+{
+
+template<typename T>
+struct PythonType
+{
+	static const char *value();
+};
+
+template<> struct PythonType<half>{ static const char *value(){ return "e"; } };
+template<> struct PythonType<float>{ static const char *value(){ return "f"; } };
+template<> struct PythonType<double>{ static const char *value(){ return "d"; } };
+template<> struct PythonType<int>{ static const char *value(){ return "i"; } };
+template<> struct PythonType<unsigned int>{ static const char *value(){ return "I"; } };
+template<> struct PythonType<char>{ static const char *value(){ return "b"; } };
+template<> struct PythonType<unsigned char>{ static const char *value(){ return "B"; } };
+template<> struct PythonType<short>{ static const char *value(){ return "h"; } };
+template<> struct PythonType<unsigned short>{ static const char *value(){ return "H"; } };
+template<> struct PythonType<int64_t>{ static const char *value(){ return "q"; } };
+template<> struct PythonType<uint64_t>{ static const char *value(){ return "Q"; } };
+
+template<typename T>
+constexpr std::pair<const char *, Py_ssize_t> typeInfo()
+{
+	if constexpr(
+		IECore::TypeTraits::IsMatrix<T>::value ||
+		IECore::TypeTraits::IsColor<T>::value ||
+		IECore::TypeTraits::IsQuat<T>::value ||
+		IECore::TypeTraits::IsVec<T>::value
+	)
+	{
+		return { PythonType<typename T::BaseType>::value(), sizeof( typename T::BaseType ) };
+	}
+	else if constexpr( IECore::TypeTraits::IsBox<T>::value )
+	{
+		using ElementType = decltype( T::min );
+		return { PythonType<typename ElementType::BaseType>::value(), sizeof( typename ElementType::BaseType ) };
+	}
+	else
+	{
+		return { PythonType<T>::value(), sizeof( T ) };
+	}
+}
+
+}  // namespace
 
 namespace IECorePython
 {
@@ -123,6 +171,200 @@ std::string str<BoolVectorData>( BoolVectorData &x )
 	}
 	return s.str();
 }
+
+Buffer::Buffer( Data *data, const bool writable ) : m_data( data->copy() ), m_writable( writable )
+{
+
+}
+
+Buffer::~Buffer()
+{
+
+}
+
+DataPtr Buffer::asData() const
+{
+	return m_data->copy();
+}
+
+bool Buffer::isWritable() const
+{
+	return m_writable;
+}
+
+int Buffer::getBuffer( PyObject *object, Py_buffer *view, int flags )
+{
+	// This method is a variation on Python's `PyBuffer_FillInfo`.
+	if( view == NULL ) {
+		PyErr_SetString( PyExc_ValueError, "getBuffer(): view==NULL argument is obsolete" );
+		return -1;
+	}
+
+	if( flags != PyBUF_SIMPLE )
+	{
+		if( flags == PyBUF_READ || flags == PyBUF_WRITE )
+		{
+			PyErr_BadInternalCall();
+			return -1;
+		}
+	}
+
+	IECorePython::BufferPtr self = boost::python::extract<IECorePython::BufferPtr>( object );
+	if( !self )
+	{
+		PyErr_SetString( PyExc_ValueError, "getBuffer(): Could not extract `BufferPtr` from Python object." );
+		return -1;
+	}
+
+	if( ( flags | PyBUF_WRITABLE ) == PyBUF_WRITABLE && !self->isWritable() )
+	{
+		return -1;
+	}
+
+	try
+	{
+		dispatch(
+			self->m_data.get(),
+			[&flags, &view, &object, &self]( auto *bufferData ) -> void
+			{
+				using DataType = typename std::remove_const_t< std::remove_pointer_t< decltype( bufferData ) > >;
+
+				if constexpr( TypeTraits::HasBaseType<DataType>::value && TypeTraits::IsNumericBasedVectorTypedData<DataType>::value )
+				{
+					using ElementType = typename DataType::ValueType::value_type;
+					const auto [format, itemSize] = typeInfo<ElementType>();
+
+					int ndim = 1;
+					Py_ssize_t *shape = NULL;
+					Py_ssize_t *strides = NULL;
+					if constexpr( IECore::TypeTraits::IsMatrix44<ElementType>::value )
+					{
+						ndim = 3;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[3]{ (Py_ssize_t)bufferData->readable().size(), 4, 4 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[3]{ 16 * itemSize, 4 * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsMatrix33<ElementType>::value )
+					{
+						ndim = 3;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[3]{ (Py_ssize_t)bufferData->readable().size(), 3, 3 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[3]{ 9 * itemSize, 3 * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsQuat<ElementType>::value )
+					{
+						ndim = 2;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[2]{ (Py_ssize_t)bufferData->readable().size(), 4 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[2]{ 4 * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsColor3<ElementType>::value )
+					{
+						// `Color3` doesn't have `dimensions()`
+						ndim = 2;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[2]{ (Py_ssize_t)bufferData->readable().size(), 3 };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[2]{ 3 * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsColor4<ElementType>::value || IECore::TypeTraits::IsVec<ElementType>::value )
+					{
+						ndim = 2;
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[2]{ (Py_ssize_t)bufferData->readable().size(), ElementType::dimensions() };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[2]{ ElementType::dimensions() * itemSize, itemSize };
+						}
+					}
+					else if constexpr( IECore::TypeTraits::IsBox<ElementType>::value )
+					{
+						ndim = 3;
+						using ElementType = decltype( ElementType::min );
+						if( ( flags & PyBUF_ND ) == PyBUF_ND )
+						{
+							shape = new Py_ssize_t[3]{ (Py_ssize_t)bufferData->readable().size(), 2, ElementType::dimensions() };
+						}
+						if( ( flags & PyBUF_STRIDES ) == PyBUF_STRIDES )
+						{
+							strides = new Py_ssize_t[3]{ 2 * ElementType::dimensions() * itemSize, ElementType::dimensions() * itemSize, itemSize };
+						}
+					}
+					else
+					{
+						shape = new Py_ssize_t{ (Py_ssize_t)bufferData->readable().size() };
+					}
+
+					Py_ssize_t shapeProduct = 1;
+					Py_ssize_t *idx = shape;
+					for( int i = 0; i < ndim; ++i, ++idx )
+					{
+						shapeProduct *= *idx;
+					}
+
+					view->obj = Py_XNewRef( object );
+					view->readonly = !self->isWritable();
+					view->buf = view->readonly ? (void*)bufferData->baseReadable() : (void*)bufferData->baseWritable();
+					view->len = view->itemsize * shapeProduct;
+					view->itemsize = itemSize;
+					view->format = ( ( flags & PyBUF_FORMAT ) == PyBUF_FORMAT ) ? const_cast<char *>( format ) : NULL;
+					view->ndim = ndim;
+					view->internal = NULL;
+					view->shape = shape;
+					view->strides = strides;
+					view->suboffsets = NULL;
+				}
+			}
+		);
+	}
+	catch( Exception &e )
+	{
+		view->obj = NULL;
+		PyErr_SetString( PyExc_BufferError, e.what() );
+		return -1;
+	}
+
+	return 0;
+}
+
+void Buffer::releaseBuffer( PyObject *object, Py_buffer *view )
+{
+	if( view->shape != NULL )
+	{
+		delete view->shape;
+	}
+	if( view->strides != NULL )
+	{
+		delete view->strides;
+	}
+	// Python takes care of decrementing `object`
+}
+
+static PyBufferProcs BufferProtocol = {
+  (getbufferproc)Buffer::getBuffer,
+  (releasebufferproc)Buffer::releaseBuffer,
+};
 
 void bindAllVectorTypedData()
 {
@@ -189,6 +431,16 @@ void bindAllVectorTypedData()
 	bindImathColorVectorTypedData();
 	bindImathBoxVectorTypedData();
 	bindImathQuatVectorTypedData();
+
+	auto c = RefCountedClass<Buffer, IECore::RefCounted>( "Buffer" )
+		.def( init<Data *, bool>() )
+		.def( "asData", &Buffer::asData )
+		.def( "isWritable", &Buffer::isWritable )
+	;
+	PyTypeObject *o = (PyTypeObject *)c.ptr();
+	o->tp_as_buffer = &BufferProtocol;
+	PyType_Modified( o );
+	
 }
 
 
