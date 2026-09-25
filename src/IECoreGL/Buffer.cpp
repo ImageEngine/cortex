@@ -101,6 +101,11 @@ GLuint Buffer::buffer() const
 
 size_t Buffer::size() const
 {
+	// \todo : This is a nasty trap to leave lying around in this code - someone looking at the API
+	// could think that was safe to call while preparing data for rendering a frame, where it will introduce
+	// a pipeline stall that could likely have a pretty significant impact. If we want to support this, we
+	// should just store the size we called glBufferData with.
+
 	ScopedBinding binding( *this, GL_ARRAY_BUFFER );
 	int result = 0;
 	glGetBufferParameteriv( GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &result );

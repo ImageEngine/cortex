@@ -36,6 +36,7 @@
 
 #include "IECoreGL/GL.h"
 #include "IECoreGL/State.h"
+#include "IECoreGL/CachedConverter.h"
 
 #include "IECore/DespatchTypedData.h"
 
@@ -57,11 +58,12 @@ class MeshPrimitive::MemberData : public IECore::RefCounted
 
 	public :
 
-		MemberData( unsigned numTriangles ) : numTriangles( numTriangles )
+		MemberData( IECore::ConstIntVectorDataPtr meshIndices ) : meshIndices( meshIndices )
 		{
 		}
 
-		unsigned numTriangles;
+		IECore::ConstIntVectorDataPtr meshIndices;
+		ConstBufferPtr meshIndicesGL;
 		Imath::Box3f bound;
 
 };
@@ -72,8 +74,8 @@ class MeshPrimitive::MemberData : public IECore::RefCounted
 
 IE_CORE_DEFINERUNTIMETYPED( MeshPrimitive );
 
-MeshPrimitive::MeshPrimitive( unsigned numTriangles )
-	:	m_memberData( new MemberData( numTriangles ) )
+MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr meshIndices )
+	:	m_memberData( new MemberData( meshIndices ) )
 {
 }
 
@@ -114,7 +116,24 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECoreS
 
 void MeshPrimitive::renderInstances( size_t numInstances ) const
 {
-	glDrawArraysInstancedARB( GL_TRIANGLES, 0, m_memberData->numTriangles * 3, numInstances );
+	if( !m_memberData->meshIndicesGL )
+	{
+		// \todo : The use of defaultCachedConverter here is very inefficient - the mesh indices have already
+		// been expanded from verticesPerFace to an explicit index list before being passed in ... any time
+		// we find the index list in the cache, the time we previously spent recomputing the expanded list
+		// was wasted.
+		// The same problem exists for primvars - we first fully expand the data out to FaceVarying in
+		// ToGLMeshConverter, and then we look up if it's in the cache and that work has already been done.
+		// The solution would be passing in more context to this convert call about how it's supposed to be
+		// converted, so we could just pass in the verticesPerFace, but indicate that they need to be converted
+		// to expanded indices. I had considered just adding a "Purpose" enum to this call, John suggested
+		// it should take some sort of function pointer, so this cache could be used for anything. Either
+		// way, it now seems complicated enough that we're not going to tackle it now.
+		m_memberData->meshIndicesGL = IECore::runTimeCast<const Buffer>( CachedConverter::defaultCachedConverter()->convert( m_memberData->meshIndices.get() ) );
+	}
+
+	Buffer::ScopedBinding binding( *m_memberData->meshIndicesGL, GL_ELEMENT_ARRAY_BUFFER );
+	glDrawElementsInstancedARB( GL_TRIANGLES, m_memberData->meshIndices->readable().size(), GL_UNSIGNED_INT, 0, numInstances );
 }
 
 Imath::Box3f MeshPrimitive::bound() const
