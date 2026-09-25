@@ -271,20 +271,35 @@ PointIterator KDTree<PointIterator>::nearestNeighbour( const Point &p, BaseType 
 }
 
 template<class PointIterator>
+template<typename F>
+void KDTree<PointIterator>::nearestNeighbours( const Point &p, BaseType r, F &&functor ) const
+{
+	nearestNeighboursWalk(rootIndex(), p, r*r, functor );
+}
+
+template<class PointIterator>
 unsigned int KDTree<PointIterator>::nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const
 {
 	nearNeighbours.clear();
 
-	nearestNeighboursWalk(rootIndex(), p, r*r, nearNeighbours );
+	nearestNeighbours( p, r, [&nearNeighbours]( PointIterator &it ){ nearNeighbours.push_back( it ); } );
 
 	return nearNeighbours.size();
 }
 
 template<class PointIterator>
-template<typename Box, typename OutputIterator>
+template<typename Box, typename F, std::enable_if_t< !Detail::IsIterator<F>::value, bool >>
+void KDTree<PointIterator>::enclosedPoints( const Box &bound, F &&functor ) const
+{
+	enclosedPointsWalk( rootIndex(), bound, functor );
+}
+
+// \deprecated wrapper
+template<class PointIterator>
+template<typename Box, typename OutputIterator, std::enable_if_t< Detail::IsIterator<OutputIterator>::value, bool >>
 void KDTree<PointIterator>::enclosedPoints( const Box &bound, OutputIterator it ) const
 {
-	enclosedPointsWalk( rootIndex(), bound, it );
+	enclosedPoints( bound, [&it]( PointIterator &p ){ *it++ = p; } );
 }
 
 template<class PointIterator>
@@ -386,7 +401,8 @@ void KDTree<PointIterator>::nearestNeighbourWalk( NodeIndex nodeIndex, const Poi
 }
 
 template<class PointIterator>
-void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, std::vector<PointIterator> &nearNeighbours ) const
+template<typename F>
+void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, F &&functor ) const
 {
 	const Node &node = m_nodes[nodeIndex];
 	if( node.isLeaf() )
@@ -399,7 +415,7 @@ void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Po
 
 			if (dist2 < r2 )
 			{
-				nearNeighbours.push_back( *perm );
+				functor( *perm );
 			}
 		}
 	}
@@ -419,10 +435,10 @@ void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Po
 			secondChild = highChildIndex( nodeIndex );
 		}
 
-		nearestNeighboursWalk( firstChild, p, r2, nearNeighbours );
+		nearestNeighboursWalk( firstChild, p, r2, functor );
 		if( d*d < r2 )
 		{
-			nearestNeighboursWalk( secondChild, p, r2, nearNeighbours );
+			nearestNeighboursWalk( secondChild, p, r2, functor );
 		}
 	}
 }
@@ -490,8 +506,8 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 }
 
 template<class PointIterator>
-template<typename Box, typename OutputIterator>
-void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const
+template<typename Box, typename F>
+void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, F &&functor ) const
 {
 	const Node &node = m_nodes[nodeIndex];
 
@@ -503,7 +519,7 @@ void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &
 			const Point &pp = **perm;
 			if( boxIntersects( bound, pp ) )
 			{
-				*it++ = *perm;
+				functor( *perm );
 			}
 		}
 	}
@@ -511,11 +527,11 @@ void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &
 	{
 		if( vecGet( BoxTraits<Box>::min( bound ), node.cutAxis() ) <= node.cutValue() )
 		{
-			enclosedPointsWalk( lowChildIndex( nodeIndex ), bound, it );
+			enclosedPointsWalk( lowChildIndex( nodeIndex ), bound, functor );
 		}
 		if( vecGet( BoxTraits<Box>::max( bound ), node.cutAxis() ) >= node.cutValue() )
 		{
-			enclosedPointsWalk( highChildIndex( nodeIndex ), bound, it );
+			enclosedPointsWalk( highChildIndex( nodeIndex ), bound, functor );
 		}
 	}
 }

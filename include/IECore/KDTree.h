@@ -49,6 +49,15 @@ IECORE_POP_DEFAULT_VISIBILITY
 namespace IECore
 {
 
+namespace Detail
+{
+	// \todo - ugly machinery needed until we deprecate the old signature of enclosedPoints
+	template <typename, typename = void>
+	struct IsIterator : std::false_type {};
+	template <typename T>
+	struct IsIterator<T, std::void_t< typename std::iterator_traits<std::remove_cv_t<std::remove_reference_t<T>>>::iterator_category >> : std::true_type {};
+}
+
 /// The KDTree class provides accelerated searching of pointsets. It is
 /// templated so that it can operate on a wide variety of datatypes, and uses
 /// the VectorTraits.h and VectorOps.h functionality to assist in this.
@@ -94,10 +103,11 @@ class KDTree
 		/// \threading May be called by multiple concurrent threads.
 		PointIterator nearestNeighbour( const Point &p, BaseType &distSquared ) const;
 
-		/// Populates the passed vector of iterators with the neighbours of point p which are closer than radius r. Returns the number of points found.
-		/// \todo There should be a form where nearNeighbours is an output iterator, to allow any container to be filled.
-		/// See enclosedPoints for an example of this form.
-		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
+		/// Call a functor for each neighbour of point p which is closer than radius r.
+		/// The functor must take a PointIterator.
+		template<typename F>
+		void nearestNeighbours( const Point &p, BaseType r, F &&functor ) const;
+		/// \deprecated - use the form above that takes a functor, rather than this version that populates a vector.
 		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
 
 		class Neighbour;
@@ -105,9 +115,14 @@ class KDTree
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours ) const;
 
-		/// Finds all the points contained by the specified bound, outputting them to the specified iterator.
+		/// Finds all the points contained by the specified bound, outputting them to the specified functor,
+		/// which must take a PointIterator.
 		/// \threading May be called by multiple concurrent threads.
-		template<typename Box, typename OutputIterator>
+		template<typename Box, typename F, std::enable_if_t< !Detail::IsIterator<F>::value, bool > = true>
+		void enclosedPoints( const Box &bound, F &&functor ) const;
+		/// \deprecated - use the form above that takes a functor ( once we get rid of this deprecated signature,
+		/// we can get rid of the ugly enable_if guard above ).
+		template<typename Box, typename OutputIterator, std::enable_if_t< Detail::IsIterator<OutputIterator>::value, bool > = true>
 		void enclosedPoints( const Box &bound, OutputIterator it ) const;
 
 		// Finds all the points contained within a set of half-spaces, passing them to the given
@@ -154,10 +169,11 @@ class KDTree
 
 		void nearestNeighbourWalk( NodeIndex nodeIndex, const Point &p, PointIterator &closestPoint, BaseType &distSquared ) const;
 
-		void nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, std::vector<PointIterator> &nearNeighbours ) const;
+		template<typename F>
+		void nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, F &&functor ) const;
 
-		template<typename Box, typename OutputIterator>
-		void enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const;
+		template<typename Box, typename F>
+		void enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, F &&functor  ) const;
 
 		struct HalfSpaceWorkingData;
 
