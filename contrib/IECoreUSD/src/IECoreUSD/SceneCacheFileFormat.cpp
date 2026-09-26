@@ -111,7 +111,10 @@ UsdSceneCacheFileFormat::~UsdSceneCacheFileFormat()
 
 SdfAbstractDataRefPtr UsdSceneCacheFileFormat::InitData( const FileFormatArguments& args ) const
 {
-    return SceneCacheData::New( args );
+    SceneCacheDataRefPtr data = SceneCacheData::New( args );
+    // The pseudo-root spec must always exist in a layer's data.
+    data->CreateSpec( SdfPath::AbsoluteRootPath(), SdfSpecTypePseudoRoot );
+    return data;
 }
 
 
