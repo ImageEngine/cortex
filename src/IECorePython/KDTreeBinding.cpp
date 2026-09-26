@@ -100,22 +100,15 @@ struct KDTreeWrapper
 	{
 		assert(m_tree);
 
-		typedef std::vector<typename T::Iterator> PointArray;
+		IntVectorDataPtr indicesData = new IntVectorData();
 
-		PointArray points;
+		auto &indices = indicesData->writable();
+		m_tree->nearestNeighbours(
+			p, r,
+			[&indices, this]( const typename T::Iterator i ){ indices.push_back( std::distance( m_points->readable().begin(), i ) ); }
+		);
 
-		unsigned int num = m_tree->nearestNeighbours(p, r, points);
-
-		IntVectorDataPtr indices = new IntVectorData();
-
-		indices->writable().reserve( num );
-
-		for (typename PointArray::const_iterator it = points.begin(); it != points.end(); ++it)
-		{
-			indices->writable().push_back(  std::distance( m_points->readable().begin(), *it ) );
-		}
-
-		return indices;
+		return indicesData;
 
 	}
 
@@ -144,22 +137,15 @@ struct KDTreeWrapper
 
 	IntVectorDataPtr enclosedPoints( const Box &bound )
 	{
-		typedef std::vector<typename T::Iterator> PointArray;
+		IntVectorDataPtr indicesData = new IntVectorData();
 
-		PointArray points;
+		auto &indices = indicesData->writable();
+		m_tree->enclosedPoints(
+			bound,
+			[&indices, this]( const typename T::Iterator i ){ indices.push_back( std::distance( m_points->readable().begin(), i ) ); }
+		);
 
-		m_tree->enclosedPoints( bound, std::back_insert_iterator<PointArray>( points ) );
-
-		IntVectorDataPtr indices = new IntVectorData();
-
-		indices->writable().reserve( points.size() );
-
-		for (typename PointArray::const_iterator it = points.begin(); it != points.end(); ++it)
-		{
-			indices->writable().push_back(  std::distance( m_points->readable().begin(), *it ) );
-		}
-
-		return indices;
+		return indicesData;
 	}
 
 	IntVectorDataPtr enclosedPointsWithHalfSpaces(
