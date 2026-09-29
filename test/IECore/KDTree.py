@@ -61,15 +61,14 @@ class TestKDTree:
 
 		for i in range(0, numPoints):
 			for r in self.radii:
-				pIdxArray = self.tree.nearestNeighbours( self.points[i], r )
+				result = self.tree.nearestNeighbours( self.points[i], r )
 
-				for pIdx in pIdxArray:
-					self.assertTrue(pIdx >= 0)
-					self.assertTrue(pIdx < numPoints)
-					nearestPt = self.points[pIdx]
-					distToNearest = (self.points[pIdx] - self.points[i]).length()
+				expectedResult = []
+				for j in range( self.points.size() ) :
+					if ( self.points[j] - self.points[i] ).length() < r:
+						expectedResult.append( j )
 
-					self.assertTrue( distToNearest <= r )
+				self.assertEqual( sorted( result ), expectedResult )
 
 	def doNearestNNeighbours(self, numPoints):
 
