@@ -263,28 +263,10 @@ void KDTree<PointIterator>::nearestNeighbours( const Point &p, BaseType r, F &&f
 }
 
 template<class PointIterator>
-unsigned int KDTree<PointIterator>::nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const
-{
-	nearNeighbours.clear();
-
-	nearestNeighbours( p, r, [&nearNeighbours]( PointIterator &it ){ nearNeighbours.push_back( it ); } );
-
-	return nearNeighbours.size();
-}
-
-template<class PointIterator>
-template<typename Box, typename F, std::enable_if_t< !Detail::IsIterator<F>::value, bool >>
+template<typename Box, typename F >
 void KDTree<PointIterator>::enclosedPoints( const Box &bound, F &&functor ) const
 {
 	enclosedPointsWalk( rootIndex(), bound, functor );
-}
-
-// \deprecated wrapper
-template<class PointIterator>
-template<typename Box, typename OutputIterator, std::enable_if_t< Detail::IsIterator<OutputIterator>::value, bool >>
-void KDTree<PointIterator>::enclosedPoints( const Box &bound, OutputIterator it ) const
-{
-	enclosedPoints( bound, [&it]( PointIterator &p ){ *it++ = p; } );
 }
 
 template<class PointIterator>
