@@ -186,6 +186,7 @@ class KDTree
 		NodeVector m_nodes;
 		int m_maxLeafSize;
 		PointIterator m_lastPoint;
+		std::pair< Point, Point > m_bound;
 
 };
 

@@ -147,29 +147,14 @@ void KDTree<PointIterator>::init( PointIterator first, PointIterator last, int m
 	// If we need accurate sizes for Nodes on the exterior of the tree ( rather than treating them as
 	// infinite ), we need to include the bound as well ( this can be particularly important when the
 	// data is an axis-aligned plane, where every node on the "exterior" in the Z axis ).
-	std::pair<Point,Point> totalBound = bound( m_perm.begin(), m_perm.end() );
+	m_bound = bound( m_perm.begin(), m_perm.end() );
 
 	// We've got a special case for the first level - we need to compute the overall bound anyway,
 	// so we precompute the major axis to avoid recomputing this bound at the first level.
-	int precomputedAxis = majorAxis( totalBound );
+	int precomputedAxis = majorAxis( m_bound );
 
 	/// \todo Can we reserve() enough space for m_nodes before doing this?
 	build( rootIndex(), m_perm.begin(), m_perm.end(), precomputedAxis );
-
-	// \todo : The total bound should be stored as an m_bound member variable, but that requires waiting for
-	// a major version, so we need to stash it somewhere else for now. Since the tree has now been fully
-	// built, and ends with leaf nodes that will stop further traversal, no one will notice if we stick
-	// some dummy nodes on the end of the list to store this bound.
-
-	m_nodes.reserve( m_nodes.size() + VectorTraits<Point>::dimensions() * 2 );
-
-	for( unsigned char i=0; i<VectorTraits<Point>::dimensions(); i++ )
-	{
-		m_nodes.push_back( Node() );
-		m_nodes.back().m_cutValue = totalBound.first[i];
-		m_nodes.push_back( Node() );
-		m_nodes.back().m_cutValue = totalBound.second[i];
-	}
 }
 
 template<class PointIterator>
@@ -314,28 +299,15 @@ void KDTree<PointIterator>::enclosedPoints(
 		throw IECore::Exception( "Mismatched normals and origins passed to enclosedPoints" );
 	}
 
-	// \todo : We should be accessing this bound from an m_bound member variable, but since
-	// we can't add a member variable yet, we're awkwardly pulling this data from some dummy
-	// nodes stuck to the end of the node list.
-	size_t dummyNodesStartOffset = m_nodes.size() - VectorTraits<Point>::dimensions() * 2;
-	std::pair<Point,Point> totalBound;
-
-	for( unsigned char i=0; i<VectorTraits<Point>::dimensions(); i++ )
-	{
-		totalBound.first[i] = m_nodes[dummyNodesStartOffset + 2 * i ].m_cutValue;
-		totalBound.second[i] = m_nodes[dummyNodesStartOffset + 2 * i + 1 ].m_cutValue;
-	}
-
 	workingData.resize( normals.size() );
 	for( size_t i = 0; i < normals.size(); i++ )
 	{
 		workingData[i].normal = normals[i];
 		workingData[i].threshold = vecDot( normals[i], origins[i] );
-
 		
 		for( unsigned char j=0; j<VectorTraits<Point>::dimensions(); j++ )
 		{
-			workingData[i].currentInnermost[j] = std::max( normals[i][j] * totalBound.first[j], normals[i][j] * totalBound.second[j] );
+			workingData[i].currentInnermost[j] = std::max( normals[i][j] * m_bound.first[j], normals[i][j] * m_bound.second[j] );
 		}
 	}
 
