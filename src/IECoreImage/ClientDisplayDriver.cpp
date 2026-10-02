@@ -72,7 +72,7 @@ class ClientDisplayDriver::PrivateData : public RefCounted
 			m_socket.close();
 		}
 
-		boost::asio::io_service m_service;
+		boost::asio::io_context m_service;
 		std::string m_host;
 		std::string m_port;
 		bool m_scanLineOrderOnly;
