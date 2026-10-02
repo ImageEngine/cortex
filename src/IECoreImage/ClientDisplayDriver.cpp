@@ -96,17 +96,21 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	m_data->m_port = displayPortData->readable();
 
 	tcp::resolver resolver(m_data->m_service);
-	tcp::resolver::query query(m_data->m_host, m_data->m_port);
 
 	boost::system::error_code error;
-	tcp::resolver::iterator iterator = resolver.resolve( query, error );
+	auto endpoints = resolver.resolve( m_data->m_host, m_data->m_port, tcp::resolver::address_configured, error );
 	if( !error )
 	{
 		error = boost::asio::error::host_not_found;
-		while( error && iterator != tcp::resolver::iterator() )
+		for( const auto &e : endpoints )
 		{
 			m_data->m_socket.close();
-			m_data->m_socket.connect( *iterator++, error );
+			m_data->m_socket.connect( e, error );
+
+			if( !error )
+			{
+				break;
+			}
 		}
 	}
 	if( error )
