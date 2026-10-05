@@ -35,7 +35,6 @@
 """Unit test for VectorData binding"""
 
 import math
-import os
 import unittest
 import imath
 
@@ -1269,7 +1268,7 @@ class TestVectorDataToString( unittest.TestCase ) :
 
 class TestVectorDataHashOptimisation( unittest.TestCase ) :
 
-	@unittest.skipIf( os.environ.get("TRAVIS", False), "'TRAVIS' env var defined - skipping unreliable test" )
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Timing tests fail intermittently on macOS CI" )
 	def test( self ) :
 
 		d = IECore.IntVectorData( 100 * 1024 * 1024 )
