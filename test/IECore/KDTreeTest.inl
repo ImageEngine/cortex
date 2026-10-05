@@ -86,7 +86,7 @@ void KDTreeTest<T>::testNearestNeighbours()
 	IteratorVector nearNeighbours;
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
 	{
-		typename T::BaseType radius = 0.05;
+		typename VectorTraits<T>::BaseType radius = 0.05;
 		unsigned int numNeighbours = m_tree->nearestNeighbours( *it, radius, nearNeighbours );
 
 		BOOST_CHECK(numNeighbours <= m_numPoints);
@@ -109,6 +109,36 @@ void KDTreeTest<T>::testNearestNeighbours()
 
 		}
 	}
+}
+
+template<typename T>
+void KDTreeTest<T>::testEnclosedPointsHalfSpaces()
+{
+	T origin;
+	T normal;
+
+	for ( unsigned int i = 0; i < VectorTraits< T >::dimensions(); i++)
+	{
+		origin[ i ] = m_randGen.nextf() * 0.1f;
+		normal[ i ] = 2.0f * m_randGen.nextf() - 1.0f;
+	}
+
+	std::vector<size_t> result;
+	m_tree->enclosedPoints( { normal }, { origin }, [&result, this]( auto &it ){ result.push_back( it - m_points.begin() ); } );
+
+	std::vector<size_t> expectedResult;
+
+	for( size_t i = 0; i < m_points.size(); i++ )
+	{
+		if( vecDot( vecSub( m_points[i], origin ), normal ) > 0.0f )
+		{
+			expectedResult.push_back( i );
+		}
+	}
+
+	std::sort( result.begin(), result.end() );
+
+	BOOST_CHECK( result == expectedResult );
 }
 
 template<typename T>
@@ -167,8 +197,8 @@ void KDTreeTest<T>::testNearestNNeighbours()
 
 			if( !found )
 			{
-				typename T::BaseType distanceToRandomPt = vecDistance2(*randomPt, *it);
-				typename T::BaseType distanceToFurthestNeighbour = vecDistance2(*furthest, *it);
+				typename VectorTraits<T>::BaseType distanceToRandomPt = vecDistance2(*randomPt, *it);
+				typename VectorTraits<T>::BaseType distanceToFurthestNeighbour = vecDistance2(*furthest, *it);
 
 				BOOST_CHECK( distanceToRandomPt >= distanceToFurthestNeighbour);
 			}

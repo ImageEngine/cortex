@@ -40,6 +40,7 @@ import unittest
 
 import pxr.Usd
 import pxr.Sdf
+import pxr.Tf
 
 import imath
 
@@ -1262,6 +1263,23 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		primitiveVariable = mesh["customConstant"]
 		self.assertTrue( primitiveVariable )
 		self.assertEqual( primitiveVariable.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
+
+	def testSubLayerIntoLiveStage( self ) :
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDSubLayer.scc" )
+		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
+		t = m.createChild( "t" )
+		del m, t
+
+		root = pxr.Sdf.Layer.CreateAnonymous( ".usda" )
+		stage = pxr.Usd.Stage.Open( root )
+
+		mark = pxr.Tf.Error.Mark()
+		mark.SetMark()
+		root.subLayerPaths.append( fileName )
+		self.assertTrue( mark.IsClean() )
+
+		self.assertTrue( stage.GetPrimAtPath( "/__IECOREUSD_ROOT/t" ) )
+
 
 if __name__ == "__main__":
 	unittest.main()

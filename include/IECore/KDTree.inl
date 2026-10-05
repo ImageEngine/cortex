@@ -33,9 +33,11 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/BoxOps.h"
+#include "IECore/Exception.h"
 #include "IECore/VectorOps.h"
 
 #include <algorithm>
+#include "boost/container/small_vector.hpp"
 
 namespace IECore
 {
@@ -108,6 +110,14 @@ class KDTree<PointIterator>::AxisSort
 		const unsigned int m_axis;
 };
 
+template<class PointIterator>
+struct KDTree<PointIterator>::HalfSpaceWorkingData
+{
+	Point normal;
+	Point currentInnermost;
+	BaseType threshold;
+};
+
 // initialisation
 
 template<class PointIterator>
@@ -122,7 +132,7 @@ KDTree<PointIterator>::KDTree( PointIterator first, PointIterator last, int maxL
 }
 
 template<class PointIterator>
-void KDTree<PointIterator>::init( PointIterator first, PointIterator last, int maxLeafSize  )
+void KDTree<PointIterator>::init( PointIterator first, PointIterator last, int maxLeafSize )
 {
 	m_maxLeafSize = maxLeafSize;
 	m_lastPoint = last;
@@ -133,14 +143,40 @@ void KDTree<PointIterator>::init( PointIterator first, PointIterator last, int m
 		m_perm[i++] = it;
 	}
 
+	// The cut planes we store only limit the size of each Node within the interior of the KDTree.
+	// If we need accurate sizes for Nodes on the exterior of the tree ( rather than treating them as
+	// infinite ), we need to include the bound as well ( this can be particularly important when the
+	// data is an axis-aligned plane, where every node on the "exterior" in the Z axis ).
+	std::pair<Point,Point> totalBound = bound( m_perm.begin(), m_perm.end() );
+
+	// We've got a special case for the first level - we need to compute the overall bound anyway,
+	// so we precompute the major axis to avoid recomputing this bound at the first level.
+	int precomputedAxis = majorAxis( totalBound );
+
 	/// \todo Can we reserve() enough space for m_nodes before doing this?
-	build( rootIndex(), m_perm.begin(), m_perm.end() );
+	build( rootIndex(), m_perm.begin(), m_perm.end(), precomputedAxis );
+
+	// \todo : The total bound should be stored as an m_bound member variable, but that requires waiting for
+	// a major version, so we need to stash it somewhere else for now. Since the tree has now been fully
+	// built, and ends with leaf nodes that will stop further traversal, no one will notice if we stick
+	// some dummy nodes on the end of the list to store this bound.
+
+	m_nodes.reserve( m_nodes.size() + VectorTraits<Point>::dimensions() * 2 );
+
+	for( unsigned char i=0; i<VectorTraits<Point>::dimensions(); i++ )
+	{
+		m_nodes.push_back( Node() );
+		m_nodes.back().m_cutValue = totalBound.first[i];
+		m_nodes.push_back( Node() );
+		m_nodes.back().m_cutValue = totalBound.second[i];
+	}
 }
 
 template<class PointIterator>
-unsigned char KDTree<PointIterator>::majorAxis( PermutationConstIterator permFirst, PermutationConstIterator permLast )
+std::pair<typename KDTree<PointIterator>::Point, typename KDTree<PointIterator>::Point> KDTree<PointIterator>::bound( PermutationConstIterator permFirst, PermutationConstIterator permLast )
 {
-	Point min, max;
+	Point min;
+	Point max;
 	for( unsigned char i=0; i<VectorTraits<Point>::dimensions(); i++ ) {
 		min[i] = std::numeric_limits<BaseType>::max();
 		max[i] = std::numeric_limits<BaseType>::lowest();
@@ -159,8 +195,14 @@ unsigned char KDTree<PointIterator>::majorAxis( PermutationConstIterator permFir
 			}
 		}
 	}
+	return { min, max };
+}
+
+template<class PointIterator>
+unsigned char KDTree<PointIterator>::majorAxis( const std::pair<Point, Point> &bound )
+{
 	unsigned char major = 0;
-	Point size = max - min;
+	Point size = bound.second - bound.first;
 	for( unsigned char i=1; i<VectorTraits<Point>::dimensions(); i++ )
 	{
 		if( size[i] > size[major] )
@@ -172,7 +214,7 @@ unsigned char KDTree<PointIterator>::majorAxis( PermutationConstIterator permFir
 }
 
 template<class PointIterator>
-void KDTree<PointIterator>::build( NodeIndex nodeIndex, PermutationIterator permFirst, PermutationIterator permLast )
+void KDTree<PointIterator>::build( NodeIndex nodeIndex, PermutationIterator permFirst, PermutationIterator permLast, int precomputedAxis )
 {
 	// make room for the new node
 	if( nodeIndex>=m_nodes.size() )
@@ -182,8 +224,18 @@ void KDTree<PointIterator>::build( NodeIndex nodeIndex, PermutationIterator perm
 
 	if( permLast - permFirst > m_maxLeafSize )
 	{
-		unsigned int cutAxis = majorAxis( permFirst, permLast );
-		PermutationIterator permMid = permFirst  + (permLast - permFirst)/2;
+		unsigned int cutAxis;
+		if( precomputedAxis == -1 )
+		{
+			std::pair<Point, Point> b = bound( permFirst, permLast );
+			cutAxis = majorAxis( b );
+		}
+		else
+		{
+			cutAxis = precomputedAxis;
+		}
+
+		PermutationIterator permMid = permFirst + (permLast - permFirst)/2;
 		std::nth_element( permFirst, permMid, permLast, AxisSort( cutAxis ) );
 		BaseType cutValue = (**permMid)[cutAxis];
 		// insert node
@@ -219,20 +271,75 @@ PointIterator KDTree<PointIterator>::nearestNeighbour( const Point &p, BaseType 
 }
 
 template<class PointIterator>
+template<typename F>
+void KDTree<PointIterator>::nearestNeighbours( const Point &p, BaseType r, F &&functor ) const
+{
+	nearestNeighboursWalk(rootIndex(), p, r*r, functor );
+}
+
+template<class PointIterator>
 unsigned int KDTree<PointIterator>::nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const
 {
 	nearNeighbours.clear();
 
-	nearestNeighboursWalk(rootIndex(), p, r*r, nearNeighbours );
+	nearestNeighbours( p, r, [&nearNeighbours]( PointIterator &it ){ nearNeighbours.push_back( it ); } );
 
 	return nearNeighbours.size();
 }
 
 template<class PointIterator>
-template<typename Box, typename OutputIterator>
+template<typename Box, typename F, std::enable_if_t< !Detail::IsIterator<F>::value, bool >>
+void KDTree<PointIterator>::enclosedPoints( const Box &bound, F &&functor ) const
+{
+	enclosedPointsWalk( rootIndex(), bound, functor );
+}
+
+// \deprecated wrapper
+template<class PointIterator>
+template<typename Box, typename OutputIterator, std::enable_if_t< Detail::IsIterator<OutputIterator>::value, bool >>
 void KDTree<PointIterator>::enclosedPoints( const Box &bound, OutputIterator it ) const
 {
-	enclosedPointsWalk( rootIndex(), bound, it );
+	enclosedPoints( bound, [&it]( PointIterator &p ){ *it++ = p; } );
+}
+
+template<class PointIterator>
+template<typename F>
+void KDTree<PointIterator>::enclosedPoints(
+	const std::vector<Point> &normals, const std::vector<Point> &origins, F &&functor
+) const
+{
+	std::vector<HalfSpaceWorkingData> workingData;
+	if( normals.size() != origins.size() )
+	{
+		throw IECore::Exception( "Mismatched normals and origins passed to enclosedPoints" );
+	}
+
+	// \todo : We should be accessing this bound from an m_bound member variable, but since
+	// we can't add a member variable yet, we're awkwardly pulling this data from some dummy
+	// nodes stuck to the end of the node list.
+	size_t dummyNodesStartOffset = m_nodes.size() - VectorTraits<Point>::dimensions() * 2;
+	std::pair<Point,Point> totalBound;
+
+	for( unsigned char i=0; i<VectorTraits<Point>::dimensions(); i++ )
+	{
+		totalBound.first[i] = m_nodes[dummyNodesStartOffset + 2 * i ].m_cutValue;
+		totalBound.second[i] = m_nodes[dummyNodesStartOffset + 2 * i + 1 ].m_cutValue;
+	}
+
+	workingData.resize( normals.size() );
+	for( size_t i = 0; i < normals.size(); i++ )
+	{
+		workingData[i].normal = normals[i];
+		workingData[i].threshold = vecDot( normals[i], origins[i] );
+
+		
+		for( unsigned char j=0; j<VectorTraits<Point>::dimensions(); j++ )
+		{
+			workingData[i].currentInnermost[j] = std::max( normals[i][j] * totalBound.first[j], normals[i][j] * totalBound.second[j] );
+		}
+	}
+
+	enclosedPointsHalfSpacesWalk( rootIndex(), workingData, functor );
 }
 
 template<class PointIterator>
@@ -294,7 +401,8 @@ void KDTree<PointIterator>::nearestNeighbourWalk( NodeIndex nodeIndex, const Poi
 }
 
 template<class PointIterator>
-void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, std::vector<PointIterator> &nearNeighbours ) const
+template<typename F>
+void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Point &p, BaseType r2, F &&functor ) const
 {
 	const Node &node = m_nodes[nodeIndex];
 	if( node.isLeaf() )
@@ -307,7 +415,7 @@ void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Po
 
 			if (dist2 < r2 )
 			{
-				nearNeighbours.push_back( *perm );
+				functor( *perm );
 			}
 		}
 	}
@@ -327,10 +435,10 @@ void KDTree<PointIterator>::nearestNeighboursWalk( NodeIndex nodeIndex, const Po
 			secondChild = highChildIndex( nodeIndex );
 		}
 
-		nearestNeighboursWalk( firstChild, p, r2, nearNeighbours );
+		nearestNeighboursWalk( firstChild, p, r2, functor );
 		if( d*d < r2 )
 		{
-			nearestNeighboursWalk( secondChild, p, r2, nearNeighbours );
+			nearestNeighboursWalk( secondChild, p, r2, functor );
 		}
 	}
 }
@@ -398,8 +506,8 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 }
 
 template<class PointIterator>
-template<typename Box, typename OutputIterator>
-void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const
+template<typename Box, typename F>
+void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, F &&functor ) const
 {
 	const Node &node = m_nodes[nodeIndex];
 
@@ -411,7 +519,7 @@ void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &
 			const Point &pp = **perm;
 			if( boxIntersects( bound, pp ) )
 			{
-				*it++ = *perm;
+				functor( *perm );
 			}
 		}
 	}
@@ -419,11 +527,100 @@ void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &
 	{
 		if( vecGet( BoxTraits<Box>::min( bound ), node.cutAxis() ) <= node.cutValue() )
 		{
-			enclosedPointsWalk( lowChildIndex( nodeIndex ), bound, it );
+			enclosedPointsWalk( lowChildIndex( nodeIndex ), bound, functor );
 		}
 		if( vecGet( BoxTraits<Box>::max( bound ), node.cutAxis() ) >= node.cutValue() )
 		{
-			enclosedPointsWalk( highChildIndex( nodeIndex ), bound, it );
+			enclosedPointsWalk( highChildIndex( nodeIndex ), bound, functor );
+		}
+	}
+}
+
+template<class PointIterator>
+template<typename F>
+void KDTree<PointIterator>::enclosedPointsHalfSpacesWalk( NodeIndex nodeIndex, std::vector<HalfSpaceWorkingData> &working, F &&functor ) const
+{
+	const Node &node = m_nodes[nodeIndex];
+
+	if( node.isLeaf() )
+	{
+		PointIterator *permLast = node.permLast();
+		for( PointIterator *perm = node.permFirst(); perm!=permLast; perm++ )
+		{
+			const Point &pp = **perm;
+			bool reject = false;
+			for( HalfSpaceWorkingData &halfSpace : working )
+			{
+				if( vecDot( pp, halfSpace.normal ) < halfSpace.threshold )
+				{
+					reject = true;
+					break;
+				}
+			}
+
+			if( !reject )
+			{
+				functor( *perm );
+			}
+		}
+	}
+	else
+	{
+		unsigned char cutAxis = node.cutAxis();
+		BaseType cutValue = node.cutValue();
+
+		boost::container::small_vector<BaseType, 6> restoreInnermost;
+		restoreInnermost.reserve( working.size() );
+
+		for( HalfSpaceWorkingData &halfSpace : working )
+		{
+			restoreInnermost.push_back( halfSpace.currentInnermost[ cutAxis ] );
+		}
+
+		bool rejectLow = false;
+		for( HalfSpaceWorkingData &halfSpace : working )
+		{
+			if( halfSpace.normal[ cutAxis ] > BaseType( 0 ) )
+			{
+				halfSpace.currentInnermost[ cutAxis ] = halfSpace.normal[ cutAxis ] * cutValue;
+				if( vecSumElements( halfSpace.currentInnermost ) < halfSpace.threshold )
+				{
+					rejectLow = true;
+				}
+			}
+		}
+
+		if( !rejectLow )
+		{
+			enclosedPointsHalfSpacesWalk( lowChildIndex( nodeIndex ), working, functor );
+		}
+
+		bool rejectHigh = false;
+		for( size_t i = 0; i < working.size(); i++ )
+		{
+			HalfSpaceWorkingData &halfSpace = working[i];
+			if( halfSpace.normal[ cutAxis ] < BaseType( 0 ) )
+			{
+				halfSpace.currentInnermost[ cutAxis ] = halfSpace.normal[ cutAxis ] * cutValue;
+				if( vecSumElements( halfSpace.currentInnermost ) < halfSpace.threshold )
+				{
+					rejectHigh = true;
+				}
+			}
+			else
+			{
+				halfSpace.currentInnermost[ cutAxis ] = restoreInnermost[i];
+			}
+		}
+
+		if( !rejectHigh )
+		{
+			enclosedPointsHalfSpacesWalk( highChildIndex( nodeIndex ), working, functor );
+		}
+
+		for( size_t i = 0; i < working.size(); i++ )
+		{
+			working[i].currentInnermost[ cutAxis ] = restoreInnermost[i];
 		}
 	}
 }

@@ -164,6 +164,9 @@ inline T vecConstruct( const typename VectorTraits<T>::BaseType *components );
 template<typename T>
 inline T vecCross( const T &v1, const T &v2 );
 
+template<typename T>
+inline typename VectorTraits<T>::BaseType vecSumElements( const T &v );
+
 } // namespace IECore
 
 #include "IECore/VectorOps.inl"
