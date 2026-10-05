@@ -65,6 +65,7 @@ class KDTreeTest
 		void testNearestNeighbour();
 		void testNearestNeighbours();
 		void testNearestNNeighbours();
+		void testEnclosedPointsHalfSpaces();
 
 	private:
 
@@ -84,6 +85,30 @@ class KDTreeTest
 
 };
 
+// I'm trying to use this test to document the current requirements we have for the types we support.
+// It's not sufficient to specialize VectorTraits, we also require that the vector type behave mostly
+// like an Imath vector. This requirement just arose over time because we only actually needed support
+// for Imath vectors, and Maya's MPoint/MVector, both of which support some standard interface for
+// vectors, like operator[] and operator-.
+struct TestVecType
+{
+	float v[3] = { 0, 0, 0 };
+
+	float &operator[]( int i ){ return v[i]; };
+	const float &operator[]( int i ) const { return v[i]; };
+
+	TestVecType operator-( const TestVecType &a ) const { return { v[0] - a.v[0], v[1] - a.v[1], v[2] - a.v[2] }; };
+};
+
+template<>
+struct VectorTraits<TestVecType>
+{
+	typedef float BaseType;
+	static unsigned int dimensions() { return 3; };
+	static double get( const TestVecType &v, unsigned int i ) { return v.v[i]; };
+	static void set( TestVecType &v, unsigned int i, float x ) { v.v[i] = x; };
+};
+
 template<unsigned int N>
 struct KDTreeTestSuite : public boost::unit_test::test_suite
 {
@@ -94,6 +119,7 @@ struct KDTreeTestSuite : public boost::unit_test::test_suite
 		addTest<Imath::V3d>( "V3d" );
 		addTest<Imath::V2f>( "V2f" );
 		addTest<Imath::V2d>( "V2d" );
+		addTest<TestVecType>( "TestVecType" );
 	}
 
 	template<typename T>
@@ -110,6 +136,10 @@ struct KDTreeTestSuite : public boost::unit_test::test_suite
 		add( test );
 
 		test = BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNNeighbours, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testEnclosedPointsHalfSpaces, instance );
 		test->p_name.set( test->p_name.get() + nameSuffix );
 		add( test );
 	}

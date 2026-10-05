@@ -61,15 +61,14 @@ class TestKDTree:
 
 		for i in range(0, numPoints):
 			for r in self.radii:
-				pIdxArray = self.tree.nearestNeighbours( self.points[i], r )
+				result = self.tree.nearestNeighbours( self.points[i], r )
 
-				for pIdx in pIdxArray:
-					self.assertTrue(pIdx >= 0)
-					self.assertTrue(pIdx < numPoints)
-					nearestPt = self.points[pIdx]
-					distToNearest = (self.points[pIdx] - self.points[i]).length()
+				expectedResult = []
+				for j in range( self.points.size() ) :
+					if ( self.points[j] - self.points[i] ).length() < r:
+						expectedResult.append( j )
 
-					self.assertTrue( distToNearest <= r )
+				self.assertEqual( sorted( result ), expectedResult )
 
 	def doNearestNNeighbours(self, numPoints):
 
@@ -129,6 +128,40 @@ class TestKDTree:
 				else :
 					self.assertFalse( i in s )
 
+	def doEnclosedPointsHalfSpaces( self, numPoints ) :
+
+		self.makeTree( numPoints )
+
+		for i in range( 0, 50 ) :
+			if i < 10:
+				# Test with a single random halfspace
+				normals = type( self.points )( [ (2 * self.randomVec() - 1) ] )
+				origins = type( self.points )( [ self.randomVec() ] )
+			elif i < 20:
+				# Test with 6 halfspaces that are guaranteed to contain some actual volume
+				# ( since they are chosen to be tangent to the surface of a sphere )
+				normals = type( self.points )( [ (2 * self.randomVec() - 1).normalized() for i in range( 6 ) ] )
+				origins = type( self.points )( [ -n * 0.25 + 0.5 for n in normals ] )
+			else:
+				# Test with three totally random halfspaces that may or may not intersect
+				# to contain anything
+				normals = type( self.points )( [ (2 * self.randomVec() - 1) for i in range( 3 ) ] )
+				origins = type( self.points )( [ self.randomVec() for i in range( 3 ) ] )
+
+			result = self.tree.enclosedPoints( normals, origins )
+
+			expectedResult = []
+			for i in range( self.points.size() ) :
+				reject = False
+				for n,o in zip( normals, origins ):
+					if ( self.points[i] - o ).dot( n ) < 0:
+						reject = True
+
+				if not reject:
+					expectedResult.append( i )
+
+			self.assertEqual( sorted( result ), expectedResult )
+
 
 class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 
@@ -147,6 +180,9 @@ class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 		min = imath.V2f( random.random(), random.random() )
 		max = min + imath.V2f( random.random(), random.random() )
 		return imath.Box2f( min, max )
+
+	def randomVec( self ):
+		return imath.V2f( random.random(), random.random() )
 
 	def testConstructors(self):
 		"""Test KDTreeV2f constructors"""
@@ -178,6 +214,12 @@ class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 		for t in self.treeSizes:
 			self.doEnclosedPoints(t)
 
+	def testEnclosedPointsHalfSpaces(self):
+		"""Test KDTreeV2f enclosedPointsHalfSpaces"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPointsHalfSpaces(t)
+
 class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 
 	def makeTree(self, numPoints):
@@ -195,6 +237,9 @@ class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 		min = imath.V2d( random.random(), random.random() )
 		max = min + imath.V2d( random.random(), random.random() )
 		return imath.Box2d( min, max )
+
+	def randomVec( self ):
+		return imath.V2d( random.random(), random.random() )
 
 	def testConstructors(self):
 		"""Test KDTreeV2d constructors"""
@@ -226,6 +271,12 @@ class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 		for t in self.treeSizes:
 			self.doEnclosedPoints(t)
 
+	def testEnclosedPointsHalfSpaces(self):
+		"""Test KDTreeV2d enclosedPointsHalfSpaces"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPointsHalfSpaces(t)
+
 class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 
 	def makeTree(self, numPoints):
@@ -243,6 +294,9 @@ class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 		min = imath.V3f( random.random(), random.random(), random.random() )
 		max = min + imath.V3f( random.random(), random.random(), random.random() )
 		return imath.Box3f( min, max )
+
+	def randomVec( self ):
+		return imath.V3f( random.random(), random.random(), random.random() )
 
 	def testConstructors(self):
 		"""Test KDTreeV3f constructors"""
@@ -274,6 +328,12 @@ class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 		for t in self.treeSizes:
 			self.doEnclosedPoints(t)
 
+	def testEnclosedPointsHalfSpaces(self):
+		"""Test KDTreeV3f enclosedPointsHalfSpaces"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPointsHalfSpaces(t)
+
 class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 
 	def makeTree(self, numPoints):
@@ -291,6 +351,9 @@ class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 		min = imath.V3d( random.random(), random.random(), random.random() )
 		max = min + imath.V3d( random.random(), random.random(), random.random() )
 		return imath.Box3d( min, max )
+
+	def randomVec( self ):
+		return imath.V3d( random.random(), random.random(), random.random() )
 
 	def testConstructors(self):
 		"""Test KDTreeV3d constructors"""
@@ -321,6 +384,12 @@ class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 
 		for t in self.treeSizes:
 			self.doEnclosedPoints(t)
+
+	def testEnclosedPointsHalfSpaces(self):
+		"""Test KDTreeV3d enclosedPointsHalfSpaces"""
+
+		for t in self.treeSizes:
+			self.doEnclosedPointsHalfSpaces(t)
 
 
 if __name__ == "__main__":
