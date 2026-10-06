@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.2.0)
 ========
 
+Build
+-----
 
+- Boost : Added compatibility with Boost 1.88.0.
 
 10.7.2.0 (relative to 10.7.1.3)
 ========
