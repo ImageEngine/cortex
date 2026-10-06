@@ -87,9 +87,12 @@ void KDTreeTest<T>::testNearestNeighbours()
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
 	{
 		typename VectorTraits<T>::BaseType radius = 0.05;
-		unsigned int numNeighbours = m_tree->nearestNeighbours( *it, radius, nearNeighbours );
+		nearNeighbours.clear();
+		m_tree->nearestNeighbours( *it, radius, [&nearNeighbours]( const typename Tree::Iterator &i ){
+			nearNeighbours.push_back( i );
+		} );
 
-		BOOST_CHECK(numNeighbours <= m_numPoints);
+		BOOST_CHECK(nearNeighbours.size() <= m_numPoints);
 
 		typename IteratorVector::const_iterator nit = nearNeighbours.begin();
 		for (; nit != nearNeighbours.end(); ++nit)

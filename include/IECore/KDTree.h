@@ -49,15 +49,6 @@ IECORE_POP_DEFAULT_VISIBILITY
 namespace IECore
 {
 
-namespace Detail
-{
-	// \todo - ugly machinery needed until we deprecate the old signature of enclosedPoints
-	template <typename, typename = void>
-	struct IsIterator : std::false_type {};
-	template <typename T>
-	struct IsIterator<T, std::void_t< typename std::iterator_traits<std::remove_cv_t<std::remove_reference_t<T>>>::iterator_category >> : std::true_type {};
-}
-
 /// The KDTree class provides accelerated searching of pointsets. It is
 /// templated so that it can operate on a wide variety of datatypes, and uses
 /// the VectorTraits.h and VectorOps.h functionality to assist in this.
@@ -107,8 +98,6 @@ class KDTree
 		/// The functor must take a PointIterator.
 		template<typename F>
 		void nearestNeighbours( const Point &p, BaseType r, F &&functor ) const;
-		/// \deprecated - use the form above that takes a functor, rather than this version that populates a vector.
-		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
 
 		class Neighbour;
 		/// Populates the passed vector with the N closest neighbours to p, sorted with the closest first. Returns the number found.
@@ -118,12 +107,8 @@ class KDTree
 		/// Finds all the points contained by the specified bound, outputting them to the specified functor,
 		/// which must take a PointIterator.
 		/// \threading May be called by multiple concurrent threads.
-		template<typename Box, typename F, std::enable_if_t< !Detail::IsIterator<F>::value, bool > = true>
+		template<typename Box, typename F>
 		void enclosedPoints( const Box &bound, F &&functor ) const;
-		/// \deprecated - use the form above that takes a functor ( once we get rid of this deprecated signature,
-		/// we can get rid of the ugly enable_if guard above ).
-		template<typename Box, typename OutputIterator, std::enable_if_t< Detail::IsIterator<OutputIterator>::value, bool > = true>
-		void enclosedPoints( const Box &bound, OutputIterator it ) const;
 
 		// Finds all the points contained within a set of half-spaces, passing them to the given
 		// functor which must take a PointIterator.
@@ -186,6 +171,7 @@ class KDTree
 		NodeVector m_nodes;
 		int m_maxLeafSize;
 		PointIterator m_lastPoint;
+		std::pair< Point, Point > m_bound;
 
 };
 
