@@ -258,6 +258,8 @@ static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, Ge
 	{ TfType::Find<VtArray<GfVec3i>>(), &dataFromArray<GfVec3i> },
 	{ TfType::Find<GfVec2f>(), &dataFromValue<GfVec2f> },
 	{ TfType::Find<VtArray<GfVec2f>>(), &dataFromArray<GfVec2f> },
+	{ TfType::Find<GfVec3h>(), &dataFromValue<GfVec3h> },
+	{ TfType::Find<VtArray<GfVec3h>>(), &dataFromArray<GfVec3h> },
 	{ TfType::Find<GfVec3f>(), &dataFromValue<GfVec3f> },
 	{ TfType::Find<VtArray<GfVec3f>>(), &dataFromArray<GfVec3f> },
 	{ TfType::Find<GfVec4f>(), &dataFromValue<GfVec4f> },

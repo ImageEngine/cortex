@@ -1,4 +1,4 @@
-10.7.x.x (relative to 10.7.2.0)
+10.7.x.x (relative to 10.7.3.0)
 ========
 
 Improvements
@@ -11,6 +11,19 @@ Breaking Changes
 
 - MeshAlgo : Changed the output of `reverseWinding()`.
 - KDTree : Removed deprecated function signatures.
+
+10.7.3.0 (relative to 10.7.2.0)
+========
+
+Features
+--------
+
+- USD : Added read support for `ParticleField3DGaussianSplat`.
+
+Build
+-----
+
+- Boost : Added compatibility with Boost 1.88.0.
 
 10.7.2.0 (relative to 10.7.1.3)
 ========

@@ -77,7 +77,7 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 	}
 	if( t )
 	{
-		if( t->readable()=="particle" || t->readable()=="disk" || t->readable()=="blobby" )
+		if( t->readable()=="particle" || t->readable()=="disk" || t->readable()=="blobby" || t->readable() == "gaussianSplat" )
 		{
 			type = PointsPrimitive::Disk;
 		}

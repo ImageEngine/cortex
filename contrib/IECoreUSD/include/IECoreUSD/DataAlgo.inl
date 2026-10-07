@@ -98,6 +98,11 @@ inline Imath::Quatd fromUSDInternal( const pxr::GfQuatd &src )
 	return Imath::Quatd( src.GetReal(), Imath::V3d( v[0], v[1], v[2] ) );
 }
 
+inline Imath::V3f fromUSDInternal( const pxr::GfVec3h &src )
+{
+	return Imath::V3f( src[0], src[1], src[2] );
+}
+
 inline IECore::InternedString fromUSDInternal( const pxr::TfToken &src )
 {
 	return IECore::InternedString( src.GetString() );

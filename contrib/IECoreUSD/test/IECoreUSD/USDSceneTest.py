@@ -5158,5 +5158,38 @@ class USDSceneTest( unittest.TestCase ) :
 						self.assertEqual( child.readAttribute( "ri:surface", 0 ), surface )
 						self.assertEqual( child.readAttribute( "ri:surface:full", 0 ), surfaceFull )
 
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 26, 3 ), "ParticleField3DGaussianSplat not available" )
+	def testReadGaussianSplats( self ) :
+
+		for sceneFile in [ "gaussianSplatsFloat.usda", "gaussianSplatsHalf.usda" ] :
+			with self.subTest( sceneFile = sceneFile ) :
+				root = IECoreScene.SceneInterface.create( str( pathlib.Path( __file__ ).parent / "data" / sceneFile ), IECore.IndexedIO.OpenMode.Read )
+				object = root.child( "splats" )
+				self.assertTrue( object.hasObject() )
+
+				splats = object.readObject( 0.0 )
+				self.assertTrue( isinstance( splats, IECoreScene.PointsPrimitive ) )
+				self.assertEqual( splats.numPoints, 4 )
+
+				for variable, dataType, interpretation, vectorLength in [
+					( "P", IECore.V3fVectorData, IECore.GeometricData.Interpretation.Point, 4 ),
+					( "orientations", IECore.QuatfVectorData, None, 4 ),
+					( "scales", IECore.V3fVectorData, IECore.GeometricData.Interpretation.Numeric, 4 ),
+					( "opacities", IECore.FloatVectorData if sceneFile == "gaussianSplatsFloat.usda" else IECore.HalfVectorData, None, 4 ),
+					( "radiance:sphericalHarmonicsDegree", IECore.IntData, None, None ),
+				] :
+					with self.subTest( variable = variable ) :
+						self.assertIsInstance( splats[variable].data, dataType )
+						if interpretation is not None :
+							self.assertEqual( splats[variable].data.getInterpretation(), interpretation )
+						if vectorLength is not None :
+							self.assertEqual( len( splats[variable].data ), vectorLength )
+
+				for i in range( 0, 4 ) : # degree = 1, count = ( degree + 1 ) * ( degree + 1 )
+					variable = "radiance:sphericalHarmonicsCoefficients[{}]".format( i )
+					self.assertIsInstance( splats[variable].data, IECore.V3fVectorData )
+					self.assertEqual( splats[variable].data.getInterpretation(), IECore.GeometricData.Interpretation.None_ )
+					self.assertEqual( len( splats[variable].data ), 4 )
+
 if __name__ == "__main__":
 	unittest.main()

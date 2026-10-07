@@ -122,6 +122,9 @@ IECOREUSD_CORTEXTYPETRAITS_SPECIALISATION( Imath::Color3f, pxr::GfVec3f, true )
 // `GfQuath` and `GfQuatf`.
 /// \todo Should we convert to `Imath::Quat<half>` in Cortex instead?
 IECOREUSD_USDTYPETRAITS_SPECIALISATION( Imath::Quatf, pxr::GfQuath, false, IECore::TypedData )
+// Only specialising USDTypeTraits, because we can't map `V3f` to both
+// `GfVec3h` and `GfVec3f`.
+IECOREUSD_USDTYPETRAITS_SPECIALISATION( Imath::V3f, pxr::GfVec3h, false, IECore::GeometricTypedData )
 
 } // namespace IECoreUSD
 
