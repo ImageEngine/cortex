@@ -126,7 +126,7 @@ IECore::ObjectPtr readGaussianSplat( pxr::UsdVolParticleField3DGaussianSplat &sp
 				coefficients[j] = allCoefficients[j * coefficientCount + i];
 			}
 
-			newPoints->variables[fmt::format( "radiance:sphericalHarmonicsCoefficients[{}]", i )] = PrimitiveVariable( PrimitiveVariable::Interpolation::Vertex, coefficientsData );
+			newPoints->variables[fmt::format( "radiance:sphericalHarmonicsCoefficients:{}", i )] = PrimitiveVariable( PrimitiveVariable::Interpolation::Vertex, coefficientsData );
 		}
 	}
 

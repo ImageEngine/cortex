@@ -5186,7 +5186,7 @@ class USDSceneTest( unittest.TestCase ) :
 							self.assertEqual( len( splats[variable].data ), vectorLength )
 
 				for i in range( 0, 4 ) : # degree = 1, count = ( degree + 1 ) * ( degree + 1 )
-					variable = "radiance:sphericalHarmonicsCoefficients[{}]".format( i )
+					variable = "radiance:sphericalHarmonicsCoefficients:{}".format( i )
 					self.assertIsInstance( splats[variable].data, IECore.V3fVectorData )
 					self.assertEqual( splats[variable].data.getInterpretation(), IECore.GeometricData.Interpretation.None_ )
 					self.assertEqual( len( splats[variable].data ), 4 )

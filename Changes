@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.3.0)
 ========
 
+Fixes
+-----
 
+- USD : Changed name of `ParticleField3DGaussianSplat` `radiance:sphericalHarmonicsCoefficients` primitive variables to end in `:$COEFFICIENT` instead of `[$COEFFICIENT]`.
 
 10.7.3.0 (relative to 10.7.2.0)
 ========
