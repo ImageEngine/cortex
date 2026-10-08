@@ -5175,7 +5175,7 @@ class USDSceneTest( unittest.TestCase ) :
 					( "P", IECore.V3fVectorData, IECore.GeometricData.Interpretation.Point, 4 ),
 					( "orientations", IECore.QuatfVectorData, None, 4 ),
 					( "scales", IECore.V3fVectorData, IECore.GeometricData.Interpretation.Numeric, 4 ),
-					( "opacities", IECore.FloatVectorData if sceneFile == "gaussianSplatsFloat.usda" else IECore.HalfVectorData, None, 4 ),
+					( "opacities", IECore.FloatVectorData, None, 4 ),
 					( "radiance:sphericalHarmonicsDegree", IECore.IntData, None, None ),
 				] :
 					with self.subTest( variable = variable ) :

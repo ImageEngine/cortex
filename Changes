@@ -4,7 +4,9 @@
 Fixes
 -----
 
-- USD : Changed name of `ParticleField3DGaussianSplat` `radiance:sphericalHarmonicsCoefficients` primitive variables to end in `:$COEFFICIENT` instead of `[$COEFFICIENT]`.
+- USD :
+  - Changed name of `ParticleField3DGaussianSplat` `radiance:sphericalHarmonicsCoefficients` primitive variables to end in `:$COEFFICIENT` instead of `[$COEFFICIENT]`.
+  - Changed Cortex type of `ParticleField3DGaussianSplat` `opacities` primitive variable to be `FloatVectorData` regardless of the incoming USD type (float or half).
 
 10.7.3.0 (relative to 10.7.2.0)
 ========

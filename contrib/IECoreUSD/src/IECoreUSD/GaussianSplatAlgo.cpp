@@ -97,6 +97,19 @@ IECore::ObjectPtr readGaussianSplat( pxr::UsdVolParticleField3DGaussianSplat &sp
 	pxr::UsdAttribute opacitiesAttr;
 	splats.UsesFloatOpacities( &opacitiesAttr );
 	PrimitiveAlgo::readPrimitiveVariable( opacitiesAttr, time, newPoints.get(), "opacities" );
+	if( auto opacitiesHalfData = newPoints->variableData<HalfVectorData>( "opacities" ) )
+	{
+		// Cortex has HalfVectorData which supports half opacities. For consistency with
+		// other attributes and downstream clients, we convert to float.
+
+		const std::vector<half> &opacitiesHalf = opacitiesHalfData->readable();
+
+		FloatVectorDataPtr opacitiesData = new FloatVectorData();
+		opacitiesData->writable().insert( opacitiesData->writable().end(), opacitiesHalf.begin(), opacitiesHalf.end() );
+
+		PrimitiveVariable v = PrimitiveVariable( PrimitiveVariable::Interpolation::Vertex, opacitiesData );
+		newPoints->variables["opacities"] = v;
+	}
 
 	Canceller::check( canceller );
 	pxr::UsdAttribute degreeAttr = splats.GetRadianceSphericalHarmonicsDegreeAttr();
