@@ -5175,7 +5175,7 @@ class USDSceneTest( unittest.TestCase ) :
 					( "P", IECore.V3fVectorData, IECore.GeometricData.Interpretation.Point, 4 ),
 					( "orientations", IECore.QuatfVectorData, None, 4 ),
 					( "scales", IECore.V3fVectorData, IECore.GeometricData.Interpretation.Numeric, 4 ),
-					( "opacities", IECore.FloatVectorData if sceneFile == "gaussianSplatsFloat.usda" else IECore.HalfVectorData, None, 4 ),
+					( "opacities", IECore.FloatVectorData, None, 4 ),
 					( "radiance:sphericalHarmonicsDegree", IECore.IntData, None, None ),
 				] :
 					with self.subTest( variable = variable ) :
@@ -5186,7 +5186,7 @@ class USDSceneTest( unittest.TestCase ) :
 							self.assertEqual( len( splats[variable].data ), vectorLength )
 
 				for i in range( 0, 4 ) : # degree = 1, count = ( degree + 1 ) * ( degree + 1 )
-					variable = "radiance:sphericalHarmonicsCoefficients[{}]".format( i )
+					variable = "radiance:sphericalHarmonicsCoefficients:{}".format( i )
 					self.assertIsInstance( splats[variable].data, IECore.V3fVectorData )
 					self.assertEqual( splats[variable].data.getInterpretation(), IECore.GeometricData.Interpretation.None_ )
 					self.assertEqual( len( splats[variable].data ), 4 )
