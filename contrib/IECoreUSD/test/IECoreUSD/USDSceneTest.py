@@ -54,6 +54,7 @@ import IECoreUSD
 import pxr.Usd
 import pxr.UsdGeom
 import pxr.UsdLux
+import pxr.UsdVol
 
 if pxr.Usd.GetVersion() < ( 0, 19, 3 ) :
 	pxr.Usd.Attribute.HasAuthoredValue = pxr.Usd.Attribute.HasAuthoredValueOpinion
@@ -5192,6 +5193,196 @@ class USDSceneTest( unittest.TestCase ) :
 					self.assertIsInstance( splats[variable].data, IECore.V3fVectorData )
 					self.assertEqual( splats[variable].data.getInterpretation(), IECore.GeometricData.Interpretation.None_ )
 					self.assertEqual( len( splats[variable].data ), 4 )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 26, 3 ), "ParticleField3DGaussianSplat not available" )
+	def testWriteGaussianSplats( self ) :
+
+		fileName = pathlib.Path( self.temporaryDirectory() ) / "usd_splats.usda"
+
+		sceneWrite = IECoreScene.SceneInterface.create( str( fileName ), IECore.IndexedIO.OpenMode.Write )
+		root = sceneWrite.createChild( "root" )
+
+		nPoints = 16
+		degree = 2
+
+		positionsData = IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, nPoints ) ] )
+
+		cortexSplats = IECoreScene.PointsPrimitive( positionsData )
+
+		typeData = IECore.StringData( "gaussianSplat" )
+		cortexSplats["type"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, typeData )
+		orientationsData = IECore.QuatfVectorData( [ imath.Quatf( i, imath.V3f( i ) ) for i in range( 0, nPoints ) ] )
+		cortexSplats["orientations"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, orientationsData )
+		scalesData = IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, nPoints ) ] )
+		cortexSplats["scales"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, scalesData )
+		opacitiesData = IECore.FloatVectorData( [ i / nPoints for i in range( 0, nPoints ) ] )
+		cortexSplats["opacities"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, opacitiesData )
+		projectionModeHintData = IECore.InternedStringData( "tangential" )
+		cortexSplats["projectionModeHint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, projectionModeHintData )
+		sortingModeHintData = IECore.InternedStringData( "cameraDistance" )
+		cortexSplats["sortingModeHint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, sortingModeHintData )
+		degreeData = IECore.IntData( degree )
+		cortexSplats["radiance:sphericalHarmonicsDegree"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, degreeData )
+		nCoefficients = ( degree + 1 ) * ( degree + 1 )
+		coefficientsData = []
+		for i in range( 0, nCoefficients ) :
+			coefficientsData.append( IECore.V3fVectorData( [ imath.V3f( j ) for j in range( 0, nPoints ) ] ) )
+			cortexSplats[f"radiance:sphericalHarmonicsCoefficients:{i}"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, coefficientsData[i] )
+
+		displayColorData = IECore.Color3fVectorData( [ imath.Color3f( i ) for i in range( 0, nPoints ) ] )
+		cortexSplats["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, displayColorData )
+
+		root.writeObject( cortexSplats, 0.0 )
+
+		del root
+		del sceneWrite
+
+		# Check USD loading
+
+		usdFile = pxr.Usd.Stage.Open( str( fileName ) )
+		usdSplats = pxr.UsdVol.ParticleField3DGaussianSplat.Get( usdFile, "/root" )
+
+		orientationsAttr = usdSplats.GetOrientationsAttr()
+		orientations = orientationsAttr.Get( 0 )
+		self.assertEqual( list( orientationsData ), [ imath.Quatf( i.GetReal(), imath.V3f( *i.GetImaginary() ) ) for i in orientations ] )
+
+		scalesAttr = usdSplats.GetScalesAttr()
+		scales = scalesAttr.Get( 0 )
+		self.assertEqual( list( scalesData ), [ imath.V3f( i[0], i[1], i[2] ) for i in scales ] )
+
+		opacitiesAttr = usdSplats.GetOpacitiesAttr()
+		opacities = opacitiesAttr.Get( 0 )
+		self.assertEqual( list( opacitiesData ), opacities )
+
+		displayColorPrimVar = usdSplats.GetDisplayColorPrimvar()
+		self.assertEqual( displayColorPrimVar.GetInterpolation(), "vertex" )
+		displayColors = displayColorPrimVar.Get( 0 )
+		self.assertEqual( list( displayColorData ), [ imath.Color3f( i[0], i[1], i[2] ) for i in displayColors ] )
+
+		projectionModeHintAttr = usdSplats.GetProjectionModeHintAttr()
+		self.assertEqual( projectionModeHintData.value, projectionModeHintAttr.Get( 0 ) )
+		sortingModeHintAttr = usdSplats.GetSortingModeHintAttr()
+		self.assertEqual( sortingModeHintData.value, sortingModeHintAttr.Get( 0 ) )
+
+		degreeAttr = usdSplats.GetRadianceSphericalHarmonicsDegreeAttr()
+		self.assertEqual( degree, degreeAttr.Get( 0 ) )
+
+		desiredCoefficients = [ coefficientsData[j][i] for i in range( 0, nPoints ) for j in range( 0, nCoefficients ) ]
+		coefficientsAttr = usdSplats.GetRadianceSphericalHarmonicsCoefficientsAttr()
+		coefficients = coefficientsAttr.Get( 0 )
+		self.assertEqual( desiredCoefficients, [ imath.V3f( i[0], i[1], i[2] ) for i in coefficients ] )
+
+		# Check round trip to Cortex
+
+		sceneRead = IECoreScene.SceneInterface.create( str( fileName ), IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( sceneRead.childNames(), ["root"] )
+		readRoot = sceneRead.child( "root" )
+
+		self.assertTrue( readRoot.hasObject() )
+
+		readPoints = readRoot.readObject( 0.0 )
+		self.assertIsInstance( readPoints, IECoreScene.PointsPrimitive )
+
+		self.assertEqual( readPoints, cortexSplats )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 26, 3 ), "ParticleField3DGaussianSplat not available" )
+	def testWriteGaussianSplatsMalformedCoefficients( self ) :
+
+		fileName = pathlib.Path( self.temporaryDirectory() ) / "usd_splats.usda"
+
+		sceneWrite = IECoreScene.SceneInterface.create( str( fileName ), IECore.IndexedIO.OpenMode.Write )
+		root = sceneWrite.createChild( "root" )
+
+		nPoints = 16
+		degree = 2
+
+		positionsData = IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, nPoints ) ] )
+
+		cortexSplats = IECoreScene.PointsPrimitive( positionsData )
+
+		cortexSplats["type"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "gaussianSplat" ) )
+		cortexSplats["radiance:sphericalHarmonicsDegree"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( degree ) )
+
+		nCoefficients = ( degree + 1 ) * ( degree + 1 )
+		coefficientsOffset = 2
+		coefficientsData = []
+		for i in list( range( 0, nCoefficients ) ):
+			coefficientsData.append( IECore.V3fVectorData( [ imath.V3f( j ) for j in range( 0, nPoints ) ] ) )
+			cortexSplats[f"radiance:sphericalHarmonicsCoefficients:{i}"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, coefficientsData[i] )
+
+		extraCoefficientsData = IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, nPoints ) ] )
+		cortexSplats[f"radiance:sphericalHarmonicsCoefficients:{nCoefficients + coefficientsOffset}"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, extraCoefficientsData )
+
+		nonNumericCoefficientIndexData = IECore.FloatVectorData( [ i + 10 for i in range( 0, nPoints ) ] )
+		cortexSplats["radiance:sphericalHarmonicsCoefficients:string"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, nonNumericCoefficientIndexData )
+
+		nonV3fCoefficientsData = IECore.FloatVectorData( [ i + 100 for i in range( 0, nPoints ) ] )
+		cortexSplats[f"radiance:sphericalHarmonicsCoefficients:{nCoefficients + 10}"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, nonV3fCoefficientsData )
+
+		with IECore.CapturingMessageHandler() as mh :
+			root.writeObject( cortexSplats, 0.0 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual(
+			mh.messages[0].message,
+			f"Invalid primitive variable \"radiance:sphericalHarmonicsCoefficients:{nCoefficients + 10}\" on location \"/root\". Spherical harmonics coefficients must be of type V3fVectorData with Vertex interpolation."
+		)
+
+		del root
+		del sceneWrite
+
+		# Check USD loading
+
+		usdFile = pxr.Usd.Stage.Open( str( fileName ) )
+		usdSplats = pxr.UsdVol.ParticleField3DGaussianSplat.Get( usdFile, "/root" )
+
+		primVars = pxr.UsdGeom.PrimvarsAPI( usdSplats )
+		stringCoefficients = primVars.GetPrimvar( "radiance:sphericalHarmonicsCoefficients:string" ).Get( 0 )
+		self.assertEqual( list( nonNumericCoefficientIndexData ), stringCoefficients )
+
+		self.assertFalse( primVars.GetPrimvar( "radiance:sphericalHarmonicsCoefficients:22" ) )
+
+		coefficientsAttr = usdSplats.GetRadianceSphericalHarmonicsCoefficientsAttr()
+		usdCoefficients = coefficientsAttr.Get( 0 )
+		self.assertEqual( len( usdCoefficients ), ( nCoefficients + coefficientsOffset + 1) * nPoints )
+
+		desiredCoefficients = []
+		for i in range( 0, nPoints ) :
+			for j in range( 0, nCoefficients ) :
+				desiredCoefficients.append( coefficientsData[j][i] )
+			for j in range( 0, coefficientsOffset ) :
+				desiredCoefficients.append( imath.V3f( 0.0 ) )
+			desiredCoefficients.append( imath.V3f( i ) )
+
+		self.assertEqual( desiredCoefficients, [ imath.V3f( i[0], i[1], i[2] ) for i in usdCoefficients ] )
+
+		# Check round trip to Cortex
+
+		sceneRead = IECoreScene.SceneInterface.create( str( fileName ), IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( sceneRead.childNames(), ["root"] )
+		readRoot = sceneRead.child( "root" )
+
+		self.assertTrue( readRoot.hasObject() )
+
+		with IECore.CapturingMessageHandler() as mh :
+			readPoints = readRoot.readObject( 0.0 )
+
+		self.assertIsInstance( readPoints, IECoreScene.PointsPrimitive )
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual(
+			mh.messages[0].message,
+			"Attribute \"radiance:sphericalHarmonicsCoefficients\" size does not match that expected by \"radiance:sphericalHarmonicsDegree\" at location \"/root\"."
+		)
+
+		self.assertEqual( readPoints["radiance:sphericalHarmonicsCoefficients:string"].data, nonNumericCoefficientIndexData )
+
+		for i in range( 0, nCoefficients ) :
+			with self.subTest( i = i ) :
+				self.assertEqual( readPoints[f"radiance:sphericalHarmonicsCoefficients:{i}"].data, coefficientsData[i] )
+		for i in range( nCoefficients, nCoefficients + coefficientsOffset ) :
+			with self.subTest( i = i ) :
+				self.assertEqual( list( readPoints[f"radiance:sphericalHarmonicsCoefficients:{i}"].data ), [ imath.V3f( 0.0 ) for i in range( 0, nPoints ) ] )
+		self.assertEqual( list( readPoints[f"radiance:sphericalHarmonicsCoefficients:{nCoefficients + coefficientsOffset}"].data ), [ imath.V3f( i ) for i in range( 0, nPoints ) ] )
 
 if __name__ == "__main__":
 	unittest.main()

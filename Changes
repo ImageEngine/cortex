@@ -4,7 +4,9 @@
 Improvements
 ------------
 
-- USD : All `radiance:sphericalHarmonicsCoefficients` are now loaded for `ParticleField3DGaussianSplat` objects, regardless of the `radiance:sphericalHarmonicsDegree`.
+- USD :
+  - All `radiance:sphericalHarmonicsCoefficients` are now loaded for `ParticleField3DGaussianSplat` objects, regardless of the `radiance:sphericalHarmonicsDegree`.
+  - Added write support for `ParticleField3DGaussianSplat`.
 
 10.7.3.1 (relative to 10.7.3.0)
 ========
