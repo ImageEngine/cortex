@@ -5167,7 +5167,9 @@ class USDSceneTest( unittest.TestCase ) :
 				object = root.child( "splats" )
 				self.assertTrue( object.hasObject() )
 
-				splats = object.readObject( 0.0 )
+				with IECore.CapturingMessageHandler() as mh :
+					splats = object.readObject( 0.0 )
+				self.assertEqual( len( mh.messages ), 0 )
 				self.assertTrue( isinstance( splats, IECoreScene.PointsPrimitive ) )
 				self.assertEqual( splats.numPoints, 4 )
 
