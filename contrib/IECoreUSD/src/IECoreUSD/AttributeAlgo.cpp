@@ -54,8 +54,6 @@ namespace
 
 const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "cortex_isConstantPrimitiveVariable" );
 const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
-const std::string g_primVarPrefix = "primvars:";
-const std::string g_primVarUserPrefix = "primvars:user:";
 const std::string g_renderPrefix = "render:";
 const std::string g_riPrefix = "ri:";
 const std::string g_riAttributesPrefix = "ri:attributes:";
