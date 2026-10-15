@@ -113,33 +113,53 @@ IECore::ObjectPtr readGaussianSplat( pxr::UsdVolParticleField3DGaussianSplat &sp
 
 	Canceller::check( canceller );
 	pxr::UsdAttribute degreeAttr = splats.GetRadianceSphericalHarmonicsDegreeAttr();
-	auto degreeData = boost::static_pointer_cast<IntData>( DataAlgo::fromUSD( degreeAttr, time, false ) );
-	newPoints->variables["radiance:sphericalHarmonicsDegree"] = PrimitiveVariable( PrimitiveVariable::Interpolation::Constant, degreeData );
-
-	const int degree = degreeData->readable();
-	const int coefficientCount = ( degree + 1 ) * ( degree + 1 );
+	PrimitiveAlgo::readPrimitiveVariable( degreeAttr, time, newPoints.get(), "radiance:sphericalHarmonicsDegree", PrimitiveVariable::Interpolation::Constant );
 
 	pxr::UsdAttribute coefficientsAttr;
 	splats.UsesFloatRadianceCoefficients( &coefficientsAttr );
-	auto allCoefficientsData = runTimeCast<V3fVectorData>( DataAlgo::fromUSD( coefficientsAttr, time ) );
 
-	if( allCoefficientsData && allCoefficientsData->readable().size() >= coefficientCount * newPoints->getNumPoints() )
+	if( auto allCoefficientsData = runTimeCast<V3fVectorData>( DataAlgo::fromUSD( coefficientsAttr, time ) ) )
 	{
 		const std::vector<Imath::V3f> &allCoefficients = allCoefficientsData->readable();
 
-		for( int i = 0; i < coefficientCount; ++i )
+		if( allCoefficients.size() % newPoints->getNumPoints() == 0 )
 		{
-			Canceller::check( canceller );
-
-			V3fVectorDataPtr coefficientsData = new V3fVectorData();
-			std::vector<Imath::V3f> &coefficients = coefficientsData->writable();
-			coefficients.resize( newPoints->getNumPoints() );
-			for( size_t j = 0, eJ = newPoints->getNumPoints(); j < eJ; ++j )
+			const int coefficientsCount = allCoefficients.size() / newPoints->getNumPoints();
+			int degree;
+			degreeAttr.Get( &degree, time );
+			if( coefficientsCount != ( degree + 1 ) * ( degree + 1 ) )
 			{
-				coefficients[j] = allCoefficients[j * coefficientCount + i];
+				IECore::msg(
+					IECore::Msg::Warning,
+					"GaussianSplatAlgo::readGaussianSplat",
+					"Attribute \"radiance:sphericalHarmonicsCoefficients\" size does not match that expected by \"radiance:sphericalHarmonicsDegree\" at location \"{}\".",
+					splats.GetPrim().GetPath().GetAsString()
+				);
 			}
 
-			newPoints->variables[fmt::format( "radiance:sphericalHarmonicsCoefficients:{}", i )] = PrimitiveVariable( PrimitiveVariable::Interpolation::Vertex, coefficientsData );
+			for( int i = 0; i < coefficientsCount; ++i )
+			{
+				Canceller::check( canceller );
+
+				V3fVectorDataPtr coefficientsData = new V3fVectorData();
+				std::vector<Imath::V3f> &coefficients = coefficientsData->writable();
+				coefficients.resize( newPoints->getNumPoints() );
+				for( size_t j = 0, eJ = newPoints->getNumPoints(); j < eJ; ++j )
+				{
+					coefficients[j] = allCoefficients[j * coefficientsCount + i];
+				}
+
+				newPoints->variables[fmt::format( "radiance:sphericalHarmonicsCoefficients:{}", i )] = PrimitiveVariable( PrimitiveVariable::Interpolation::Vertex, coefficientsData );
+			}
+		}
+		else
+		{
+			IECore::msg(
+				IECore::Msg::Warning,
+				"GaussianSplatAlgo::readGaussianSplat",
+				"Attribute \"radiance:sphericalHarmonicsCoefficients\" has invalid length at location \"{}\".",
+				splats.GetPrim().GetPath().GetAsString()
+			);
 		}
 	}
 
