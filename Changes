@@ -1,5 +1,13 @@
-10.5.x.x (relative to 10.5.18.1)
+10.5.x.x (relative to 10.5.18.2)
 ========
+
+10.5.18.2 (relative to 10.5.18.1)
+========
+
+Fixes
+-----
+
+- VDB : Mitigated lack of thread safety in `hash()`
 
 10.5.18.1 (relative to 10.5.18.0)
 ========
