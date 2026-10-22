@@ -424,11 +424,12 @@ openvdb::GridBase::Ptr VDBObject::HashedGrid::grid() const
 
 IECore::MurmurHash VDBObject::HashedGrid::hash() const
 {
+	/// \todo This is not threadsafe. Fix it.
 	if( !m_hashValid )
 	{
-		m_hash = IECore::MurmurHash();
+		IECore::MurmurHash h;
 
-		MurmurHashSink sink( m_hash );
+		MurmurHashSink sink( h );
 		boost::iostreams::stream<MurmurHashSink> hashStream( sink );
 
 		openvdb::io::StreamMetadata::Ptr streamMetadata ( new openvdb::io::StreamMetadata() );
@@ -439,6 +440,7 @@ IECore::MurmurHash VDBObject::HashedGrid::hash() const
 		m_grid->writeBuffers( hashStream );
 		m_grid->writeTransform( hashStream );
 
+		m_hash = h;
 		m_hashValid = true;
 	}
 
