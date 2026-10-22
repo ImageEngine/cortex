@@ -102,6 +102,22 @@ struct MurmurHashSink
 	MurmurHash &hash;
 };
 
+const bool g_initialised = [] () {
+
+	openvdb::initialize();
+
+	/// \todo Remove when we upgrade to OpenVDB 13.
+	using HalfTree = openvdb::tree::Tree4<openvdb::math::half, 5, 4, 3>::Type;
+	using HalfGrid = openvdb::Grid<HalfTree>;
+	if( !HalfGrid::isRegistered() )
+	{
+		HalfGrid::registerGrid();
+	}
+
+	return true;
+
+} ();
+
 }
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( VDBObject );
@@ -114,8 +130,6 @@ VDBObject::VDBObject() : m_unmodifiedFromFile( false )
 
 VDBObject::VDBObject( const std::string &filename ) : m_unmodifiedFromFile( true )
 {
-	openvdb::initialize(); // safe to call multiple times but has a performance hit of a mutex.
-
 	// note it seems fine for this file object to go out of scope
 	// and grids are still able to pull in additional grid data
 	m_lockedFile.reset( new LockedFile( new openvdb::io::File( filename ) ) );
@@ -420,11 +434,12 @@ openvdb::GridBase::Ptr VDBObject::HashedGrid::grid() const
 
 IECore::MurmurHash VDBObject::HashedGrid::hash() const
 {
+	/// \todo This is not threadsafe. Fix it.
 	if( !m_hashValid )
 	{
-		m_hash = IECore::MurmurHash();
+		IECore::MurmurHash h;
 
-		MurmurHashSink sink( m_hash );
+		MurmurHashSink sink( h );
 		boost::iostreams::stream<MurmurHashSink> hashStream( sink );
 
 		openvdb::io::StreamMetadata::Ptr streamMetadata ( new openvdb::io::StreamMetadata() );
@@ -435,6 +450,7 @@ IECore::MurmurHash VDBObject::HashedGrid::hash() const
 		m_grid->writeBuffers( hashStream );
 		m_grid->writeTransform( hashStream );
 
+		m_hash = h;
 		m_hashValid = true;
 	}
 
