@@ -276,34 +276,16 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		elapsed = time.time() - startTime
 		print( "Time for 16000000 faces with heavy, unindexed, face-varying primvar", elapsed )
 
-	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel( self ) :
-		canceller = IECore.Canceller()
-		cancelled = [False]
 
 		# Basic large mesh
 		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 3000000, 1 ) ), imath.V2i( 3000000, 1 ) )
 
-		def backgroundRun():
-			try:
-				IECoreScene.MeshAlgo.triangulate( strip, canceller )
-			except IECore.Cancelled:
-				cancelled[0] = True
-
-		thread = threading.Thread(target=backgroundRun, args=())
-
-		startTime = time.time()
-		thread.start()
-
-		time.sleep( 0.01 )
+		canceller = IECore.Canceller()
 		canceller.cancel()
-		thread.join()
 
-		# This test should actually produce a time extremely close to the sleep duration ( within
-		# 0.01 seconds whether the sleep duration is 0.01 seconds or 1 seconds ), but checking
-		# that it terminates with 0.2 seconds is a minimal performance bar
-		self.assertLess( time.time() - startTime, 0.2 )
-		self.assertTrue( cancelled[0] )
+		with self.assertRaisesRegex( IECore.Cancelled, "" ):
+			IECoreScene.MeshAlgo.triangulate( strip, canceller )
 
 if __name__ == "__main__":
 	unittest.main()

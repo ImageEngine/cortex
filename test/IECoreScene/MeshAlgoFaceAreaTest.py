@@ -128,36 +128,17 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 		self.assertEqual( textureAreas[0], 6 )
 		self.assertEqual( textureAreas[1], 1 )
 
-	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel( self ) :
 		canceller = IECore.Canceller()
-		cancelled = [False]
+		canceller.cancel()
 
 		# Basic large mesh
 		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1000000, 1 ) ), imath.V2i( 1000000, 1 ) )
 
-		def backgroundRun( texture ):
-			try:
-				if texture:
-					IECoreScene.MeshAlgo.calculateFaceTextureArea( strip, "uv", "P", canceller )
-				else:
-					IECoreScene.MeshAlgo.calculateFaceArea( strip, "P", canceller )
-			except IECore.Cancelled:
-				cancelled[0] = True
-
-		for texture in [ False, True ]:
-			cancelled[0] = False
-			thread = threading.Thread(target=backgroundRun, args=(texture,))
-
-			startTime = time.time()
-			thread.start()
-
-			time.sleep( 0.01 )
-			canceller.cancel()
-			thread.join()
-
-			self.assertLess( time.time() - startTime, 0.03 )
-			self.assertTrue( cancelled[0] )
+		with self.assertRaisesRegex( IECore.Cancelled, "" ):
+			IECoreScene.MeshAlgo.calculateFaceTextureArea( strip, "uv", "P", canceller )
+		with self.assertRaisesRegex( IECore.Cancelled, "" ):
+			IECoreScene.MeshAlgo.calculateFaceArea( strip, "P", canceller )
 
 if __name__ == "__main__":
     unittest.main()

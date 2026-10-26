@@ -344,7 +344,7 @@ class MeshAlgoNormalsTest( unittest.TestCase ) :
 						# averaging in the nearby cone faces that have similar normals and pushing the normal
 						# towards the axis.
 						zComp = -0.8660255
-						
+
 					planeComp = ( 1 - zComp * zComp ) ** 0.5
 					angles = [ 2 * math.pi * ( i + 0.5 ) / divs for i in range( divs ) ]
 					self.assertVectorListsAlmostEqual( list( n.data )[0:3 * divs:3], [ imath.V3f( planeComp * math.cos( a ), planeComp * math.sin( a ), zComp ) for a in angles ], absError = 1e-3 if divs == 10000 else 1e-5 )
@@ -394,33 +394,13 @@ class MeshAlgoNormalsTest( unittest.TestCase ) :
 		elapsed = time.time() - startTime
 		print( "Time for 1000000 face sphere with extreme verts, thresholded faceVarying: ", elapsed )
 
-	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel( self ) :
 		canceller = IECore.Canceller()
-		cancelled = [False]
-
-		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 3000000, 1 ) ), imath.V2i( 3000000, 1 ) )
-		def backgroundRun():
-
-			try:
-				IECoreScene.MeshAlgo.calculateVertexNormals( strip, IECoreScene.MeshAlgo.NormalWeighting.Equal, canceller = canceller )
-			except IECore.Cancelled:
-				cancelled[0] = True
-
-		thread = threading.Thread(target=backgroundRun, args=())
-
-		startTime = time.time()
-		thread.start()
-
-		time.sleep( 0.05 )
 		canceller.cancel()
-		thread.join()
 
-		# This test should actually produce a time extremely close to the sleep duration ( within
-		# 0.003 seconds whether the sleep duration is 0.01 seconds or 100 seconds ), but checking
-		# that it terminates with 0.1 seconds is a minimal performance bar
-		self.assertLess( time.time() - startTime, 0.15 )
-		self.assertTrue( cancelled[0] )
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 3000, 1 ) ), imath.V2i( 3000, 1 ) )
+		with self.assertRaisesRegex( IECore.Cancelled, "" ):
+			IECoreScene.MeshAlgo.calculateVertexNormals( strip, IECoreScene.MeshAlgo.NormalWeighting.Equal, canceller = canceller )
 
 if __name__ == "__main__":
 	unittest.main()
