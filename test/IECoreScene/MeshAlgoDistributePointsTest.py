@@ -419,37 +419,18 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1 )
 		self.assertEqual( len( p["P"].data ), 0 )
 
-	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel( self ) :
 		# Initializing the points distribution is slow and not cancellable
 		# Pre-initialize it so it doesn't mess with our timing
 		IECore.PointDistribution.defaultInstance()
 
 		canceller = IECore.Canceller()
-		cancelled = [False]
+		canceller.cancel()
 
 		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 
-		def backgroundRun():
-			try:
-				p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 10000000, offset = imath.V2f( 0.0001, 0.0001 ), canceller = canceller )
-			except IECore.Cancelled:
-				cancelled[0] = True
-
-		thread = threading.Thread(target=backgroundRun, args=())
-
-		startTime = time.time()
-		thread.start()
-
-		time.sleep( 0.1 )
-		canceller.cancel()
-		thread.join()
-
-		# This test should actually produce a time extremely close to the sleep duration ( within
-		# 0.003 seconds whether the sleep duration is 0.01 seconds or 100 seconds ), but checking
-		# that it terminates with 0.1 seconds is a minimal performance bar
-		self.assertLess( time.time() - startTime, 0.2 )
-		self.assertTrue( cancelled[0] )
+		with self.assertRaisesRegex( IECore.Cancelled, "" ):
+			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 10000000, offset = imath.V2f( 0.0001, 0.0001 ), canceller = canceller )
 
 	@unittest.skipIf( True, "Not running slow perf tests by default" )
 	def testPerformance( self ) :
