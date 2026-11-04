@@ -42,6 +42,25 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
+namespace
+{
+
+template<typename T>
+PrimitiveVariable::IndexedView<typename T::ValueType::value_type> vertexVariableIndexedView( const Primitive *primitive, const std::string &name )
+{
+	auto optionalView = primitive->variableIndexedView<T>( name, PrimitiveVariable::Vertex );
+	if( !optionalView )
+	{
+		// Varying is equivalent to Vertex for PointInstancer, and some folks seem
+		// determined to write things that way.
+		optionalView = primitive->variableIndexedView<T>( name, PrimitiveVariable::Varying );
+	}
+
+	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<typename T::ValueType::value_type>();
+}
+
+} // namespace
+
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( PointInstancer );
 
 PointInstancer::PointInstancer( size_t numPoints )
@@ -115,8 +134,7 @@ void PointInstancer::setPrototypeIndex( const IECore::IntVectorDataPtr &prototyp
 
 PrimitiveVariable::IndexedView<int> PointInstancer::getPrototypeIndex() const
 {
-	auto optionalView = variableIndexedView<IntVectorData>( "prototypeIndex", PrimitiveVariable::Vertex );
-	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<int>();
+	return vertexVariableIndexedView<IntVectorData>( this, "prototypeIndex" );
 }
 
 void PointInstancer::setPosition( const IECore::V3fVectorDataPtr &position )
@@ -134,8 +152,7 @@ void PointInstancer::setPosition( const IECore::V3fVectorDataPtr &position )
 
 PrimitiveVariable::IndexedView<Imath::V3f> PointInstancer::getPosition() const
 {
-	auto optionalView = variableIndexedView<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<Imath::V3f>();
+	return vertexVariableIndexedView<V3fVectorData>( this, "P" );
 }
 
 void PointInstancer::setScale( const IECore::V3fVectorDataPtr &scale )
@@ -152,8 +169,7 @@ void PointInstancer::setScale( const IECore::V3fVectorDataPtr &scale )
 
 PrimitiveVariable::IndexedView<Imath::V3f> PointInstancer::getScale() const
 {
-	auto optionalView = variableIndexedView<V3fVectorData>( "scale", PrimitiveVariable::Vertex );
-	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<Imath::V3f>();
+	return vertexVariableIndexedView<V3fVectorData>( this, "scale" );
 }
 
 void PointInstancer::setOrientation( const IECore::QuatfVectorDataPtr &orientation )
@@ -170,8 +186,7 @@ void PointInstancer::setOrientation( const IECore::QuatfVectorDataPtr &orientati
 
 PrimitiveVariable::IndexedView<Imath::Quatf> PointInstancer::getOrientation() const
 {
-	auto optionalView = variableIndexedView<QuatfVectorData>( "orientation", PrimitiveVariable::Vertex );
-	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<Imath::Quatf>();
+	return vertexVariableIndexedView<QuatfVectorData>( this, "orientation" );
 }
 
 void PointInstancer::setID( const IECore::Int64VectorDataPtr &ids )
@@ -188,8 +203,7 @@ void PointInstancer::setID( const IECore::Int64VectorDataPtr &ids )
 
 PrimitiveVariable::IndexedView<int64_t> PointInstancer::getID() const
 {
-	auto optionalView = variableIndexedView<Int64VectorData>( "instanceId", PrimitiveVariable::Vertex );
-	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<int64_t>();
+	return vertexVariableIndexedView<Int64VectorData>( this, "instanceId" );
 }
 
 void PointInstancer::setInvisibleIDs( const IECore::Int64VectorDataPtr &invisibleIds )
