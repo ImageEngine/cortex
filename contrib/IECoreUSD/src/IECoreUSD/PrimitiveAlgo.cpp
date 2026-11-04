@@ -212,6 +212,12 @@ void addPrimitiveVariableIfValid( IECoreScene::Primitive *primitive, const std::
 		return;
 	}
 
+	if( primitive->variables.find( name ) != primitive->variables.end() )
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", "Ignoring duplicate primitive variable \"{}\"", source.GetPath().GetAsString() );
+		return;
+	}
+
 	primitive->variables[name] = primitiveVariable;
 }
 
@@ -558,21 +564,11 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 
 void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
 {
-	readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time, primitive, canceller );
-
 	pxr::UsdSkelRoot skelRoot = pxr::UsdSkelRoot::Find( pointBased.GetPrim() );
 	if( !skelRoot || !::readPrimitiveVariables( skelRoot, pointBased, time, primitive, canceller ) )
 	{
 		Canceller::check( canceller );
 		readPrimitiveVariable( pointBased.GetPointsAttr(), time, primitive, "P" );
-
-		Canceller::check( canceller );
-		if( !primitive->variables.count( "N" ) )
-		{
-			// Only load `PointBased::GetNormalsAttr()` if we didn't already load `primvars:normals`.
-			// From the USD API docs : "If normals and primvars:normals are both specified, the latter has precedence."
-			readPrimitiveVariable( pointBased.GetNormalsAttr(), time, primitive, "N", PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ) );
-		}
 	}
 
 	Canceller::check( canceller );
@@ -580,6 +576,16 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 
 	Canceller::check( canceller );
 	readPrimitiveVariable( pointBased.GetAccelerationsAttr(), time, primitive, "acceleration" );
+
+	readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time, primitive, canceller );
+
+	Canceller::check( canceller );
+	if( !primitive->variables.count( "N" ) )
+	{
+		// Only load `PointBased::GetNormalsAttr()` if we didn't already load `primvars:normals`.
+		// From the USD API docs : "If normals and primvars:normals are both specified, the latter has precedence."
+		readPrimitiveVariable( pointBased.GetNormalsAttr(), time, primitive, "N", PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ) );
+	}
 }
 
 void IECoreUSD::PrimitiveAlgo::readPrimitiveVariable( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const std::string &name, IECoreScene::PrimitiveVariable::Interpolation interpolation )

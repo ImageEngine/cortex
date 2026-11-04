@@ -81,9 +81,6 @@ IECore::ObjectPtr readGaussianSplat( pxr::UsdVolParticleField3DGaussianSplat &sp
 	PrimitiveAlgo::readPrimitiveVariable( splats.GetSortingModeHintAttr(), time, newPoints.get(), "sortingModeHint", PrimitiveVariable::Interpolation::Constant );
 
 	Canceller::check( canceller );
-	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( splats.GetPrim() ), time, newPoints.get(), canceller );
-
-	Canceller::check( canceller );
 	pxr::UsdAttribute orientationsAttr;
 	splats.UsesFloatOrientations( &orientationsAttr );
 	PrimitiveAlgo::readPrimitiveVariable( orientationsAttr, time, newPoints.get(), "orientations" );
@@ -162,6 +159,9 @@ IECore::ObjectPtr readGaussianSplat( pxr::UsdVolParticleField3DGaussianSplat &sp
 			);
 		}
 	}
+
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( splats.GetPrim() ), time, newPoints.get(), canceller );
 
 	return newPoints;
 }

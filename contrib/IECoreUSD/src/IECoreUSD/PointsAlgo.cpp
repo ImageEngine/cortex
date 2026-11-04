@@ -63,7 +63,6 @@ namespace
 IECore::ObjectPtr readPoints( pxr::UsdGeomPoints &points, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( points.GetPointCount( time ) );
-	PrimitiveAlgo::readPrimitiveVariables( points, time, newPoints.get(), canceller );
 
 	Canceller::check( canceller );
 	PrimitiveAlgo::readPrimitiveVariable( points.GetIdsAttr(), time, newPoints.get(), "id" );
@@ -72,6 +71,9 @@ IECore::ObjectPtr readPoints( pxr::UsdGeomPoints &points, pxr::UsdTimeCode time,
 	PrimitiveAlgo::readPrimitiveVariable(
 		points.GetWidthsAttr(), time, newPoints.get(), "width", PrimitiveAlgo::fromUSD( points.GetWidthsInterpolation() )
 	);
+
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariables( points, time, newPoints.get(), canceller );
 
 	return newPoints;
 }
