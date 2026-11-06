@@ -1,6 +1,8 @@
 10.7.x.x (relative to 10.7.4.0)
 ========
 
+Fixes
+-----
 
 - PointInstancer : Fixed accessors to accept Varying primitive variables where Vertex is expected, since the two interpolations are equivalent.
 
