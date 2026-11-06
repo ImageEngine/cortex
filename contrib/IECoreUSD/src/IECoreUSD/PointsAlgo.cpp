@@ -40,8 +40,13 @@
 
 #include "IECore/SimpleTypedData.h"
 
+#include "boost/algorithm/string/predicate.hpp"
+
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/points.h"
+#if PXR_VERSION >= 2603
+#include "pxr/usd/usdVol/particleField3DGaussianSplat.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace IECore;
@@ -94,6 +99,104 @@ namespace
 
 bool writePoints( const IECoreScene::PointsPrimitive *points, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
+#if PXR_VERSION >= 2603
+	auto type = points->variableData<const StringData>( "type", PrimitiveVariable::Constant );
+	if( type && type->readable() == "gaussianSplat" )
+	{
+		auto usdSplats = pxr::UsdVolParticleField3DGaussianSplat::Define( stage, path );
+
+		int maxCoefficientsIndex = -1;
+		std::unordered_map<int, const V3fVectorData *> coefficientsMap;
+
+		for( const auto &p : points->variables )
+		{
+			if( p.first == "P" )
+			{
+				usdSplats.CreatePositionsAttr().Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
+			}
+			else if( p.first == "orientations" )
+			{
+				usdSplats.CreateOrientationsAttr().Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
+			}
+			else if( p.first == "scales" )
+			{
+				usdSplats.CreateScalesAttr().Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
+			}
+			else if( p.first == "opacities" )
+			{
+				usdSplats.CreateOpacitiesAttr().Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
+			}
+			else if( p.first == "radiance:sphericalHarmonicsDegree" )
+			{
+				usdSplats.CreateRadianceSphericalHarmonicsDegreeAttr().Set( DataAlgo::toUSD( p.second.data.get() ), time );
+			}
+			else if( p.first == "projectionModeHint" )
+			{
+				usdSplats.CreateProjectionModeHintAttr().Set( DataAlgo::toUSD( p.second.data.get() ), time );
+			}
+			else if( p.first == "sortingModeHint" )
+			{
+				usdSplats.CreateSortingModeHintAttr().Set( DataAlgo::toUSD( p.second.data.get() ), time );
+			}
+			else if( boost::starts_with( p.first, "radiance:sphericalHarmonicsCoefficients:" ) )
+			{
+				try
+				{
+					const int coefficientsIndex = std::stoi( p.first.substr( 40 ) );  // 40 = length of `radiance:...` prefix
+
+					if( p.second.data->typeId() != V3fVectorDataTypeId || p.second.interpolation != PrimitiveVariable::Interpolation::Vertex )
+					{
+						IECore::msg(
+							IECore::Msg::Warning,
+							"PointsAlgo::writePoints",
+							"Invalid primitive variable \"{}\" on location \"{}\". Spherical harmonics coefficients must be of type V3fVectorData with Vertex interpolation.",
+							p.first, path.GetAsString()
+						);
+						continue;
+					}
+
+					coefficientsMap[coefficientsIndex] = static_cast<const V3fVectorData *>( p.second.data.get() );
+					maxCoefficientsIndex = std::max( maxCoefficientsIndex, coefficientsIndex );
+				}
+				catch( ... )
+				{
+					PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdSplats, time );
+				}
+			}
+			else if(  p.first == "type" )
+			{
+				// This is intrinsic to `UsdVolParticleField3DGaussianSplat`
+				continue;
+			}
+			else
+			{
+				PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdSplats, time );
+			}
+		}
+
+		if( !coefficientsMap.empty() )
+		{
+			const int coefficientsCount = maxCoefficientsIndex + 1;
+			pxr::VtArray<pxr::GfVec3f> allCoefficients( coefficientsCount * points->getNumPoints() );
+
+			for( const auto &[i, coefficientsData] : coefficientsMap )
+			{
+				const std::vector<Imath::V3f> &coefficients = coefficientsData->readable();
+
+				for( size_t j = 0, eJ = points->getNumPoints(); j < eJ; ++j )
+				{
+					allCoefficients[j * coefficientsCount + i] = DataAlgo::toUSD( coefficients[j] );
+				}
+			}
+
+			usdSplats.CreateRadianceSphericalHarmonicsCoefficientsAttr().Set( allCoefficients, time );
+		}
+
+		return true;
+	}
+
+#endif
+
 	auto usdPoints = pxr::UsdGeomPoints::Define( stage, path );
 	for( const auto &p : points->variables )
 	{
