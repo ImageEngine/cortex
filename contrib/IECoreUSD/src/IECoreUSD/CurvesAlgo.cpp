@@ -65,12 +65,14 @@ IECore::ObjectPtr readCurves( pxr::UsdGeomCurves &curves, pxr::UsdTimeCode time,
 
 	Canceller::check( canceller );
 	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData.get(), basis, wrap );
-	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get(), canceller );
 
 	Canceller::check( canceller );
 	PrimitiveAlgo::readPrimitiveVariable(
 		curves.GetWidthsAttr(), time, newCurves.get(), "width", PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() )
 	);
+
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get(), canceller );
 
 	return newCurves;
 }
