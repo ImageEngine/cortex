@@ -71,6 +71,27 @@ class PointInstancerTest( unittest.TestCase ) :
 		)
 		self.assertFalse( instancer.getPosition() )
 
+	def testVaryingPrimitiveVariables( self ) :
+
+		instancer = IECoreScene.PointInstancer( 1 )
+		instancer.setPosition( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
+		instancer.setScale( IECore.V3fVectorData( [ imath.V3f( 1 ) ] ) )
+		instancer.setOrientation( IECore.QuatfVectorData( [ imath.Quatf() ] ) )
+		instancer.setPrototypeIndex( IECore.IntVectorData( [ 0 ] ) )
+		instancer.setID( IECore.Int64VectorData( [ 10 ] ) )
+
+		instancer2 = instancer.copy()
+		for key in instancer2.keys() :
+			p = instancer2[key]
+			p.interpolation = IECoreScene.PrimitiveVariable.Interpolation.Varying
+			instancer2[key] = p
+
+		self.assertEqual( list( instancer2.getPosition() ), list( instancer.getPosition() ) )
+		self.assertEqual( list( instancer2.getScale() ), list( instancer.getScale() ) )
+		self.assertEqual( list( instancer2.getOrientation() ), list( instancer.getOrientation() ) )
+		self.assertEqual( list( instancer2.getPrototypeIndex() ), list( instancer.getPrototypeIndex() ) )
+		self.assertEqual( list( instancer2.getID() ), list( instancer.getID() ) )
+
 	def testVisibilityQuery( self ) :
 
 		instancer = IECoreScene.PointInstancer( 4 )
