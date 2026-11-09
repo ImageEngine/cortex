@@ -6,6 +6,11 @@ Improvements
 
 - MeshAlgo : Changed `reverseWinding()` so that the first vertex of each face remains unchanged. This matches the algorithm used in other DCCs.
 
+Fixes
+-----
+
+- USD : Fixed loading when a `primvars:*` attribute conflicts with a primitive variable loaded from a schema attribute, for instance `PointBased.points`. The schema attribute now takes precedence and a warning is emitted.
+
 Breaking Changes
 ----------------
 

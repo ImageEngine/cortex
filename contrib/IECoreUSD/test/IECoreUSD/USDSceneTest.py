@@ -4156,6 +4156,92 @@ class USDSceneTest( unittest.TestCase ) :
 					else :
 						self.assertEqual( data[0], imath.Quatf( halfOrientation.GetReal(), *halfOrientation.GetImaginary() ) )
 
+	def testPrimvarsDontClobberPrimitiveVariablesFromSchemas( self ) :
+
+		schemaTypes = [ pxr.UsdGeom.Mesh, pxr.UsdGeom.BasisCurves, pxr.UsdGeom.Points, pxr.UsdGeom.PointInstancer ]
+		if pxr.Usd.GetVersion() >= ( 0, 26, 3 ) :
+			gSplatSchemaType = pxr.UsdVol.ParticleField3DGaussianSplat
+			schemaTypes.append( gSplatSchemaType )
+		else :
+			gSplatSchemaType = type( None )
+
+		for schemaType in schemaTypes :
+
+			with self.subTest( schemaType = schemaType ) :
+
+				fileName = os.path.join( self.temporaryDirectory(), f"clashingPrimvars{schemaType.__name__}.usda" )
+				stage = pxr.Usd.Stage.CreateNew( fileName )
+				schema = schemaType.Define( stage, "/object" )
+
+				if hasattr( schema, "CreatePointsAttr" ) :
+					schema.CreatePointsAttr( [ ( 1, 1, 1 ) ] * 3 )
+				else :
+					# PointInstancer uses a different name for some reason.
+					schema.CreatePositionsAttr( [ ( 1, 1, 1 ) ] * 3 )
+
+				if hasattr( schema, "CreateWidthsAttr" ) :
+					schema.CreateWidthsAttr().Set( [ 1 ] * 3 )
+
+				if hasattr( schema, "CreateScalesAttr" ) :
+					schema.CreateScalesAttr().Set( [ ( 1, 1, 1 ) ] * 3 )
+
+				if isinstance( schema, pxr.UsdGeom.Mesh ) :
+					schema.CreateFaceVertexCountsAttr().Set( [ 3 ] )
+					schema.CreateFaceVertexIndicesAttr().Set( [ 0, 1, 2 ] )
+				elif isinstance( schema, pxr.UsdGeom.BasisCurves ) :
+					schema.CreateTypeAttr().Set( pxr.UsdGeom.Tokens.linear )
+					schema.CreateCurveVertexCountsAttr().Set( [ 3 ] )
+
+				primvars = pxr.UsdGeom.PrimvarsAPI( schema )
+				p = primvars.CreatePrimvar( "P", pxr.Sdf.ValueTypeNames.Point3fArray, "vertex" )
+				p.Set( [ ( 0, 0, 0 ) ] * 3 )
+				width = primvars.CreatePrimvar( "width", pxr.Sdf.ValueTypeNames.FloatArray, "vertex" )
+				width.Set( [ 0, 0, 0 ] )
+				scaleName = "scales" if isinstance( schema, gSplatSchemaType ) else "scale"
+				scale = primvars.CreatePrimvar( scaleName, pxr.Sdf.ValueTypeNames.Float3Array, "vertex" )
+				scale.Set( [ ( 0, 0, 0 ) ] * 3 )
+
+				stage.GetRootLayer().Save()
+
+				root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+				with IECore.CapturingMessageHandler() as mh :
+					primitive = root.child( "object" ).readObject( 0 )
+
+				# "P" will clash for all schema types.
+
+				self.assertEqual( primitive["P"].data, IECore.V3fVectorData( [ imath.V3f( 1, 1, 1 ) ] * 3, IECore.GeometricData.Interpretation.Point ) )
+				self.assertGreaterEqual( len( mh.messages ), 1 )
+				self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+				self.assertEqual( mh.messages[0].context, "IECoreUSD::PrimitiveAlgo" )
+				self.assertEqual( mh.messages[0].message, 'Ignoring duplicate primitive variable "/object.primvars:P"' )
+				del mh.messages[0]
+
+				# But "widths" will only clash for schemas that have it.
+
+				if hasattr( schema, "CreateWidthsAttr" ) :
+					self.assertEqual( primitive["width"].data, IECore.FloatVectorData( [ 1, 1, 1 ] ) )
+					self.assertGreaterEqual( len( mh.messages ), 1 )
+					self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+					self.assertEqual( mh.messages[0].context, "IECoreUSD::PrimitiveAlgo" )
+					self.assertEqual( mh.messages[0].message, 'Ignoring duplicate primitive variable "/object.primvars:width"' )
+					del mh.messages[0]
+				else :
+					self.assertEqual( primitive["width"].data, IECore.FloatVectorData( [ 0, 0, 0 ] ) )
+
+				# Likewise for "scales".
+
+				if hasattr( schema, "CreateScalesAttr" ) :
+					self.assertEqual( primitive[scaleName].data, IECore.V3fVectorData( [ imath.V3f( 1, 1, 1 ) ] * 3 ) )
+					self.assertGreaterEqual( len( mh.messages ), 1 )
+					self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+					self.assertEqual( mh.messages[0].context, "IECoreUSD::PrimitiveAlgo" )
+					self.assertEqual( mh.messages[0].message, f'Ignoring duplicate primitive variable "/object.primvars:{scaleName}"' )
+					del mh.messages[0]
+				else :
+					self.assertEqual( primitive[scaleName].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ) ] * 3 ) )
+
+				self.assertEqual( len( mh.messages ), 0 )
+
 	def testArnoldArrayInputs( self ) :
 
 		def assertExpectedArrayInputs( network ) :
