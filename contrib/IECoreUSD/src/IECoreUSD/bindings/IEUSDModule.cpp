@@ -34,6 +34,7 @@
 
 #include "IECoreUSD/DataAlgo.h"
 #include "IECoreUSD/SceneCacheDataAlgo.h"
+#include "IECoreUSD/StageAlgo.h"
 
 #include "IECoreScene/SceneInterface.h"
 
@@ -151,6 +152,7 @@ BOOST_PYTHON_MODULE( _IECoreUSD )
 	PxrBoostConverter<pxr::TfToken>::registerConverters();
 	PxrBoostConverter<pxr::VtValue>::registerConverters();
 	PxrBoostConverter<pxr::SdfValueTypeName>::registerConverters();
+	PxrBoostConverter<pxr::UsdStageRefPtr>::registerConverters();
 #endif
 
 	{
@@ -173,5 +175,13 @@ BOOST_PYTHON_MODULE( _IECoreUSD )
 		def( "fromInternalName", &SceneCacheDataAlgo::fromInternalName );
 		def( "toInternalPath", toInternalPath );
 		def( "fromInternalPath", fromInternalPath );
+	}
+
+	{
+		object stageAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreUSD.StageAlgo" ) ) ) );
+		scope().attr( "StageAlgo" ) = stageAlgoModule;
+		scope stageAlgoModuleScope( stageAlgoModule );
+
+		def( "sceneInterface", &StageAlgo::sceneInterface );
 	}
 }
