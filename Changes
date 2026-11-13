@@ -6,6 +6,11 @@ Fixes
 
 - PointInstancer : Fixed accessors to accept Varying primitive variables where Vertex is expected, since the two interpolations are equivalent.
 
+API
+---
+
+- IECoreUSD::StageAlgo : Added new namespace with a `sceneInterface()` function, providing a SceneInterface for reading an existing `UsdStage`.
+
 10.7.4.0 (relative to 10.7.3.1)
 ========
 
