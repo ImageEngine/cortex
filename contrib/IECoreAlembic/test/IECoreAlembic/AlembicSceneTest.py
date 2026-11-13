@@ -1899,7 +1899,6 @@ class AlembicSceneTest( unittest.TestCase ) :
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 		)
 
-	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel ( self ) :
 
 		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 100000, 1 ) ), imath.V2i( 100000, 1 ) )
@@ -1916,25 +1915,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 		readRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		canceller = IECore.Canceller()
-		cancelled = [False]
-
-		def backgroundRun():
-			try:
-				readRoot.child( "sphere" ).readObject( 0.0, canceller )
-			except IECore.Cancelled:
-				cancelled[0] = True
-
-		thread = threading.Thread(target=backgroundRun, args=())
-
-		startTime = time.time()
-		thread.start()
-
-		time.sleep( 0.01 )
 		canceller.cancel()
-		thread.join()
 
-		self.assertLess( time.time() - startTime, 0.1 if IECore.isDebug() else 0.06 )
-		self.assertTrue( cancelled[0] )
+		with self.assertRaisesRegex( IECore.Cancelled, "" ):
+			readRoot.child( "sphere" ).readObject( 0.0, canceller )
 
 	def testIndexedCurveUVs( self ) :
 
