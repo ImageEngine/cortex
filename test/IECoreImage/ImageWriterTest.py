@@ -415,11 +415,15 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgNew = r.read()
 		imgBlindData = imgNew.blindData()
 		# eliminate default header info that comes from OIIO
-		del imgBlindData['oiio:ColorSpace']
+		if IECoreImage.OpenImageIOAlgo.version() < 30104 :
+			del imgBlindData['oiio:ColorSpace']
 		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
 			del imgBlindData['oiio:subimages']
 		if IECoreImage.OpenImageIOAlgo.version() >= 30000 :
 			del imgBlindData["openexr:lineOrder"]
+		if IECoreImage.OpenImageIOAlgo.version() >= 30202 :
+			del imgBlindData["oiio:SourcePath"]
+			del imgBlindData["oiio:SourceFileFormat"]
 		del imgBlindData['compression']
 		del imgBlindData['PixelAspectRatio']
 		del imgBlindData['displayWindow']
