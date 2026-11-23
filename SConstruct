@@ -99,7 +99,7 @@ o.Add(
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
-	"c++17"
+	"c++20"
 )
 
 o.Add(
@@ -952,6 +952,7 @@ else:
 			"/FC", # display full paths in diagnostics
 			"/EHsc", # catch c++ exceptions only
 			"/MP",  # enable multiprocessing of builds
+			"/utf-8", # Required for fmtlib
 			"/std:$CXXSTD",
 		]
 	)
@@ -1275,6 +1276,10 @@ testEnvLibPath = testEnv.subst( testEnvLibPath )
 
 if testEnv["PLATFORM"] == "darwin" :
 	testEnvLibPath = os.pathsep.join( [ "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Resources/", testEnvLibPath ] )
+
+if "g++" in os.path.basename( env["CXX"] ) and "clang++" not in os.path.basename( env["CXX"] ) :
+	# GCC 14 reports this warning from inlined std::atomic loads used by oneTBB in RefCountedThreadingTest.
+	testEnv.Append( CXXFLAGS = [ "-Wno-error=stringop-overflow" ] )
 
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = os.pathsep.join( [ testEnv["ENV"].get(testEnv["TEST_LIBRARY_PATH_ENV_VAR"], ""), testEnvLibPath ] )
 if testEnv["TEST_LIBRARY_PATH_ENV_VAR"] != libraryPathEnvVar :

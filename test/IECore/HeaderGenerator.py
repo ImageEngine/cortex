@@ -37,6 +37,7 @@
 """Unit test for HeaderGenerator binding"""
 import getpass
 import platform
+import sys
 import unittest
 
 import IECore
@@ -49,6 +50,8 @@ class TestHeaderGenerator(unittest.TestCase):
 		header = IECore.HeaderGenerator.header()
 		self.assertEqual( header['ieCoreVersion'].value, IECore.versionString() )
 		( sysname, nodename, release, version, machine, processor ) = platform.uname()
+		if sys.platform == "win32" :
+			release = str( sys.getwindowsversion().major )
 		self.assertEqual( header["host"]["systemName"].value, sysname )
 		self.assertEqual( header["host"]["nodeName"].value, nodename )
 		self.assertEqual( header["host"]["systemRelease"].value, release )

@@ -30,69 +30,71 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux-platform24,
           linux-platform25,
-          linux-debug-platform25,
-          windows-platform25,
-          windows-debug-platform25,
-          macos-platform25
+          linux-platform26,
+          linux-debug-platform26,
+          windows-platform26,
+          windows-debug-platform26,
+          macos-platform26
         ]
 
         include:
-
-          - name: linux-platform24
-            os: ubuntu-24.04
-            buildType: RELEASE
-            containerImage: ghcr.io/gafferhq/build/build:3.4.0
-            options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/10.0.0/gafferDependencies-10.0.0-linux-gcc11.tar.gz
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
-            publish: true
-            jobs: 4
 
           - name: linux-platform25
             os: ubuntu-24.04
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:4.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a8/gafferDependencies-11.0.0a8-linux-platform25.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0/gafferDependencies-11.0.0-linux-platform25.tar.gz
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: true
+            jobs: 4
+            pythonABIVersion: "3.11"
+            extraBuildArguments: CXXSTD=c++17
+
+          - name: linux-platform26
+            os: ubuntu-24.04
+            buildType: RELEASE
+            containerImage: ghcr.io/gafferhq/build/build:5.0.0a1
+            options: .github/workflows/main/options.posix
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/12.0.0a3/gafferDependencies-12.0.0a3-linux-platform26.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 4
 
-          - name: linux-debug-platform25
+          - name: linux-debug-platform26
             os: ubuntu-24.04
             buildType: DEBUG
-            containerImage: ghcr.io/gafferhq/build/build:4.0.0
+            containerImage: ghcr.io/gafferhq/build/build:5.0.0a1
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a8/gafferDependencies-11.0.0a8-linux-platform25.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/12.0.0a3/gafferDependencies-12.0.0a3-linux-platform26.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
             jobs: 4
 
-          - name: windows-platform25
+          - name: windows-platform26
             os: windows-2022
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a8/gafferDependencies-11.0.0a8-windows-platform25.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/12.0.0a3/gafferDependencies-12.0.0a3-windows-platform26.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 4
 
-          - name: windows-debug-platform25
+          - name: windows-debug-platform26
             os: windows-2022
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a8/gafferDependencies-11.0.0a8-windows-platform25.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/12.0.0a3/gafferDependencies-12.0.0a3-windows-platform26.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
             jobs: 4
 
-          - name: macos-platform25
+          - name: macos-platform26
             os: macos-15
             buildType: RELEASE
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/11.0.0a8/gafferDependencies-11.0.0a8-macos-platform25.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/12.0.0a3/gafferDependencies-12.0.0a3-macos-platform26.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
             jobs: 3
@@ -101,20 +103,18 @@ jobs:
 
     container: ${{ matrix.containerImage }}
 
+    env:
+      CORTEX_PYTHON_ABI_VERSION: ${{ matrix.pythonABIVersion }}
+
     steps:
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - name: Install Windows SDK
-      run: |
-        curl.exe -L --output winsdksetup.exe --url https://download.microsoft.com/download/9/7/9/97982c1d-d687-41be-9dd3-6d01e52ceb68/windowssdk/winsdksetup.exe
-        Start-Process ./winsdksetup.exe -ArgumentList "/Features OptionId.DesktopCPPx64 /Quiet /NoRestart" -NoNewWindow -Wait
-      shell: pwsh
-      if: runner.os == 'Windows'
-
-    - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+    - uses: TheMrMilchmann/setup-msvc-dev@368ef7d1ee4d1171b31d4a7f67f4d954f903f5a9 # v4.1.0
       with:
-        sdk: 10.0.20348.0
+        sdk: 10.0.22621.0
+        arch: x64
+      if: runner.os == 'Windows'
 
     - name: Install toolchain (Windows)
       run: |
@@ -178,20 +178,20 @@ jobs:
 
     - name: Build
       run: |
-       scons -j ${{ matrix.jobs }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       scons -j ${{ matrix.jobs }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache ${{ matrix.extraBuildArguments }}
        # Copy the config log for use in the "Debug Failures" step, because it
        # gets clobbered by the `scons test*` call below.
        cp config.log buildConfig.log
 
     - name: Test
       run: |
-        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache ${{ matrix.extraBuildArguments }}
       env:
         OCIO: ocio://studio-config-v1.0.0_aces-v1.3_ocio-v2.1
 
     - name: Build Package
       run: |
-       scons install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       scons install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache ${{ matrix.extraBuildArguments }}
        ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 

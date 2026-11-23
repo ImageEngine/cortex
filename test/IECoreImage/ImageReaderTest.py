@@ -33,6 +33,7 @@
 ##########################################################################
 
 import os
+import pathlib
 import sys
 import unittest
 import imath
@@ -216,9 +217,9 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testHeaderToBlindData( self ) :
 
+		filePath = pathlib.Path( "test" ) / "IECoreImage" / "data" / "exr" / "uvMap.512x256.exr"
 		dictHeader = {
 			'channelNames': IECore.StringVectorData( [ "R", "G", "B" ] ),
-			'oiio:ColorSpace': IECore.StringData( "lin_rec709" if IECoreImage.OpenImageIOAlgo.version() >= 30000 else "Linear" ),
 			'compression': IECore.StringData( "piz" ),
 			'screenWindowCenter': IECore.V2fData( imath.V2f(0,0) ),
 			'displayWindow': IECore.Box2iData( imath.Box2i( imath.V2i(0,0), imath.V2i(511,255) ) ),
@@ -233,7 +234,18 @@ class ImageReaderTest( unittest.TestCase ) :
 			dictHeader["openexr:lineOrder"] = IECore.StringData( "increasingY" )
 			dictHeader["screenWindowCenter"] = IECore.V2fData( imath.V2f( 0 ) )
 
-		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) )
+		if IECoreImage.OpenImageIOAlgo.version() < 30000 :
+			dictHeader["oiio:ColorSpace"] = IECore.StringData( "Linear" )
+		elif IECoreImage.OpenImageIOAlgo.version() < 30104 :
+			dictHeader["oiio:ColorSpace"] = IECore.StringData( "lin_rec709" )
+
+		if IECoreImage.OpenImageIOAlgo.version() >= 30200 :
+			dictHeader["oiio:RowsPerChunk"] = IECore.IntData( 32 )
+		if IECoreImage.OpenImageIOAlgo.version() >= 30202 :
+			dictHeader["oiio:SourcePath"] = IECore.StringData( str( filePath ) )
+			dictHeader["oiio:SourceFileFormat"] = IECore.StringData( "openexr" )
+
+		r = IECore.Reader.create( str( filePath ) )
 		header = r.readHeader()
 		self.assertEqual( header, IECore.CompoundObject(dictHeader) )
 
@@ -264,6 +276,11 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( header["smpte:TimeCode"], td )
 
 		img3 = r2.read()
+		if IECoreImage.OpenImageIOAlgo.version() >= 30202 :
+			del img.blindData()["oiio:SourcePath"]
+			del img2.blindData()["oiio:SourcePath"]
+			del img3.blindData()["oiio:SourcePath"]
+
 		self.assertTrue( "smpte:TimeCode" in img3.blindData() )
 		self.assertEqual( img3.blindData()["smpte:TimeCode"], td )
 		del img3.blindData()["Software"]
