@@ -34,6 +34,7 @@
 
 #include "IECoreUSD/DataAlgo.h"
 #include "IECoreUSD/SceneCacheDataAlgo.h"
+#include "IECoreUSD/StageAlgo.h"
 
 #include "IECoreScene/SceneInterface.h"
 
@@ -101,8 +102,11 @@ struct PxrBoostConverter
 	static void registerConverters()
 	{
 		boost::python::to_python_converter<T, ToPxrBoost>();
-		/// \todo Add conversion from Python when we have
-		/// a use for it. See PyBindConverter for an example.
+		boost::python::converter::registry::push_back(
+			&FromPxrBoost::convertible,
+			&FromPxrBoost::construct,
+			boost::python::type_id<T>()
+		);
 	}
 
 	private :
@@ -117,6 +121,25 @@ struct PxrBoostConverter
 			}
 		};
 
+		struct FromPxrBoost
+		{
+
+			static void *convertible( PyObject *object )
+			{
+				return pxr::pxr_boost::python::extract<T>( object ).check() ? object : nullptr;
+			}
+
+			static void construct( PyObject *object, boost::python::converter::rvalue_from_python_stage1_data *data )
+			{
+				void *storage = ( ( boost::python::converter::rvalue_from_python_storage<T> * ) data )->storage.bytes;
+				T *t = new( storage ) T;
+				data->convertible = storage;
+
+				*t = pxr::pxr_boost::python::extract<T>( object )();
+			}
+
+		};
+
 };
 
 #endif // PXR_VERSION >= 2505
@@ -129,6 +152,7 @@ BOOST_PYTHON_MODULE( _IECoreUSD )
 	PxrBoostConverter<pxr::TfToken>::registerConverters();
 	PxrBoostConverter<pxr::VtValue>::registerConverters();
 	PxrBoostConverter<pxr::SdfValueTypeName>::registerConverters();
+	PxrBoostConverter<pxr::UsdStageRefPtr>::registerConverters();
 #endif
 
 	{
@@ -151,5 +175,13 @@ BOOST_PYTHON_MODULE( _IECoreUSD )
 		def( "fromInternalName", &SceneCacheDataAlgo::fromInternalName );
 		def( "toInternalPath", toInternalPath );
 		def( "fromInternalPath", fromInternalPath );
+	}
+
+	{
+		object stageAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreUSD.StageAlgo" ) ) ) );
+		scope().attr( "StageAlgo" ) = stageAlgoModule;
+		scope stageAlgoModuleScope( stageAlgoModule );
+
+		def( "sceneInterface", &StageAlgo::sceneInterface );
 	}
 }

@@ -40,6 +40,8 @@ __import__( "pxr.Kind" )
 __import__( "pxr.Vt" )
 __import__( "pxr.Sdf" )
 
+__import__( "IECoreScene" )
+
 from ._IECoreUSD import *
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreUSD" )
