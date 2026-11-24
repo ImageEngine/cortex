@@ -5,6 +5,7 @@ Fixes
 -----
 
 - IECoreGL::Primitive : Fixed bounding boxes drawn via "gl:primitive:bound".
+- PointInstancer : Fixed accessors to accept FaceVarying primitive variables where Vertex is expected, since the two interpolations are equivalent.
 
 10.7.4.1 (relative to 10.7.4.0)
 ========

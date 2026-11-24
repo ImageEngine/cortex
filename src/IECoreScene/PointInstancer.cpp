@@ -48,15 +48,14 @@ namespace
 template<typename T>
 PrimitiveVariable::IndexedView<typename T::ValueType::value_type> vertexVariableIndexedView( const Primitive *primitive, const std::string &name )
 {
-	auto optionalView = primitive->variableIndexedView<T>( name, PrimitiveVariable::Vertex );
-	if( !optionalView )
+	for( auto interpolation : { PrimitiveVariable::Vertex, PrimitiveVariable::Varying, PrimitiveVariable::FaceVarying } )
 	{
-		// Varying is equivalent to Vertex for PointInstancer, and some folks seem
-		// determined to write things that way.
-		optionalView = primitive->variableIndexedView<T>( name, PrimitiveVariable::Varying );
+		if( auto optionalView = primitive->variableIndexedView<T>( name, interpolation ) )
+		{
+			return *optionalView;
+		}
 	}
-
-	return optionalView ? *optionalView : PrimitiveVariable::IndexedView<typename T::ValueType::value_type>();
+	return PrimitiveVariable::IndexedView<typename T::ValueType::value_type>();
 }
 
 } // namespace
