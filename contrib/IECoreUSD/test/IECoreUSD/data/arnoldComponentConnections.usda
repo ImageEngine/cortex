@@ -1,0 +1,28 @@
+#usda 1.0
+
+def Sphere "sphere" (
+    prepend apiSchemas = ["MaterialBindingAPI"]
+)
+{
+    rel material:binding = </testMaterial>
+}
+
+def Material "testMaterial"
+{
+    token outputs:arnold:surface.connect = </testMaterial/standardSurface.outputs:surface>
+
+    def Shader "standardSurface"
+    {
+        uniform token info:id = "arnold:standard_surface"
+        float inputs:indirect_specular = 0
+        float inputs:indirect_specular.connect = </testMaterial/state_vector.outputs:out_variable:y>
+        token outputs:surface
+    }
+
+    def Shader "state_vector"
+    {
+        uniform token info:id = "arnold:state_vector"
+        vector outputs:out_variable
+        float outputs:out_variable:y
+    }
+}
