@@ -1,7 +1,10 @@
 10.7.x.x (relative to 10.7.4.1)
 ========
 
+Fixes
+-----
 
+- IECoreGL::Primitive : Fixed bounding boxes drawn via "gl:primitive:bound".
 
 10.7.4.1 (relative to 10.7.4.0)
 ========
