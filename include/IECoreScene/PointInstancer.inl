@@ -52,7 +52,8 @@ struct PointInstancer::InstanceAttributePredicate
 		return
 			(
 				value.second.interpolation == PrimitiveVariable::Vertex ||
-				value.second.interpolation == PrimitiveVariable::Varying
+				value.second.interpolation == PrimitiveVariable::Varying ||
+				value.second.interpolation == PrimitiveVariable::FaceVarying
 			) &&
 			value.first != "prototypeRoots" &&
 			value.first != "prototypeIndex" &&
