@@ -362,7 +362,7 @@ IECoreScene::MeshAlgo::MeshSplitter::MeshSplitter( ConstMeshPrimitivePtr mesh, c
 	int remapSegmentIndexMin = 0;
 
 
-	IECore::dispatch( segmentPrimitiveVariable.data.get(), [ segmentPrimitiveVariable, &numSegments, &faceToSegmentIndexData, &remapSegmentIndices, &remapSegmentIndexMin, canceller]( const auto *primVarData )
+	IECore::DataAlgo::dispatch( segmentPrimitiveVariable.data.get(), [ segmentPrimitiveVariable, &numSegments, &faceToSegmentIndexData, &remapSegmentIndices, &remapSegmentIndexMin, canceller]( const auto *primVarData )
 		{
 			using DataType = typename std::remove_pointer_t< decltype( primVarData ) >;
 			if constexpr ( !TypeTraits::IsVectorTypedData<DataType>::value )
@@ -960,7 +960,7 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::MeshSplitter::mesh( int segmentId, const
 			continue;
 		}
 		Canceller::check( canceller );
-		ret->variables[ p.first ] = IECore::dispatch( p.second.data.get(), ResamplePrimitiveVariableFunctor(), p.second, startIndex, numFaces, totalFaceVerts, m_faceRemap, sourceVerticesPerFace, m_faceIndices, vertRemapBackwards, canceller );
+		ret->variables[ p.first ] = IECore::DataAlgo::dispatch( p.second.data.get(), ResamplePrimitiveVariableFunctor(), p.second, startIndex, numFaces, totalFaceVerts, m_faceRemap, sourceVerticesPerFace, m_faceIndices, vertRemapBackwards, canceller );
 	}
 
 	return ret;

@@ -46,7 +46,7 @@ namespace
 
 PyObject *addressWrapper( Data *data )
 {
-	return PyLong_FromVoidPtr( address( data ) );
+	return PyLong_FromVoidPtr( DataAlgo::address( data ) );
 }
 
 } // namespace
@@ -56,14 +56,17 @@ namespace IECorePython
 
 void bindDataAlgo()
 {
-	def( "getGeometricInterpretation", &getGeometricInterpretation );
-	def( "setGeometricInterpretation", &setGeometricInterpretation );
+	object dataAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECore.DataAlgo" ) ) ) );
+	scope().attr( "DataAlgo" ) = dataAlgoModule;
+	scope dataAlgoModuleScope( dataAlgoModule );
 
-	def( "uniqueValues", &uniqueValues );
+	def( "getGeometricInterpretation", &IECore::DataAlgo::getGeometricInterpretation );
+	def( "setGeometricInterpretation", &IECore::DataAlgo::setGeometricInterpretation );
 
-	def( "size", &IECore::size );
+	def( "uniqueValues", &IECore::DataAlgo::uniqueValues );
+
+	def( "size", &IECore::DataAlgo::size );
 	def( "address", &addressWrapper );
-
 }
 
 } // namespace IECorePython

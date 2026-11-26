@@ -164,7 +164,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 
 	PrimitiveVariable::IndexedView<V2f> uvIndexedView( *uvData, uvIndices );
 
-	size_t numUVs = IECore::size( uvIt->second.data.get() );
+	size_t numUVs = IECore::DataAlgo::size( uvIt->second.data.get() );
 
 	Canceller::check( canceller );
 	std::vector<V3f> uTangents( numUVs, V3f( 0 ) );

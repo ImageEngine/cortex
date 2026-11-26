@@ -391,7 +391,7 @@ bool ImagePrimitive::channelValid( const IECore::Data *data, std::string *reason
 		return false;
 	}
 
-	if( !trait<TypeTraits::IsNumericVectorTypedData>( data ) )
+	if( !DataAlgo::trait<TypeTraits::IsNumericVectorTypedData>( data ) )
 	{
 		if( reason )
 		{
@@ -400,7 +400,7 @@ bool ImagePrimitive::channelValid( const IECore::Data *data, std::string *reason
 		return false;
 	}
 
-	size_t size = IECore::size( data );
+	size_t size = IECore::DataAlgo::size( data );
 	size_t numPixels = channelSize();
 	if( size!=numPixels )
 	{

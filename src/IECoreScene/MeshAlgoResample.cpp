@@ -322,7 +322,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		IECoreScene::Detail::AverageValueFromVector fn;
-		dstData = dispatch( srcData.get(), fn );
+		dstData = DataAlgo::dispatch( srcData.get(), fn );
 		primitiveVariable = PrimitiveVariable( interpolation, dstData );
 		return;
 	}
@@ -330,7 +330,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
 		IECoreScene::Detail::FillVectorFromValue fn( mesh->variableSize( interpolation ) );
-		DataPtr arrayData = dispatch( srcData.get(), fn );
+		DataPtr arrayData = DataAlgo::dispatch( srcData.get(), fn );
 		if (arrayData)
 		{
 			primitiveVariable = PrimitiveVariable(interpolation, arrayData);

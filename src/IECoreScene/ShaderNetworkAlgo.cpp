@@ -441,7 +441,7 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 
 				// Set fallback values for adapter input parameters (since all may not receive connections).
 
-				dispatch(
+				DataAlgo::dispatch(
 					parameterValue,
 					[&] ( auto *d ) {
 						using DataType = typename std::remove_const_t<std::remove_pointer_t<decltype( d )>>;

@@ -202,32 +202,32 @@ struct Address
 
 } // namespace
 
-IECore::GeometricData::Interpretation IECore::getGeometricInterpretation( const IECore::Data *data )
+IECore::GeometricData::Interpretation IECore::DataAlgo::getGeometricInterpretation( const IECore::Data *data )
 {
 	return dispatch( data, GeometricInterpretationGetter() );
 }
 
-void IECore::setGeometricInterpretation( IECore::Data *data, IECore::GeometricData::Interpretation interpretation )
+void IECore::DataAlgo::setGeometricInterpretation( IECore::Data *data, IECore::GeometricData::Interpretation interpretation )
 {
 	dispatch( data, GeometricInterpretationSetter( interpretation ) );
 }
 
-IECore::DataPtr IECore::uniqueValues(const IECore::Data *data)
+IECore::DataPtr IECore::DataAlgo::uniqueValues(const IECore::Data *data)
 {
 	return dispatch( data, UniqueValueCollector() );
 }
 
-IECORE_API size_t IECore::size( const IECore::Data *data )
+IECORE_API size_t IECore::DataAlgo::size( const IECore::Data *data )
 {
 	return dispatch( data, Size() );
 }
 
-IECORE_API void *IECore::address( IECore::Data *data )
+IECORE_API void *IECore::DataAlgo::address( IECore::Data *data )
 {
 	return dispatch( data, Address() );
 }
 
-IECORE_API const void *IECore::address( const IECore::Data *data )
+IECORE_API const void *IECore::DataAlgo::address( const IECore::Data *data )
 {
 	return dispatch( data, Address() );
 }

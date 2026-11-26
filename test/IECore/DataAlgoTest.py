@@ -34,7 +34,6 @@
 
 import unittest
 import ctypes
-import math
 import imath
 import IECore
 
@@ -42,60 +41,60 @@ class DataAlgoTest( unittest.TestCase ) :
 
 	def testGetGeometricInterpretation( self ) :
 
-		self.assertEqual( IECore.GeometricData.Interpretation.Vector, IECore.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Vector ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Normal ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.Point ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.None_ ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( IECore.FloatData( 5 ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( IECore.StringData( "foo" ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.Vector, IECore.DataAlgo.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Vector ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.DataAlgo.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Normal ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.DataAlgo.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.Point ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.DataAlgo.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.None_ ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.DataAlgo.getGeometricInterpretation( IECore.FloatData( 5 ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.DataAlgo.getGeometricInterpretation( IECore.StringData( "foo" ) ) )
 
 	def testSetGeometricInterpretation( self ) :
 
 		v = IECore.V3fVectorData( [] )
-		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( v ) )
-		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Vector )
-		self.assertEqual( IECore.GeometricData.Interpretation.Vector, IECore.getGeometricInterpretation( v ) )
-		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Normal )
-		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.getGeometricInterpretation( v ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.DataAlgo.getGeometricInterpretation( v ) )
+		IECore.DataAlgo.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Vector )
+		self.assertEqual( IECore.GeometricData.Interpretation.Vector, IECore.DataAlgo.getGeometricInterpretation( v ) )
+		IECore.DataAlgo.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Normal )
+		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.DataAlgo.getGeometricInterpretation( v ) )
 
 		v = IECore.V3fData( imath.V3f( 0 ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( v ) )
-		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Point )
-		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.getGeometricInterpretation( v ) )
-		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.None_ )
-		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( v ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.DataAlgo.getGeometricInterpretation( v ) )
+		IECore.DataAlgo.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.DataAlgo.getGeometricInterpretation( v ) )
+		IECore.DataAlgo.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.None_ )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.DataAlgo.getGeometricInterpretation( v ) )
 
 
 		#Setting the geometric interpretation of data that is not geometric is OK if you set it to None, but is otherwise an exception
-		IECore.setGeometricInterpretation( IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.None_ )
-		IECore.setGeometricInterpretation( IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.None_ )
+		IECore.DataAlgo.setGeometricInterpretation( IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.None_ )
+		IECore.DataAlgo.setGeometricInterpretation( IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.None_ )
 
-		self.assertRaises( RuntimeError, IECore.setGeometricInterpretation, IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.Normal )
-		self.assertRaises( RuntimeError, IECore.setGeometricInterpretation, IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.Point )
+		self.assertRaises( RuntimeError, IECore.DataAlgo.setGeometricInterpretation, IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.Normal )
+		self.assertRaises( RuntimeError, IECore.DataAlgo.setGeometricInterpretation, IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.Point )
 
 	def testCanGenerateUniqueValuesForStringVectorData( self ) :
 		data = IECore.StringVectorData( ['a', 'b', 'a', 'c', 'c', 'a', 'b'] )
 
-		output = IECore.uniqueValues( data )
+		output = IECore.DataAlgo.uniqueValues( data )
 
 		self.assertEqual( set( output ), set( IECore.StringVectorData( ['a', 'b', 'c'] ) ) )
 
 	def testCanGenerateUniqueValuesForIntVectorData( self ) :
 		data = IECore.IntVectorData( [1, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1] )
 
-		output = IECore.uniqueValues( data )
+		output = IECore.DataAlgo.uniqueValues( data )
 
 		self.assertEqual( set( output ), set( IECore.IntVectorData( [1, 2] ) ) )
 
 	def testSize( self ) :
 
 		self.assertEqual(
-			IECore.size( IECore.StringData( "hi" ) ),
+			IECore.DataAlgo.size( IECore.StringData( "hi" ) ),
 			1
 		)
 
 		self.assertEqual(
-			IECore.size(
+			IECore.DataAlgo.size(
 				IECore.V3fVectorData( [ imath.V3f( 1 ), imath.V3f( 2 ) ] )
 			),
 			2
@@ -106,7 +105,7 @@ class DataAlgoTest( unittest.TestCase ) :
 		v = IECore.IntVectorData( [ 1, 2, 3 ] )
 
 		p = ctypes.cast(
-			IECore.address( v ),
+			IECore.DataAlgo.address( v ),
 			ctypes.POINTER( ctypes.c_int )
 		)
 
