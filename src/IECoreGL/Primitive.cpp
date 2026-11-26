@@ -456,7 +456,7 @@ const Shader::Setup *Primitive::boundSetup() const
 	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
 
 	m_boundSetup = new Shader::Setup( Shader::constant() );
-	m_boundSetup->addVertexAttribute( "P", pData );
+	m_boundSetup->addVertexAttribute( "vertexP", pData );
 
 	return m_boundSetup.get();
 }
