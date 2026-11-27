@@ -31,6 +31,11 @@ Build
 10.7.x.x (relative to 10.7.4.1)
 ========
 
+Improvements
+------------
+
+- IECoreGL::CachedConverter : Added `convert()` overload taking a `resultType` parameter.
+
 Fixes
 -----
 

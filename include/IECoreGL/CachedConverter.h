@@ -60,6 +60,12 @@ class IECOREGL_API CachedConverter : public IECore::RefCounted
 		/// Returns the object converted to an appropriate IECoreGL type, reusing
 		/// a previous conversion where possible.
 		IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object );
+		/// As above, but specifying the required result type. This is used
+		/// to select a converter via `ToGLConverter::create()`.
+		/// > Note : The cache key includes the result type, so two conversions
+		/// > with different result types will never share results, even if they
+		/// > would otherwise be equivalent.
+		IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object, IECore::TypeId resultType );
 
 		/// Returns the maximum amount of memory (in bytes) the cache will use.
 		size_t getMaxMemory() const;
