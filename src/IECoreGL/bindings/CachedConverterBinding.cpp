@@ -47,10 +47,10 @@ using namespace IECoreGL;
 namespace
 {
 
-IECore::RunTimeTypedPtr convert( CachedConverter &c, IECore::ObjectPtr o )
+IECore::RunTimeTypedPtr convert( CachedConverter &c, IECore::ObjectPtr o, IECore::TypeId resultType )
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	return boost::const_pointer_cast<IECore::RunTimeTyped>( c.convert( o.get() ) );
+	return boost::const_pointer_cast<IECore::RunTimeTyped>( c.convert( o.get(), resultType ) );
 }
 
 void clearUnused( CachedConverter &c )
@@ -65,7 +65,7 @@ void IECoreGL::bindCachedConverter()
 {
 	IECorePython::RefCountedClass<CachedConverter, IECore::RefCounted>( "CachedConverter" )
 		.def( init<size_t>() )
-		.def( "convert", &convert )
+		.def( "convert", &convert, ( arg( "object" ), arg( "resultType" ) = IECore::RunTimeTypedTypeId ) )
 		.def( "getMaxMemory", &CachedConverter::getMaxMemory )
 		.def( "setMaxMemory", &CachedConverter::setMaxMemory )
 		.def( "clearUnused", &clearUnused )

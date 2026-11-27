@@ -208,5 +208,22 @@ class CachedConverterTest( unittest.TestCase ) :
 			for thread in threads :
 				thread.join()
 
+	def testResultType( self ) :
+
+		converter = IECoreGL.CachedConverter( 500 * 1024 * 1024 ) # 500 megs
+
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		glMesh1 = converter.convert( mesh )
+		glMesh2 = converter.convert( mesh, IECore.RunTimeTyped.staticTypeId() )
+		self.assertIsInstance( glMesh1, IECoreGL.MeshPrimitive )
+		self.assertTrue( glMesh1.isSame( glMesh2 ) )
+
+		glMesh3 = converter.convert( mesh, IECoreGL.Renderable.staticTypeId() )
+		self.assertIsInstance( glMesh3, IECoreGL.MeshPrimitive )
+		self.assertFalse( glMesh3.isSame( glMesh1 ) )
+
+		with self.assertRaisesRegex( RuntimeError, 'Unable to create converter from "MeshPrimitive" to "Object"' ) :
+			converter.convert( mesh, IECore.Object.staticTypeId() )
+
 if __name__ == "__main__":
     unittest.main()

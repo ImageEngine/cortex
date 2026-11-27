@@ -62,12 +62,12 @@ struct CacheGetterKey
 {
 
 	CacheGetterKey()
-		:	object( nullptr )
+		:	object( nullptr ), resultType( IECore::InvalidTypeId )
 	{
 	}
 
-	CacheGetterKey( const IECore::Object *o )
-		: object( o ), hash( o->hash() )
+	CacheGetterKey( const IECore::Object *o, IECore::TypeId resultType )
+		: object( o ), resultType( resultType ), hash( o->hash().append( resultType ) )
 	{
 	}
 
@@ -82,6 +82,7 @@ struct CacheGetterKey
 	}
 
 	const IECore::Object *object;
+	const IECore::TypeId resultType;
 	const IECore::MurmurHash hash;
 
 };
@@ -98,11 +99,14 @@ struct CachedConverter::MemberData
 	static IECore::RunTimeTypedPtr getter( const CacheGetterKey &key, size_t &cost )
 	{
 		cost = key.object->memoryUsage();
-		ToGLConverterPtr converter = ToGLConverter::create( key.object );
+		ToGLConverterPtr converter = ToGLConverter::create( key.object, key.resultType );
 		if( !converter )
 		{
 			throw IECore::Exception(
-				fmt::format( "Unable to create converter for Object of type \"{}\"", key.object->typeName()	)
+				fmt::format(
+					"Unable to create converter from \"{}\" to \"{}\"",
+					key.object->typeName(), IECore::RunTimeTyped::typeNameFromTypeId( key.resultType )
+				)
 			);
 		}
 		return converter->convert();
@@ -130,7 +134,12 @@ CachedConverter::~CachedConverter()
 
 IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object )
 {
-	return m_data->cache.get( CacheGetterKey( object ) );
+	return convert( object, IECore::RunTimeTypedTypeId );
+}
+
+IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object, IECore::TypeId resultType )
+{
+	return m_data->cache.get( CacheGetterKey( object, resultType ) );
 }
 
 size_t CachedConverter::getMaxMemory() const
